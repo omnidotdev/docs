@@ -1,0 +1,39 @@
+{
+  "name": "@omnidotdev/docs",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
+    "types:check": "fumadocs-mdx && tsc --noEmit"
+  },
+  "dependencies": {
+    "@icons-pack/react-simple-icons": "^13.8.0",
+    "@tanstack/react-router": "^1.139.14",
+    "@tanstack/react-router-devtools": "^1.139.14",
+    "@tanstack/react-start": "^1.139.14",
+    "fumadocs-core": "^16.2.2",
+    "fumadocs-mdx": "^14.0.4",
+    "fumadocs-ui": "^16.2.2",
+    "lucide-react": "^0.555.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "tailwind-merge": "^3.4.0",
+    "vite": "^7.2.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "nitro": "3.0.1-alpha.1",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vite-plugin-mkcert": "^1.17.9",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
