@@ -1,12 +1,13 @@
 import {
-  createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
+  createRootRoute,
 } from "@tanstack/react-router";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
-import appCss from "@/lib/styles/app.css?url";
+
 import { app } from "@/lib/config";
+import appCss from "@/lib/styles/app.css?url";
 
 import type { PropsWithChildren } from "react";
 

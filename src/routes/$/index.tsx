@@ -1,9 +1,9 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { createServerFn } from "@tanstack/react-start";
-import source from "@/lib/source";
-import type * as PageTree from "fumadocs-core/page-tree";
 import browserCollections from "fumadocs-mdx:collections/browser";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { useFumadocsLoader } from "fumadocs-core/source/client";
+import { Banner } from "fumadocs-ui/components/banner";
+import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   DocsBody,
   DocsDescription,
@@ -11,9 +11,11 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
+
 import sharedLayoutOptions from "@/lib/layout.shared";
-import { Banner } from "fumadocs-ui/components/banner";
-import { useFumadocsLoader } from "fumadocs-core/source/client";
+import source from "@/lib/source";
+
+import type * as PageTree from "fumadocs-core/page-tree";
 
 const Page = () => {
   const data = Route.useLoaderData();

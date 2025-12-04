@@ -1,5 +1,5 @@
-import { loader } from "fumadocs-core/source";
 import { docs } from "fumadocs-mdx:collections/server";
+import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 
 // TODO remote MDX sources https://fumadocs.dev/docs/mdx/performance#remote-source
