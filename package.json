@@ -7,7 +7,11 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "check": "biome check && fumadocs-mdx && tsc --noEmit",
+    "knip": "knip-bun",
+    "prepare": "husky"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.8.0",
@@ -24,12 +28,15 @@
     "vite": "^7.2.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
     "@tailwindcss/vite": "^4.1.17",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "husky": "^9.1.7",
+    "knip": "^5.71.0",
     "nitro": "3.0.1-alpha.1",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
