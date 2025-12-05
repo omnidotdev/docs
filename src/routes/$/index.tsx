@@ -12,7 +12,7 @@ import {
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 
-import sharedLayoutOptions from "@/lib/layout.shared";
+import baseLayoutOptions from "@/lib/layout.base";
 import source from "@/lib/source";
 
 import type * as PageTree from "fumadocs-core/page-tree";
@@ -27,7 +27,7 @@ const Page = () => {
       <Banner variant="rainbow">
         Omni builds open source software for creators, businesses
       </Banner>
-      <DocsLayout {...sharedLayoutOptions()} tree={pageTree}>
+      <DocsLayout {...baseLayoutOptions()} tree={pageTree}>
         <Content />
       </DocsLayout>
     </>
