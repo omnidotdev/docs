@@ -3,6 +3,8 @@ import { createFromSource as createSearchServerFromSource } from "fumadocs-core/
 
 import source from "@/lib/source";
 
+// TODO `/` or `ctrl+k` for search, not just cmd key for all OS
+
 /**
  * Search server.
  * @see https://fumadocs.dev/docs/headless/search

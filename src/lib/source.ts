@@ -11,6 +11,7 @@ import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 const source = loader({
   baseUrl: "/",
   source: docs.toFumadocsSource(),
+  // TODO consolidate icon libs, currently using `react-icons` and `lucide-react`
   plugins: [lucideIconsPlugin()],
 });
 
