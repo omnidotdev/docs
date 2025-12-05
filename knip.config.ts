@@ -9,7 +9,7 @@ const knipConfig: KnipConfig = {
   project: ["src/**/*.{ts,tsx,css,mdx}", "content/docs/**/*.mdx"],
   ignore: ["**/*.gen.*", "**/generated/**", "src/components/ui/*.tsx"],
   // used in MDX files, not picked up by MDX compiler
-  ignoreDependencies: ["@omnidotdev/garden", "react-icons"],
+  ignoreDependencies: ["@omnidotdev/garden"],
   tags: ["-knipignore"],
 };
 
