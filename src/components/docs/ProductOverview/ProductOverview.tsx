@@ -1,0 +1,135 @@
+"use client";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+
+import type { ReactNode } from "react";
+import LinkButton from "../LinkButton/LinkButton";
+import type { Link } from "../LinkButton/LinkButton";
+import { cn } from "@/lib/utils";
+
+interface ProductOverviewAlert {
+  /**
+   * Title of the alert.
+   */
+  title: string;
+  /**
+   * Description text for the alert.
+   */
+  description: string;
+  /**
+   * Icon to display before the title.
+   */
+  icon?: string;
+  /**
+   * Classes for styling the alert.
+   */
+  className?: string;
+}
+
+interface ProductOverviewTag {
+  /**
+   * Label text to display in the tag.
+   */
+  label: string;
+  /**
+   * Classes for styling the tag.
+   */
+  className?: string;
+  /**
+   * Icon or logo to display with the tag.
+   */
+  icon?: ReactNode;
+}
+
+interface ProductOverviewProps {
+  /**
+   * Name.
+   */
+  title: string;
+  /**
+   * Emoji to display with the title.
+   */
+  emoji: string;
+  /**
+   * Tagline to display below the title.
+   */
+  tagline: string;
+  /**
+   * Brief description of the product.
+   */
+  description: string;
+  /**
+   * Array of links to display (website, repository, etc.).
+   */
+  links?: Link[];
+  /**
+   * Array of alerts to display (under construction, big idea, etc.).
+   */
+  alerts?: ProductOverviewAlert[];
+  /**
+   * Array of tags to display (technologies, categories, etc.).
+   */
+  tags?: ProductOverviewTag[];
+}
+
+// TODO improve styles
+
+/**
+ * Product overview.
+ */
+const ProductOverview: React.FC<ProductOverviewProps> = ({
+  // TODO
+  // tagline,
+  links = [],
+  alerts = [],
+  tags = [],
+}) => (
+  <div className="mb-8">
+    {/*{tagline && (
+      <p>
+        <strong>
+          <i>{tagline}</i>
+        </strong>
+      </p>
+    )}*/}
+
+    {tags.length > 0 && (
+      <div className="mb-4 flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <Badge key={tag.label} className={tag.className}>
+            <div className="flex items-center gap-1">
+              {tag.icon && <span>{tag.icon}</span>}
+
+              {tag.label}
+            </div>
+          </Badge>
+        ))}
+      </div>
+    )}
+
+    {links.length > 0 && (
+      <div className="flex gap-2">
+        {links.map((link) => (
+          <LinkButton key={link.label} link={link} />
+        ))}
+      </div>
+    )}
+
+    {alerts.length > 0 && (
+      <div className="mt-4 flex flex-col gap-2">
+        {alerts.map((alert) => (
+          <Alert key={alert.title} className={cn(alert.className)}>
+            <AlertTitle>
+              {alert.icon ? `${alert.icon} ${alert.title}` : alert.title}
+            </AlertTitle>
+
+            <AlertDescription>{alert.description}</AlertDescription>
+          </Alert>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+export default ProductOverview;
