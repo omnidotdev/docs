@@ -34,6 +34,7 @@ const NEW_PRODUCTS = ["Backfeed", "Garden"],
   COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
 
 // TODO fix alphabetical sort (folders appearing last)
+// TODO sidebar Omni logo
 
 /**
  * Splat page.
