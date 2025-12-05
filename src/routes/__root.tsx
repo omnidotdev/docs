@@ -4,13 +4,13 @@ import {
   Scripts,
   createRootRoute,
 } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 
 import { app } from "@/lib/config";
 import appCss from "@/lib/styles/app.css?url";
 
 import type { PropsWithChildren } from "react";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 /**
  * Root component.
