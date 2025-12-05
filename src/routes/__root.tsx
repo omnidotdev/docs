@@ -40,7 +40,6 @@ export const Route = createRootRoute({
     // TODO manifest (TSS template https://github.com/omnidotdev/template-tanstack-start/pull/7)
     links: [
       { rel: "stylesheet", href: appCss },
-      // TODO fix favicon not appearing
       { rel: "icon", href: "/favicon.ico" },
     ],
   }),
