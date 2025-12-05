@@ -1,5 +1,5 @@
 import browserCollections from "fumadocs-mdx:collections/browser";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, useLocation } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Banner } from "fumadocs-ui/components/banner";
@@ -16,18 +16,137 @@ import baseLayoutOptions from "@/lib/layout.base";
 import source from "@/lib/source";
 
 import type * as PageTree from "fumadocs-core/page-tree";
+import { Badge } from "@/components/ui/badge";
 
+// TODO extract to frontmatter
+// can be extended in source config e.g.
+// ```
+//  docs: {
+//    schema: frontmatterSchema.extend({
+//      new: z.boolean().default(false),
+//    }),
+//  },
+// ````
+// then need to figure a way to grab the frontmatter here
+
+// TODO grab from Omni API
+const NEW_PRODUCTS = ["Backfeed", "Garden"],
+  COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
+
+/**
+ * Splat page.
+ */
 const Page = () => {
   const data = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
   const Content = clientLoader.getComponent(data.path);
 
+  const { pathname } = useLocation();
+
   return (
     <>
       <Banner variant="rainbow">
-        Omni builds open source software for creators, businesses
+        Omni builds open source software for everyone
       </Banner>
-      <DocsLayout {...baseLayoutOptions()} tree={pageTree}>
+
+      <DocsLayout
+        {...baseLayoutOptions()}
+        tree={pageTree}
+        sidebar={{
+          components: {
+            Separator: ({ item }) => (
+              // TODO collapsible
+              <>
+                <hr className="my-6" />
+
+                <div className="mb-2 inline-flex items-center gap-2 font-bold [&amp;_svg]:size-4 [&amp;_svg]:shrink-0">
+                  <p style={{ paddingInlineStart: "calc(2 * var(--spacing))" }}>
+                    <span className="flex gap-2">
+                      {item.icon}
+                      {item.name}
+                    </span>
+                  </p>
+                </div>
+              </>
+            ),
+            // TODO do similar to `Item` below (badges)
+            // Folder: (folder) => (
+            //   <>
+            //     <div>
+            //       <a
+            //         data-active="true"
+            //         className="relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors w-full active"
+            //         href="/garden"
+            //         data-status="active"
+            //         aria-current="page"
+            //         // style="padding-inline-start: calc(2 * var(--spacing));"
+            //       >
+            //         <span>{folder.item.name}</span>
+            //         <svg
+            //           xmlns="http://www.w3.org/2000/svg"
+            //           width="24"
+            //           height="24"
+            //           viewBox="0 0 24 24"
+            //           fill="none"
+            //           stroke="currentColor"
+            //           stroke-width="2"
+            //           stroke-linecap="round"
+            //           stroke-linejoin="round"
+            //           className="lucide ms-auto transition-transform -rotate-90"
+            //           data-icon="true"
+            //         >
+            //           <path d="m6 9 6 6 6-6"></path>
+            //         </svg>
+            //       </a>
+            //       <div
+            //         data-state="closed"
+            //         id="radix-_r_l_"
+            //         className="overflow-hidden data-[state=closed]:animate-fd-collapsible-up data-[state=open]:animate-fd-collapsible-down relative before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5"
+            //         // style="--radix-collapsible-content-height: 36px; --radix-collapsible-content-width: 236px;"
+            //         // hidden=""
+            //       ></div>
+            //     </div>
+            //   </>
+            // ),
+            Item: ({ item }) => (
+              <a
+                data-active={item.url === pathname}
+                data-status={item.url === pathname && "active"}
+                aria-current="page"
+                href={item.url}
+                style={{ paddingInlineStart: "calc(2 * var(--spacing))" }}
+                className="wrap-anywhere active relative flex flex-row items-center justify-between gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors [&amp;_svg]:size-4 [&amp;_svg]:shrink-0"
+              >
+                <span className="flex gap-2">
+                  {item.icon}
+                  {item.name}
+                </span>
+
+                {/* TODO convert to frontmatter (see note near top of file) */}
+                {NEW_PRODUCTS.some((product) =>
+                  // @ts-expect-error TODO type `props` properly
+                  item.name?.props?.dangerouslySetInnerHTML?.__html?.includes(
+                    product,
+                  ),
+                ) && (
+                  <Badge className="bg-green-200 text-green-950">New! 🚀</Badge>
+                )}
+
+                {COMING_SOON_PRODUCTS.some((product) =>
+                  // @ts-expect-error TODO type `props` properly
+                  item.name?.props?.dangerouslySetInnerHTML?.__html?.includes(
+                    product,
+                  ),
+                ) && (
+                  <Badge className="bg-amber-200 text-amber-950">
+                    Coming Soon 🚧
+                  </Badge>
+                )}
+              </a>
+            ),
+          },
+        }}
+      >
         <Content />
       </DocsLayout>
     </>
