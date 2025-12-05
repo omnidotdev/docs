@@ -6,6 +6,8 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
+// import mkcert from "vite-plugin-mkcert";
+
 import * as mdxConfig from "./source.config";
 
 /**
