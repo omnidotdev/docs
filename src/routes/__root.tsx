@@ -10,6 +10,7 @@ import { app } from "@/lib/config";
 import appCss from "@/lib/styles/app.css?url";
 
 import type { PropsWithChildren } from "react";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 /**
  * Root component.
@@ -17,6 +18,8 @@ import type { PropsWithChildren } from "react";
 const RootComponent = () => (
   <RootDocument>
     <Outlet />
+
+    <TanStackRouterDevtools />
   </RootDocument>
 );
 
