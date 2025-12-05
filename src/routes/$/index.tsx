@@ -33,6 +33,8 @@ import { Badge } from "@/components/ui/badge";
 const NEW_PRODUCTS = ["Backfeed", "Garden"],
   COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
 
+// TODO fix alphabetical sort (folders appearing last)
+
 /**
  * Splat page.
  */
@@ -70,44 +72,8 @@ const Page = () => {
               </>
             ),
             // TODO do similar to `Item` below (badges)
-            // Folder: (folder) => (
-            //   <>
-            //     <div>
-            //       <a
-            //         data-active="true"
-            //         className="relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors w-full active"
-            //         href="/garden"
-            //         data-status="active"
-            //         aria-current="page"
-            //         // style="padding-inline-start: calc(2 * var(--spacing));"
-            //       >
-            //         <span>{folder.item.name}</span>
-            //         <svg
-            //           xmlns="http://www.w3.org/2000/svg"
-            //           width="24"
-            //           height="24"
-            //           viewBox="0 0 24 24"
-            //           fill="none"
-            //           stroke="currentColor"
-            //           stroke-width="2"
-            //           stroke-linecap="round"
-            //           stroke-linejoin="round"
-            //           className="lucide ms-auto transition-transform -rotate-90"
-            //           data-icon="true"
-            //         >
-            //           <path d="m6 9 6 6 6-6"></path>
-            //         </svg>
-            //       </a>
-            //       <div
-            //         data-state="closed"
-            //         id="radix-_r_l_"
-            //         className="overflow-hidden data-[state=closed]:animate-fd-collapsible-up data-[state=open]:animate-fd-collapsible-down relative before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5"
-            //         // style="--radix-collapsible-content-height: 36px; --radix-collapsible-content-width: 236px;"
-            //         // hidden=""
-            //       ></div>
-            //     </div>
-            //   </>
-            // ),
+            // unsure of a clean way to do this, the styles below for `Item` were grabbed from the default Fumadocs sidebar item rendered DOM
+            // Folder: (folder) => <></>,
             Item: ({ item }) => (
               <a
                 data-active={item.url === pathname}
