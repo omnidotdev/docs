@@ -11,10 +11,11 @@ const NotFound = () => (
     nav={{
       title: app.name.long,
     }}
-    className="justify-center py-32 text-center"
+    className="text-center"
   >
-    <div className="flex flex-col items-center gap-4">
+    <div className="mt-18 flex flex-col items-center gap-4">
       <h1 className="font-bold text-6xl text-fd-muted-foreground">404</h1>
+
       <h2 className="font-semibold text-2xl">Page Not Found</h2>
 
       <p className="max-w-md text-fd-muted-foreground">
