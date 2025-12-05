@@ -14,7 +14,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@icons-pack/react-simple-icons": "^13.8.0",
     "@omnidotdev/garden": "^0.1.4",
     "@tanstack/react-router": "^1.139.14",
     "@tanstack/react-router-devtools": "^1.139.14",

@@ -5,7 +5,6 @@
     "": {
       "name": "@omnidotdev/docs",
       "dependencies": {
-        "@icons-pack/react-simple-icons": "^13.8.0",
         "@omnidotdev/garden": "^0.1.4",
         "@tanstack/react-router": "^1.139.14",
         "@tanstack/react-router-devtools": "^1.139.14",
@@ -186,8 +185,6 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
     "@formatjs/intl-localematcher": ["@formatjs/intl-localematcher@0.6.2", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA=="],
-
-    "@icons-pack/react-simple-icons": ["@icons-pack/react-simple-icons@13.8.0", "", { "peerDependencies": { "react": "^16.13 || ^17 || ^18 || ^19" } }, "sha512-iZrhL1fSklfCCVn68IYHaAoKfcby3RakUTn2tRPyHBkhr2tkYqeQbjJWf+NizIYBzKBn2IarDJXmTdXd6CuEfw=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
