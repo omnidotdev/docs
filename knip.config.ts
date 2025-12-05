@@ -5,9 +5,11 @@ import type { KnipConfig } from "knip";
  * @see https://knip.dev/overview/configuration
  */
 const knipConfig: KnipConfig = {
-  entry: ["src/routes/**/*.{ts,tsx}", "src/router.tsx"],
-  project: ["src/**/*.{ts,tsx,css}"],
-  ignore: ["**/*.gen.*", "**/generated/**"],
+  entry: ["src/**/*.ts", "src/**/*.tsx", "src/router.tsx"],
+  project: ["src/**/*.{ts,tsx,css,mdx}", "content/docs/**/*.mdx"],
+  ignore: ["**/*.gen.*", "**/generated/**", "src/components/ui/*.tsx"],
+  // used in MDX files, not picked up by MDX compiler
+  ignoreDependencies: ["@omnidotdev/garden", "react-icons"],
   tags: ["-knipignore"],
 };
 
