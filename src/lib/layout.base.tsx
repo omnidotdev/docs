@@ -1,5 +1,9 @@
-import { SiGithub, SiX } from "@icons-pack/react-simple-icons";
-import { EarthIcon } from "lucide-react";
+import {
+  SiDiscord as DiscordIcon,
+  SiGithub as GitHubIcon,
+  SiX as XIcon,
+} from "react-icons/si";
+import { FaEarthAmericas as EarthIcon } from "react-icons/fa6";
 
 import { app } from "./config";
 
@@ -16,14 +20,19 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
       url: app.organization.website,
     },
     {
-      icon: <SiX />,
+      icon: <XIcon />,
       text: `@${app.socials.x.split("/")[3]}`,
       url: app.socials.x,
     },
     {
-      icon: <SiGithub />,
+      icon: <GitHubIcon />,
       text: "GitHub",
       url: app.socials.github,
+    },
+    {
+      icon: <DiscordIcon />,
+      text: "Discord",
+      url: app.socials.discord,
     },
     // TODO LinkedIn (see https://github.com/simple-icons/simple-icons/issues/11372)
   ],
