@@ -1,0 +1,112 @@
+---
+title: 📣 Backfeed
+# TODO make description look good (not so much space)
+# description: User feedback reporting platform
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import {
+  PiMegaphoneBold,
+  PiChartLineUpBold,
+  PiChatCircleBold,
+} from "react-icons/pi";
+
+<ProductOverview
+  title="Backfeed"
+  emoji="📣"
+  tagline="Streamlined user feedback"
+  description="A user feedback reporting platform that aggregates user data for your products, services, and experiences, providing a centralized location to iterate on your projects with user-driven insights."
+  tags={[
+    {
+      label: "User Feedback",
+      icon: <PiMegaphoneBold />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+    {
+      label: "Product Analytics",
+      icon: <PiChartLineUpBold />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+    {
+      label: "Community Insights",
+      icon: <PiChatCircleBold />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://backfeed.omni.dev",
+      label: "Visit App",
+      type: "website",
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+    {
+      href: `${app.socials.github}/backfeed`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Under Construction",
+      description:
+        "Backfeed is new! Expect this documentation to change rapidly and have rough edges.",
+      icon: "🚧",
+    },
+    {
+      title: "Big Idea",
+      description:
+        "Seamlessly let your users, customers, and clients drive your product direction",
+      icon: "💡",
+    },
+  ]}
+/>
+
+**Omni Backfeed** is a user feedback reporting platform. Backfeed aggregates user data for your products, services, and experiences, providing a centralized location to iterate on your projects with user-driven insights and planning.
+
+Backfeed is composed of:
+
+{/* TODO mermaid */}
+
+- **Organizations**: The highest level, representing a company or group.
+- **Projects**: Each organization can house multiple projects, representing different products or services.
+- **Feedback**: Each project contains feedback submissions, which include:
+  - Upvotes/downvotes from the community
+  - A discussion section for comments and collaboration
+
+## Features
+
+- **Feedback Aggregation**: Collect and categorize feedback from multiple sources, ensuring a streamlined workflow for product teams.
+- **Prioritization Tools**: Rank feedback based on user demand, impact, and urgency, making it easier to decide what to build next.
+- **Roadmap Planning**: Communicate product direction by turning feedback into actionable roadmap items.
+- **User Voting & Discussion**: Each feedback includes upvotes/downvotes and a community discussion section for comments.
+- **Analytics & Insights**: Gain deep insights into user needs and engagement trends (planned).
+- **API Access**: Integrate Backfeed seamlessly into your existing infrastructure with a powerful API (planned).
+
+## Getting Started
+
+1. **Sign Up & Create an Organization**
+   Get started by signing up and creating a new organization. This serves as the central hub for managing projects and feedback.
+2. **Create a Project**
+   Within your organization, set up projects to track feedback for specific products or services.
+3. **Customize Your Feedback Board**
+   Configure your board to allow public submissions, internal feedback, or a mix of both. Set up categories to organize feedback effectively.
+4. **Invite Your Users**
+   Share your feedback board with users, customers, or internal teams. Encourage them to submit suggestions and vote on existing ideas.
+5. **Review & Prioritize**
+   Use Backfeed's prioritization tools to filter, sort, and rank feedback based on importance and feasibility.
+6. **Plan & Execute**
+   Convert prioritized feedback into roadmap items, assign tasks to your team, and start building based on user demand.
+
+## Integrations (Planned)
+
+Backfeed plans to support integrations with popular tools like:
+
+- GitHub
+- Linear
+- Jira
+
+## API & Webhooks (Planned)
+
+Backfeed will offer a fully-featured API for developers looking to extend its functionality. Webhooks will allow real-time notifications and automation with your existing stack.
