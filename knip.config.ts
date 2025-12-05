@@ -7,6 +7,7 @@ import type { KnipConfig } from "knip";
 const knipConfig: KnipConfig = {
   entry: ["src/routes/**/*.{ts,tsx}", "src/router.tsx"],
   project: ["src/**/*.{ts,tsx,css}"],
+  ignore: ["**/*.gen.*", "**/generated/**"],
   tags: ["-knipignore"],
 };
 
