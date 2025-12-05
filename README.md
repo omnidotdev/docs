@@ -2,7 +2,7 @@
 
 Omni documentation, powered by [Fumadocs](https://github.com/fuma-nama/fumadocs).
 
-### Building and Running
+## Local Development
 
 Run `tilt up`, or:
 
