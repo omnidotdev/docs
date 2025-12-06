@@ -42,12 +42,15 @@ const LinkButton = ({ link, ...rest }: Props) => {
   };
 
   const btn = (
-    <Button size="sm" variant="outline" color="foreground.default">
-      <div className="flex items-center gap-2">
-        {getIcon(link)}
+    <Button
+      size="sm"
+      variant="outline"
+      color="foreground.default"
+      className="cursor-pointer items-center gap-2"
+    >
+      {getIcon(link)}
 
-        {link.label}
-      </div>
+      {link.label}
     </Button>
   );
 
