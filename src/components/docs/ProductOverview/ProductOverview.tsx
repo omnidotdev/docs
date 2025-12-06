@@ -18,10 +18,6 @@ interface ProductOverviewAlert {
    */
   description: string;
   /**
-   * Icon to display before the title.
-   */
-  icon?: string;
-  /**
    * Classes for styling the alert.
    */
   className?: string;
@@ -120,9 +116,7 @@ const ProductOverview: React.FC<ProductOverviewProps> = ({
       <div className="mt-4 flex flex-col gap-2">
         {alerts.map((alert) => (
           <Alert key={alert.title} className={cn(alert.className)}>
-            <AlertTitle>
-              {alert.icon ? `${alert.icon} ${alert.title}` : alert.title}
-            </AlertTitle>
+            <AlertTitle>{alert.title}</AlertTitle>
 
             <AlertDescription>{alert.description}</AlertDescription>
           </Alert>
