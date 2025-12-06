@@ -15,75 +15,47 @@ Omni is committed to building open-source software, which includes apps, website
 
 Creating open-source software aligns with Omni’s core values, which prioritize freedom and openness. By developing with a focus on transparency, privacy, and security, Omni ensures its software is trustworthy and accessible. Moreover, by making the source code openly available, Omni invites the global community to engage in the highest level of collaboration, fostering innovation and collective improvement through shared contributions and scrutiny.
 
+export const green =
+  "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300";
+
+export const red =
+  "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300";
+
+export const label = "font-bold";
+
+export const rows = [
+  [
+    "💰 Cost",
+    "No licensing fees, predictable infra maintenance only.",
+    "Recurring licensing fees.",
+  ],
+  ["👨‍💻 Code Access", "Full source access.", "Source hidden."],
+  ["🔒 Security", "Transparent community auditing.", "Security via obscurity."],
+  ["☁️ Deployment", "Cloud, on-prem, hybrid.", "Vendor limits."],
+  ["🧠 Knowledge", "Public collaboration.", "Siloed."],
+  ["🏃‍♀️ Velocity", "Parallel innovation.", "Vendor pacing."],
+  ["⚖️ Compliance", "Simple licensing.", "Complex EULAs."],
+  ["👔 Continuity", "Persists beyond creators.", "Tied to vendor success."],
+  ["⛓️‍💥 Data", "Full sovereignty.", "Vendor infra."],
+  ["🎗️ Governance", "Community-driven.", "Top-down decisions."],
+];
+
 <Table>
   <TableHeader>
     <TableRow>
-      <TableHead className="font-bold">Attribute</TableHead>
-      <TableHead className="font-bold">Omni Open Source Software</TableHead>
-      <TableHead className="font-bold">Proprietary Software</TableHead>
+      <TableHead className={label}>Attribute</TableHead>
+      <TableHead className={label}>Open Source</TableHead>
+      <TableHead className={label}>Proprietary</TableHead>
     </TableRow>
   </TableHeader>
 
   <TableBody>
-    <TableRow>
-      <TableCell className="font-bold">💰 Cost</TableCell>
-      <TableCell className="bg-green-300/50">No licensing fees, predictable infra maintenance only.</TableCell>
-      <TableCell className="bg-red-300/50">Recurring licensing fees.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">👨‍💻 Code Access</TableCell>
-      <TableCell className="bg-green-300/50">Full source access.</TableCell>
-      <TableCell className="bg-red-300/50">Source hidden.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">🔒 Security</TableCell>
-      <TableCell className="bg-green-300/50">Transparent community auditing.</TableCell>
-      <TableCell className="bg-red-300/50">Security via obscurity.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">☁️ Deployment</TableCell>
-      <TableCell className="bg-green-300/50">Cloud, on-prem, hybrid.</TableCell>
-      <TableCell className="bg-red-300/50">Vendor limits.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">🧠 Knowledge</TableCell>
-      <TableCell className="bg-green-300/50">Public collaboration.</TableCell>
-      <TableCell className="bg-red-300/50">Siloed.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">🏃‍♀️ Velocity</TableCell>
-      <TableCell className="bg-green-300/50">Parallel innovation.</TableCell>
-      <TableCell className="bg-red-300/50">Vendor pacing.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">⚖️ Compliance</TableCell>
-      <TableCell className="bg-green-300/50">Simple licensing.</TableCell>
-      <TableCell className="bg-red-300/50">Complex EULAs.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">👔 Continuity</TableCell>
-      <TableCell className="bg-green-300/50">Persists beyond creators.</TableCell>
-      <TableCell className="bg-red-300/50">Tied to vendor success.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">⛓️‍💥 Data</TableCell>
-      <TableCell className="bg-green-300/50">Full sovereignty.</TableCell>
-      <TableCell className="bg-red-300/50">Vendor infra.</TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableCell className="font-bold">🎗️ Governance</TableCell>
-      <TableCell className="bg-green-300/50">Community-driven.</TableCell>
-      <TableCell className="bg-red-300/50">Top-down decisions.</TableCell>
-    </TableRow>
-
+    {rows.map(([attr, oss, prop]) => (
+      <TableRow key={attr}>
+        <TableCell className={label}>{attr}</TableCell>
+        <TableCell className={green}>{oss}</TableCell>
+        <TableCell className={red}>{prop}</TableCell>
+      </TableRow>
+    ))}
   </TableBody>
 </Table>
