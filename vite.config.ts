@@ -19,6 +19,12 @@ const viteConfig = defineConfig({
     port: 3000,
     host: "0.0.0.0",
   },
+  ssr: {
+    noExternal: ["@omnidotdev/garden"],
+  },
+  optimizeDeps: {
+    include: ["@omnidotdev/garden", "@xyflow/react", "react", "react-dom"],
+  },
   plugins: [
     // TODO enable, dev breaks
     // mkcert(),
