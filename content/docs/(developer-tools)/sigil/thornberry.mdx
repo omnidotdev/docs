@@ -1,0 +1,52 @@
+---
+title: 🍓 Thornberry
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiReact, SiTailwindcss } from "react-icons/si";
+
+<ProductOverview
+  title="Thornberry"
+  emoji="🍓"
+  tagline="Sigil extension with Tailwind and shadcn"
+  description="An extension of the Sigil design system that integrates Tailwind CSS and shadcn components, providing a comprehensive UI toolkit for rapid application development."
+  tags={[
+    {
+      label: "React",
+      icon: <SiReact />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+    {
+      label: "Tailwind",
+      icon: <SiTailwindcss />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://thornberry.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/thornberry`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Unreleased",
+      description: "Thornberry is not yet released.",
+      icon: "🚧",
+    },
+    {
+      title: "Big Idea",
+      description: "Extend Sigil with the power of Tailwind and shadcn",
+      icon: "💡",
+    },
+  ]}
+/>
+
+**Omni Sigil Thornberry** docs coming soon. Smashing! 🍓
