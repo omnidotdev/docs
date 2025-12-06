@@ -11,7 +11,25 @@ import { SiGraphql, SiTypescript, SiOpenapiinitiative } from "react-icons/si";
   emoji="ᯅ"
   tagline="TODO"
   description="TODO"
+  tags={[
+    {
+      label: "Extended Reality",
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      label: "Augmented Reality",
+      className:
+        "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Virtual Reality",
+      className:
+        "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
   links={[
+    // TODO
     // {
     //   href: "https://rdk.omni.dev",
     //   label: "Visit Website",
@@ -29,18 +47,17 @@ import { SiGraphql, SiTypescript, SiOpenapiinitiative } from "react-icons/si";
       description:
         "RDK is in early development. Expect this documentation to change rapidly.",
       icon: "🚧",
-      bgColor: "brand.quaternary.200a",
     },
     {
       title: "Big Idea",
-      description: "TODO",
+      description:
+        "Unify spatial computing development under a single orchestrated, React-first API",
       icon: "💡",
-      bgColor: "brand.primary.200a",
     },
     {
       title: "🚩 Problem Solved",
-      description: "TOO",
-      bgColor: "brand.tertiary.200a",
+      description:
+        "Platform-agnostic, web-based extended reality and spatial computing development",
     },
   ]}
 />
