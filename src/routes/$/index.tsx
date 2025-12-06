@@ -17,6 +17,7 @@ import source from "@/lib/source";
 
 import type * as PageTree from "fumadocs-core/page-tree";
 import { Badge } from "@/components/ui/badge";
+import { app } from "@/lib/config";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -56,6 +57,25 @@ const Page = () => {
         {...baseLayoutOptions()}
         tree={pageTree}
         sidebar={{
+          footer: (
+            <div className="mt-3 flex justify-end gap-2 text-2xs text-fd-accent-foreground/80">
+              <a
+                href={app.legal.privacyPolicy}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Privacy Policy
+              </a>
+
+              <a
+                href={app.legal.termsOfService}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Terms of Service
+              </a>
+            </div>
+          ),
           components: {
             Separator: ({ item }) => (
               // TODO collapsible
