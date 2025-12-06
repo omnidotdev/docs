@@ -18,6 +18,7 @@ import source from "@/lib/source";
 import type * as PageTree from "fumadocs-core/page-tree";
 import { Badge } from "@/components/ui/badge";
 import { app } from "@/lib/config";
+import { Button } from "@/components/ui/button";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -59,6 +60,25 @@ const Page = () => {
         {...baseLayoutOptions()}
         tree={patchedTree}
         sidebar={{
+          banner: (
+            <span className="text-xs">
+              We turn ideas into products, from apps to websites to email
+              automation.
+              <a
+                href="https://omni.dev/#contact"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="ml-2 cursor-pointer px-0 text-fd-primary text-xs"
+                >
+                  Hire Us →
+                </Button>
+              </a>
+            </span>
+          ),
           footer: (
             <div className="mt-3 flex justify-end gap-2 text-2xs text-fd-accent-foreground/80">
               <a
