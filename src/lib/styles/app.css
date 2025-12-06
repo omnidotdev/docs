@@ -126,9 +126,11 @@
 
   /* disable Tailwind blockquote styles (https://tjaddison.com/blog/2020/08/updating-to-tailwind-typography-to-style-markdown-posts) */
   blockquote p:first-of-type:before {
+    /* biome-ignore lint/complexity/noImportantStyles: intentional to aggressively override Tailwind default */
     content: none !important;
   }
   blockquote p:last-of-type:after {
+    /* biome-ignore lint/complexity/noImportantStyles: intentional to aggressively override Tailwind default */
     content: none !important;
   }
 }
