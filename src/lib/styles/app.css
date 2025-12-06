@@ -119,7 +119,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* disable Tailwind blockquote styles (https://tjaddison.com/blog/2020/08/updating-to-tailwind-typography-to-style-markdown-posts) */
+  blockquote p:first-of-type:before {
+    content: none !important;
+  }
+  blockquote p:last-of-type:after {
+    content: none !important;
   }
 }
