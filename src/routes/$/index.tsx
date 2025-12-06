@@ -52,6 +52,7 @@ const Page = () => {
 
   return (
     <>
+      {/* TODO rotating banner */}
       <Banner variant="rainbow">
         Omni builds open source software for everyone
       </Banner>
