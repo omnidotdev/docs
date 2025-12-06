@@ -43,6 +43,8 @@ const NEW_PRODUCTS = ["Backfeed", "Garden", "RDK"],
 const Page = () => {
   const data = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
+  const patchedTree = transformPageTree(pageTree);
+
   const Content = clientLoader.getComponent(data.path);
 
   const { pathname } = useLocation();
@@ -55,7 +57,7 @@ const Page = () => {
 
       <DocsLayout
         {...baseLayoutOptions()}
-        tree={pageTree}
+        tree={patchedTree}
         sidebar={{
           footer: (
             <div className="mt-3 flex justify-end gap-2 text-2xs text-fd-accent-foreground/80">
@@ -83,8 +85,8 @@ const Page = () => {
                 <hr className="my-6" />
 
                 <div className="mb-2 inline-flex items-center gap-2 font-bold [&amp;_svg]:size-4 [&amp;_svg]:shrink-0">
-                  <p style={{ paddingInlineStart: "calc(2 * var(--spacing))" }}>
-                    <span className="flex gap-2">
+                  <p>
+                    <span className="flex gap-2 ps-[calc(2*var(--spacing))]">
                       {item.icon}
                       {item.name}
 
@@ -103,10 +105,15 @@ const Page = () => {
                 data-status={item.url === pathname && "active"}
                 aria-current="page"
                 href={item.url}
-                style={{ paddingInlineStart: "calc(2 * var(--spacing))" }}
                 className="wrap-anywhere active relative flex flex-row items-center justify-between gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors [&amp;_svg]:size-4 [&amp;_svg]:shrink-0"
               >
-                <span className="flex items-center gap-2">
+                <span
+                  className={`flex items-center gap-2 ${
+                    // visually nest if child of folder
+                    // @ts-expect-error TODO
+                    item.isChildOfFolder ? "ps-[calc(2*var(--spacing))]" : ""
+                  }`}
+                >
                   {item.icon}
                   {item.name}
                 </span>
@@ -189,9 +196,12 @@ const clientLoader = browserCollections.docs.createClientLoader({
   ),
 });
 
-// biome-ignore lint/correctness/noUnusedVariables: false alarm
 const transformPageTree = (root: PageTree.Root): PageTree.Root => {
-  const mapNode = <T extends PageTree.Node>(item: T): T => {
+  // add lineage flag
+  const mapNode = <T extends PageTree.Node>(
+    item: T,
+    isChildOfFolder = false,
+  ): T => {
     if (typeof item.icon === "string")
       item = {
         ...item,
@@ -208,16 +218,24 @@ const transformPageTree = (root: PageTree.Root): PageTree.Root => {
     if (item.type === "folder")
       return {
         ...item,
-        index: item.index ? mapNode(item.index) : undefined,
-        children: item.children.map(mapNode),
+        // mark folder itself
+        isChildOfFolder,
+        index: item.index ? mapNode(item.index, true) : undefined,
+        // mark all children of folder
+        children: item.children.map((c) => mapNode(c, true)),
       };
 
-    return item;
+    // leaf/file
+    return {
+      ...item,
+      isChildOfFolder,
+    };
   };
 
   return {
     ...root,
-    children: root.children.map(mapNode),
+    // root children have no parent folder
+    children: root.children.map((c) => mapNode(c, false)),
     fallback: root.fallback ? transformPageTree(root.fallback) : undefined,
   };
 };
