@@ -30,7 +30,7 @@ import { Badge } from "@/components/ui/badge";
 // then need to figure a way to grab the frontmatter here
 
 // TODO grab from Omni API
-const NEW_PRODUCTS = ["Backfeed", "Garden"],
+const NEW_PRODUCTS = ["Backfeed", "Garden", "RDK"],
   COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
 
 // TODO fix alphabetical sort (folders appearing last)
@@ -96,7 +96,9 @@ const Page = () => {
                     product,
                   ),
                 ) && (
-                  <Badge className="bg-green-200 text-green-950">New! 🚀</Badge>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                    New! 🚀
+                  </Badge>
                 )}
 
                 {COMING_SOON_PRODUCTS.some((product) =>
@@ -105,7 +107,7 @@ const Page = () => {
                     product,
                   ),
                 ) && (
-                  <Badge className="bg-amber-200 text-amber-950">
+                  <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
                     Coming Soon 🚧
                   </Badge>
                 )}
