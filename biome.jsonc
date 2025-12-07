@@ -1,0 +1,85 @@
+// see https://biomejs.dev/reference/configuration
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "identifierOrder": "lexicographic",
+            "groups": [
+              { "type": false, "source": [":BUN:", ":NODE:"] },
+              ":BLANK_LINE:",
+              {
+                "type": false,
+                "source": [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"]
+              },
+              ":BLANK_LINE:",
+              { "type": false, "source": ["**"] },
+              ":BLANK_LINE:",
+              { "type": true }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!!**/*.gen.*",
+      "!!**/bun.lock",
+      "!!**/generated",
+      "!!**/public"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedImports": {
+          "fix": "safe",
+          "level": "error"
+        }
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "error",
+          "options": {
+            "attributes": ["class", "className"],
+            "functions": ["cn", "clsx", "classnames", "cva", "tv"]
+          }
+        }
+      },
+      "style": {
+        "useImportType": {
+          "level": "error",
+          "options": { "style": "separatedType" }
+        }
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn",
+        "noConsole": {
+          "level": "error",
+          "options": { "allow": ["error", "warn", "info"] }
+        }
+      }
+    }
+  }
+}

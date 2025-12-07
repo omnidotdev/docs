@@ -1,0 +1,52 @@
+---
+title: 🎨 Sigil
+---
+
+import { ProductOverview } from "@/components/docs";
+import { SiStorybook } from "react-icons/si";
+import app from "@/lib/config/app.config";
+
+<ProductOverview
+  title="Sigil"
+  emoji="🎨"
+  tagline="Omni's unified design system"
+  description="A unified collection of design tokens, components, and utilities for building accessible, consistent, and beautiful user interfaces across the Omni product ecosystem."
+  links={[
+    {
+      href: `${app.socials.github}/sigil`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+    {
+      href: "https://sigil.omni.dev",
+      label: "View Storybook",
+      type: "custom",
+      icon: <SiStorybook />,
+    },
+  ]}
+  alerts={[
+    {
+      title: "Design System",
+      description:
+        "Sigil is Omni's unified design system, providing consistent design elements across all products.",
+      icon: "🎨",
+    },
+  ]}
+/>
+
+> Curious to learn more about design systems, including what they are and how they work? Check out Backlight's [What is a Design System?](https://backlight.dev/mastery/what-is-a-design-system)
+
+## What’s Included
+
+Sigil provides:
+
+- **Design tokens** for color, spacing, typography, and other visual primitives.
+- **Prebuilt components** like buttons, inputs, and dialogs, designed with accessibility and responsiveness in mind.
+- **Theming support** to customize appearance while maintaining consistency.
+- **Developer-first ergonomics** to be fast, composable, and type-safe.
+
+## Core Goals
+
+- **CSS and framework agnosticism**: Sigil is built on [Panda CSS](https://panda-css.com/), a CSS-in-JS engine that compiles to static, atomic CSS. This makes it easy to decouple styling from specific frontend frameworks, enabling adoption across diverse environments.
+- **Customizable by anyone**: Even outside the Omni ecosystem, teams can extend or override the Sigil theme to suit their brand or product needs. Panda CSS makes theme extension intuitive and scalable.
+- **Modern design system best practices**: Sigil is built to serve as a foundation for scalable design and development collaboration, following accessibility standards and flexible architecture principles.
