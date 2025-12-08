@@ -1,14 +1,15 @@
+import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
   HeadContent,
   Outlet,
   Scripts,
   createRootRoute,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 
-import { app } from "@/lib/config";
 import appCss from "@/lib/styles/app.css?url";
+import seo from "@/lib/util/seo";
 
 import type { PropsWithChildren } from "react";
 
@@ -18,8 +19,6 @@ import type { PropsWithChildren } from "react";
 const RootComponent = () => (
   <RootDocument>
     <Outlet />
-
-    <TanStackRouterDevtools />
   </RootDocument>
 );
 
@@ -36,9 +35,7 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      {
-        title: app.name.long,
-      },
+      ...seo(),
     ],
     // TODO manifest (TSS template https://github.com/omnidotdev/template-tanstack-start/pull/7)
     links: [
@@ -60,6 +57,17 @@ const RootDocument = ({ children }: PropsWithChildren) => (
 
     <body className="flex min-h-screen flex-col">
       <RootProvider>{children}</RootProvider>
+
+      {/* Dev Tools - only included in development */}
+      <TanStackDevtools
+        plugins={[
+          {
+            name: "Router",
+            render: <TanStackRouterDevtoolsPanel />,
+            defaultOpen: true,
+          },
+        ]}
+      />
 
       <Scripts />
     </body>

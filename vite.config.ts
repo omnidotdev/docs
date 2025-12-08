@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import mdx from "fumadocs-mdx/vite";
@@ -26,6 +27,7 @@ const viteConfig = defineConfig({
     include: ["@omnidotdev/garden", "@xyflow/react", "react", "react-dom"],
   },
   plugins: [
+    devtools(),
     // TODO enable, dev breaks
     // mkcert(),
     mdx(mdxConfig),
