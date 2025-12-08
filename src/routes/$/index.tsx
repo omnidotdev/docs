@@ -12,13 +12,15 @@ import {
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { app } from "@/lib/config";
 import baseLayoutOptions from "@/lib/layout.base";
 import source from "@/lib/source";
+import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
+import seo from "@/lib/util/seo";
 
 import type * as PageTree from "fumadocs-core/page-tree";
-import { Badge } from "@/components/ui/badge";
-import { app } from "@/lib/config";
-import { Button } from "@/components/ui/button";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -42,7 +44,7 @@ const NEW_PRODUCTS = ["Backfeed", "Garden", "RDK"],
  * Splat page.
  */
 const Page = () => {
-  const data = Route.useLoaderData();
+  const { data } = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
   const patchedTree = transformPageTree(pageTree);
 
@@ -184,7 +186,24 @@ export const Route = createFileRoute("/$/")({
 
     await clientLoader.preload(data.path);
 
-    return data;
+    return { data, slugs };
+  },
+  head: ({ loaderData }) => {
+    const slugs = loaderData?.slugs;
+    const currentSegment = slugs?.length
+      ? slugs
+          .at(-1)!
+          .split("-")
+          .map((seg) =>
+            capitalizeFirstLetter({ str: seg, allCaps: seg === "rdk" }),
+          )
+          .join(" ")
+      : undefined;
+
+    return {
+      // TODO: dynamic descriptions
+      meta: seo({ title: currentSegment ?? undefined }),
+    };
   },
 });
 
