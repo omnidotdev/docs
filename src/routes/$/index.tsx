@@ -1,4 +1,3 @@
-import browserCollections from "fumadocs-mdx:collections/browser";
 import { createFileRoute, notFound, useLocation } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
@@ -12,6 +11,7 @@ import {
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 
+import browserCollections from "fumadocs-mdx:collections/browser";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
