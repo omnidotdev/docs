@@ -1,6 +1,6 @@
 import FumadocsLink from "fumadocs-core/link";
-import { SiGithub as GitHubIcon } from "react-icons/si";
 import { FaEarthAmericas as EarthIcon } from "react-icons/fa6";
+import { SiGithub as GitHubIcon } from "react-icons/si";
 
 import { Button } from "@/components/ui/button";
 

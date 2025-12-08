@@ -1,9 +1,9 @@
+import { FaEarthAmericas as EarthIcon } from "react-icons/fa6";
 import {
   SiDiscord as DiscordIcon,
   SiGithub as GitHubIcon,
   SiX as XIcon,
 } from "react-icons/si";
-import { FaEarthAmericas as EarthIcon } from "react-icons/fa6";
 
 import { app } from "./config";
 

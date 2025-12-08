@@ -1,8 +1,9 @@
-import { docs } from "fumadocs-mdx:collections/server";
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
-import { createElement } from "react";
 import { icons } from "lucide-react";
+import { createElement } from "react";
+
+import { docs } from "fumadocs-mdx:collections/server";
 
 // TODO remote MDX sources https://fumadocs.dev/docs/mdx/performance#remote-source
 

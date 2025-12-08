@@ -14,16 +14,28 @@
           "options": {
             "identifierOrder": "lexicographic",
             "groups": [
-              { "type": false, "source": [":BUN:", ":NODE:"] },
+              {
+                "type": false,
+                "source": [":BUN:", ":NODE:"]
+              },
               ":BLANK_LINE:",
               {
                 "type": false,
-                "source": [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"]
+                "source": [
+                  ":PACKAGE:",
+                  ":PACKAGE_WITH_PROTOCOL:",
+                  "!fumadocs-mdx:collections/**"
+                ]
               },
               ":BLANK_LINE:",
-              { "type": false, "source": ["**"] },
+              {
+                "type": false,
+                "source": ["**"]
+              },
               ":BLANK_LINE:",
-              { "type": true }
+              {
+                "type": true
+              }
             ]
           }
         }
@@ -70,14 +82,18 @@
       "style": {
         "useImportType": {
           "level": "error",
-          "options": { "style": "separatedType" }
+          "options": {
+            "style": "separatedType"
+          }
         }
       },
       "suspicious": {
         "noArrayIndexKey": "warn",
         "noConsole": {
           "level": "error",
-          "options": { "allow": ["error", "warn", "info"] }
+          "options": {
+            "allow": ["error", "warn", "info"]
+          }
         }
       }
     }

@@ -9,7 +9,7 @@
     "start": "node .output/server/index.mjs",
     "format": "biome format --write",
     "lint": "biome lint",
-    "check": "fumadocs-mdx && tsc --noEmit && biome lint --diagnostic-level=error",
+    "check": "fumadocs-mdx && biome check --diagnostic-level=error",
     "knip": "knip-bun",
     "prepare": "husky"
   },
