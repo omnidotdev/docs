@@ -34,7 +34,7 @@ import type * as PageTree from "fumadocs-core/page-tree";
 // then need to figure a way to grab the frontmatter here
 
 // TODO grab from Omni API
-const NEW_PRODUCTS = ["Backfeed", "Garden", "RDK"],
+const NEW_PRODUCTS = ["RDK"],
   COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
 
 // TODO fix alphabetical sort (folders appearing last)
