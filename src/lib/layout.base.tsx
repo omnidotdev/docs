@@ -37,7 +37,13 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
     // TODO LinkedIn (see https://github.com/simple-icons/simple-icons/issues/11372)
   ],
   nav: {
-    title: app.name.short,
+    title: (
+      <img
+        src="/svg/logo.svg"
+        alt="Omni Logo"
+        className="h-8 w-auto opacity-80 invert-0 dark:invert"
+      />
+    ),
   },
 });
 
