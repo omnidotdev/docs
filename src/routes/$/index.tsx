@@ -1,7 +1,6 @@
 import { createFileRoute, notFound, useLocation } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
-import { Banner } from "fumadocs-ui/components/banner";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   DocsBody,
@@ -12,6 +11,7 @@ import {
 import defaultMdxComponents from "fumadocs-ui/mdx";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
+import { RotatingBanner } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
@@ -53,10 +53,7 @@ const Page = () => {
 
   return (
     <>
-      {/* TODO rotating banner */}
-      <Banner variant="rainbow">
-        Omni builds open source software for everyone
-      </Banner>
+      <RotatingBanner />
 
       <DocsLayout
         {...baseLayoutOptions()}
@@ -189,11 +186,13 @@ export const Route = createFileRoute("/$/")({
   },
   head: ({ loaderData }) => {
     const slugs = loaderData?.slugs;
+
     const currentSegment = slugs?.length
       ? slugs
           .at(-1)!
           .split("-")
           .map((seg) =>
+            // TODO make this more robust (avoid hardcoding product acronyms here)
             capitalizeFirstLetter({ str: seg, allCaps: seg === "rdk" }),
           )
           .join(" ")
