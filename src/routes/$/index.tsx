@@ -1,7 +1,6 @@
 import { createFileRoute, notFound, useLocation } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
-import { Banner } from "fumadocs-ui/components/banner";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   DocsBody,
@@ -21,6 +20,7 @@ import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
 
 import type * as PageTree from "fumadocs-core/page-tree";
+import { RotatingBanner } from "@/components/layout";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -53,10 +53,7 @@ const Page = () => {
 
   return (
     <>
-      {/* TODO rotating banner */}
-      <Banner variant="rainbow">
-        Omni builds open source software for everyone
-      </Banner>
+      <RotatingBanner />
 
       <DocsLayout
         {...baseLayoutOptions()}
