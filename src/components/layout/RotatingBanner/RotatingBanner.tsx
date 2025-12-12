@@ -21,6 +21,23 @@ const items = [
   {
     text: (
       <div className="flex gap-1">
+        <span>ᯅ Build spatial and XR web experiences with</span>
+        <a
+          href="https://github.com/omnidotdev/rdk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 border-b-border-b-fd-accent font-bold"
+        >
+          <span className="font-bold underline">RDK →</span>
+        </a>
+      </div>
+    ),
+    // TODO tokens
+    rainbowColors: ["#c026d3", "#d946ef", "#f0abfc"],
+  },
+  {
+    text: (
+      <div className="flex gap-1">
         <span>📣 Organize your user feedback with</span>
         <a
           href="https://backfeed.omni.dev"
