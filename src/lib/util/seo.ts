@@ -1,43 +1,48 @@
 import app from "@/lib/config/app.config";
 
-const seo = ({
-  title,
-  description,
-  keywords,
-  image,
-  url,
-}: {
+interface Params {
   title?: string;
   description?: string;
   image?: string;
   keywords?: string;
   url?: string;
-} = {}) => {
-  const shownTitle = title ? `${app.name.long} | ${title}` : app.name.long;
-  const shownDescription = description ?? app.description;
-  const shownUrl = url ?? app.appUrl;
+}
+
+/**
+ * Create meta tags.
+ */
+const createMetaTags = ({
+  title,
+  description,
+  image,
+  keywords,
+  url,
+}: Params = {}) => {
+  const displayedTitle = title ? `${app.name.long} | ${title}` : app.name.long;
+  const displayedDescription = description ?? app.description;
+  const displayedUrl = url ?? app.appUrl;
 
   const tags = [
-    { title: shownTitle },
+    { title: displayedTitle },
     {
       name: "description",
-      content: shownDescription,
+      content: displayedDescription,
     },
     { name: "keywords", content: keywords },
-    { name: "twitter:title", content: shownTitle },
+    { name: "twitter:title", content: displayedTitle },
     {
       name: "twitter:description",
-      content: shownDescription,
+      content: displayedDescription,
     },
     { name: "twitter:creator", content: "@omnidotdev" },
-    { name: "twitter:url", content: shownUrl },
+    { name: "twitter:url", content: displayedUrl },
     { name: "og:type", content: "website" },
-    { name: "og:title", content: shownTitle },
+    { name: "og:title", content: displayedTitle },
     {
       name: "og:description",
-      content: shownDescription,
+      content: displayedDescription,
     },
-    { name: "og:url", content: shownUrl },
+    { name: "og:url", content: displayedUrl },
     ...(image
       ? [
           { name: "twitter:image", content: image },
@@ -54,4 +59,4 @@ const seo = ({
   return tags;
 };
 
-export default seo;
+export default createMetaTags;
