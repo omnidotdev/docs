@@ -83,7 +83,7 @@ const RotatingBanner = () => {
     <Banner
       variant="rainbow"
       rainbowColors={rainbowColors}
-      className="relative"
+      className="relative sticky top-0"
     >
       {/* nav left */}
       <button
