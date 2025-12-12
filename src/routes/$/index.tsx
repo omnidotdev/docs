@@ -11,6 +11,7 @@ import {
 import defaultMdxComponents from "fumadocs-ui/mdx";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
+import { RotatingBanner } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
@@ -20,7 +21,6 @@ import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
 
 import type * as PageTree from "fumadocs-core/page-tree";
-import { RotatingBanner } from "@/components/layout";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -186,11 +186,13 @@ export const Route = createFileRoute("/$/")({
   },
   head: ({ loaderData }) => {
     const slugs = loaderData?.slugs;
+
     const currentSegment = slugs?.length
       ? slugs
           .at(-1)!
           .split("-")
           .map((seg) =>
+            // TODO make this more robust (avoid hardcoding product acronyms here)
             capitalizeFirstLetter({ str: seg, allCaps: seg === "rdk" }),
           )
           .join(" ")
