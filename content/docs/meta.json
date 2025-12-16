@@ -1,16 +1,24 @@
 {
+  "root": true,
   "pages": [
     "---Welcome to Omni---",
-    "...(welcome)",
-    "---Products---",
-    "...(products)",
-    "---Developer Tools---",
-    "...(developer-tools)",
-    "---Specifications & Standards---",
-    "...(specs-standards)",
+    "index",
+    "ecosystem",
+    "open-source",
+    "...",
+    "---Omni Core---",
+    "...core",
+    "---Omni Reality---",
+    "...reality",
+    "---Omni Sigil---",
+    "...sigil",
+    "---Omni Blueprint---",
+    "...blueprint",
+    "---Omni Forge---",
+    "...forge",
     "---Community---",
-    "...(community)",
+    "...community",
     "---Help---",
-    "...(help)"
+    "...help"
   ]
 }
