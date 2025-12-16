@@ -9,47 +9,57 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
+import { useEffect, useState } from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
+import {
+  SidebarFolder,
+  SidebarItem,
+  SidebarSection,
+  SidebarSeparator,
+} from "@/components/docs";
 import { RotatingBanner } from "@/components/layout";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
 import baseLayoutOptions from "@/lib/layout.base";
+import transformPageTree from "@/lib/pageTreeTransform";
+import { getPillarByPath } from "@/lib/pillars";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
 
-import type * as PageTree from "fumadocs-core/page-tree";
-
-// TODO extract to frontmatter
-// can be extended in source config e.g.
-// ```
-//  docs: {
-//    schema: frontmatterSchema.extend({
-//      new: z.boolean().default(false),
-//    }),
-//  },
-// ````
-// then need to figure a way to grab the frontmatter here
-
-// TODO grab from Omni API
-const NEW_PRODUCTS = ["RDK"],
-  COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
-
-// TODO fix alphabetical sort (folders appearing last)
+/**
+ * Determine which section contains the current page.
+ * @param pathname Current pathname.
+ * @returns Section name, if found.
+ */
+const getSectionFromPath = (pathname: string): string => {
+  const pillar = getPillarByPath(pathname);
+  return pillar?.id ?? "welcome";
+};
 
 /**
  * Splat page.
  */
 const Page = () => {
-  const { data } = Route.useLoaderData();
+  const { data, activeSection } = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
   const patchedTree = transformPageTree(pageTree);
 
   const Content = clientLoader.getComponent(data.path);
 
   const { pathname } = useLocation();
+
+  const [currentOpenSection, setCurrentOpenSection] = useState<string | null>(
+    () => activeSection || getSectionFromPath(pathname) || "welcome",
+  );
+
+  // update open section when pathname changes
+  useEffect(() => {
+    const newActiveSection = getSectionFromPath(pathname);
+
+    setCurrentOpenSection(newActiveSection);
+  }, [pathname]);
 
   return (
     <>
@@ -87,7 +97,6 @@ const Page = () => {
               >
                 Privacy Policy
               </a>
-
               <a
                 href={app.legal.termsOfService}
                 target="_blank"
@@ -98,69 +107,35 @@ const Page = () => {
             </div>
           ),
           components: {
-            Separator: ({ item }) => (
-              // TODO collapsible
-              <>
-                <hr className="my-6" />
+            Separator: ({ item }) => <SidebarSeparator item={item} />,
+            Folder: ({ item, children }) => {
+              // check if this is a virtual section folder created by the transform
+              if ((item as any).virtualSection) {
+                const originalSeparator = (item as any).originalSeparator;
+                const sectionId = (item as any).sectionId;
+                const isOpen = currentOpenSection === sectionId;
 
-                <div className="mb-2 inline-flex items-center gap-2 font-bold [&amp;_svg]:size-4 [&amp;_svg]:shrink-0">
-                  <p>
-                    <span className="flex gap-2 ps-[calc(2*var(--spacing))]">
-                      {item.icon}
-                      {item.name}
+                const handleToggle = (newOpen: boolean) => {
+                  setCurrentOpenSection(newOpen ? sectionId : null);
+                };
 
-                      {/* TODO pillar description */}
-                    </span>
-                  </p>
-                </div>
-              </>
-            ),
-            // TODO do similar to `Item` below (badges)
-            // unsure of a clean way to do this, the styles below for `Item` were grabbed from the default Fumadocs sidebar item rendered DOM
-            // Folder: (folder) => <></>,
-            Item: ({ item }) => (
-              <a
-                data-active={item.url === pathname}
-                data-status={item.url === pathname && "active"}
-                aria-current="page"
-                href={item.url}
-                className="wrap-anywhere active relative flex flex-row items-center justify-between gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors [&amp;_svg]:size-4 [&amp;_svg]:shrink-0"
-              >
-                <span
-                  className={`flex items-center gap-2 ${
-                    // visually nest if child of folder
-                    // @ts-expect-error TODO
-                    item.isChildOfFolder ? "ps-[calc(2*var(--spacing))]" : ""
-                  }`}
-                >
-                  {item.icon}
-                  {item.name}
-                </span>
+                return (
+                  <SidebarSection
+                    item={item}
+                    sectionId={sectionId}
+                    isOpen={isOpen}
+                    onToggle={handleToggle}
+                    originalSeparator={originalSeparator}
+                  >
+                    {children}
+                  </SidebarSection>
+                );
+              }
 
-                {/* TODO convert to frontmatter (see note near top of file) */}
-                {NEW_PRODUCTS.some((product) =>
-                  // @ts-expect-error TODO type `props` properly
-                  item.name?.props?.dangerouslySetInnerHTML?.__html?.includes(
-                    product,
-                  ),
-                ) && (
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
-                    New! 🚀
-                  </Badge>
-                )}
-
-                {COMING_SOON_PRODUCTS.some((product) =>
-                  // @ts-expect-error TODO type `props` properly
-                  item.name?.props?.dangerouslySetInnerHTML?.__html?.includes(
-                    product,
-                  ),
-                ) && (
-                  <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                    Coming Soon 🚧
-                  </Badge>
-                )}
-              </a>
-            ),
+              // regular folder behavior (these don't participate in accordion behavior)
+              return <SidebarFolder item={item}>{children}</SidebarFolder>;
+            },
+            Item: ({ item }) => <SidebarItem item={item} pathname={pathname} />,
           },
         }}
       >
@@ -175,22 +150,26 @@ const Page = () => {
  */
 export const Route = createFileRoute("/$/")({
   component: Page,
-  loader: async ({ params }) => {
+  loader: async ({ params, location }) => {
     const slugs = params._splat?.split("/") ?? [];
 
     const data = await serverLoader({ data: slugs });
 
     await clientLoader.preload(data.path);
 
-    return { data, slugs };
+    // determine active section
+    const pathname = new URL(location.url).pathname;
+    const activeSection = getSectionFromPath(pathname);
+
+    return { data, slugs, activeSection };
   },
   head: ({ loaderData }) => {
     const slugs = loaderData?.slugs;
 
     const currentSegment = slugs?.length
       ? slugs
-          .at(-1)!
-          .split("-")
+          .at(-1)
+          ?.split("-")
           .map((seg) =>
             // TODO make this more robust (avoid hardcoding product acronyms here)
             capitalizeFirstLetter({ str: seg, allCaps: seg === "rdk" }),
@@ -199,7 +178,7 @@ export const Route = createFileRoute("/$/")({
       : undefined;
 
     return {
-      // TODO: dynamic descriptions
+      // TODO dynamic descriptions
       meta: seo({ title: currentSegment ?? undefined }),
     };
   },
@@ -222,58 +201,12 @@ const clientLoader = browserCollections.docs.createClientLoader({
   component: ({ toc, frontmatter, default: MDX }) => (
     <DocsPage toc={toc}>
       <DocsTitle>{frontmatter.title}</DocsTitle>
+
       <DocsDescription>{frontmatter.description}</DocsDescription>
+
       <DocsBody>
-        <MDX
-          components={{
-            ...defaultMdxComponents,
-          }}
-        />
+        <MDX components={defaultMdxComponents} />
       </DocsBody>
     </DocsPage>
   ),
 });
-
-const transformPageTree = (root: PageTree.Root): PageTree.Root => {
-  // add lineage flag
-  const mapNode = <T extends PageTree.Node>(
-    item: T,
-    isChildOfFolder = false,
-  ): T => {
-    if (typeof item.icon === "string")
-      item = {
-        ...item,
-        icon: (
-          <span
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: pattern implemented from Fumadocs
-            dangerouslySetInnerHTML={{
-              __html: item.icon,
-            }}
-          />
-        ),
-      };
-
-    if (item.type === "folder")
-      return {
-        ...item,
-        // mark folder itself
-        isChildOfFolder,
-        index: item.index ? mapNode(item.index, true) : undefined,
-        // mark all children of folder
-        children: item.children.map((c) => mapNode(c, true)),
-      };
-
-    // leaf/file
-    return {
-      ...item,
-      isChildOfFolder,
-    };
-  };
-
-  return {
-    ...root,
-    // root children have no parent folder
-    children: root.children.map((c) => mapNode(c, false)),
-    fallback: root.fallback ? transformPageTree(root.fallback) : undefined,
-  };
-};
