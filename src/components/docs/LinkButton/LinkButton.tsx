@@ -20,9 +20,9 @@ export interface Link {
   /**
    * Link type that determines the icon.
    */
-  type: "website" | "repository" | "custom";
+  type: "website" | "repository";
   /**
-   * Custom icon for type="custom".
+   * Custom icon.
    */
   icon?: ReactNode;
 }
@@ -35,14 +35,11 @@ interface Props extends LinkProps {
  * Link button.
  */
 const LinkButton = ({ link, ...rest }: Props) => {
-  const getIcon = (link: Link) => {
+  const getIcon = (link: Link) =>
     match(link.type)
       .with("website", () => <EarthIcon />)
       .with("repository", () => <GitHubIcon />)
-      .otherwise(() => null);
-
-    return link.icon || null;
-  };
+      .exhaustive();
 
   const btn = (
     <Button
