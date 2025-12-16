@@ -1,0 +1,192 @@
+import React from "react";
+
+import { PILLARS } from "./pillars";
+
+import type * as PageTree from "fumadocs-core/page-tree";
+
+/**
+ * Extract section ID from section name.
+ * @param name Section name.
+ * @returns Section ID.
+ */
+const getSectionIdFromName = (name: any): string => {
+  if (!name?.props?.dangerouslySetInnerHTML?.__html) return "unknown";
+  const html = name.props.dangerouslySetInnerHTML.__html.toLowerCase();
+
+  // Check against all pillars
+  const pillar = PILLARS.find((p) => html.includes(p.id));
+  return pillar?.id ?? "unknown";
+};
+
+/**
+ * Sort nodes alphabetically only for folders without meta.json.
+ * @param nodes Nodes to sort.
+ * @param respectOrder Whether to respect the order of the nodes.
+ * @returns Sorted nodes.
+ */
+const sortNodes = (
+  nodes: PageTree.Node[],
+  respectOrder = true,
+): PageTree.Node[] => {
+  // Don't sort if we should respect ordering (for sections with meta.json)
+  if (respectOrder) {
+    return nodes;
+  }
+
+  const stripEmojisAndNonAlpha = (text: string): string => {
+    // Remove emojis and keep only alphabetic characters and spaces
+    return text
+      .replace(
+        /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu,
+        "",
+      )
+      .replace(/[^a-zA-Z\s]/g, "")
+      .trim();
+  };
+
+  return nodes.sort((a, b) => {
+    const aName =
+      typeof a.name === "string"
+        ? a.name
+        : (a.name as any)?.props?.dangerouslySetInnerHTML?.__html || "";
+    const bName =
+      typeof b.name === "string"
+        ? b.name
+        : (b.name as any)?.props?.dangerouslySetInnerHTML?.__html || "";
+
+    const aSortName = stripEmojisAndNonAlpha(aName);
+    const bSortName = stripEmojisAndNonAlpha(bName);
+
+    return aSortName.localeCompare(bSortName, undefined, {
+      sensitivity: "base",
+    });
+  });
+};
+
+/**
+ * Transform page tree.
+ * @param root Root node.
+ * @returns Transformed page tree.
+ */
+const transformPageTree = (root: PageTree.Root): PageTree.Root => {
+  // Group items under separators to make sections collapsible
+  const groupBySection = (children: PageTree.Node[]): PageTree.Node[] => {
+    const result: PageTree.Node[] = [];
+    let currentSection: PageTree.Node | null = null;
+    let currentSectionItems: PageTree.Node[] = [];
+    let _sectionIndex = 0; // Track section index for first section
+
+    for (const child of children) {
+      if (child.type === "separator") {
+        // If we have a previous section, create a virtual folder for it
+        if (currentSection) {
+          // Find if any folder in this section has an index that should become the section index
+          const folderWithIndex = currentSectionItems.find(
+            (item) => item.type === "folder" && item.index,
+          ) as PageTree.Folder | undefined;
+
+          const virtualFolder: PageTree.Folder = {
+            type: "folder",
+            name: currentSection.name,
+            icon: currentSection.icon,
+            index: folderWithIndex?.index
+              ? mapNode(folderWithIndex.index, true)
+              : undefined,
+            children: sortNodes(currentSectionItems, true).map((c) =>
+              mapNode(c, false),
+            ),
+            // Add a flag to identify virtual sections
+            virtualSection: true,
+            originalSeparator: currentSection,
+            sectionId: getSectionIdFromName(currentSection.name), // Add section ID
+          } as any;
+          result.push(virtualFolder);
+          _sectionIndex++;
+        }
+
+        // Start new section
+        currentSection = child;
+        currentSectionItems = [];
+      } else {
+        // Add item to current section
+        if (currentSection) {
+          currentSectionItems.push(child);
+        } else {
+          // No section yet, add directly
+          result.push(mapNode(child, false));
+        }
+      }
+    }
+
+    // Handle the last section
+    if (currentSection && currentSectionItems.length > 0) {
+      // Find if any folder in this section has an index that should become the section index
+      const folderWithIndex = currentSectionItems.find(
+        (item) => item.type === "folder" && item.index,
+      ) as PageTree.Folder | undefined;
+
+      const virtualFolder: PageTree.Folder = {
+        type: "folder",
+        name: currentSection.name,
+        icon: currentSection.icon,
+        index: folderWithIndex?.index
+          ? mapNode(folderWithIndex.index, true)
+          : undefined,
+        children: sortNodes(currentSectionItems, true).map((c) =>
+          mapNode(c, false),
+        ),
+        // Add a flag to identify virtual sections
+        virtualSection: true,
+        originalSeparator: currentSection,
+        sectionId: getSectionIdFromName(currentSection.name), // Add section ID
+      } as any;
+      result.push(virtualFolder);
+    }
+
+    return result;
+  };
+
+  // add lineage flag
+  const mapNode = <T extends PageTree.Node>(
+    item: T,
+    isChildOfFolder = false,
+  ): T => {
+    if (typeof item.icon === "string")
+      item = {
+        ...item,
+        icon: React.createElement("span", {
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Fumadocs does this in their example
+          dangerouslySetInnerHTML: {
+            __html: item.icon,
+          },
+        }),
+      } as T;
+
+    if (item.type === "folder")
+      return {
+        ...item,
+        // mark folder itself
+        isChildOfFolder,
+        index: item.index ? mapNode(item.index, true) : undefined,
+        // mark all children of folder
+        children: sortNodes((item as any).children, false).map((c: any) =>
+          mapNode(c, true),
+        ),
+      } as T;
+
+    // leaf/file
+    return {
+      ...item,
+      isChildOfFolder,
+    } as T;
+  };
+
+  return {
+    ...root,
+    // Transform children to group by sections
+    children: groupBySection(root.children),
+    fallback: root.fallback ? transformPageTree(root.fallback) : undefined,
+  };
+};
+
+export default transformPageTree;

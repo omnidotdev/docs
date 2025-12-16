@@ -1,6 +1,7 @@
 import FumadocsLink from "fumadocs-core/link";
 import { FaEarthAmericas as EarthIcon } from "react-icons/fa6";
 import { SiGithub as GitHubIcon } from "react-icons/si";
+import { match } from "ts-pattern";
 
 import { Button } from "@/components/ui/button";
 
@@ -35,8 +36,10 @@ interface Props extends LinkProps {
  */
 const LinkButton = ({ link, ...rest }: Props) => {
   const getIcon = (link: Link) => {
-    if (link.type === "website") return <EarthIcon />;
-    if (link.type === "repository") return <GitHubIcon />;
+    match(link.type)
+      .with("website", () => <EarthIcon />)
+      .with("repository", () => <GitHubIcon />)
+      .otherwise(() => null);
 
     return link.icon || null;
   };
