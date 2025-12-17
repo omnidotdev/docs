@@ -39,7 +39,7 @@ const LinkButton = ({ link, ...rest }: Props) => {
     match(link.type)
       .with("website", () => <EarthIcon />)
       .with("repository", () => <GitHubIcon />)
-      .exhaustive();
+      .otherwise(() => null);
 
   const btn = (
     <Button
