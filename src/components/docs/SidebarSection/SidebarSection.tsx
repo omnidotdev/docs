@@ -18,6 +18,10 @@ interface SidebarSectionProps {
   originalSeparator: any;
 }
 
+/**
+ * Sidebar expandable section.
+ */
+// TODO animate open/close + chevron
 const SidebarSection = ({
   item,
   children,
@@ -33,7 +37,7 @@ const SidebarSection = ({
   return (
     <Collapsible open={isOpen} onOpenChange={handleToggle}>
       <CollapsibleTrigger asChild>
-        <div className="group w-full cursor-pointer text-left">
+        <div className="group w-full cursor-pointer select-none text-left">
           <div
             className={cn(
               "inline-flex w-full items-center gap-2 rounded-md p-2 transition-all duration-300 [&_svg]:size-4 [&_svg]:shrink-0",
