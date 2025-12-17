@@ -1,4 +1,6 @@
 {
+  "title": "Help",
+  "tagline": "Get help",
   "description": "Get help in the Omni ecosystem",
   "pages": ["support", "feedback", "..."]
 }

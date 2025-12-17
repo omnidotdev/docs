@@ -1,4 +1,6 @@
 {
+  "title": "Omni Sigil",
+  "tagline": "Design system",
   "description": "Omni's design system",
   "pages": ["index", "..."]
 }

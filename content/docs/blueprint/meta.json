@@ -1,4 +1,6 @@
 {
-  "description": "Documents and guidelines",
+  "title": "Blueprint",
+  "tagline": "Specifications & standards",
+  "description": "Specifications & standards",
   "pages": ["index", "..."]
 }

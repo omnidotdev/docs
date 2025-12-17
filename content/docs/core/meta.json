@@ -1,5 +1,6 @@
 {
+  "title": "Omni Core",
+  "tagline": "Omni products",
   "description": "For businesses and individuals",
-  "icon": "Home",
   "pages": ["index", "..."]
 }

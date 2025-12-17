@@ -1,5 +1,8 @@
 {
   "root": true,
+  "title": "Welcome to Omni",
+  "tagline": "Open-source ecosystem",
+  "description": "Open-source ecosystem",
   "pages": [
     "---Welcome to Omni---",
     "index",

@@ -1,4 +1,6 @@
 {
+  "title": "Omni Reality",
   "description": "Reality is a powerful tool for building and deploying applications.",
+  "tagline": "Spatial computing suite",
   "pages": ["index", "..."]
 }
