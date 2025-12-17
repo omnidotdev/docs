@@ -131,9 +131,34 @@ export const getPillarById = (id: string): Pillar | undefined => {
  * @returns Pillar object or undefined if not found.
  */
 export const getPillarByPath = (pathname: string): Pillar | undefined => {
-  return PILLARS.find((pillar) =>
-    pillar.paths.some((path) => pathname.includes(path)),
-  );
+  // Handle root path specially
+  if (pathname === "/" || pathname === "/docs" || pathname === "/docs/") {
+    return getPillarById("welcome");
+  }
+
+  // Exclude welcome pillar from general search and check other pillars
+  const nonWelcomePillars = PILLARS.filter((pillar) => pillar.id !== "welcome");
+
+  // Sort by path specificity (longer paths first)
+  const sortedPillars = [...nonWelcomePillars].sort((a, b) => {
+    const maxLengthA = Math.max(...a.paths.map((p) => p.length));
+    const maxLengthB = Math.max(...b.paths.map((p) => p.length));
+    return maxLengthB - maxLengthA;
+  });
+
+  return (
+    sortedPillars.find((pillar) =>
+      pillar.paths.some((path) => {
+        // Normalize both pathname and path for comparison
+        const normalizedPath = path.replace(/[()]/g, "").replace(/\/+$/, "");
+        const normalizedPathname = pathname.replace(/\/+$/, "");
+
+        return (
+          normalizedPathname.startsWith(normalizedPath) && normalizedPath !== ""
+        );
+      }),
+    ) || getPillarById("welcome")
+  ); // fallback to welcome
 };
 
 /**
