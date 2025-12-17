@@ -12,8 +12,9 @@ const getSectionGradient = (
   const pillar = getPillarById(sectionId);
 
   if (!pillar) {
-    // Fallback to welcome gradient if pillar not found
+    // fall back to welcome gradient if pillar not found
     const welcomePillar = getPillarById("welcome");
+
     if (!welcomePillar) return "";
 
     return isOpen

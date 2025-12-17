@@ -2,7 +2,13 @@ import React from "react";
 
 import { PILLARS } from "./pillars";
 
-import type * as PageTree from "fumadocs-core/page-tree";
+import type { Folder, Node, Root, Separator } from "fumadocs-core/page-tree";
+
+export interface VirtualFolder extends Folder {
+  virtualSection: boolean;
+  originalSeparator: Separator;
+  sectionId: string;
+}
 
 /**
  * Extract section ID from section name.
@@ -24,10 +30,7 @@ const getSectionIdFromName = (name: any): string => {
  * @param respectOrder Whether to respect the order of the nodes.
  * @returns Sorted nodes.
  */
-const sortNodes = (
-  nodes: PageTree.Node[],
-  respectOrder = true,
-): PageTree.Node[] => {
+const sortNodes = (nodes: Node[], respectOrder = true): Node[] => {
   // Don't sort if we should respect ordering (for sections with meta.json)
   if (respectOrder) {
     return nodes;
@@ -68,12 +71,12 @@ const sortNodes = (
  * @param root Root node.
  * @returns Transformed page tree.
  */
-const transformPageTree = (root: PageTree.Root): PageTree.Root => {
+const transformPageTree = (root: Root): Root => {
   // Group items under separators to make sections collapsible
-  const groupBySection = (children: PageTree.Node[]): PageTree.Node[] => {
-    const result: PageTree.Node[] = [];
-    let currentSection: PageTree.Node | null = null;
-    let currentSectionItems: PageTree.Node[] = [];
+  const groupBySection = (children: Node[]): Node[] => {
+    const result: Node[] = [];
+    let currentSection: Node | null = null;
+    let currentSectionItems: Node[] = [];
     let _sectionIndex = 0; // Track section index for first section
 
     for (const child of children) {
@@ -83,9 +86,9 @@ const transformPageTree = (root: PageTree.Root): PageTree.Root => {
           // Find if any folder in this section has an index that should become the section index
           const folderWithIndex = currentSectionItems.find(
             (item) => item.type === "folder" && item.index,
-          ) as PageTree.Folder | undefined;
+          ) as Folder | undefined;
 
-          const virtualFolder: PageTree.Folder = {
+          const virtualFolder: Folder = {
             type: "folder",
             name: currentSection.name,
             icon: currentSection.icon,
@@ -100,6 +103,7 @@ const transformPageTree = (root: PageTree.Root): PageTree.Root => {
             originalSeparator: currentSection,
             sectionId: getSectionIdFromName(currentSection.name), // Add section ID
           } as any;
+
           result.push(virtualFolder);
           _sectionIndex++;
         }
@@ -123,9 +127,9 @@ const transformPageTree = (root: PageTree.Root): PageTree.Root => {
       // Find if any folder in this section has an index that should become the section index
       const folderWithIndex = currentSectionItems.find(
         (item) => item.type === "folder" && item.index,
-      ) as PageTree.Folder | undefined;
+      ) as Folder | undefined;
 
-      const virtualFolder: PageTree.Folder = {
+      const virtualFolder: VirtualFolder = {
         type: "folder",
         name: currentSection.name,
         icon: currentSection.icon,
@@ -135,11 +139,11 @@ const transformPageTree = (root: PageTree.Root): PageTree.Root => {
         children: sortNodes(currentSectionItems, true).map((c) =>
           mapNode(c, false),
         ),
-        // Add a flag to identify virtual sections
         virtualSection: true,
         originalSeparator: currentSection,
-        sectionId: getSectionIdFromName(currentSection.name), // Add section ID
-      } as any;
+        sectionId: getSectionIdFromName(currentSection.name),
+      };
+
       result.push(virtualFolder);
     }
 
@@ -147,10 +151,7 @@ const transformPageTree = (root: PageTree.Root): PageTree.Root => {
   };
 
   // add lineage flag
-  const mapNode = <T extends PageTree.Node>(
-    item: T,
-    isChildOfFolder = false,
-  ): T => {
+  const mapNode = <T extends Node>(item: T, isChildOfFolder = false): T => {
     if (typeof item.icon === "string")
       item = {
         ...item,
