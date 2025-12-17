@@ -9,7 +9,7 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
 import {
@@ -35,6 +35,7 @@ import seo from "@/lib/util/seo";
  */
 const getSectionFromPath = (pathname: string): string => {
   const pillar = getPillarByPath(pathname);
+
   return pillar?.id ?? "welcome";
 };
 
@@ -44,29 +45,39 @@ const getSectionFromPath = (pathname: string): string => {
 const Page = () => {
   const { data, activeSection } = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
-  const patchedTree = transformPageTree(pageTree);
+  const patchedTree = useMemo(() => transformPageTree(pageTree), [pageTree]);
 
   const Content = clientLoader.getComponent(data.path);
 
   const { pathname } = useLocation();
 
-  const [currentOpenSection, setCurrentOpenSection] = useState<string | null>(
-    () => activeSection || getSectionFromPath(pathname) || "welcome",
+  const [currentOpenSection, setCurrentOpenSection] = useState<string>(
+    activeSection || "welcome",
   );
 
-  // update open section when pathname changes
-  useEffect(() => {
-    const newActiveSection = getSectionFromPath(pathname);
+  // track previous pathname to detect navigation
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
-    setCurrentOpenSection(newActiveSection);
-  }, [pathname]);
+  // update open section only on actual navigation, not initial load
+  useEffect(() => {
+    if (prevPathname !== pathname) {
+      const newActiveSection = getSectionFromPath(pathname);
+
+      setCurrentOpenSection(newActiveSection);
+
+      setPrevPathname(pathname);
+    }
+  }, [pathname, prevPathname]);
+
+  const memoizedBaseOptions = useMemo(() => baseLayoutOptions(), []);
 
   return (
     <>
+      {/* TODO prevent re-render on navigation */}
       <RotatingBanner />
 
       <DocsLayout
-        {...baseLayoutOptions()}
+        {...memoizedBaseOptions}
         tree={patchedTree}
         sidebar={{
           banner: (
@@ -116,7 +127,7 @@ const Page = () => {
                 const isOpen = currentOpenSection === sectionId;
 
                 const handleToggle = (newOpen: boolean) => {
-                  setCurrentOpenSection(newOpen ? sectionId : null);
+                  setCurrentOpenSection(newOpen ? sectionId : "none");
                 };
 
                 return (
