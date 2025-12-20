@@ -1,0 +1,58 @@
+---
+title: 🌙 Runa
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaClipboardList, FaColumns, FaCalendarAlt } from "react-icons/fa";
+
+<ProductOverview
+  title="Runa"
+  emoji="🌙"
+  tagline="Streamlined project management"
+  description="A streamlined project management tool with agile workflows such as kanban."
+  tags={[
+    {
+      label: "Project Management",
+      icon: <FaClipboardList />,
+      className:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+    },
+    {
+      label: "Kanban",
+      icon: <FaColumns />,
+      className:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://runa.omni.dev",
+      label: "Visit App",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/runa`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+      {
+        title: "🚧 Open Alpha",
+        description:
+          "Runa is in early development. Expect this documentation to change rapidly as the app itself evolves rapidly.",
+      },
+    {
+      title: "💡 Big Idea",
+      description: "Project management that doesn't get in your way",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Runa addresses scattered project management with a centralized, efficient workflow system",
+    },
+  ]}
+/>
+
+**Omni Runa** is an upcoming project management tool that focuses on simplicity.
