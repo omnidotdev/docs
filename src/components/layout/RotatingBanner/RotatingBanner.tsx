@@ -2,8 +2,6 @@ import { Banner } from "fumadocs-ui/components/banner";
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 
-import { Badge } from "@/components/ui/badge";
-
 /**
  * Fade duration in milliseconds.
  */
@@ -55,9 +53,15 @@ const items = [
   {
     text: (
       <div className="flex gap-2">
-        <span>🌙 Runa helps teams move faster</span>
-
-        <Badge className="no-underline!">Coming Soon</Badge>
+        <span>🌙 Do work faster with your team on</span>
+        <a
+          href="https://runa.omni.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 border-b-border-b-fd-accent font-bold"
+        >
+          <span className="font-bold underline">Runa →</span>
+        </a>
       </div>
     ),
     // TODO tokens
@@ -69,10 +73,7 @@ const items = [
  * Rotating layout banner. Useful for announcements.
  */
 const RotatingBanner = () => {
-  const [index, setIndex] = useState(() =>
-    // start at random pick
-    Math.floor(Math.random() * items.length),
-  );
+  const [index, setIndex] = useState(0);
 
   const [fade, setFade] = useState(true);
 
@@ -100,7 +101,7 @@ const RotatingBanner = () => {
     <Banner
       variant="rainbow"
       rainbowColors={rainbowColors}
-      className="relative sticky top-0"
+      className="sticky top-0"
     >
       {/* nav left */}
       <button
