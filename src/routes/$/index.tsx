@@ -1,6 +1,14 @@
 import { createFileRoute, notFound, useLocation } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
+import {
+  SidebarFolderContent as BaseSidebarFolderContent,
+  SidebarFolderLink as BaseSidebarFolderLink,
+  SidebarFolderTrigger as BaseSidebarFolderTrigger,
+  SidebarFolder,
+  useFolder,
+  useFolderDepth,
+} from "fumadocs-ui/components/sidebar/base";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   DocsBody,
@@ -9,6 +17,7 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
+import { cn } from "fumadocs-ui/utils/cn";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
 import { RotatingBanner } from "@/components/layout";
@@ -21,6 +30,81 @@ import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
 
 import type * as PageTree from "fumadocs-core/page-tree";
+import type { ComponentProps, ReactNode } from "react";
+
+// styled sidebar folder components (`replicating fumadocs-ui/layouts/docs/sidebar` styling)
+const itemVariants =
+    "relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0",
+  buttonVariant =
+    "transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none",
+  linkVariant =
+    "transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors";
+
+const getItemOffset = (depth: number) =>
+  `calc(${2 + 3 * depth} * var(--spacing))`;
+
+const SidebarFolderTrigger = ({
+  className,
+  style,
+  ...props
+}: ComponentProps<typeof BaseSidebarFolderTrigger>) => {
+  const folder = useFolder();
+  const depth = folder?.depth ?? 1;
+  const collapsible = folder?.collapsible ?? true;
+
+  return (
+    <BaseSidebarFolderTrigger
+      className={cn(
+        itemVariants,
+        collapsible && buttonVariant,
+        "w-full",
+        className,
+      )}
+      style={{
+        paddingInlineStart: getItemOffset(depth - 1),
+        ...style,
+      }}
+      {...props}
+    />
+  );
+};
+
+const SidebarFolderLink = ({
+  className,
+  style,
+  ...props
+}: ComponentProps<typeof BaseSidebarFolderLink>) => {
+  const depth = useFolderDepth();
+  return (
+    <BaseSidebarFolderLink
+      className={cn(itemVariants, linkVariant, "w-full", className)}
+      style={{
+        paddingInlineStart: getItemOffset(depth - 1),
+        ...style,
+      }}
+      {...props}
+    />
+  );
+};
+
+const SidebarFolderContent = ({
+  className,
+  ...props
+}: ComponentProps<typeof BaseSidebarFolderContent>) => {
+  const depth = useFolderDepth();
+
+  return (
+    <BaseSidebarFolderContent
+      className={cn(
+        "relative",
+        depth === 1 &&
+          "before:absolute before:inset-y-1 before:start-2.5 before:w-px before:bg-fd-border before:content-['']",
+        className,
+      )}
+      {...props}
+    />
+  );
+};
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -115,9 +199,68 @@ const Page = () => {
                 </div>
               </>
             ),
-            // TODO do similar to `Item` below (badges)
-            // unsure of a clean way to do this, the styles below for `Item` were grabbed from the default Fumadocs sidebar item rendered DOM
-            // Folder: (folder) => <></>,
+            Folder: ({
+              item,
+              children,
+            }: {
+              item: PageTree.Folder;
+              children: ReactNode;
+            }) => {
+              const getFolderBadge = () => {
+                // Check folder name for product matches
+                const nameHtml =
+                  // @ts-expect-error TODO type `props` properly
+                  item.name?.props?.dangerouslySetInnerHTML?.__html;
+
+                if (
+                  NEW_PRODUCTS.some((product) => nameHtml?.includes(product))
+                ) {
+                  return (
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                      New! 🚀
+                    </Badge>
+                  );
+                }
+
+                if (
+                  COMING_SOON_PRODUCTS.some((product) =>
+                    nameHtml?.includes(product),
+                  )
+                ) {
+                  return (
+                    <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                      Coming Soon 🚧
+                    </Badge>
+                  );
+                }
+
+                return null;
+              };
+
+              const badge = getFolderBadge();
+
+              return (
+                <SidebarFolder
+                  collapsible={item.collapsible}
+                  defaultOpen={item.defaultOpen}
+                >
+                  {item.index ? (
+                    <SidebarFolderLink href={item.index.url}>
+                      {item.icon}
+                      {item.name}
+                      {badge && <span className="ml-auto">{badge}</span>}
+                    </SidebarFolderLink>
+                  ) : (
+                    <SidebarFolderTrigger>
+                      {item.icon}
+                      {item.name}
+                      {badge && <span className="mr-auto">{badge}</span>}
+                    </SidebarFolderTrigger>
+                  )}
+                  <SidebarFolderContent>{children}</SidebarFolderContent>
+                </SidebarFolder>
+              );
+            },
             Item: ({ item }) => (
               <a
                 data-active={item.url === pathname}
@@ -189,8 +332,8 @@ export const Route = createFileRoute("/$/")({
 
     const currentSegment = slugs?.length
       ? slugs
-          .at(-1)!
-          .split("-")
+          .at(-1)
+          ?.split("-")
           .map((seg) =>
             // TODO make this more robust (avoid hardcoding product acronyms here)
             capitalizeFirstLetter({ str: seg, allCaps: seg === "rdk" }),
