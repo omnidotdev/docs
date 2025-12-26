@@ -107,7 +107,7 @@ const RotatingBanner = () => {
       <button
         type="button"
         onClick={() => rotate(-1)}
-        className="-translate-y-1/2 absolute top-1/2 left-3 z-10 cursor-pointer opacity-70 hover:opacity-100"
+        className="absolute top-1/2 left-3 z-10 -translate-y-1/2 cursor-pointer opacity-70 hover:opacity-100"
         aria-label="Previous"
       >
         <FaArrowLeft />
@@ -126,7 +126,7 @@ const RotatingBanner = () => {
       <button
         type="button"
         onClick={() => rotate(1)}
-        className="-translate-y-1/2 absolute top-1/2 right-3 z-10 cursor-pointer opacity-70 hover:opacity-100"
+        className="absolute top-1/2 right-3 z-10 -translate-y-1/2 cursor-pointer opacity-70 hover:opacity-100"
         aria-label="Next"
       >
         <FaArrowRight />
