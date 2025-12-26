@@ -17,7 +17,6 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { cn } from "fumadocs-ui/utils/cn";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
 import { RotatingBanner } from "@/components/layout";
@@ -28,6 +27,7 @@ import baseLayoutOptions from "@/lib/layout.base";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
+import { cn } from "@/lib/utils";
 
 import type * as PageTree from "fumadocs-core/page-tree";
 import type { ComponentProps, ReactNode } from "react";
