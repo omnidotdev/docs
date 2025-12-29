@@ -1,4 +1,8 @@
-import { FaEarthAmericas as EarthIcon } from "react-icons/fa6";
+import {
+  FaEarthAmericas as EarthIcon,
+  FaLinkedin,
+  FaRegNewspaper,
+} from "react-icons/fa6";
 import {
   SiDiscord as DiscordIcon,
   SiGithub as GitHubIcon,
@@ -20,9 +24,19 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
       url: app.organization.website,
     },
     {
+      icon: <FaRegNewspaper />,
+      text: "Blog",
+      url: app.organization.blog,
+    },
+    {
       icon: <XIcon />,
       text: `@${app.socials.x.split("/")[3]}`,
       url: app.socials.x,
+    },
+    {
+      icon: <FaLinkedin />,
+      text: "LinkedIn",
+      url: app.socials.linkedin,
     },
     {
       icon: <GitHubIcon />,
@@ -34,7 +48,10 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
       text: "Discord",
       url: app.socials.discord,
     },
-    // TODO LinkedIn (see https://github.com/simple-icons/simple-icons/issues/11372)
+    {
+      text: "🛍️ Shop Omni Merch (Soon)",
+      url: app.merchUrl,
+    },
   ],
   githubUrl: app.socials.github,
   // TODO vendor-agnostic search (e.g. no command key on non-MacOS)
