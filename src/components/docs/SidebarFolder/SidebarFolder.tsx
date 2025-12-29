@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 
 import {
@@ -6,7 +7,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
 
 interface SidebarFolderProps {
   item: any;
@@ -34,17 +34,46 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
         >
           {item.icon}
           <span className="font-medium">{item.name}</span>
-          <ChevronRight
-            className={cn(
-              "h-4 w-4 transition-transform duration-300 ease-out",
-              open && "rotate-90",
-            )}
-          />
+          <motion.div
+            animate={{ rotate: open ? 90 : 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          >
+            <ChevronRight className="h-4 w-4 text-fd-muted-foreground" />
+          </motion.div>
         </button>
       </CollapsibleTrigger>
 
-      <CollapsibleContent>
-        <div className="ml-6 space-y-1 pt-1">{children}</div>
+      <CollapsibleContent forceMount asChild>
+        <motion.div
+          initial={false}
+          animate={{
+            height: open ? "auto" : 0,
+            opacity: open ? 1 : 0,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            opacity: { duration: 0.2 },
+          }}
+          style={{ overflow: "hidden" }}
+        >
+          <motion.div
+            className="ml-6 space-y-1 pt-1"
+            animate={{
+              y: open ? 0 : -8,
+              opacity: open ? 1 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 25,
+              delay: open ? 0.1 : 0,
+            }}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
       </CollapsibleContent>
     </Collapsible>
   );

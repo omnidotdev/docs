@@ -36,6 +36,9 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
     },
     // TODO LinkedIn (see https://github.com/simple-icons/simple-icons/issues/11372)
   ],
+  githubUrl: app.socials.github,
+  // TODO vendor-agnostic search (e.g. no command key on non-MacOS)
+  // searchToggle: ...
   nav: {
     title: (
       <img

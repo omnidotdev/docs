@@ -9,7 +9,7 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
 import {
@@ -18,7 +18,7 @@ import {
   SidebarSection,
   SidebarSeparator,
 } from "@/components/docs";
-import { RotatingBanner } from "@/components/layout";
+import RotatingBanner from "@/components/layout/RotatingBanner/RotatingBanner";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
 import baseLayoutOptions from "@/lib/layout.base";
@@ -51,29 +51,31 @@ const Page = () => {
 
   const { pathname } = useLocation();
 
-  const [currentOpenSection, setCurrentOpenSection] = useState<string>(
-    activeSection || "welcome",
-  );
+  // Use ref to track open section without causing re-renders
+  const openSectionRef = useRef<string>(activeSection || "welcome");
+  const [, forceUpdate] = useState({});
 
-  // track previous pathname to detect navigation
-  const [prevPathname, setPrevPathname] = useState(pathname);
-
-  // update open section only on actual navigation, not initial load
+  // Update open section when navigating to a page in a different section
   useEffect(() => {
-    if (prevPathname !== pathname) {
-      const newActiveSection = getSectionFromPath(pathname);
-
-      setCurrentOpenSection(newActiveSection);
-
-      setPrevPathname(pathname);
+    const newActiveSection = getSectionFromPath(pathname);
+    if (openSectionRef.current !== newActiveSection) {
+      openSectionRef.current = newActiveSection;
+      forceUpdate({});
     }
-  }, [pathname, prevPathname]);
+  }, [pathname]);
+
+  const handleSectionToggle = useCallback(
+    (sectionId: string, newOpen: boolean) => {
+      openSectionRef.current = newOpen ? sectionId : "none";
+      forceUpdate({});
+    },
+    [],
+  );
 
   const memoizedBaseOptions = useMemo(() => baseLayoutOptions(), []);
 
   return (
     <>
-      {/* TODO prevent re-render on navigation */}
       <RotatingBanner />
 
       <DocsLayout
@@ -97,6 +99,7 @@ const Page = () => {
                   Hire Us →
                 </Button>
               </a>
+              <hr />
             </span>
           ),
           footer: (
@@ -124,18 +127,16 @@ const Page = () => {
               if ((item as any).virtualSection) {
                 const originalSeparator = (item as any).originalSeparator;
                 const sectionId = (item as any).sectionId;
-                const isOpen = currentOpenSection === sectionId;
-
-                const handleToggle = (newOpen: boolean) => {
-                  setCurrentOpenSection(newOpen ? sectionId : "none");
-                };
+                const isOpen = openSectionRef.current === sectionId;
 
                 return (
                   <SidebarSection
                     item={item}
                     sectionId={sectionId}
                     isOpen={isOpen}
-                    onToggle={handleToggle}
+                    onToggle={(newOpen) =>
+                      handleSectionToggle(sectionId, newOpen)
+                    }
                     originalSeparator={originalSeparator}
                   >
                     {children}
