@@ -1,13 +1,24 @@
-import { ChevronRight } from "lucide-react";
-
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "fumadocs-ui/components/ui/collapsible";
+import { ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useRef } from "react";
+
 import getSectionDescription from "@/lib/getSectionDescription";
 import getSectionGradient from "@/lib/getSectionGradient";
+import getSectionTextColors from "@/lib/getSectionTextColors";
 import { cn } from "@/lib/utils";
+
+// Find the sidebar scroll viewport
+const getScrollViewport = (): HTMLElement | null => {
+  // Fumadocs uses a scroll viewport inside the sidebar
+  return document.querySelector(
+    "#nd-sidebar [data-radix-scroll-area-viewport]",
+  ) as HTMLElement | null;
+};
 
 interface SidebarSectionProps {
   item: any;
@@ -21,7 +32,6 @@ interface SidebarSectionProps {
 /**
  * Sidebar expandable section.
  */
-// TODO animate open/close + chevron
 const SidebarSection = ({
   item,
   children,
@@ -30,43 +40,91 @@ const SidebarSection = ({
   onToggle,
   originalSeparator,
 }: SidebarSectionProps) => {
-  const handleToggle = (newOpen: boolean) => {
-    onToggle(newOpen);
-  };
+  const textColors = getSectionTextColors(sectionId, isOpen);
+  const scrollPosRef = useRef<number>(0);
+
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      // Save scroll position before toggle
+      const viewport = getScrollViewport();
+      if (viewport) {
+        scrollPosRef.current = viewport.scrollTop;
+      }
+
+      onToggle(newOpen);
+
+      // Restore scroll position after React re-render
+      requestAnimationFrame(() => {
+        const vp = getScrollViewport();
+        if (vp) {
+          vp.scrollTop = scrollPosRef.current;
+        }
+      });
+    },
+    [onToggle],
+  );
 
   return (
-    <Collapsible open={isOpen} onOpenChange={handleToggle}>
+    <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
       <CollapsibleTrigger asChild>
-        <div className="group w-full cursor-pointer select-none text-left">
-          <div
+        <motion.div
+          className="group w-full cursor-pointer select-none text-left"
+          whileHover={{ scale: 1.005 }}
+          whileTap={{ scale: 0.995 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        >
+          <motion.div
             className={cn(
-              "inline-flex w-full items-center gap-2 rounded-md p-2 transition-all duration-300 [&_svg]:size-4 [&_svg]:shrink-0",
+              "inline-flex w-full items-center gap-2 rounded-md p-2 transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 [&_svg]:size-4 [&_svg]:shrink-0",
               getSectionGradient(sectionId, isOpen),
               !isOpen && getSectionGradient(sectionId, false, true),
             )}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
           >
             <div className="flex-1">
-              <span className="flex items-center gap-2 font-bold">
+              <motion.span
+                className={cn(
+                  "flex items-center gap-2 font-bold",
+                  textColors.title,
+                )}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
                 {item.icon}
                 {item.name}
-              </span>
+              </motion.span>
 
-              <span className="mt-1 block text-fd-muted-foreground text-sm italic">
+              <motion.span
+                className={cn(
+                  "mt-1 block text-fd-muted-foreground text-sm italic",
+                  textColors.description,
+                )}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
                 {getSectionDescription(
                   originalSeparator?.name?.props?.dangerouslySetInnerHTML
                     ?.__html,
                 )}
-              </span>
+              </motion.span>
             </div>
 
-            <ChevronRight
-              className={cn(
-                "h-4 w-4 text-fd-muted-foreground transition-transform duration-300 ease-out",
-                isOpen && "rotate-90",
-              )}
-            />
-          </div>
-        </div>
+            <motion.div
+              animate={{ rotate: isOpen ? 90 : 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              whileHover={{ x: 2, scale: 1.1 }}
+            >
+              <ChevronRight
+                className={cn(
+                  "h-4 w-4 text-fd-muted-foreground",
+                  isOpen && "text-current",
+                )}
+              />
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </CollapsibleTrigger>
 
       <CollapsibleContent>

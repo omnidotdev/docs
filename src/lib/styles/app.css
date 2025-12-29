@@ -117,6 +117,23 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
+/* Motion-optimized styles for sidebar sections */
+.sidebar-section {
+  /* Optimize for motion animations */
+  contain: layout style paint;
+  will-change: transform;
+}
+
+.sidebar-section-content {
+  /* Prevent layout shifts during animations */
+  contain: layout;
+}
+
+/* Smooth collapsible content */
+[data-radix-collapsible-content] {
+  overflow: hidden;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
