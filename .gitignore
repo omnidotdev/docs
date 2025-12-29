@@ -1,5 +1,6 @@
 .output
 .source
 .tanstack
+.nitro
 .vite
 node_modules

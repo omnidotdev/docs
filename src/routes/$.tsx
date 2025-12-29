@@ -160,7 +160,7 @@ const Page = () => {
 /**
  * Splat route.
  */
-export const Route = createFileRoute("/$/")({
+export const Route = createFileRoute("/$")({
   component: Page,
   loader: async ({ params, location }) => {
     const slugs = params._splat?.split("/") ?? [];
