@@ -9,12 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SplatIndexRouteImport } from './routes/$/index'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 
-const SplatIndexRoute = SplatIndexRouteImport.update({
-  id: '/$/',
-  path: '/$/',
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSearchRoute = ApiSearchRouteImport.update({
@@ -24,38 +24,38 @@ const ApiSearchRoute = ApiSearchRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/$': typeof SplatRoute
   '/api/search': typeof ApiSearchRoute
-  '/$': typeof SplatIndexRoute
 }
 export interface FileRoutesByTo {
+  '/$': typeof SplatRoute
   '/api/search': typeof ApiSearchRoute
-  '/$': typeof SplatIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/$': typeof SplatRoute
   '/api/search': typeof ApiSearchRoute
-  '/$/': typeof SplatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/api/search' | '/$'
+  fullPaths: '/$' | '/api/search'
   fileRoutesByTo: FileRoutesByTo
-  to: '/api/search' | '/$'
-  id: '__root__' | '/api/search' | '/$/'
+  to: '/$' | '/api/search'
+  id: '__root__' | '/$' | '/api/search'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  SplatRoute: typeof SplatRoute
   ApiSearchRoute: typeof ApiSearchRoute
-  SplatIndexRoute: typeof SplatIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/$/': {
-      id: '/$/'
+    '/$': {
+      id: '/$'
       path: '/$'
       fullPath: '/$'
-      preLoaderRoute: typeof SplatIndexRouteImport
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/search': {
@@ -69,8 +69,8 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  SplatRoute: SplatRoute,
   ApiSearchRoute: ApiSearchRoute,
-  SplatIndexRoute: SplatIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
