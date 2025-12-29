@@ -2,12 +2,11 @@ import { Banner } from "fumadocs-ui/components/banner";
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 
-import { Badge } from "@/components/ui/badge";
-
 /**
  * Fade duration in milliseconds.
  */
 const FADE_MS = 250;
+
 /**
  * Rotation duration in milliseconds.
  */
@@ -39,6 +38,7 @@ const items = [
     text: (
       <div className="flex gap-1">
         <span>📣 Organize your user feedback with</span>
+
         <a
           href="https://backfeed.omni.dev"
           target="_blank"
@@ -54,10 +54,17 @@ const items = [
   },
   {
     text: (
-      <div className="flex gap-2">
-        <span>🌙 Runa helps teams move faster</span>
+      <div className="flex gap-1">
+        <span>🌙 Build projects faster with</span>
 
-        <Badge className="no-underline!">Coming Soon</Badge>
+        <a
+          href="https://runa.omni.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 border-b-border-b-fd-accent font-bold"
+        >
+          <span className="font-bold underline">Runa →</span>
+        </a>
       </div>
     ),
     // TODO tokens
