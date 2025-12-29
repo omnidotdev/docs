@@ -9,7 +9,7 @@ import { useCallback, useRef } from "react";
 
 import getSectionDescription from "@/lib/getSectionDescription";
 import getSectionGradient from "@/lib/getSectionGradient";
-import getSectionTextColors from "@/lib/getSectionTextColors";
+import getSectionTextColors from "@/lib/util/getSectionTextColors";
 import { cn } from "@/lib/utils";
 
 // Find the sidebar scroll viewport
