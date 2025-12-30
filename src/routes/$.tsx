@@ -12,6 +12,7 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
+import { RealmTOC } from "@/components/docs";
 import {
   RotatingBanner,
   SidebarFolder,
@@ -222,7 +223,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
       <DocsDescription>{frontmatter.description}</DocsDescription>
 
       <DocsBody>
-        <MDX components={defaultMdxComponents} />
+        <MDX components={{ ...defaultMdxComponents, RealmTOC }} />
       </DocsBody>
     </DocsPage>
   ),
