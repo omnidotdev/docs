@@ -37,22 +37,6 @@ interface ProductOverviewTag {
 
 interface ProductOverviewProps {
   /**
-   * Name.
-   */
-  title: string;
-  /**
-   * Emoji to display with the title.
-   */
-  emoji: string;
-  /**
-   * Tagline to display below the title.
-   */
-  tagline: string;
-  /**
-   * Brief description of the product.
-   */
-  description: string;
-  /**
    * Array of links to display (website, repository, etc.).
    */
   links?: Link[];
@@ -72,21 +56,11 @@ interface ProductOverviewProps {
  * Product overview.
  */
 const ProductOverview: React.FC<ProductOverviewProps> = ({
-  // TODO
-  // tagline,
   links = [],
   alerts = [],
   tags = [],
 }) => (
   <div className="mb-8">
-    {/*{tagline && (
-      <p>
-        <strong>
-          <i>{tagline}</i>
-        </strong>
-      </p>
-    )}*/}
-
     {tags.length > 0 && (
       <div className="mb-4 flex flex-wrap gap-2">
         {tags.map((tag) => (
