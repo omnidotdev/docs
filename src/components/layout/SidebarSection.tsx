@@ -103,7 +103,7 @@ const SidebarSection = ({
   }, [onToggle, isOpen]);
 
   return (
-    <div className="my-2">
+    <div className="my-1">
       <button
         type="button"
         onClick={handleToggle}
@@ -155,7 +155,7 @@ const SidebarSection = ({
         </motion.div>
       </button>
 
-      <div className="sidebar-collapse" data-open={isOpen}>
+      <div className="sidebar-collapse mt-1" data-open={isOpen}>
         <div>
           {children}
 
