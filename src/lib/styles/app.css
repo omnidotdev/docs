@@ -134,6 +134,25 @@
   overflow: hidden;
 }
 
+/* Sidebar section collapse animation */
+.sidebar-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 200ms ease-in-out,
+    opacity 200ms ease-in-out;
+}
+
+.sidebar-collapse[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.sidebar-collapse > div {
+  overflow: hidden;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
