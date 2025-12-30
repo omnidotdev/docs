@@ -14,7 +14,8 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useCallback, useRef } from "react";
+import { Children, useCallback, useRef } from "react";
+import { SiX } from "react-icons/si";
 
 import getSectionDescription from "@/lib/getSectionDescription";
 import getSectionGradient from "@/lib/getSectionGradient";
@@ -143,7 +144,30 @@ const SidebarSection = ({
       </button>
 
       <div className="sidebar-collapse" data-open={isOpen}>
-        <div>{children}</div>
+        <div>
+          {children}
+
+          {Children.count(children) <= 1 && (
+            <div className="flex flex-col items-center py-3 text-fd-muted-foreground text-xs italic">
+              <span>
+                {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}{" "}
+                products coming soon!
+              </span>
+              <span>
+                Follow{" "}
+                <a
+                  href="https://x.com/omnidotdev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 underline hover:text-fd-foreground"
+                >
+                  @omnidotdev <SiX className="inline h-3 w-3" />
+                </a>{" "}
+                for updates
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
