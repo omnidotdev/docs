@@ -36,6 +36,7 @@ interface Props extends LinkProps {
  */
 const LinkButton = ({ link, ...rest }: Props) => {
   const getIcon = (link: Link) =>
+    link.icon ??
     match(link.type)
       .with("website", () => <EarthIcon />)
       .with("repository", () => <GitHubIcon />)
