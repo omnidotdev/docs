@@ -1,6 +1,6 @@
 import React from "react";
 
-import { REALMS } from "./realms";
+import { REALMS } from "./sections";
 
 import type { Folder, Node, Root, Separator } from "fumadocs-core/page-tree";
 

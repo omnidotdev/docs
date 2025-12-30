@@ -1,4 +1,4 @@
-import { getRealmById } from "./realms";
+import { getRealmById } from "./sections";
 
 /**
  * Get section gradient for each section.

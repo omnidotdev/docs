@@ -24,7 +24,7 @@ import { app } from "@/lib/config";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
-import { getRealmByPath } from "@/lib/realms";
+import { getRealmByPath } from "@/lib/sections";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
@@ -115,6 +115,7 @@ const Page = () => {
               >
                 Privacy Policy
               </a>
+
               <a
                 href={app.legal.termsOfService}
                 target="_blank"

@@ -1,4 +1,4 @@
-import { getRealmById } from "../realms";
+import { getRealmById } from "../sections";
 
 /**
  * Get section text colors for title and description based on state.

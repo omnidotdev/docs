@@ -16,7 +16,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import type { Realm } from "@/lib/realms";
+import type { Realm } from "@/lib/sections";
 
 /**
  * Hover text colors matching sidebar section colors.

@@ -1,4 +1,4 @@
-import { REALMS } from "./realms";
+import { REALMS } from "./sections";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.

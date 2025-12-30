@@ -1,5 +1,8 @@
 import realmsData from "../../realms.json";
 
+/** Realm IDs. Non-realm sections (welcome, community, help, debug) are excluded. */
+export const REALM_IDS: string[] = realmsData.realms.map((r) => r.id);
+
 export interface Realm {
   /** ID. */
   id: string;
@@ -24,7 +27,7 @@ export interface Realm {
   };
 }
 
-const REALM_GRADIENTS: Record<
+const SECTION_GRADIENTS: Record<
   string,
   { open: string; hover: string; closed: string }
 > = {
@@ -117,7 +120,7 @@ const REALM_GRADIENTS: Record<
 /**
  * Icon mapping for each realm.
  */
-export const REALM_ICONS: Record<string, string> = {
+export const SECTION_ICONS: Record<string, string> = {
   welcome: "Sparkles",
   core: "Box",
   kindred: "Heart",
@@ -142,8 +145,8 @@ const ADDITIONAL_SECTIONS: Realm[] = [
     tagline: "Open-source ecosystem",
     paths: ["/"],
     href: "/",
-    icon: REALM_ICONS.welcome,
-    gradients: REALM_GRADIENTS.welcome,
+    icon: SECTION_ICONS.welcome,
+    gradients: SECTION_GRADIENTS.welcome,
   },
   {
     id: "community",
@@ -151,8 +154,8 @@ const ADDITIONAL_SECTIONS: Realm[] = [
     tagline: "Collaborate with us",
     paths: ["/(community)/", "/community/"],
     href: "/community",
-    icon: REALM_ICONS.community,
-    gradients: REALM_GRADIENTS.community,
+    icon: SECTION_ICONS.community,
+    gradients: SECTION_GRADIENTS.community,
   },
   {
     id: "help",
@@ -160,8 +163,8 @@ const ADDITIONAL_SECTIONS: Realm[] = [
     tagline: "Get help",
     paths: ["/(help)/", "/help/"],
     href: "/help",
-    icon: REALM_ICONS.help,
-    gradients: REALM_GRADIENTS.help,
+    icon: SECTION_ICONS.help,
+    gradients: SECTION_GRADIENTS.help,
   },
 ];
 
@@ -175,8 +178,8 @@ const buildRealmsFromJson = (): Realm[] => {
     tagline: realm.tagline,
     paths: [`/(${realm.id})/`, `/${realm.id}/`],
     href: realm.docsUrl,
-    icon: REALM_ICONS[realm.id] || "Box",
-    gradients: REALM_GRADIENTS[realm.id] || REALM_GRADIENTS.welcome,
+    icon: SECTION_ICONS[realm.id] || "Box",
+    gradients: SECTION_GRADIENTS[realm.id] || SECTION_GRADIENTS.welcome,
   }));
 
   const welcome = ADDITIONAL_SECTIONS.find((s) => s.id === "welcome")!;
