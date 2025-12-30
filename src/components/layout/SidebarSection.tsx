@@ -1,11 +1,45 @@
-import { ChevronRight } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import {
+  Box,
+  Brush,
+  ChevronRight,
+  FileCode,
+  Glasses,
+  Globe,
+  Hammer,
+  Heart,
+  HelpCircle,
+  Palette,
+  Server,
+  Sparkles,
+  Users,
+} from "lucide-react";
+import { motion } from "motion/react";
 import { useCallback, useRef } from "react";
 
 import getSectionDescription from "@/lib/getSectionDescription";
 import getSectionGradient from "@/lib/getSectionGradient";
+import { REALM_ICONS } from "@/lib/realms";
 import getSectionTextColors from "@/lib/util/getSectionTextColors";
 import { cn } from "@/lib/utils";
+
+/** Map icon names to Lucide components */
+const ICON_COMPONENTS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  Sparkles,
+  Box,
+  Heart,
+  Brush,
+  Server,
+  Hammer,
+  FileCode,
+  Palette,
+  Glasses,
+  Globe,
+  Users,
+  HelpCircle,
+};
 
 // Find the sidebar scroll viewport
 const getScrollViewport = (): HTMLElement | null => {
@@ -38,6 +72,10 @@ const SidebarSection = ({
   const textColors = getSectionTextColors(sectionId, isOpen);
   const scrollPosRef = useRef<number>(0);
 
+  const iconName = REALM_ICONS[sectionId];
+
+  const IconComponent = iconName ? ICON_COMPONENTS[iconName] : null;
+
   const handleToggle = useCallback(() => {
     // Save scroll position before toggle
     const viewport = getScrollViewport();
@@ -57,15 +95,15 @@ const SidebarSection = ({
   }, [onToggle, isOpen]);
 
   return (
-    <div>
+    <div className="my-2">
       <button
         type="button"
         onClick={handleToggle}
         className={cn(
           "group w-full cursor-pointer select-none text-left",
-          "inline-flex w-full items-center gap-2 rounded-md p-2 transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 [&_svg]:size-4 [&_svg]:shrink-0",
+          "inline-flex w-full items-center gap-2 rounded-md p-2 transition-all duration-200 [&_svg]:size-4 [&_svg]:shrink-0",
           getSectionGradient(sectionId, isOpen),
-          !isOpen && getSectionGradient(sectionId, false, true),
+          getSectionGradient(sectionId, false, true),
         )}
       >
         <div className="flex-1">
@@ -75,13 +113,13 @@ const SidebarSection = ({
               textColors.title,
             )}
           >
-            {item.icon}
+            {IconComponent && <IconComponent className="h-4 w-4" />}
             {item.name}
           </span>
 
           <span
             className={cn(
-              "mt-1 block text-fd-muted-foreground text-sm italic",
+              "mt-1 block text-fd-muted-foreground text-xs italic",
               textColors.description,
             )}
           >
@@ -104,21 +142,9 @@ const SidebarSection = ({
         </motion.div>
       </button>
 
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ overflow: "hidden" }}
-          >
-            <div className="space-y-1 pt-1">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <hr className="my-2" />
+      <div className="sidebar-collapse" data-open={isOpen}>
+        <div>{children}</div>
+      </div>
     </div>
   );
 };

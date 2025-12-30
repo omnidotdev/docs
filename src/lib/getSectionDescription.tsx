@@ -1,4 +1,4 @@
-import { PILLARS } from "./pillars";
+import { REALMS } from "./realms";
 
 // TODO extract to frontmatter
 // can be extended in source config e.g.
@@ -12,8 +12,8 @@ import { PILLARS } from "./pillars";
 // then need to figure a way to grab the frontmatter here
 
 // TODO grab from Omni API
-export const NEW_PRODUCTS = ["RDK"];
-export const COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
+export const NEW_PRODUCTS = ["RDK", "Runa"];
+export const COMING_SOON_PRODUCTS = ["Thornberry"];
 
 // TODO augment section metadata directly (unsure if this is possible with Fumadocs)
 
@@ -23,16 +23,14 @@ export const COMING_SOON_PRODUCTS = ["Runa", "Thornberry"];
  * @returns The description of the section.
  */
 // TODO narrow type (can validate `meta.json` against schema)
-const getDescription = (sectionName: string) => {
+const getSectionDescription = (sectionName: string) => {
   const lowerName = sectionName.toLowerCase();
 
-  // find matching pillar by checking if the section name contains the pillar ID
-  const matchingPillar = PILLARS.find((pillar) =>
-    lowerName.includes(pillar.id),
-  );
+  // find matching realm by checking if the section name contains the realm ID
+  const matchingRealm = REALMS.find((realm) => lowerName.includes(realm.id));
 
-  if (matchingPillar) {
-    const description = matchingPillar.description;
+  if (matchingRealm) {
+    const description = matchingRealm.tagline;
 
     if (description.includes("&")) return <>{description}</>;
 
@@ -42,4 +40,4 @@ const getDescription = (sectionName: string) => {
   return null;
 };
 
-export default getDescription;
+export default getSectionDescription;

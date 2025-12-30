@@ -13,18 +13,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
 import {
+  RotatingBanner,
   SidebarFolder,
   SidebarItem,
   SidebarSection,
   SidebarSeparator,
-} from "@/components/docs";
-import RotatingBanner from "@/components/layout/RotatingBanner/RotatingBanner";
+} from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
-import { getPillarByPath } from "@/lib/pillars";
+import { getRealmByPath } from "@/lib/realms";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
@@ -35,9 +35,9 @@ import seo from "@/lib/util/seo";
  * @returns Section name, if found.
  */
 const getSectionFromPath = (pathname: string): string => {
-  const pillar = getPillarByPath(pathname);
+  const section = getRealmByPath(pathname);
 
-  return pillar?.id ?? "welcome";
+  return section?.id ?? "welcome";
 };
 
 /**

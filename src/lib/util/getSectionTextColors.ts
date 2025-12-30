@@ -1,4 +1,4 @@
-import { getPillarById } from "../pillars";
+import { getRealmById } from "../realms";
 
 /**
  * Get section text colors for title and description based on state.
@@ -12,12 +12,13 @@ const getSectionTextColors = (
   isOpen: boolean,
   isHover = false,
 ) => {
-  const pillar = getPillarById(sectionId);
+  const section = getRealmById(sectionId);
 
-  if (!pillar) {
-    // fallback to welcome colors if pillar not found
-    const welcomePillar = getPillarById("welcome");
-    if (!welcomePillar)
+  if (!section) {
+    // fall back to welcome colors if section not found
+    const welcomeSection = getRealmById("welcome");
+
+    if (!welcomeSection)
       return {
         title: "",
         description: "",
@@ -26,7 +27,6 @@ const getSectionTextColors = (
     return getSectionTextColors("welcome", isOpen, isHover);
   }
 
-  // Define color mappings for each pillar
   const colorMappings = {
     welcome: {
       title: {
@@ -53,16 +53,66 @@ const getSectionTextColors = (
         closed: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
       },
     },
-    reality: {
+    kindred: {
       title: {
-        open: "text-purple-800 dark:text-white",
-        hover: "group-hover:text-purple-700 dark:group-hover:text-purple-200",
+        open: "text-pink-800 dark:text-white",
+        hover: "group-hover:text-pink-700 dark:group-hover:text-pink-200",
         closed: "",
       },
       description: {
-        open: "text-purple-700 dark:text-purple-200",
-        hover: "group-hover:text-purple-600 dark:group-hover:text-purple-300",
-        closed: "group-hover:text-purple-600 dark:group-hover:text-purple-400",
+        open: "text-pink-700 dark:text-pink-200",
+        hover: "group-hover:text-pink-600 dark:group-hover:text-pink-300",
+        closed: "group-hover:text-pink-600 dark:group-hover:text-pink-400",
+      },
+    },
+    fabric: {
+      title: {
+        open: "text-amber-800 dark:text-white",
+        hover: "group-hover:text-amber-700 dark:group-hover:text-amber-200",
+        closed: "",
+      },
+      description: {
+        open: "text-amber-700 dark:text-amber-200",
+        hover: "group-hover:text-amber-600 dark:group-hover:text-amber-300",
+        closed: "group-hover:text-amber-600 dark:group-hover:text-amber-400",
+      },
+    },
+    grid: {
+      title: {
+        open: "text-cyan-800 dark:text-white",
+        hover: "group-hover:text-cyan-700 dark:group-hover:text-cyan-200",
+        closed: "",
+      },
+      description: {
+        open: "text-cyan-700 dark:text-cyan-200",
+        hover: "group-hover:text-cyan-600 dark:group-hover:text-cyan-300",
+        closed: "group-hover:text-cyan-600 dark:group-hover:text-cyan-400",
+      },
+    },
+    // Armory uses gray/slate colors
+    armory: {
+      title: {
+        open: "text-slate-800 dark:text-white",
+        hover: "group-hover:text-slate-700 dark:group-hover:text-slate-200",
+        closed: "",
+      },
+      description: {
+        open: "text-slate-700 dark:text-slate-200",
+        hover: "group-hover:text-slate-600 dark:group-hover:text-slate-300",
+        closed: "group-hover:text-slate-600 dark:group-hover:text-slate-400",
+      },
+    },
+    // Codex uses Blueprint colors (sky)
+    codex: {
+      title: {
+        open: "text-sky-800 dark:text-white",
+        hover: "group-hover:text-sky-700 dark:group-hover:text-sky-200",
+        closed: "",
+      },
+      description: {
+        open: "text-sky-700 dark:text-sky-200",
+        hover: "group-hover:text-sky-600 dark:group-hover:text-sky-300",
+        closed: "group-hover:text-sky-600 dark:group-hover:text-sky-400",
       },
     },
     sigil: {
@@ -77,40 +127,40 @@ const getSectionTextColors = (
         closed: "group-hover:text-rose-600 dark:group-hover:text-rose-400",
       },
     },
-    blueprint: {
+    reality: {
       title: {
-        open: "text-amber-800 dark:text-white",
-        hover: "group-hover:text-amber-700 dark:group-hover:text-amber-200",
+        open: "text-purple-800 dark:text-white",
+        hover: "group-hover:text-purple-700 dark:group-hover:text-purple-200",
         closed: "",
       },
       description: {
-        open: "text-amber-700 dark:text-amber-200",
-        hover: "group-hover:text-amber-600 dark:group-hover:text-amber-300",
-        closed: "group-hover:text-amber-600 dark:group-hover:text-amber-400",
+        open: "text-purple-700 dark:text-purple-200",
+        hover: "group-hover:text-purple-600 dark:group-hover:text-purple-300",
+        closed: "group-hover:text-purple-600 dark:group-hover:text-purple-400",
       },
     },
-    forge: {
+    worlds: {
       title: {
-        open: "text-slate-800 dark:text-white",
-        hover: "group-hover:text-slate-700 dark:group-hover:text-slate-200",
+        open: "text-violet-800 dark:text-white",
+        hover: "group-hover:text-violet-700 dark:group-hover:text-violet-200",
         closed: "",
       },
       description: {
-        open: "text-slate-700 dark:text-slate-200",
-        hover: "group-hover:text-slate-600 dark:group-hover:text-slate-300",
-        closed: "group-hover:text-slate-600 dark:group-hover:text-slate-400",
+        open: "text-violet-700 dark:text-violet-200",
+        hover: "group-hover:text-violet-600 dark:group-hover:text-violet-300",
+        closed: "group-hover:text-violet-600 dark:group-hover:text-violet-400",
       },
     },
     community: {
       title: {
-        open: "text-cyan-800 dark:text-white",
-        hover: "group-hover:text-cyan-700 dark:group-hover:text-cyan-200",
+        open: "text-teal-800 dark:text-white",
+        hover: "group-hover:text-teal-700 dark:group-hover:text-teal-200",
         closed: "",
       },
       description: {
-        open: "text-cyan-700 dark:text-cyan-200",
-        hover: "group-hover:text-cyan-600 dark:group-hover:text-cyan-300",
-        closed: "group-hover:text-cyan-600 dark:group-hover:text-cyan-400",
+        open: "text-teal-700 dark:text-teal-200",
+        hover: "group-hover:text-teal-600 dark:group-hover:text-teal-300",
+        closed: "group-hover:text-teal-600 dark:group-hover:text-teal-400",
       },
     },
     help: {

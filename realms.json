@@ -1,0 +1,77 @@
+{
+  "realms": [
+    {
+      "id": "core",
+      "name": "CORE",
+      "emoji": "☄️",
+      "description": "Omni's unified business operations realm. Project management, CRM, finance, commerce, and everything businesses need to operate.",
+      "tagline": "Tools for businesses",
+      "docsUrl": "/core"
+    },
+    {
+      "id": "fabric",
+      "name": "FABRIC",
+      "emoji": "🎨",
+      "description": "Tools for content creation, design, and knowledge work. Everything creators need to build, design, and share their ideas.",
+      "tagline": "Tools for creators",
+      "docsUrl": "/fabric"
+    },
+    {
+      "id": "armory",
+      "name": "ARMORY",
+      "emoji": "🛠️",
+      "description": "Developer tools and utilities. Everything engineers need to build, test, deploy, and maintain software.",
+      "tagline": "Tools for developers and tinkerers",
+      "docsUrl": "/armory"
+    },
+    {
+      "id": "reality",
+      "name": "REALITY",
+      "emoji": "𐯅",
+      "description": "Omni's spatial computing realm focused on XR, immersion, and real-world interfaces. Open, web-first tools for blending digital and physical worlds.",
+      "tagline": "Spatial computing and XR",
+      "docsUrl": "/reality"
+    },
+    {
+      "id": "kindred",
+      "name": "KINDRED",
+      "emoji": "🤝",
+      "description": "Consumer-facing products for creators, communities, and everyday life. Identity, social connection, lifestyle, and meaningful digital relationships.",
+      "tagline": "Social and lifestyle",
+      "docsUrl": "/kindred"
+    },
+    {
+      "id": "grid",
+      "name": "GRID",
+      "emoji": "🔌",
+      "description": "Cloud, deployment, infrastructure, and platform tools. The backbone that powers distributed, federated platforms.",
+      "tagline": "Cloud, deployment, infrastructure",
+      "docsUrl": "/grid"
+    },
+    {
+      "id": "codex",
+      "name": "CODEX",
+      "emoji": "📜",
+      "description": "Specifications, standards, and schemas. The protocols and formats that define how systems communicate and interoperate.",
+      "tagline": "Specifications and standards",
+      "docsUrl": "/codex"
+    },
+    {
+      "id": "sigil",
+      "name": "SIGIL",
+      "emoji": "✨",
+      "description": "A unified design system: collection of design tokens, components, and utilities for building accessible, consistent, and beautiful user interfaces and experiences.",
+      "tagline": "Omni's unified design system",
+      "websiteUrl": "https://sigil.omni.dev",
+      "docsUrl": "/sigil"
+    },
+    {
+      "id": "worlds",
+      "name": "WORLDS",
+      "emoji": "🌌",
+      "description": "Immersive experiences, games, and generative worlds. Interactive entertainment.",
+      "tagline": "Games and experiences",
+      "docsUrl": "/worlds"
+    }
+  ]
+}

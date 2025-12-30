@@ -1,6 +1,6 @@
 import React from "react";
 
-import { PILLARS } from "./pillars";
+import { REALMS } from "./realms";
 
 import type { Folder, Node, Root, Separator } from "fumadocs-core/page-tree";
 
@@ -19,9 +19,9 @@ const getSectionIdFromName = (name: any): string => {
   if (!name?.props?.dangerouslySetInnerHTML?.__html) return "unknown";
   const html = name.props.dangerouslySetInnerHTML.__html.toLowerCase();
 
-  // Check against all pillars
-  const pillar = PILLARS.find((p) => html.includes(p.id));
-  return pillar?.id ?? "unknown";
+  const realm = REALMS.find((r) => html.includes(r.id));
+
+  return realm?.id ?? "unknown";
 };
 
 /**
