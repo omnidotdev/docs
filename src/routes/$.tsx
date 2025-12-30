@@ -21,6 +21,7 @@ import {
 import RotatingBanner from "@/components/layout/RotatingBanner/RotatingBanner";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
+import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
 import { getPillarByPath } from "@/lib/pillars";
@@ -46,6 +47,9 @@ const Page = () => {
   const { data, activeSection } = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
   const patchedTree = useMemo(() => transformPageTree(pageTree), [pageTree]);
+
+  // Persist sidebar scroll position and scroll to active item on navigation
+  useSidebarScrollPersistence();
 
   const Content = clientLoader.getComponent(data.path);
 
