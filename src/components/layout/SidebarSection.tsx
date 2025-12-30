@@ -77,7 +77,8 @@ const SidebarSection = ({
 
   const childCount = Children.count(children);
 
-  const docCount = childCount;
+  // subtract 1 to exclude the index/introduction page from the count
+  const docCount = childCount - 1;
 
   const isRealm = REALM_IDS.includes(sectionId);
 
@@ -158,7 +159,7 @@ const SidebarSection = ({
         <div>
           {children}
 
-          {Children.count(children) <= 1 && (
+          {docCount <= 0 && (
             <div className="flex flex-col items-center py-3 text-fd-muted-foreground text-xs italic">
               <span>
                 {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}{" "}
