@@ -77,6 +77,7 @@ const items = [
  */
 const RotatingBanner = () => {
   const [index, setIndex] = useState(0);
+  const [isFirstRotation, setIsFirstRotation] = useState(true);
 
   const [fade, setFade] = useState(true);
 
@@ -84,7 +85,18 @@ const RotatingBanner = () => {
     setFade(false);
 
     setTimeout(() => {
-      setIndex((idx) => (idx + dir + items.length) % items.length);
+      setIndex((idx) => {
+        // after first entry, pick a random index (excluding current)
+        if (isFirstRotation && dir === 1) {
+          setIsFirstRotation(false);
+
+          const randomIdx = Math.floor(Math.random() * (items.length - 1)) + 1;
+
+          return randomIdx;
+        }
+
+        return (idx + dir + items.length) % items.length;
+      });
 
       setFade(true);
     }, FADE_MS);
