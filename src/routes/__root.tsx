@@ -7,11 +7,41 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
+import { useEffect, useState } from "react";
 
 import appCss from "@/lib/styles/app.css?url";
 import createMetaTags from "@/lib/util/seo";
 
 import type { PropsWithChildren } from "react";
+
+/**
+ * Display `Ctrl` or `⌘` based on operating system.
+ */
+const CtrlOrCmd = () => {
+  const [key, setKey] = useState("⌘");
+
+  useEffect(() => {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+
+    if (!isMac) setKey("Ctrl");
+  }, []);
+
+  return key;
+};
+
+/**
+ * Search hotkey configuration (Ctrl/⌘ + K).
+ */
+const searchHotKey = [
+  {
+    key: (e: KeyboardEvent) => e.metaKey || e.ctrlKey,
+    display: <CtrlOrCmd />,
+  },
+  {
+    key: "k",
+    display: "K",
+  },
+];
 
 /**
  * Root component.
@@ -56,7 +86,7 @@ const RootDocument = ({ children }: PropsWithChildren) => (
     </head>
 
     <body className="flex min-h-screen flex-col">
-      <RootProvider>{children}</RootProvider>
+      <RootProvider search={{ hotKey: searchHotKey }}>{children}</RootProvider>
 
       {/* NB: dev tools automatically only included when `NODE_ENV=development` */}
       <TanStackDevtools
