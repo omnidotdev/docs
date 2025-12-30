@@ -3,11 +3,7 @@ import {
   FaLinkedin,
   FaRegNewspaper,
 } from "react-icons/fa6";
-import {
-  SiDiscord as DiscordIcon,
-  SiGithub as GitHubIcon,
-  SiX as XIcon,
-} from "react-icons/si";
+import { SiDiscord as DiscordIcon, SiX as XIcon } from "react-icons/si";
 
 import { app } from "./config";
 
@@ -29,28 +25,30 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
       url: app.organization.blog,
     },
     {
+      text: "🛍️ Shop Omni Merch (Soon)",
+      url: app.merchUrl,
+    },
+    // social links
+    {
+      type: "icon",
       icon: <XIcon />,
-      text: `@${app.socials.x.split("/")[3]}`,
+      text: "X",
       url: app.socials.x,
+      secondary: true,
     },
     {
+      type: "icon",
       icon: <FaLinkedin />,
       text: "LinkedIn",
       url: app.socials.linkedin,
+      secondary: true,
     },
     {
-      icon: <GitHubIcon />,
-      text: "GitHub",
-      url: app.socials.github,
-    },
-    {
+      type: "icon",
       icon: <DiscordIcon />,
       text: "Discord",
       url: app.socials.discord,
-    },
-    {
-      text: "🛍️ Shop Omni Merch (Soon)",
-      url: app.merchUrl,
+      secondary: true,
     },
   ],
   githubUrl: app.socials.github,

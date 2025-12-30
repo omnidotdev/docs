@@ -1,34 +1,34 @@
-import { getPillarById } from "./pillars";
+import { getRealmById } from "./realms";
 
 /**
- * Get section gradient for each pillar.
- * @returns The section gradient for the pillar.
+ * Get section gradient for each section.
+ * @returns the section gradient for the section.
  */
 const getSectionGradient = (
   sectionId: string,
   isOpen: boolean,
   isHover = false,
 ) => {
-  const pillar = getPillarById(sectionId);
+  const section = getRealmById(sectionId);
 
-  if (!pillar) {
-    // fall back to welcome gradient if pillar not found
-    const welcomePillar = getPillarById("welcome");
+  if (!section) {
+    // fall back to welcome gradient if section not found
+    const welcomeSection = getRealmById("welcome");
 
-    if (!welcomePillar) return "";
+    if (!welcomeSection) return "";
 
     return isOpen
-      ? welcomePillar.gradients.open
+      ? welcomeSection.gradients.open
       : isHover
-        ? welcomePillar.gradients.hover
-        : welcomePillar.gradients.closed;
+        ? welcomeSection.gradients.hover
+        : welcomeSection.gradients.closed;
   }
 
   return isOpen
-    ? pillar.gradients.open
+    ? section.gradients.open
     : isHover
-      ? pillar.gradients.hover
-      : pillar.gradients.closed;
+      ? section.gradients.hover
+      : section.gradients.closed;
 };
 
 export default getSectionGradient;
