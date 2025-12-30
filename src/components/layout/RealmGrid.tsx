@@ -1,4 +1,4 @@
-import { REALMS } from "@/lib/realms";
+import { REALMS } from "@/lib/sections";
 import RealmCard from "./RealmCard";
 
 interface RealmGridProps {

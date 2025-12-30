@@ -19,7 +19,7 @@ import { SiX } from "react-icons/si";
 
 import getSectionDescription from "@/lib/getSectionDescription";
 import getSectionGradient from "@/lib/getSectionGradient";
-import { REALM_ICONS } from "@/lib/realms";
+import { REALM_IDS, SECTION_ICONS } from "@/lib/sections";
 import getSectionTextColors from "@/lib/util/getSectionTextColors";
 import { cn } from "@/lib/utils";
 
@@ -73,7 +73,13 @@ const SidebarSection = ({
   const textColors = getSectionTextColors(sectionId, isOpen);
   const scrollPosRef = useRef<number>(0);
 
-  const iconName = REALM_ICONS[sectionId];
+  const iconName = SECTION_ICONS[sectionId];
+
+  const childCount = Children.count(children);
+
+  const docCount = childCount;
+
+  const isRealm = REALM_IDS.includes(sectionId);
 
   const IconComponent = iconName ? ICON_COMPONENTS[iconName] : null;
 
@@ -116,6 +122,11 @@ const SidebarSection = ({
           >
             {IconComponent && <IconComponent className="h-4 w-4" />}
             {item.name}
+            {isRealm && (
+              <span className="text-2xs opacity-50">
+                {docCount > 1 ? docCount : "Soon"}
+              </span>
+            )}
           </span>
 
           <span
