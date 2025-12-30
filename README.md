@@ -7,7 +7,7 @@ Omni documentation, powered by [Fumadocs](https://github.com/fuma-nama/fumadocs)
 Run `tilt up`, or:
 
 ```sh
-bun install
+bun i
 ```
 
 ```sh
