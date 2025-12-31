@@ -3,6 +3,11 @@ import { ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import {
+  COMING_SOON_PRODUCTS,
+  NEW_PRODUCTS,
+} from "@/lib/getSectionDescription";
 import { cn } from "@/lib/utils";
 
 interface SidebarFolderProps {
@@ -16,8 +21,19 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
   // Folder URL can be on item.url or item.index.url (Fumadocs structure)
   const folderUrl = item.url || item.index?.url;
 
-  // Check if this folder or any of its children is active
+  // check if folder matches any product badges
+  const folderName =
+    item.name?.props?.dangerouslySetInnerHTML?.__html || item.name || "";
+
+  const isNew = NEW_PRODUCTS.some((product) => folderName.includes(product));
+
+  const isComingSoon = COMING_SOON_PRODUCTS.some((product) =>
+    folderName.includes(product),
+  );
+
+  // check if this folder or any of its children is active
   const isActive = folderUrl === pathname;
+
   const containsActive =
     item.children?.some(
       (child: any) =>
@@ -30,15 +46,13 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
 
   const [open, setOpen] = useState(isActive || containsActive);
 
-  // Auto-expand when navigating to a child page
+  // auto-expand when navigating to a child page
   useEffect(() => {
-    if (containsActive && !open) {
-      setOpen(true);
-    }
+    if (containsActive && !open) setOpen(true);
   }, [containsActive, open]);
 
-  // If folder has a URL, render as a link with separate toggle button
-  if (folderUrl) {
+  // if folder has a URL, render as a link with separate toggle button
+  if (folderUrl)
     return (
       <div>
         <div
@@ -55,7 +69,20 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
             )}
           >
             {item.icon}
+
             <span className="font-medium">{item.name}</span>
+
+            {isNew && (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                New! 🚀
+              </Badge>
+            )}
+
+            {isComingSoon && (
+              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                Coming Soon 🚧
+              </Badge>
+            )}
           </Link>
           <button
             type="button"
@@ -90,9 +117,8 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
         </AnimatePresence>
       </div>
     );
-  }
 
-  // Folder without URL - just toggle to expand/collapse
+  // folder without URL - just toggle to expand/collapse
   return (
     <div>
       <button
