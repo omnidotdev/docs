@@ -9,8 +9,8 @@
 /* TODO Sigil colors */
 
 @theme inline {
-  --text-2xs: 0.625rem; /* 10px */
-  --text-2xs--line-height: 1rem; /* optional */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -115,6 +115,42 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+}
+
+/* Motion-optimized styles for sidebar sections */
+.sidebar-section {
+  /* Optimize for motion animations */
+  contain: layout style paint;
+  will-change: transform;
+}
+
+.sidebar-section-content {
+  /* Prevent layout shifts during animations */
+  contain: layout;
+}
+
+/* Smooth collapsible content */
+[data-radix-collapsible-content] {
+  overflow: hidden;
+}
+
+/* Sidebar section collapse animation */
+.sidebar-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 200ms ease-in-out,
+    opacity 200ms ease-in-out;
+}
+
+.sidebar-collapse[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.sidebar-collapse > div {
+  overflow: hidden;
 }
 
 @layer base {

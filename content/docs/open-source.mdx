@@ -1,0 +1,60 @@
+---
+title: Why Open Source?
+description: An explainer for why Omni is committed to open-source software
+---
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+In one word: **Freedom.**
+
+In more words: Omni follows the official Open Source Initiative (OSI) guidelines for open-source software, including its well-respected [definition of open source software](https://opensource.org/osd), for almost everything produced at the company. This includes apps, websites, APIs, developer tools, and other software that provides complete access to its source code. This freedom allows users to inspect, modify, and redistribute it freely. This inherent freedom promotes transparency, innovation, and community-driven development without restrictive licensing barriers. **The idea is that Omni software transforms the world with open-source primitives that transcends its creators and breaks down corporate barriers.**
+
+Creating open-source software aligns with Omni’s core values, which prioritize freedom and openness. By developing with a focus on transparency, privacy, and security, Omni ensures its software is trustworthy and accessible. Moreover, by making the source code openly available, Omni invites the global community to engage in the highest level of collaboration, fostering innovation and collective improvement through shared contributions and scrutiny.
+
+export const green =
+  "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300";
+
+export const red =
+  "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300";
+
+export const label = "font-bold";
+
+export const rows = [
+  ["💰 Cost", "No licensing fees", "Recurring licensing fees"],
+  ["👨‍💻 Code Access", "Full access", "No or partial access"],
+  ["🔒 Security", "Transparent community auditing", "Security via obscurity"],
+  ["☁️ Deployment", "Cloud, on-prem, hybrid", "Vendor limits"],
+  ["🧠 Knowledge", "Public collaboration", "Siloed"],
+  ["🏃‍♀️ Velocity", "Parallel innovation", "Vendor pacing"],
+  ["⚖️ Compliance", "Simple licensing", "Complex EULAs"],
+  ["👔 Continuity", "Persists beyond creators", "Tied to vendor success"],
+  ["⛓️‍💥 Data", "Full sovereignty", "Vendor infrastructure"],
+  ["🎗️ Governance", "Community-driven", "Top-down decisions"],
+];
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead className={label}>Attribute</TableHead>
+      <TableHead className={label}>Open Source</TableHead>
+      <TableHead className={label}>Proprietary</TableHead>
+    </TableRow>
+  </TableHeader>
+
+  <TableBody>
+    {rows.map(([attr, oss, prop]) => (
+      <TableRow key={attr}>
+        <TableCell className={label}>{attr}</TableCell>
+        <TableCell className={green}>{oss}</TableCell>
+        <TableCell className={red}>{prop}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>

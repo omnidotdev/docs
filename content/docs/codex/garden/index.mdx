@@ -1,0 +1,111 @@
+---
+title: 🌱 Garden
+---
+
+import { Garden } from "@omnidotdev/garden";
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import schema from "./garden.json";
+import { FaProjectDiagram, FaSitemap, FaReact } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Visualization",
+      icon: <FaProjectDiagram />,
+      className:
+        "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Ecosystem",
+      icon: <FaSitemap />,
+      className:
+        "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "React",
+      icon: <FaReact />,
+      className:
+        "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://garden.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/garden`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Garden is new! Expect this documentation to change rapidly and have rough edges.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Visually model your ecosystem of products, services, or anything else",
+    },
+  ]}
+/>
+
+Garden graphs are composed of:
+
+- **Sprouts**: Individual entities within gardens representing products, services, tools, or any other element in your ecosystem
+- **Gardens**: Collections of sprouts or other gardens (**subgardens**). Gardens may also be nested within other gardens (**supergardens**)
+
+## Demo
+
+Below, **Omni Ecosystem** is a _supergarden_ of the **Omni Products** and **Omni Dev Tools** gardens, which are _subgardens_ in this case.
+
+**Omni Docs** is a _sprout_ of the Omni Ecosystem garden. Backfeed is a sprout of the Omni Products garden, while Sigil is a sprout of the Omni Dev Tools garden.
+
+<div className="w-full h-[600px] mt-4">
+  {/* TODO grab schema from API/remote source */}
+  <Garden schema={schema} expandSubgardens showMinimap={false} />
+</div>
+
+## Features
+
+- **Interactive Visualization**: Navigate through your ecosystem with an intuitive, interactive graph interface via the <br /> `<Garden />` component shipped with `@omnidotdev/garden`
+- **Hierarchical Navigation**: Explore complex relationships with support for nested gardens (subgardens/supergardens)
+- **Customizable Nodes**: Personalize node appearance with custom themes, colors, and styling
+- **Smart Layout**: Automatic layout calculation ensures optimal presentation of your garden
+- **Edge Customization**: Choose from various edge types and animations to visualize connections
+- **Responsive Design**: Works across different screen sizes and devices
+- **React Integration**: Easily integrate with React applications as a standalone component
+- **Rich Node Content**: Support for images, descriptions, call-to-action buttons, and external links
+- **Garden Switching**: Navigate between multiple gardens within the same visualization
+- **Minimap & Controls**: Optional navigation aids for larger garden structures
+
+## Getting Started
+
+To integrate Garden in your React application, first `bun add @omnidotdev/garden`, then:
+
+```tsx
+import { Garden } from "@omnidotdev/garden";
+
+import type { GardenSchema } from "@omnidotdev/garden";
+
+// import required Garden styles
+import "@omnidotdev/garden/styles.css";
+
+const schema: GardenSchema = {
+  name: "Ecosystem",
+  // ...
+};
+
+/**
+ * Render the Garden component with the provided ecosystem schema.
+ *
+ * `schema` is validated against the Garden specification at runtime.
+ * If the schema is invalid, an error will be thrown.
+ */
+const App = () => <Garden schema={schema} />;
+```
