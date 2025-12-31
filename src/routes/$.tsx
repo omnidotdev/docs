@@ -130,20 +130,21 @@ const Page = () => {
             Separator: ({ item }) => <SidebarSeparator item={item} />,
             Folder: ({ item, children }) => {
               // check if this is a virtual section folder created by the transform
-              if ((item as any).virtualSection) {
-                const originalSeparator = (item as any).originalSeparator;
-                const sectionId = (item as any).sectionId;
-                const isOpen = openSectionRef.current === sectionId;
+              if ("virtualSection" in item && item.virtualSection) {
+                const virtualItem =
+                  item as import("@/lib/pageTreeTransform").VirtualFolder;
+
+                const isOpen = openSectionRef.current === virtualItem.sectionId;
 
                 return (
                   <SidebarSection
-                    item={item}
-                    sectionId={sectionId}
+                    item={virtualItem}
+                    sectionId={virtualItem.sectionId}
                     isOpen={isOpen}
                     onToggle={(newOpen) =>
-                      handleSectionToggle(sectionId, newOpen)
+                      handleSectionToggle(virtualItem.sectionId, newOpen)
                     }
-                    originalSeparator={originalSeparator}
+                    originalSeparator={virtualItem.originalSeparator}
                   >
                     {children}
                   </SidebarSection>
