@@ -1,0 +1,121 @@
+---
+title: Local Development
+---
+
+This guide covers how to run Omni projects locally using our polyrepo-based development workflow.
+
+## Prerequisites
+
+- [Bun](https://bun.sh) - JavaScript runtime and package manager
+- [Tilt](https://tilt.dev) - Local development orchestration
+- Git
+
+## Metarepo Pattern
+
+Omni projects use a **metarepo** (or *polyrepo*) pattern rather than a monorepo approach:
+
+- Services are **separate git repositories**
+- A metarepo orchestrates development without containing service code
+- Services are cloned into a `services/` directory (git-ignored)
+- Each service, being its own individual repo, maintains its own dependencies and deployment lifecycle
+
+Exmaples:
+
+- [Backfeed (GitHub)](https://github.com/omnidotdev/backfeed)
+- [Runa (GitHub)](https://github.com/omnidotdev/runa)
+
+### Structure
+
+```sh
+project/
+├── Tiltfile           # main orchestration
+├── services.yaml      # service definitions
+├── services/          # cloned repos (git-ignored at the root)
+│   ├── api/
+│   └── app/
+└── .gitignore
+```
+
+## Getting Started
+
+1. Clone the metarepo:
+
+   ```sh
+   git clone $METAREPO_URL
+   cd $PROJECT
+   ```
+
+2. Copy the services template:
+
+   ```sh
+   cp services.yaml.template services.yaml
+   ```
+
+3. Start Tilt:
+
+   ```sh
+   tilt up
+   ```
+
+   Tilt will automatically clone any missing services defined in `services.yaml`.
+
+4. Open the Tilt UI at http://localhost:10350 to monitor all services.
+
+## Configuration
+
+### `services.yaml`
+
+Define which services to include:
+
+```yaml
+services:
+  - project-api:
+      repo: https://github.com/org/project-api#master
+  - project-app:
+      repo: https://github.com/org/project-app#master
+       # optional: custom path
+      path: ../project-app
+```
+
+**Fields:**
+
+- `repo` (required): Git URL with branch reference
+- `path` (optional): Custom local path (defaults to `services/$SERVICE`)
+- `env` (optional): Environment variables to set
+
+### Environment Variables
+
+Check the individual service's `README.md` for environment variable requirements.
+
+Commonly, services load environment variables from `.env.local`. Copy the template:
+
+```sh
+cd services/api
+cp .env.local.template .env.local
+```
+
+## Common Commands
+
+| Command                          | Description                         |
+| -------------------------------- | ----------------------------------- |
+| `tilt up`                        | Start all services                  |
+| `tilt down`                      | Stop all services                   |
+
+See more in the [Tilt documentation](https://docs.tilt.dev).
+
+## Troubleshooting
+
+### Service not starting
+
+- **Important prerequisite:** check the service's `README.md` for setup instructions
+- Check Tilt UI for error logs
+- Verify `.env.local` exists with required variables
+- Run `bun i` in the service directory
+
+### Port conflicts
+
+- Another process may be using the port: check with `lsof -i :$PORT`.
+
+## Bonus: Custom Tilt Extensions
+
+Omni maintains a collection of Tilt extensions at [Omni `tilt-extensions` (GitHub)](https://github.com/omnidotdev/tilt-extensions).
