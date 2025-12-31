@@ -1,10 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+
+const SCROLL_STORAGE_KEY = "sidebar-scroll-position";
 
 /**
- * Hook to scroll the active sidebar item into view after navigation.
- * Uses a simple approach: listen for clicks on sidebar links and scroll after navigation.
+ * Hook to persist sidebar scroll position across navigation.
+ * Saves scroll position before navigation and restores it after.
  */
 export function useSidebarScrollPersistence() {
+  const hasRestoredRef = useRef(false);
+
   useEffect(() => {
     // Find the sidebar's scrollable element
     const findScrollableElement = (): Element | null => {
@@ -23,7 +27,31 @@ export function useSidebarScrollPersistence() {
       return null;
     };
 
-    // Scroll active item into view
+    // Save current scroll position to sessionStorage
+    const saveScrollPosition = () => {
+      const scrollElement = findScrollableElement();
+      if (scrollElement) {
+        sessionStorage.setItem(
+          SCROLL_STORAGE_KEY,
+          String(scrollElement.scrollTop),
+        );
+      }
+    };
+
+    // Restore scroll position from sessionStorage
+    const restoreScrollPosition = () => {
+      const scrollElement = findScrollableElement();
+      if (!scrollElement) return false;
+
+      const savedPosition = sessionStorage.getItem(SCROLL_STORAGE_KEY);
+      if (savedPosition !== null) {
+        scrollElement.scrollTop = Number(savedPosition);
+        return true;
+      }
+      return false;
+    };
+
+    // Scroll active item into view (only used on first visit)
     const scrollToActiveItem = () => {
       const scrollElement = findScrollableElement();
       if (!scrollElement) return;
@@ -31,7 +59,6 @@ export function useSidebarScrollPersistence() {
       const activeItem = scrollElement.querySelector("[data-active='true']");
       if (!activeItem) return;
 
-      // Calculate position relative to scroll container and scroll manually
       const scrollRect = scrollElement.getBoundingClientRect();
       const activeRect = activeItem.getBoundingClientRect();
       const relativeTop =
@@ -42,25 +69,33 @@ export function useSidebarScrollPersistence() {
       scrollElement.scrollTop = Math.max(0, centeredPosition);
     };
 
-    // Scroll on initial load after a delay to let DOM settle
-    const initialTimeout = setTimeout(scrollToActiveItem, 100);
+    // On initial load, try to restore scroll position, otherwise scroll to active item
+    const initialTimeout = setTimeout(() => {
+      if (!hasRestoredRef.current) {
+        const restored = restoreScrollPosition();
+        if (!restored) {
+          scrollToActiveItem();
+        }
+        hasRestoredRef.current = true;
+      }
+    }, 50);
 
-    // Watch for URL changes using popstate and click events on sidebar links
+    // Handle navigation - restore scroll position after DOM updates
     const handleNavigation = () => {
-      // Wait for React to update the DOM with new active state
-      setTimeout(scrollToActiveItem, 100);
-      setTimeout(scrollToActiveItem, 300);
+      setTimeout(restoreScrollPosition, 50);
     };
 
     // Listen for browser back/forward
     window.addEventListener("popstate", handleNavigation);
 
-    // Listen for clicks on sidebar links
+    // Listen for clicks on sidebar links - save position before navigation
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("aside a[href]");
       if (link) {
-        handleNavigation();
+        saveScrollPosition();
+        // Restore after navigation completes
+        setTimeout(restoreScrollPosition, 50);
       }
     };
     document.addEventListener("click", handleClick);

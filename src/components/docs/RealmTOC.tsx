@@ -22,9 +22,7 @@ const RealmTOC = ({ realmPath }: Props) => {
   const [pages, setPages] = useState<RealmPage[]>([]);
 
   useEffect(() => {
-    // TODO remove type hack to work around `getServerFn` error, hard to repro. Browser occasional "`getServerFn` is not a function"
-    if (typeof getRealmPages === "function")
-      getRealmPages({ data: realmPath }).then(setPages).catch(console.error);
+    getRealmPages({ data: realmPath }).then(setPages).catch(console.error);
   }, [realmPath]);
 
   if (pages.length === 0) return null;

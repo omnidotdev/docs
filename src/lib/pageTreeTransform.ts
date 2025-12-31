@@ -8,7 +8,29 @@ export interface VirtualFolder extends Folder {
   virtualSection: boolean;
   originalSeparator: Separator;
   sectionId: string;
+  /** Count of pages in this section (excluding index pages). */
+  docCount: number;
 }
+
+/**
+ * Recursively count page items in a node tree, excluding index pages.
+ * @param nodes Nodes to count.
+ * @returns Count of page items.
+ */
+const countPages = (nodes: Node[]): number => {
+  let count = 0;
+
+  for (const node of nodes) {
+    if (node.type === "page") {
+      count += 1;
+    } else if (node.type === "folder") {
+      // Count children recursively, but don't count the folder's index page
+      count += countPages((node as Folder).children);
+    }
+  }
+
+  return count;
+};
 
 /**
  * Extract section ID from section name.
@@ -88,7 +110,7 @@ const transformPageTree = (root: Root): Root => {
             (item) => item.type === "folder" && item.index,
           ) as Folder | undefined;
 
-          const virtualFolder: Folder = {
+          const virtualFolder: VirtualFolder = {
             type: "folder",
             name: currentSection.name,
             icon: currentSection.icon,
@@ -101,8 +123,9 @@ const transformPageTree = (root: Root): Root => {
             // Add a flag to identify virtual sections
             virtualSection: true,
             originalSeparator: currentSection,
-            sectionId: getSectionIdFromName(currentSection.name), // Add section ID
-          } as any;
+            sectionId: getSectionIdFromName(currentSection.name),
+            docCount: countPages(currentSectionItems),
+          };
 
           result.push(virtualFolder);
           _sectionIndex++;
@@ -142,6 +165,7 @@ const transformPageTree = (root: Root): Root => {
         virtualSection: true,
         originalSeparator: currentSection,
         sectionId: getSectionIdFromName(currentSection.name),
+        docCount: countPages(currentSectionItems),
       };
 
       result.push(virtualFolder);

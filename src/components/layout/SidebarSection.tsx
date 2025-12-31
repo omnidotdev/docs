@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { Children, useCallback, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { SiX } from "react-icons/si";
 
 import getSectionDescription from "@/lib/getSectionDescription";
@@ -22,6 +22,8 @@ import getSectionGradient from "@/lib/getSectionGradient";
 import { REALM_IDS, SECTION_ICONS } from "@/lib/sections";
 import getSectionTextColors from "@/lib/util/getSectionTextColors";
 import { cn } from "@/lib/utils";
+
+import type { VirtualFolder } from "@/lib/pageTreeTransform";
 
 /** Map icon names to Lucide components */
 const ICON_COMPONENTS: Record<
@@ -51,7 +53,7 @@ const getScrollViewport = (): HTMLElement | null => {
 };
 
 interface SidebarSectionProps {
-  item: any;
+  item: VirtualFolder;
   children: React.ReactNode;
   sectionId: string;
   isOpen: boolean;
@@ -75,10 +77,8 @@ const SidebarSection = ({
 
   const iconName = SECTION_ICONS[sectionId];
 
-  const childCount = Children.count(children);
-
-  // subtract 1 to exclude the index/introduction page from the count
-  const docCount = childCount - 1;
+  // use pre-computed count from page tree transform (excludes index pages, counts nested items)
+  const docCount = item.docCount ?? 0;
 
   const isRealm = REALM_IDS.includes(sectionId);
 
