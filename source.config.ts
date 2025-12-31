@@ -8,4 +8,10 @@ export const docs = defineDocs({
   dir: "content/docs",
 });
 
-export default defineConfig();
+/**
+ * Global configuration.
+ * @see https://fumadocs.dev/docs/mdx/global
+ */
+const globalConfig = defineConfig();
+
+export default globalConfig;

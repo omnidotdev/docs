@@ -1,2 +1,3 @@
-export { default as LinkButton } from "./LinkButton/LinkButton";
-export { default as ProductOverview } from "./ProductOverview/ProductOverview";
+export { default as LinkButton } from "./LinkButton";
+export { default as ProductOverview } from "./ProductOverview";
+export { default as RealmTOC } from "./RealmTOC";
