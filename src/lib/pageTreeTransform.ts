@@ -94,41 +94,39 @@ const sortNodes = (nodes: Node[], respectOrder = true): Node[] => {
  * @returns Transformed page tree.
  */
 const transformPageTree = (root: Root): Root => {
+  // Create a virtual folder for a section
+  const createVirtualFolder = (section: Node, items: Node[]): VirtualFolder => {
+    const folderWithIndex = items.find(
+      (item) => item.type === "folder" && item.index,
+    ) as Folder | undefined;
+
+    return {
+      type: "folder",
+      name: section.name,
+      icon: section.icon,
+      index: folderWithIndex?.index
+        ? mapNode(folderWithIndex.index, true)
+        : undefined,
+      children: sortNodes(items, true).map((c) => mapNode(c, false)),
+      virtualSection: true,
+      originalSeparator: section as Separator,
+      sectionId: getSectionIdFromName(section.name),
+      // Subtract 1 for the introduction/index page
+      docCount: Math.max(0, countPages(items) - 1),
+    };
+  };
+
   // Group items under separators to make sections collapsible
   const groupBySection = (children: Node[]): Node[] => {
     const result: Node[] = [];
     let currentSection: Node | null = null;
     let currentSectionItems: Node[] = [];
-    let _sectionIndex = 0; // Track section index for first section
 
     for (const child of children) {
       if (child.type === "separator") {
         // If we have a previous section, create a virtual folder for it
         if (currentSection) {
-          // Find if any folder in this section has an index that should become the section index
-          const folderWithIndex = currentSectionItems.find(
-            (item) => item.type === "folder" && item.index,
-          ) as Folder | undefined;
-
-          const virtualFolder: VirtualFolder = {
-            type: "folder",
-            name: currentSection.name,
-            icon: currentSection.icon,
-            index: folderWithIndex?.index
-              ? mapNode(folderWithIndex.index, true)
-              : undefined,
-            children: sortNodes(currentSectionItems, true).map((c) =>
-              mapNode(c, false),
-            ),
-            // Add a flag to identify virtual sections
-            virtualSection: true,
-            originalSeparator: currentSection,
-            sectionId: getSectionIdFromName(currentSection.name),
-            docCount: countPages(currentSectionItems),
-          };
-
-          result.push(virtualFolder);
-          _sectionIndex++;
+          result.push(createVirtualFolder(currentSection, currentSectionItems));
         }
 
         // Start new section
@@ -145,30 +143,9 @@ const transformPageTree = (root: Root): Root => {
       }
     }
 
-    // handle the last section (include even if empty to show "coming soon" message)
+    // Handle the last section (include even if empty to show "coming soon" message)
     if (currentSection) {
-      // Find if any folder in this section has an index that should become the section index
-      const folderWithIndex = currentSectionItems.find(
-        (item) => item.type === "folder" && item.index,
-      ) as Folder | undefined;
-
-      const virtualFolder: VirtualFolder = {
-        type: "folder",
-        name: currentSection.name,
-        icon: currentSection.icon,
-        index: folderWithIndex?.index
-          ? mapNode(folderWithIndex.index, true)
-          : undefined,
-        children: sortNodes(currentSectionItems, true).map((c) =>
-          mapNode(c, false),
-        ),
-        virtualSection: true,
-        originalSeparator: currentSection,
-        sectionId: getSectionIdFromName(currentSection.name),
-        docCount: countPages(currentSectionItems),
-      };
-
-      result.push(virtualFolder);
+      result.push(createVirtualFolder(currentSection, currentSectionItems));
     }
 
     return result;
