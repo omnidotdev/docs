@@ -34,7 +34,7 @@ const CtrlOrCmd = () => {
  */
 const searchHotKey = [
   {
-    key: (e: KeyboardEvent) => e.metaKey || e.ctrlKey,
+    key: (evt: KeyboardEvent) => evt.metaKey || evt.ctrlKey,
     display: <CtrlOrCmd />,
   },
   {
