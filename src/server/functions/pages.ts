@@ -14,7 +14,7 @@ const getRealmPages = createServerFn({ method: "GET" })
       .filter(
         (page) =>
           page.slugs[0] === realmPath &&
-          page.slugs.length > 1 &&
+          page.slugs.length === 2 &&
           page.slugs[1] !== "index",
       )
       .sort((a, b) => {
