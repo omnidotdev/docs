@@ -145,8 +145,8 @@ const transformPageTree = (root: Root): Root => {
       }
     }
 
-    // Handle the last section
-    if (currentSection && currentSectionItems.length > 0) {
+    // handle the last section (include even if empty to show "coming soon" message)
+    if (currentSection) {
       // Find if any folder in this section has an index that should become the section index
       const folderWithIndex = currentSectionItems.find(
         (item) => item.type === "folder" && item.index,
