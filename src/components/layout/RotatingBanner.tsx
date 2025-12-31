@@ -78,7 +78,6 @@ const items = [
 const RotatingBanner = () => {
   const [index, setIndex] = useState(0);
   const [isFirstRotation, setIsFirstRotation] = useState(true);
-
   const [fade, setFade] = useState(true);
 
   const rotate = (dir: number) => {
