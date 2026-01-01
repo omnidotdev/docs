@@ -1,0 +1,152 @@
+---
+title: 🌿 Eden
+description: Development environment verification CLI
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      color: "orange.100a",
+    },
+  ]}
+  links={[
+    {
+      href: "https://eden.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/eden-cli`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "❄️ Under Construction",
+      description:
+        "Eden was just released to celebrate the 2026 new year.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Streamlined development environment verification in one command",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Eden addresses the common challenge of inconsistent development environments by providing a fast, Rust-powered automated preflight check system that verifies all required dependencies before development begins, saving hours of troubleshooting and onboarding time.",
+    },
+  ]}
+/>
+
+## Key Features
+
+- **Dependency Verification**: Check for required binaries and environment variables
+- **Configuration-as-Code**: Define preflight requirements in a simple config: TOML, YAML, JSON(C) supported
+- **CI Integration**: Run as part of CI pipelines to ensure environment consistency
+- **Cross-Platform**: Works on Linux and macOS development environments
+- **Rust Performance**: Fast checks with minimal system overhead
+
+## How It Works
+
+Eden runs a series of checks defined in your Eden configuration file to verify that your development environment has everything needed to work on a specific project. This includes checking for:
+
+- Required binaries (Docker, Tilt, node, etc.)
+- Environment variables
+
+## Configuration
+
+Eden uses a simple configuration file to define what should be checked, e.g. this TOML:
+
+```toml
+# eden.toml
+
+[checks]
+# required binaries (must be in PATH)
+binaries = [
+    "docker",
+    "tilt",
+    "node",
+]
+
+# required environment variables
+environment = [
+    "DATABASE_URL",
+    "API_KEY",
+]
+```
+
+Eden also supports `eden.yaml`, `eden.json`, and `eden.jsonc` configuration formats.
+
+## Example Usage
+
+```bash
+# run all preflight checks in the current directory
+$ eden check
+
+🌱 Binary: docker - v20.10.8 (/usr/bin/docker)
+🌱 Binary: tilt - v0.30.12 (/usr/bin/tilt)
+🥀 Binary: node - not found in PATH
+🌱 Env: DATABASE_URL - set
+🥀 Env: API_KEY - not set
+
+🌱 3 sprouted, 🥀 2 need water
+```
+
+## Integration with Development Workflows
+
+Eden can be integrated into various development workflows:
+
+- **New Developer Onboarding**: Have new team members run Eden as their first step
+- **CI/CD Pipelines**: Verify environments before running tests
+- **Pre-commit Hooks**: Ensure environment consistency before commits
+- **Project Bootstrap**: Include in project setup scripts
+
+## Getting Started
+
+1. Install Eden:
+
+   ```bash
+   # install via cargo
+   cargo install eden-cli
+
+   # or download binaries from GitHub releases
+   # https://github.com/omnidotdev/eden-cli/releases
+   ```
+
+2. Create an `eden.toml` file in your project root (manually or with `eden init`):
+
+   ```toml
+   [checks]
+   binaries = ["docker", "tilt"]
+   environment = ["DATABASE_URL"]
+   ```
+
+3. Run the preflight check:
+
+   ```bash
+   eden check
+   ```
+
+## Roadmap
+
+Eden is in active development. Planned features include:
+
+- **Version Constraints**: Validate specific versions (`node >= 18.0.0`)
+- **Environment Validation**: Check environment variable formats (`API_KEY = "non-empty"`)
+- **Network Checks**: Verify connectivity to required services
+- **Disk Space Checks**: Ensure minimum disk space
+- **Custom Scripts**: Run project-specific validation scripts
+- **Auto-Fix**: Interactive guided resolution for missing dependencies
+- **JSON Output**: Machine-readable output for CI pipelines (`--json`)
+- **Custom Configuration**: Allow custom configuration files and directories
+- **Multi-Project Support**: Validate multiple projects simultaneously
+
+See the [GitHub repository](https://github.com/omnidotdev/eden-cli) for progress.
