@@ -5,3 +5,5 @@ export { default as SidebarFolder } from "./SidebarFolder";
 export { default as SidebarItem } from "./SidebarItem";
 export { default as SidebarSection } from "./SidebarSection";
 export { default as SidebarSeparator } from "./SidebarSeparator";
+export { default as TechStackCard } from "./TechStackCard";
+export { default as TechStackGrid } from "./TechStackGrid";
