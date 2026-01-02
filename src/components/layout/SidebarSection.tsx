@@ -125,7 +125,7 @@ const SidebarSection = ({
             {item.name}
             {isRealm && (
               <span className="text-2xs opacity-50">
-                {docCount > 1 ? docCount : "Soon"}
+                {docCount > 0 ? docCount : "Soon"}
               </span>
             )}
           </span>
