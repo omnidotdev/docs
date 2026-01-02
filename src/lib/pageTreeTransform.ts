@@ -13,19 +13,21 @@ export interface VirtualFolder extends Folder {
 }
 
 /**
- * Recursively count page items in a node tree, excluding index pages.
+ * Count product items in a node tree.
+ * Each page counts as 1, and each folder counts as 1 (representing a product with sub-pages).
+ * This excludes the section's introduction/index page.
  * @param nodes Nodes to count.
- * @returns Count of page items.
+ * @returns Count of product items.
  */
-const countPages = (nodes: Node[]): number => {
+const countProducts = (nodes: Node[]): number => {
   let count = 0;
 
   for (const node of nodes) {
     if (node.type === "page") {
       count += 1;
     } else if (node.type === "folder") {
-      // Count children recursively, but don't count the folder's index page
-      count += countPages((node as Folder).children);
+      // Count folder as 1 product (don't recurse into sub-pages)
+      count += 1;
     }
   }
 
@@ -112,7 +114,7 @@ const transformPageTree = (root: Root): Root => {
       originalSeparator: section as Separator,
       sectionId: getSectionIdFromName(section.name),
       // Subtract 1 for the introduction/index page
-      docCount: Math.max(0, countPages(items) - 1),
+      docCount: Math.max(0, countProducts(items) - 1),
     };
   };
 
