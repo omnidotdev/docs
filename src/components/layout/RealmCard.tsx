@@ -60,7 +60,6 @@ interface RealmCardProps {
 
 /**
  * A card component displaying a realm with its icon, name, tagline, and gradient styling.
- * Used in the RealmGrid to showcase different areas of the Omni ecosystem.
  *
  * @param props - Component props.
  * @param props.realm - The realm data to display.

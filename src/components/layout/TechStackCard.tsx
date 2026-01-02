@@ -144,7 +144,6 @@ interface TechStackCardProps {
 
 /**
  * A card component displaying a technology with its icon, name, purpose, and rationale.
- * Used in the TechStackGrid to showcase the Omni tech stack.
  */
 const TechStackCard = ({ tech }: TechStackCardProps) => {
   const Icon = tech.icon;
