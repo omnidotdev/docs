@@ -22,6 +22,7 @@ import {
 } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
+import { useSidebarEscClose } from "@/lib/hooks/useSidebarEscClose";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
@@ -51,6 +52,8 @@ const Page = () => {
 
   // Persist sidebar scroll position and scroll to active item on navigation
   useSidebarScrollPersistence();
+  // Close sidebar drawer on ESC key
+  useSidebarEscClose();
 
   const Content = clientLoader.getComponent(data.path);
 
