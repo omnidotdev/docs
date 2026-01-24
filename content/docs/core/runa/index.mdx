@@ -5,7 +5,7 @@ description: Streamlined project management
 
 import { ProductOverview } from "@/components/docs";
 import app from "@/lib/config/app.config";
-import { FaClipboardList, FaColumns } from "react-icons/fa";
+import { FaClipboardList, FaColumns, FaUsers } from "react-icons/fa";
 
 <ProductOverview
   tags={[
@@ -18,6 +18,12 @@ import { FaClipboardList, FaColumns } from "react-icons/fa";
     {
       label: "Kanban",
       icon: <FaColumns />,
+      className:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+    },
+    {
+      label: "Team Collaboration",
+      icon: <FaUsers />,
       className:
         "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
     },
@@ -52,4 +58,50 @@ import { FaClipboardList, FaColumns } from "react-icons/fa";
   ]}
 />
 
-**Omni Runa** is a streamlined project management tool with agile workflows such as kanban.
+**Omni Runa** is a full-featured, open-source project management platform designed for teams to collaborate on work. With an emphasis on intuitive planning and seamless execution, Runa helps you organize tasks using beautiful Kanban-style boards with drag-and-drop functionality.
+
+## Key Features
+
+- **Intuitive Kanban Boards**: Visualize your workflow with drag-and-drop task management and customizable columns
+- **Flexible Task Management**: Create tasks with labels, priorities, due dates, and rich text descriptions
+- **Team Collaboration**: Assign tasks to team members, leave comments, and mention teammates with @mentions
+- **Custom Workflows**: Design columns and statuses that match how your team actually works
+- **Multiple Views**: Switch between board view for visual organization and list view for quick scanning
+- **Real-time Updates**: Changes sync instantly across your team
+- **Dark/Light Themes**: Work comfortably in any lighting condition
+
+## Use Cases
+
+- **Software Development**: Track features, bugs, and sprints with customizable workflows
+- **Product Management**: Manage roadmaps, prioritize features, and coordinate releases
+- **Marketing Campaigns**: Plan content calendars, track deliverables, and manage approvals
+- **Personal Projects**: Organize side projects, learning goals, or home improvements
+- **Client Work**: Keep client projects organized with dedicated workspaces
+
+## Pricing
+
+Runa is **free for individuals and small teams**. The free tier includes:
+
+- Up to 2 projects
+- Up to 500 tasks
+- Unlimited team members
+
+Paid tiers are available for larger teams with additional features and capacity.
+
+## Open Source
+
+Runa is **100% open source** under the MIT license. You can:
+
+- Self-host on your own infrastructure
+- Contribute features and fixes
+- Customize to fit your needs
+- Audit the code for security
+
+## Getting Started
+
+1. Visit [runa.omni.dev](https://runa.omni.dev) to create an account
+2. Create your first workspace for your team or personal use
+3. Set up a project and customize your columns
+4. Start adding tasks and collaborating!
+
+Try the [interactive demo](https://runa.omni.dev/demo) to explore Runa without signing up.
