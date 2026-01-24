@@ -1,4 +1,4 @@
-import React from "react";
+import { createElement } from "react";
 
 import { REALMS } from "./sections";
 
@@ -158,7 +158,7 @@ const transformPageTree = (root: Root): Root => {
     if (typeof item.icon === "string")
       item = {
         ...item,
-        icon: React.createElement("span", {
+        icon: createElement("span", {
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Fumadocs does this in their example
           dangerouslySetInnerHTML: {
             __html: item.icon,
@@ -187,6 +187,8 @@ const transformPageTree = (root: Root): Root => {
 
   return {
     ...root,
+    // Assign a new `$id` to prevent fumadocs cache collision with the original tree
+    $id: root.$id != null ? `${root.$id}-transformed` : undefined,
     // Transform children to group by sections
     children: groupBySection(root.children),
     fallback: root.fallback ? transformPageTree(root.fallback) : undefined,

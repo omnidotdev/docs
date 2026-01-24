@@ -10,7 +10,7 @@ interface RealmPage {
 }
 
 interface Props {
-  /** The realm path (e.g., "core", "fabric"). */
+  /** The realm path (e.g. "core", "fabric"). */
   realmPath: string;
 }
 
