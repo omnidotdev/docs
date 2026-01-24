@@ -153,9 +153,18 @@
   overflow: hidden;
 }
 
-/* Fumadocs search cursor fixes */
+/* Fumadocs cursor fixes */
 [data-search],
-[data-search-full] {
+[data-search-full],
+[data-sidebar-placeholder] button,
+[data-sidebar-panel] button,
+#nd-sidebar button,
+#nd-sidebar-mobile button,
+#nd-subnav button,
+/* Accordion triggers */
+[data-radix-collection-item],
+/* TOC popover trigger */
+[data-toc-popover-trigger] {
   cursor: pointer;
 }
 
