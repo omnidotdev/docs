@@ -1,0 +1,11 @@
+{
+  "title": "Contributing",
+  "pages": [
+    "index",
+    "changesets",
+    "golden",
+    "local-development",
+    "pillars",
+    "tech-stack"
+  ]
+}

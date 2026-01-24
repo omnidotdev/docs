@@ -1,0 +1,35 @@
+---
+title: Pillars
+---
+
+Omni employs _pillars_ which serve as guidelines to ensure a consistent and high-quality product.
+
+These pillars serve as a "checklist" for Omni product quality. Omni products are not guaranteed to have all pillars perfectly implemented, but they should strive to meet these guidelines; the pillars serve as north stars.
+
+The pillars:
+
+- **Schema & API-first.** Schemas define the contract; APIs and types are artifacts of that schema. Each product should expose a well-defined API, with any UI serving as a convenient, user-facing layer. SDKs and type definitions should be generated from the schema, ensuring consistency across languages and clients.
+- **Keyboard-driven.** On the UI, keyboard shortcuts should be intuitive, consistent, and abundant.
+- **Isolated Integration.** Omni products should work well independently and have no dependence on other products, but should cohesively integrate with other products in Omni's product ecosystem web.
+- **PWA support.** Where applicable, Omni products should be optimized for [progressive web app (PWA)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) standards, ensuring they work seamlessly across devices and browsers.
+- **SEO-friendly.** Omni products should be optimized for search engines, with clear and concise metadata and structured data. [OpenGraph](https://ogp.me) tags should be used to enhance social sharing.
+- **Security.** [Mozilla Observatory](https://observatory.mozilla.org) should pass all security tests. [OWASP](https://owasp.org) guidelines should be followed to prevent common vulnerabilities. A zero-trust approach should be adopted for all information exchange.
+- **Privacy.** Products should practice data minimization, require explicit user consent, and follow privacy-by-design principles.
+- **Performance.** [Lighthouse](https://developer.chrome.com/docs/lighthouse) scores should report all scores as 100.
+- **Accessibility.** Omni products should be accessible to all users, including those with disabilities. [WCAG](https://www.w3.org/WAI/standards-guidelines/wcag) guidelines should be followed.
+- **Internationalization.** Products should be designed for localization from the start, with externalized strings, locale-aware formatting, and support for RTL layouts.
+- **Observability.** Products should emit structured logs, metrics, and traces to enable effective debugging and monitoring in production.
+- **Testing.** Omni products should be thoroughly tested, with a strong suite of automated tests, to ensure they meet the highest standards of quality and reliability.
+
+## Engravings
+
+Building on the pillars above, there are further _engravings_ that dig into the product development:
+
+- [Tilt](https://tilt.dev) should serve as the entry point for all repositories. Tilt is federated, decentralized, composable, and language-agnostic.
+- HTTPS should be enabled for all local development to maximize dev-prod parity at the transport layer and allow secure context features, such as [WebXR](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API).
+
+## See Also
+
+- [👑 Golden](/community/contributing/golden): Code style and formatting conventions
+- [Changesets](/community/contributing/changesets): Versioning workflow
+- [Ethos](/ethos): Our core values and principles

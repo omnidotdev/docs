@@ -6,8 +6,57 @@ We invite you to become an active participant in our open-source community at Om
 
 This section outlines guidelines to help you get started. Thank you for your interest in contributing to the Omni ecosystem!
 
-Explore the guides in this section:
+## Contribution Workflow
+
+### Issues & Discussions
+
+Before starting work, check for existing issues or discussions related to your idea. If none exist, open an issue to discuss your proposal. For questions or general discussion, join our [Discord community](https://discord.gg/omnidotdev).
+
+### Branching
+
+Create a feature branch from the default branch:
+
+```bash
+git switch -c feature/your-feature-name
+```
+
+Use descriptive branch names with prefixes like `feature/`, `fix/`, or `chore/`.
+
+### Commits
+
+Omni uses Extended Conventional Commits (ECC), our extension of [Conventional Commits](https://conventionalcommits.org) with full-word type aliases for readability.
+
+```
+type(scope): description
+
+feature(auth): add OAuth2 support
+fix(api): handle null response
+documentation(readme): update install steps
+```
+
+Write **atomic commits**: each commit should represent a single logical change.
+
+### Pull Requests
+
+Submit **atomic PRs**: each pull request should focus on a single change or feature.
+
+- Keep pull requests focused and reviewable
+- Update documentation to reflect your changes
+- Add tests for new features
+- Follow our [👑 Golden](/community/contributing/golden) guidelines
+
+### Code Review
+
+All contributions go through code review. Reviewers will check for:
+
+- Adherence to [👑 Golden](/community/contributing/golden)
+- Alignment with [quality pillars](/community/contributing/pillars)
+- Test coverage and documentation
+
+## What's Next?
 
 - [Changesets](/community/contributing/changesets): *How do I version my changes?*
+- [👑 Golden](/community/contributing/golden): *How should my code look?*
 - [Local Development](/community/contributing/local-development): *How do I run Omni projects locally?*
+- [Pillars](/community/contributing/pillars): *What quality pillars apply?*
 - [Tech Stack](/community/contributing/tech-stack): *What technologies does Omni use?*
