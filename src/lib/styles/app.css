@@ -153,6 +153,17 @@
   overflow: hidden;
 }
 
+/* Fumadocs search cursor fixes */
+[data-search],
+[data-search-full] {
+  cursor: pointer;
+}
+
+/* Search result list items */
+[role="dialog"] button[aria-selected] {
+  cursor: pointer;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
