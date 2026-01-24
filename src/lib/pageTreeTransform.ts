@@ -98,17 +98,13 @@ const sortNodes = (nodes: Node[], respectOrder = true): Node[] => {
 const transformPageTree = (root: Root): Root => {
   // Create a virtual folder for a section
   const createVirtualFolder = (section: Node, items: Node[]): VirtualFolder => {
-    const folderWithIndex = items.find(
-      (item) => item.type === "folder" && item.index,
-    ) as Folder | undefined;
-
     return {
       type: "folder",
       name: section.name,
       icon: section.icon,
-      index: folderWithIndex?.index
-        ? mapNode(folderWithIndex.index, true)
-        : undefined,
+      // Don't copy index here - let the actual section folder handle it
+      // to avoid duplication in navigation flattening
+      index: undefined,
       children: sortNodes(items, true).map((c) => mapNode(c, false)),
       virtualSection: true,
       originalSeparator: section as Separator,
@@ -166,17 +162,27 @@ const transformPageTree = (root: Root): Root => {
         }),
       } as T;
 
-    if (item.type === "folder")
+    if (item.type === "folder") {
+      const folder = item as unknown as Folder;
+      // Check if index is already in children (listed in meta.json pages array)
+      const indexUrl = folder.index?.url;
+      const indexInChildren = folder.children.some(
+        (c) => c.type === "page" && (c as any).url === indexUrl,
+      );
+
       return {
         ...item,
         // mark folder itself
         isChildOfFolder,
-        index: item.index ? mapNode(item.index, true) : undefined,
-        // mark all children of folder
-        children: sortNodes((item as any).children, false).map((c: any) =>
-          mapNode(c, true),
-        ),
+        // Only set folder.index if it's NOT already in children (avoid duplicate in navigation)
+        index:
+          folder.index && !indexInChildren
+            ? mapNode(folder.index, true)
+            : undefined,
+        // mark all children of folder (preserve order from meta.json)
+        children: folder.children.map((c: any) => mapNode(c, true)),
       } as T;
+    }
 
     // leaf/file
     return {
