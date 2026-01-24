@@ -71,24 +71,29 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
             {item.icon}
 
             <span className="font-medium">{item.name}</span>
+          </Link>
 
-            {isNew && (
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+          {isNew && (
+            <Link to={folderUrl}>
+              <Badge className="cursor-pointer bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
                 New! 🚀
               </Badge>
-            )}
+            </Link>
+          )}
 
-            {isComingSoon && (
-              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+          {isComingSoon && (
+            <Link to={folderUrl}>
+              <Badge className="cursor-pointer bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
                 Coming Soon 🚧
               </Badge>
-            )}
-          </Link>
+            </Link>
+          )}
+
           <button
             type="button"
             onClick={() => setOpen(!open)}
             className={cn(
-              "p-2 text-fd-muted-foreground transition-colors group-hover:text-fd-accent-foreground/80",
+              "cursor-pointer p-2 text-fd-muted-foreground transition-colors group-hover:text-fd-accent-foreground/80",
               isActive && "text-fd-primary",
             )}
             aria-expanded={open}

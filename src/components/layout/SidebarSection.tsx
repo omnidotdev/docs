@@ -156,7 +156,7 @@ const SidebarSection = ({
       </button>
 
       <div className="sidebar-collapse mt-1" data-open={isOpen}>
-        <div>
+        <div className="space-y-1">
           {children}
 
           {docCount <= 0 && (
