@@ -199,9 +199,12 @@ export const Route = createFileRoute("/$")({
           .join(" ")
       : undefined;
 
+    // Build full slug path for OG image
+    const slug = slugs?.length ? slugs.join("/") : undefined;
+
     return {
       // TODO dynamic descriptions
-      meta: seo({ title: currentSegment ?? undefined }),
+      meta: seo({ title: currentSegment ?? undefined, slug }),
     };
   },
 });

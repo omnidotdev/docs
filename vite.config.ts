@@ -22,9 +22,13 @@ const viteConfig = defineConfig({
   },
   ssr: {
     noExternal: ["@omnidotdev/garden"],
+    // Native modules must be externalized for SSR
+    external: ["@resvg/resvg-js"],
   },
   optimizeDeps: {
     include: ["@omnidotdev/garden", "@xyflow/react", "react", "react-dom"],
+    // Exclude native modules from optimization
+    exclude: ["@resvg/resvg-js"],
   },
   plugins: [
     devtools(),

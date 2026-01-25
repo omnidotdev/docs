@@ -6,7 +6,18 @@ interface Params {
   image?: string;
   keywords?: string;
   url?: string;
+  /** Page slug for dynamic OG image generation. */
+  slug?: string;
 }
+
+/**
+ * Generate dynamic OG image URL from slug.
+ */
+const getOgImageUrl = (slug?: string): string => {
+  if (!slug) return `${app.appUrl}/img/omni-logo.png`;
+
+  return `${app.appUrl}/og/${slug}.png`;
+};
 
 /**
  * Create meta tags.
@@ -17,10 +28,12 @@ const createMetaTags = ({
   image,
   keywords,
   url,
+  slug,
 }: Params = {}) => {
   const displayedTitle = title ? `${app.name.long} | ${title}` : app.name.long;
   const displayedDescription = description ?? app.description;
   const displayedUrl = url ?? app.appUrl;
+  const ogImage = image ?? getOgImageUrl(slug);
 
   const tags = [
     { title: displayedTitle },
@@ -43,17 +56,11 @@ const createMetaTags = ({
       content: displayedDescription,
     },
     { name: "og:url", content: displayedUrl },
-    ...(image
-      ? [
-          { name: "twitter:image", content: image },
-          { name: "twitter:card", content: "summary_large_image" },
-          { name: "og:image", content: image },
-        ]
-      : [
-          { name: "twitter:image", content: "/img/omni-logo.png" },
-          { name: "twitter:card", content: "summary_large_image" },
-          { name: "og:image", content: "/img/omni-logo.png" },
-        ]),
+    { name: "twitter:image", content: ogImage },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "og:image", content: ogImage },
+    { name: "og:image:width", content: "1200" },
+    { name: "og:image:height", content: "630" },
   ];
 
   return tags;
