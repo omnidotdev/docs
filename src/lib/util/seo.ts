@@ -30,7 +30,7 @@ const createMetaTags = ({
   url,
   slug,
 }: Params = {}) => {
-  const displayedTitle = title ? `${app.name.long} | ${title}` : app.name.long;
+  const displayedTitle = title ? `${title} | ${app.name.long}` : app.name.long;
   const displayedDescription = description ?? app.description;
   const displayedUrl = url ?? app.appUrl;
   const ogImage = image ?? getOgImageUrl(slug);
