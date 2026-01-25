@@ -153,7 +153,8 @@ export const Route = createFileRoute("/og/$")({
           return new Response(new Uint8Array(pngBuffer), {
             headers: {
               "Content-Type": "image/png",
-              "Cache-Control": "public, max-age=31536000, immutable",
+              // Cache for 1 day, allow revalidation (avoid immutable for OG images)
+              "Cache-Control": "public, max-age=86400, s-maxage=86400",
             },
           });
         } catch (error) {
