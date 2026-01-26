@@ -18,10 +18,11 @@ curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/.env.local.te
 
 # Configure
 cp .env.local.template .env.local
-# Edit .env.local with your settings
+# Edit .env.local with your settings (use `openssl rand -base64 32` to generate secrets)
 
 # Run
-docker compose up -d
+docker compose --env-file .env.local up
+# Or run in background: docker compose --env-file .env.local up -d
 ```
 
 ## Development Mode
@@ -33,14 +34,14 @@ git clone https://github.com/omnidotdev/runa.git
 cd runa
 
 cp .env.local.template .env.local
-docker compose -f compose.yaml -f compose.dev.yaml up -d
+docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up
 ```
 
 ## Upgrading
 
 ```sh
 docker compose pull
-docker compose up -d
+docker compose --env-file .env.local up -d
 ```
 
 ## Backup
