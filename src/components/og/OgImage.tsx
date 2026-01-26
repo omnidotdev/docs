@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Box,
   Brush,
   FileCode,
@@ -9,7 +10,6 @@ import {
   HelpCircle,
   Palette,
   Server,
-  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -18,7 +18,7 @@ import type realmsData from "../../../realms.json";
 
 /** Realm icon mapping. */
 const REALM_ICONS: Record<string, ReactNode> = {
-  welcome: <Sparkles size={20} color="rgba(255,255,255,0.9)" />,
+  welcome: <BookOpen size={20} color="rgba(255,255,255,0.9)" />,
   core: <Box size={20} color="rgba(255,255,255,0.9)" />,
   kindred: <Heart size={20} color="rgba(255,255,255,0.9)" />,
   fabric: <Brush size={20} color="rgba(255,255,255,0.9)" />,
