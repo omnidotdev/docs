@@ -1,0 +1,54 @@
+---
+title: Self-Hosting
+description: Run Omni products on your own infrastructure.
+---
+
+# Self-Hosting
+
+Many Omni products support self-hosting with Docker.
+
+## Quick Start
+
+Using [Runa](/docs/core/runa) as an example:
+
+```sh
+# Download Compose files
+curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/compose.yaml
+curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/.env.local.template
+
+# Configure
+cp .env.local.template .env.local
+# Edit .env.local with your settings
+
+# Run
+docker compose up -d
+```
+
+## Development Mode
+
+To build from source instead of pulling pre-built images:
+
+```sh
+git clone https://github.com/omnidotdev/runa.git
+cd runa
+
+cp .env.local.template .env.local
+docker compose -f compose.yaml -f compose.dev.yaml up -d
+```
+
+## Upgrading
+
+```sh
+docker compose pull
+docker compose up -d
+```
+
+## Backup
+
+```sh
+# Database backup
+docker compose exec db pg_dump -U postgres runa > backup.sql
+
+# Restore
+docker compose exec -T db psql -U postgres runa < backup.sql
+```
