@@ -1,0 +1,77 @@
+{
+  "realms": [
+    {
+      "id": "core",
+      "name": "CORE",
+      "icon": "☄️",
+      "description": "Omni's unified business operations suite. Project management, CRM, finance, commerce, and everything businesses need to operate.",
+      "tagline": "Unified business operations",
+      "docsUrl": "/core"
+    },
+    {
+      "id": "kindred",
+      "name": "KINDRED",
+      "icon": "🤝",
+      "description": "Consumer-facing products for creators, communities, and everyday life. Identity, social connection, lifestyle, and meaningful digital relationships.",
+      "tagline": "Social, consumer, and lifestyle",
+      "docsUrl": "/kindred"
+    },
+    {
+      "id": "fabric",
+      "name": "FABRIC",
+      "icon": "🎨",
+      "description": "Tools for content creation, design, and knowledge work. Everything creators need to build, design, and share their ideas.",
+      "tagline": "Content creation and knowledge work",
+      "docsUrl": "/fabric"
+    },
+    {
+      "id": "grid",
+      "name": "GRID",
+      "icon": "🔌",
+      "description": "Cloud, deployment, infrastructure, and platform tools. The backbone that powers Omni's distributed platform.",
+      "tagline": "Cloud, deployment, infrastructure",
+      "docsUrl": "/grid"
+    },
+    {
+      "id": "armory",
+      "name": "ARMORY",
+      "icon": "🛠️",
+      "description": "Developer tools and utilities. Everything engineers need to build, test, deploy, and maintain software.",
+      "tagline": "Developer tools",
+      "docsUrl": "/armory"
+    },
+    {
+      "id": "codex",
+      "name": "CODEX",
+      "icon": "📜",
+      "description": "Specifications, standards, and schemas. The protocols and formats that define how Omni systems communicate and interoperate.",
+      "tagline": "Specifications and standards",
+      "docsUrl": "/codex"
+    },
+    {
+      "id": "sigil",
+      "name": "SIGIL",
+      "icon": "✨",
+      "description": "A unified collection of design tokens, components, and utilities for building accessible, consistent, and beautiful user interfaces across the Omni product ecosystem.",
+      "tagline": "Omni's unified design system",
+      "websiteUrl": "https://sigil.omni.dev",
+      "docsUrl": "/sigil"
+    },
+    {
+      "id": "reality",
+      "name": "REALITY",
+      "icon": "ᯅ",
+      "description": "Omni's spatial computing realm focused on AR, XR, and real-world interfaces. Open, web-first tools for anchoring digital experiences to physical space.",
+      "tagline": "Spatial computing and XR",
+      "docsUrl": "/reality"
+    },
+    {
+      "id": "worlds",
+      "name": "WORLDS",
+      "icon": "🌌",
+      "description": "Immersive experiences, games, and generative worlds. Interactive entertainment and AI-driven environments that blur the line between reality and imagination.",
+      "tagline": "Games and immersive experiences",
+      "docsUrl": "/worlds"
+    }
+  ]
+}
