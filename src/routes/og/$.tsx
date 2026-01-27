@@ -98,9 +98,6 @@ const getOgMetadata = (path: string): OgMetadata => {
   };
 };
 
-// TODO: Blend product color palette with realm colors for OG previews.
-// Add `ogColors` to products.json, then mix product + realm gradients here.
-
 /**
  * OG image route handler.
  * Generates dynamic PNG images for OpenGraph previews.
