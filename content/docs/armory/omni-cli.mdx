@@ -1,0 +1,37 @@
+---
+title: ⏣ Omni CLI
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaTerminal } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "CLI",
+      icon: <FaTerminal />,
+      className: "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://cli.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/cli`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Coming Soon",
+      description: "Omni CLI is currently in development.",
+    },
+  ]}
+/>
+
+**Omni CLI** docs coming soon ⏣
