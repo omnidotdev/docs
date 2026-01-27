@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ExternalLink, MessageCircle } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,19 @@ interface ViewOptionsProps {
  * Dropdown with options to open page in GitHub or AI chat interfaces.
  */
 function ViewOptions({ markdownUrl, githubUrl }: ViewOptionsProps) {
+  const [open, setOpen] = useState(false);
+
+  // Close popover on scroll
+  useEffect(() => {
+    if (!open) return;
+
+    const handleScroll = () => setOpen(false);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
+
   const items = useMemo(() => {
     const fullMarkdownUrl =
       typeof window !== "undefined"
@@ -67,7 +80,7 @@ function ViewOptions({ markdownUrl, githubUrl }: ViewOptionsProps) {
   }, [githubUrl, markdownUrl]);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="secondary" size="sm" className="cursor-pointer gap-2">
           Open
