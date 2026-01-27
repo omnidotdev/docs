@@ -20,6 +20,7 @@ import {
   SidebarSection,
   SidebarSeparator,
 } from "@/components/layout";
+import { LLMCopyButton, ViewOptions } from "@/components/llm";
 import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
 import { useSidebarEscClose } from "@/lib/hooks/useSidebarEscClose";
@@ -30,6 +31,10 @@ import { getRealmByPath } from "@/lib/sections";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
+
+const GITHUB_REPO_URL = "https://github.com/omnidotdev/docs";
+const GITHUB_BRANCH = "master";
+const CONTENT_PATH = "content/docs";
 
 /**
  * Determine which section contains the current page.
@@ -223,15 +228,25 @@ const serverLoader = createServerFn({ method: "GET" })
   });
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component: ({ toc, frontmatter, default: MDX }) => (
-    <DocsPage toc={toc}>
-      <DocsTitle>{frontmatter.title}</DocsTitle>
+  component: ({ toc, frontmatter, default: MDX, path }) => {
+    const markdownUrl = `/${path}.mdx`;
+    const githubUrl = `${GITHUB_REPO_URL}/blob/${GITHUB_BRANCH}/${CONTENT_PATH}/${path}.mdx`;
 
-      <DocsDescription>{frontmatter.description}</DocsDescription>
+    return (
+      <DocsPage toc={toc}>
+        <DocsTitle>{frontmatter.title}</DocsTitle>
 
-      <DocsBody>
-        <MDX components={{ ...defaultMdxComponents, RealmTOC }} />
-      </DocsBody>
-    </DocsPage>
-  ),
+        <DocsDescription>{frontmatter.description}</DocsDescription>
+
+        <div className="flex flex-row items-center gap-2 border-b pb-4">
+          <LLMCopyButton markdownUrl={markdownUrl} />
+          <ViewOptions markdownUrl={markdownUrl} githubUrl={githubUrl} />
+        </div>
+
+        <DocsBody>
+          <MDX components={{ ...defaultMdxComponents, RealmTOC }} />
+        </DocsBody>
+      </DocsPage>
+    );
+  },
 });
