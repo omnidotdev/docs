@@ -14,9 +14,10 @@ interface Params {
  * Generate dynamic OG image URL from slug.
  */
 const getOgImageUrl = (slug?: string): string => {
-  if (!slug) return `${app.appUrl}/img/omni-logo.png`;
+  // Use "index" for homepage, otherwise use the slug
+  const path = slug || "index";
 
-  return `${app.appUrl}/og/${slug}.png`;
+  return `${app.appUrl}/og/${path}.png`;
 };
 
 /**

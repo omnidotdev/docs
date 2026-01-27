@@ -63,7 +63,8 @@ const getOgMetadata = (path: string): OgMetadata => {
   const cleaned = path.replace(/\.png$/, "");
   const segments = cleaned.split("/").filter(Boolean);
 
-  if (segments.length === 0) {
+  // Handle homepage (empty path or "index")
+  if (segments.length === 0 || (segments.length === 1 && segments[0] === "index")) {
     return {
       realm: null,
       title: "Omni Docs",
