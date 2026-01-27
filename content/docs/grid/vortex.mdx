@@ -1,0 +1,37 @@
+---
+title: 🌪️ Vortex
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaNetworkWired } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Grid",
+      icon: <FaNetworkWired />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://vortex.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/vortex`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Coming Soon",
+      description: "Vortex is currently in development.",
+    },
+  ]}
+/>
+
+**Omni Vortex** docs coming soon 🌪️
