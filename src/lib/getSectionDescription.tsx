@@ -13,7 +13,7 @@ import { REALMS } from "./sections";
 
 // TODO grab from Omni API
 export const NEW_PRODUCTS = ["Eden", "RDK", "Runa"];
-export const COMING_SOON_PRODUCTS = ["Thornberry"];
+export const COMING_SOON_PRODUCTS = ["Omni CLI", "Thornberry", "Vortex"];
 
 // TODO augment section metadata directly (unsure if this is possible with Fumadocs)
 
