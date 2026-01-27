@@ -69,7 +69,7 @@ function ViewOptions({ markdownUrl, githubUrl }: ViewOptionsProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="secondary" size="sm" className="gap-2">
+        <Button variant="secondary" size="sm" className="cursor-pointer gap-2">
           Open
           <ChevronDown className="size-3.5 text-fd-muted-foreground" />
         </Button>

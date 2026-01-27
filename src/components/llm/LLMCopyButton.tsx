@@ -52,7 +52,7 @@ function LLMCopyButton({ markdownUrl }: LLMCopyButtonProps) {
       size="sm"
       disabled={isLoading}
       onClick={handleCopy}
-      className="gap-2"
+      className="cursor-pointer gap-2"
     >
       {isCopied ? (
         <Check className="size-3.5 text-fd-muted-foreground" />
