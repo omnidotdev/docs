@@ -228,7 +228,10 @@ const serverLoader = createServerFn({ method: "GET" })
   });
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component: ({ toc, frontmatter, default: MDX, path }) => {
+  component: ({ toc, frontmatter, default: MDX }) => {
+    const { pathname } = useLocation();
+    // Remove leading slash to get the path
+    const path = pathname.slice(1) || "index";
     const markdownUrl = `/${path}.mdx`;
     const githubUrl = `${GITHUB_REPO_URL}/blob/${GITHUB_BRANCH}/${CONTENT_PATH}/${path}.mdx`;
 
