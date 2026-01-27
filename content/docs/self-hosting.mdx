@@ -46,6 +46,17 @@ docker compose pull
 docker compose --env-file .env.local up -d
 ```
 
+## URL Configuration
+
+For production deployments, configure your public URLs in `.env.local`:
+
+```sh
+BASE_URL=https://runa.example.com
+API_BASE_URL=https://api.runa.example.com
+```
+
+For local development, the defaults work out of the box.
+
 ## Authentication
 
 Email/password authentication is enabled by default. OAuth providers activate automatically when credentials are provided:
