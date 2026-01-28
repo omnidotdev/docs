@@ -29,7 +29,6 @@ import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
 import { getRealmByPath } from "@/lib/sections";
 import source from "@/lib/source";
-import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import seo from "@/lib/util/seo";
 
 const GITHUB_REPO_URL = "https://github.com/omnidotdev/docs";
@@ -191,25 +190,15 @@ export const Route = createFileRoute("/$")({
     return { data, slugs, activeSection };
   },
   head: ({ loaderData }) => {
-    const slugs = loaderData?.slugs;
-
-    const currentSegment = slugs?.length
-      ? slugs
-          .at(-1)
-          ?.split("-")
-          .map((seg) =>
-            // TODO make this more robust (avoid hardcoding product acronyms here)
-            capitalizeFirstLetter({ str: seg, allCaps: seg === "rdk" }),
-          )
-          .join(" ")
-      : undefined;
-
-    // Build full slug path for OG image
+    const { slugs, data } = loaderData ?? {};
     const slug = slugs?.length ? slugs.join("/") : undefined;
 
     return {
-      // TODO dynamic descriptions
-      meta: seo({ title: currentSegment ?? undefined, slug }),
+      meta: seo({
+        title: data?.title,
+        description: data?.description,
+        slug,
+      }),
     };
   },
 });
@@ -223,6 +212,8 @@ const serverLoader = createServerFn({ method: "GET" })
 
     return {
       path: page.path,
+      title: page.data.title,
+      description: page.data.description,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });
