@@ -14,17 +14,19 @@ Many Omni products support self-hosting with Docker.
 Using [🌙 Runa](/core/runa) as an example:
 
 ```sh
-# Download Compose files
+# Download Compose file
 curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/compose.yaml
+
+# Download env var template
 curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/.env.local.template
 
-# Configure
+# Copy from template
 cp .env.local.template .env.local
-# Edit .env.local with your settings
+# Edit `.env.local` with your settings
 
 # Run
 docker compose --env-file .env.local up
-# Or run in background: docker compose --env-file .env.local up -d
+# Or run in background: `docker compose --env-file .env.local up -d`
 ```
 
 ## Development Mode
