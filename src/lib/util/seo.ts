@@ -1,4 +1,5 @@
 import app from "@/lib/config/app.config";
+import stripEmojis from "@/lib/util/stripEmojis";
 
 interface Params {
   title?: string;
@@ -31,19 +32,24 @@ const createMetaTags = ({
   url,
   slug,
 }: Params = {}) => {
-  const displayedTitle = title ? `${title} | ${app.name.long}` : app.name.long;
+  const cleanTitle = title ? stripEmojis(title) : null;
+  // Page title includes app name suffix, OG title does not
+  const pageTitle = cleanTitle
+    ? `${cleanTitle} | ${app.name.long}`
+    : app.name.long;
+  const ogTitle = cleanTitle ?? app.name.long;
   const displayedDescription = description ?? app.description;
   const displayedUrl = url ?? app.appUrl;
   const ogImage = image ?? getOgImageUrl(slug);
 
   const tags = [
-    { title: displayedTitle },
+    { title: pageTitle },
     {
       name: "description",
       content: displayedDescription,
     },
     { name: "keywords", content: keywords },
-    { name: "twitter:title", content: displayedTitle },
+    { name: "twitter:title", content: ogTitle },
     {
       name: "twitter:description",
       content: displayedDescription,
@@ -51,7 +57,7 @@ const createMetaTags = ({
     { name: "twitter:creator", content: "@omnidotdev" },
     { name: "twitter:url", content: displayedUrl },
     { property: "og:type", content: "website" },
-    { property: "og:title", content: displayedTitle },
+    { property: "og:title", content: ogTitle },
     {
       property: "og:description",
       content: displayedDescription,
