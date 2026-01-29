@@ -1,0 +1,176 @@
+---
+title: LSP Integration
+description: Code intelligence via language servers
+---
+
+# LSP Integration
+
+Omni CLI integrates with Language Server Protocol (LSP) servers to provide code intelligence capabilities like hover documentation, go-to-definition, and find references.
+
+## Overview
+
+The LSP integration allows the agent to:
+
+- Get type information and documentation on hover
+- Navigate to definitions and implementations
+- Find all references to a symbol
+- Browse document and workspace symbols
+
+This enables more accurate code understanding and modifications.
+
+## Supported Languages
+
+Omni CLI supports 13 language servers out of the box:
+
+| Language | Server | Command |
+|----------|--------|---------|
+| Rust | rust-analyzer | `rust-analyzer` |
+| TypeScript/JavaScript | typescript-language-server | `typescript-language-server --stdio` |
+| Python | pylsp | `pylsp` |
+| Go | gopls | `gopls` |
+| C/C++ | clangd | `clangd` |
+| Java | jdtls | `jdtls` |
+| Ruby | solargraph | `solargraph stdio` |
+| PHP | intelephense | `intelephense --stdio` |
+| Lua | lua-language-server | `lua-language-server` |
+| Zig | zls | `zls` |
+| Elixir | elixir-ls | `elixir-ls` |
+| Haskell | haskell-language-server | `haskell-language-server-wrapper --lsp` |
+| OCaml | ocamllsp | `ocamllsp` |
+
+## LSP Tool
+
+The agent has access to an `lsp` tool for code intelligence:
+
+### Operations
+
+#### Hover
+
+Get type information and documentation at a position:
+
+```json
+{
+  "operation": "hover",
+  "file": "src/main.rs",
+  "line": 42,
+  "column": 15
+}
+```
+
+#### Go to Definition
+
+Find where a symbol is defined:
+
+```json
+{
+  "operation": "goToDefinition",
+  "file": "src/main.rs",
+  "line": 42,
+  "column": 15
+}
+```
+
+#### Go to Implementation
+
+Find implementations of a trait/interface:
+
+```json
+{
+  "operation": "goToImplementation",
+  "file": "src/traits.rs",
+  "line": 10,
+  "column": 5
+}
+```
+
+#### Find References
+
+Find all usages of a symbol:
+
+```json
+{
+  "operation": "findReferences",
+  "file": "src/main.rs",
+  "line": 42,
+  "column": 15
+}
+```
+
+#### Document Symbols
+
+List all symbols in a file:
+
+```json
+{
+  "operation": "documentSymbol",
+  "file": "src/main.rs"
+}
+```
+
+#### Workspace Symbols
+
+Search for symbols across the workspace:
+
+```json
+{
+  "operation": "workspaceSymbol",
+  "query": "Config"
+}
+```
+
+## Server Lifecycle
+
+Language servers are started on-demand when the agent needs code intelligence for a specific file type. They remain running for the duration of the session to handle subsequent requests efficiently.
+
+### Auto-detection
+
+Omni CLI automatically detects which language server to use based on file extension:
+
+| Extension | Language Server |
+|-----------|-----------------|
+| `.rs` | rust-analyzer |
+| `.ts`, `.tsx`, `.js`, `.jsx` | typescript-language-server |
+| `.py` | pylsp |
+| `.go` | gopls |
+| `.c`, `.cpp`, `.h` | clangd |
+| `.java` | jdtls |
+| `.rb` | solargraph |
+| `.php` | intelephense |
+| `.lua` | lua-language-server |
+| `.zig` | zls |
+| `.ex`, `.exs` | elixir-ls |
+| `.hs` | haskell-language-server |
+| `.ml`, `.mli` | ocamllsp |
+
+## Requirements
+
+Language servers must be installed separately. For example:
+
+```bash
+# Rust
+rustup component add rust-analyzer
+
+# TypeScript
+npm install -g typescript-language-server typescript
+
+# Python
+pip install python-lsp-server
+
+# Go
+go install golang.org/x/tools/gopls@latest
+```
+
+If a language server isn't installed, LSP operations for that language will gracefully fail with a message indicating the server isn't available.
+
+## Configuration
+
+Custom language server configurations can be added in your config file:
+
+```toml
+[lsp.servers.custom-server]
+languages = ["mylang"]
+command = "my-language-server"
+args = ["--stdio"]
+```
+
+See [Configuration](/docs/armory/omni-cli/configuration) for details.

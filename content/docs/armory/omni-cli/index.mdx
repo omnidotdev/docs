@@ -1,0 +1,219 @@
+---
+title: ⏣ Omni CLI
+description: Your conduit to the universe
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaTerminal, FaServer } from "react-icons/fa";
+import { SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "CLI",
+      icon: <FaTerminal />,
+      className: "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300",
+    },
+    {
+      label: "TUI",
+      icon: <FaTerminal />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "HTTP API",
+      icon: <FaServer />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://cli.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/cli`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Early Development",
+      description:
+        "Omni CLI is in early development. Expect this documentation to evolve.",
+    },
+  ]}
+/>
+
+## Overview
+
+**Your conduit to the universe.**
+
+Omni CLI is an agentic CLI for the Omni ecosystem. It provides three interfaces:
+
+- **CLI**: Traditional command-line interface for scripting and automation
+- **TUI**: Interactive terminal user interface for visual workflows
+- **HTTP API**: RESTful API for remote access and integrations
+
+## Installation
+
+```bash
+# From source
+git clone https://github.com/omnidotdev/cli
+cd cli
+cargo build --release
+
+# Binary will be at target/release/omni
+```
+
+## Quick Start
+
+### TUI Mode (Default)
+
+Launch the interactive terminal interface:
+
+```bash
+omni
+# or explicitly
+omni tui
+```
+
+### Shell Mode
+
+Convert natural language to shell commands:
+
+```bash
+omni "list files by size"
+# → Command: ls -lhS
+# Execute? [y/N]
+```
+
+Safe commands auto-execute; others require confirmation. Use `-y` to skip confirmation or `-n` for dry-run:
+
+```bash
+omni -y "show disk usage"     # Auto-execute
+omni -n "delete temp files"   # Show command only
+```
+
+### Agent Mode
+
+Execute agentic tasks directly:
+
+```bash
+omni agent "summarize the README in this directory"
+omni a "what files are in src/"  # 'a' is an alias for 'agent'
+```
+
+### HTTP API Mode
+
+Start the API server for remote access:
+
+```bash
+omni serve
+# Starts on http://127.0.0.1:7890
+
+# Bind to all interfaces (for LAN/phone access)
+omni serve --host 0.0.0.0 --port 7890
+```
+
+## Modes
+
+Omni CLI supports two operating modes that control what actions the agent can take:
+
+| Mode | Description | Permissions |
+|------|-------------|-------------|
+| **Build** | Full access for implementation | Read, write, edit files; run commands |
+| **Plan** | Read-only exploration for planning | Read files; run read-only commands |
+
+Switch modes in the TUI with `Tab` or slash commands:
+
+```
+/plan   # Switch to plan mode
+/build  # Switch to build mode
+```
+
+## TUI Interface
+
+The TUI provides a rich interactive experience with:
+
+### Slash Commands
+
+| Command | Description |
+|---------|-------------|
+| `/clear` | Clear conversation history |
+| `/exit`, `/quit` | Exit the application |
+| `/model` | Show available models |
+| `/model <name>` | Switch to a specific model |
+| `/plan` | Switch to plan mode |
+| `/build` | Switch to build mode |
+| `/sessions` | Open session browser |
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Send message |
+| `Shift+Enter` or `Alt+Enter` | Insert newline |
+| `Tab` | Toggle mode (Build/Plan) |
+| `Ctrl+C` | Cancel streaming / Clear input / Exit |
+| `Ctrl+L` | Clear conversation |
+| `Ctrl+S` | Open session list |
+| `Ctrl+A` | Move cursor to start |
+| `Ctrl+E` | Move cursor to end |
+| `Ctrl+U` | Delete to start of line |
+| `Ctrl+K` | Delete to end of line |
+| `Ctrl+W` | Delete word |
+| `PageUp/Down` | Scroll messages |
+| `Esc` | Dismiss dropdown / Clear input |
+
+### Permission Dialogs
+
+When the agent needs to perform sensitive operations (file writes, shell commands), a permission dialog appears:
+
+- `[a]` Allow once
+- `[s]` Always allow (for session)
+- `[d]` Deny
+- `Esc` Cancel (deny)
+
+## Architecture
+
+```
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│     CLI     │  │     TUI     │  │   HTTP API  │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       └────────────────┼────────────────┘
+                        │
+                 ┌──────┴──────┐
+                 │    Core     │
+                 └─────────────┘
+```
+
+All interfaces share the `core` module for business logic, ensuring consistent behavior across CLI, TUI, and API.
+
+## Command Reference
+
+```bash
+omni [OPTIONS] [PROMPT] [COMMAND]
+
+Commands:
+  agent   Execute an agentic task (alias: a)
+  tui     Start the TUI interface
+  serve   Start the HTTP API server
+  config  Manage configuration
+  session Manage sessions
+
+Options:
+  -y, --yes       Skip confirmation for all commands
+  -n, --dry-run   Show command only, don't execute
+  -v, --verbose   Increase logging verbosity
+  -h, --help      Print help
+  -V, --version   Print version
+```

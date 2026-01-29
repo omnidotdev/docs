@@ -1,0 +1,278 @@
+---
+title: Configuration
+description: Config file reference
+---
+
+# Configuration
+
+Omni CLI uses TOML configuration files with support for global and project-level settings.
+
+## Config Locations
+
+| Location | Scope | Priority |
+|----------|-------|----------|
+| `~/.config/omni/cli/config.toml` | Global | Lower |
+| `.omni/config.toml` | Project | Higher |
+
+Project config merges with global config, with project settings taking precedence.
+
+## Config Commands
+
+```bash
+omni config show    # Display current configuration
+omni config path    # Show config file location
+omni config generate-token  # Generate API token
+```
+
+## Full Configuration Reference
+
+```toml
+# =============================================================================
+# Agent Configuration
+# =============================================================================
+
+[agent]
+# LLM provider: anthropic, openai, google, groq, mistral, ollama
+provider = "anthropic"
+
+# Model to use
+model = "claude-sonnet-4-20250514"
+
+# Maximum tokens for responses
+max_tokens = 8192
+
+# Default mode: build or plan
+default_mode = "build"
+
+# Maximum iterations before stopping (prevents infinite loops)
+max_iterations = 50
+
+# =============================================================================
+# Provider Configuration
+# =============================================================================
+
+[agent.providers.anthropic]
+api_key_env = "ANTHROPIC_API_KEY"
+# base_url = "https://api.anthropic.com"  # Optional custom URL
+
+[agent.providers.openai]
+api_key_env = "OPENAI_API_KEY"
+# base_url = "https://api.openai.com/v1"
+
+[agent.providers.google]
+api_key_env = "GOOGLE_API_KEY"
+
+[agent.providers.groq]
+api_key_env = "GROQ_API_KEY"
+
+[agent.providers.mistral]
+api_key_env = "MISTRAL_API_KEY"
+
+[agent.providers.ollama]
+type = "openai"
+base_url = "http://localhost:11434/v1"
+
+# =============================================================================
+# Permission Configuration
+# =============================================================================
+
+[agent.agents.build]
+description = "Full access for implementation"
+
+[agent.agents.build.permissions]
+edit = "ask"        # ask, allow, deny
+write = "ask"
+bash_write = "ask"
+bash_read = "allow"
+read = "allow"
+web_search = "ask"
+code_search = "ask"
+
+[agent.agents.plan]
+description = "Read-only exploration for planning"
+
+[agent.agents.plan.permissions]
+edit = "deny"
+write = "deny"
+bash_write = "deny"
+bash_read = "allow"
+read = "allow"
+web_search = "allow"
+code_search = "allow"
+
+# =============================================================================
+# API Server Configuration
+# =============================================================================
+
+[api]
+# Bind address
+host = "127.0.0.1"
+port = 7890
+
+# API authentication token (generate with: omni config generate-token)
+# token = "omni_..."
+
+# CORS allowed origins (default: localhost only)
+# cors_origins = ["https://myapp.com"]
+
+# =============================================================================
+# TUI Configuration
+# =============================================================================
+
+[tui]
+# Enable mouse support
+mouse = true
+
+# Show tips and hints
+tips = true
+
+# Theme: auto, light, dark
+theme = "auto"
+
+# =============================================================================
+# MCP Server Configuration
+# =============================================================================
+
+# MCP servers provide additional tools via the Model Context Protocol
+
+[mcp.servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/dir"]
+
+[mcp.servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+env = { GITHUB_TOKEN = "ghp_..." }
+
+[mcp.servers.postgres]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-postgres"]
+env = { DATABASE_URL = "postgres://..." }
+
+# =============================================================================
+# Plugin Configuration
+# =============================================================================
+
+[plugins]
+# Auto-discover plugins from standard locations
+auto_discover = true
+
+# Plugin search paths (in addition to defaults)
+paths = [
+  "~/.config/omni/plugins",
+  ".omni/plugins"
+]
+
+# Explicitly enabled plugins
+enabled = ["my-plugin"]
+
+# Explicitly disabled plugins
+disabled = []
+
+# =============================================================================
+# LSP Configuration
+# =============================================================================
+
+[lsp]
+# Enable LSP integration
+enabled = true
+
+# Custom language server configurations
+[lsp.servers.custom]
+languages = ["mylang"]
+command = "my-language-server"
+args = ["--stdio"]
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+
+[logging]
+# Log level: trace, debug, info, warn, error
+level = "info"
+
+# Log file (optional)
+# file = "~/.local/share/omni/cli/omni.log"
+
+# =============================================================================
+# Secret Masking
+# =============================================================================
+
+[secrets]
+# Enable secret masking in output
+mask_secrets = true
+
+# Additional patterns to mask (regex)
+patterns = [
+  "my_secret_[a-z0-9]+",
+]
+```
+
+## Environment Variables
+
+Environment variables override config file settings:
+
+| Variable | Description |
+|----------|-------------|
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `GOOGLE_API_KEY` | Google API key |
+| `GROQ_API_KEY` | Groq API key |
+| `MISTRAL_API_KEY` | Mistral API key |
+| `OMNI_PROVIDER` | Override provider |
+| `OMNI_MODEL` | Override model |
+| `OMNI_API_TOKEN` | API authentication token |
+| `OMNI_LOG` | Log level |
+
+## Project Configuration
+
+Create `.omni/config.toml` in your project to override settings:
+
+```toml
+# Use a more capable model for this complex project
+[agent]
+model = "claude-opus-4-20250514"
+
+# Allow shell commands without prompting
+[agent.agents.build.permissions]
+bash_read = "allow"
+bash_write = "allow"
+```
+
+## Permission Values
+
+| Value | Behavior |
+|-------|----------|
+| `ask` | Prompt user for permission each time |
+| `allow` | Automatically allow |
+| `deny` | Automatically deny |
+
+## MCP Server Discovery
+
+MCP servers are discovered from:
+
+1. Config file `[mcp.servers.*]` sections
+2. `~/.config/omni/mcp/` directory
+3. `.omni/mcp/` in the project
+
+## Plugin Discovery
+
+Plugins are discovered from:
+
+1. `~/.config/omni/plugins/`
+2. `.omni/plugins/` in the project
+3. Paths specified in `plugins.paths`
+
+Each plugin should have a `plugin.toml` manifest:
+
+```toml
+[plugin]
+name = "my-plugin"
+version = "1.0.0"
+description = "My custom plugin"
+
+[[tools]]
+name = "my_tool"
+description = "Does something useful"
+command = "./my-tool.sh"
+```

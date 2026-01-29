@@ -1,0 +1,169 @@
+---
+title: Sessions
+description: Conversation persistence and sharing
+---
+
+# Sessions
+
+Omni CLI persists conversation sessions per project, allowing you to continue where you left off and share conversations with others.
+
+## Session Storage
+
+Sessions are stored locally at:
+
+```
+~/.local/share/omni/cli/sessions/<project-id>/<session-id>.json
+```
+
+Each project gets its own session directory based on a hash of the project path.
+
+## Listing Sessions
+
+```bash
+# Table format (default)
+omni session list
+
+# JSON format
+omni session list --format json
+
+# Limit results
+omni session list --limit 10
+```
+
+Output:
+
+```
+ID          Created              Messages  Title
+─────────────────────────────────────────────────────
+abc123def   2024-01-15 10:30    12        Implement auth
+xyz789ghi   2024-01-14 15:45    8         Fix build errors
+```
+
+## Exporting Sessions
+
+Export a session for backup or sharing:
+
+```bash
+# JSON to stdout
+omni session export <session-id>
+
+# Markdown format
+omni session export <session-id> --format markdown
+
+# Write to file
+omni session export <session-id> --output conversation.md
+```
+
+### Export Formats
+
+**JSON** (default): Full session data including metadata
+
+```json
+{
+  "id": "abc123def",
+  "project_id": "proj_xyz",
+  "created_at": "2024-01-15T10:30:00Z",
+  "messages": [...]
+}
+```
+
+**Markdown**: Human-readable conversation format
+
+```markdown
+# Session: Implement auth
+Created: 2024-01-15 10:30
+
+## User
+How do I add authentication?
+
+## Assistant
+I'll help you implement authentication...
+```
+
+## Session Sharing
+
+Share sessions via URL tokens for collaboration or review.
+
+### Creating a Share
+
+```bash
+# Share with no expiration
+omni session share <session-id>
+
+# Share with TTL (time-to-live)
+omni session share <session-id> --ttl 7d
+```
+
+TTL formats:
+- `30s` - 30 seconds
+- `5m` - 5 minutes
+- `2h` - 2 hours
+- `7d` - 7 days
+- `1w` - 1 week
+
+Output:
+
+```
+Session shared!
+
+  Token:  abc12345
+  Secret: 550e8400-e29b-41d4-a716-446655440000
+
+Access via API:
+  GET http://localhost:7890/api/share/abc12345
+
+Expires: 2024-01-22 10:30 UTC
+
+To revoke:
+  omni session unshare abc12345 --secret 550e8400-...
+```
+
+### Accessing Shared Sessions
+
+Shared sessions are accessible via the HTTP API:
+
+```bash
+curl http://localhost:7890/api/share/abc12345
+```
+
+Returns the exported session in JSON format.
+
+### Revoking a Share
+
+```bash
+omni session unshare <token> --secret <secret>
+```
+
+The secret is required to revoke a share, preventing unauthorized revocation.
+
+### Share Security
+
+- **Tokens** are short (8 characters) for easy sharing
+- **Secrets** are UUIDs, required only for revocation
+- **TTL** allows automatic expiration
+- **Access count** tracks how many times a share was accessed
+
+## TUI Session Browser
+
+Press `Ctrl+S` in the TUI to open the session browser:
+
+- Browse recent sessions
+- Switch to a previous session
+- Delete old sessions
+- See session metadata (messages, created date)
+
+## Session Commands Reference
+
+```bash
+# List sessions
+omni session list [--format table|json] [--limit N]
+
+# Export session
+omni session export <ID> [--format json|markdown] [--output FILE]
+
+# Share session
+omni session share <ID> [--ttl DURATION]
+
+# Revoke share
+omni session unshare <TOKEN> --secret <SECRET>
+```
