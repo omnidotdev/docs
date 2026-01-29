@@ -1,0 +1,222 @@
+---
+title: Providers
+description: LLM provider configuration
+---
+
+# Providers
+
+Omni CLI supports multiple LLM providers through a unified interface, allowing you to switch between models from different vendors.
+
+## Supported Providers
+
+| Provider | Models | API Key Env |
+|----------|--------|-------------|
+| **Anthropic** | Claude 4, Claude 3.5, Claude 3 | `ANTHROPIC_API_KEY` |
+| **OpenAI** | GPT-4o, GPT-4, GPT-3.5 | `OPENAI_API_KEY` |
+| **Google** | Gemini 2.0, Gemini 1.5 | `GOOGLE_API_KEY` |
+| **Groq** | Llama 3, Mixtral | `GROQ_API_KEY` |
+| **Mistral** | Mistral Large, Medium, Small | `MISTRAL_API_KEY` |
+| **Ollama** | Any local model | (none) |
+
+## Default Configuration
+
+By default, Omni CLI uses Anthropic's Claude:
+
+```toml
+[agent]
+provider = "anthropic"
+model = "claude-sonnet-4-20250514"
+```
+
+## Switching Providers
+
+### Via Config File
+
+Edit `~/.config/omni/cli/config.toml`:
+
+```toml
+[agent]
+provider = "openai"
+model = "gpt-4o"
+```
+
+### Via Environment
+
+```bash
+export OMNI_PROVIDER=openai
+export OMNI_MODEL=gpt-4o
+```
+
+### Via TUI
+
+Use the `/model` command:
+
+```
+/model gpt-4o
+```
+
+## Provider Configuration
+
+### Anthropic
+
+```toml
+[agent]
+provider = "anthropic"
+model = "claude-sonnet-4-20250514"
+
+[agent.providers.anthropic]
+api_key_env = "ANTHROPIC_API_KEY"
+# Optional: custom base URL
+# base_url = "https://api.anthropic.com"
+```
+
+Available models:
+- `claude-opus-4-20250514` (most capable)
+- `claude-sonnet-4-20250514` (balanced)
+- `claude-3-5-sonnet-20241022`
+- `claude-3-5-haiku-20241022` (fastest)
+
+### OpenAI
+
+```toml
+[agent]
+provider = "openai"
+model = "gpt-4o"
+
+[agent.providers.openai]
+api_key_env = "OPENAI_API_KEY"
+```
+
+Available models:
+- `gpt-4o` (recommended)
+- `gpt-4-turbo`
+- `gpt-4`
+- `gpt-3.5-turbo`
+
+### Google Gemini
+
+```toml
+[agent]
+provider = "google"
+model = "gemini-2.0-flash"
+
+[agent.providers.google]
+api_key_env = "GOOGLE_API_KEY"
+```
+
+Available models:
+- `gemini-2.0-flash`
+- `gemini-1.5-pro`
+- `gemini-1.5-flash`
+
+### Groq
+
+```toml
+[agent]
+provider = "groq"
+model = "llama-3.1-70b-versatile"
+
+[agent.providers.groq]
+api_key_env = "GROQ_API_KEY"
+```
+
+Available models:
+- `llama-3.1-70b-versatile`
+- `llama-3.1-8b-instant`
+- `mixtral-8x7b-32768`
+
+### Mistral
+
+```toml
+[agent]
+provider = "mistral"
+model = "mistral-large-latest"
+
+[agent.providers.mistral]
+api_key_env = "MISTRAL_API_KEY"
+```
+
+Available models:
+- `mistral-large-latest`
+- `mistral-medium-latest`
+- `mistral-small-latest`
+
+### Ollama (Local)
+
+Run models locally with Ollama:
+
+```toml
+[agent]
+provider = "ollama"
+model = "llama3"
+
+[agent.providers.ollama]
+type = "openai"  # Ollama uses OpenAI-compatible API
+base_url = "http://localhost:11434/v1"
+# No API key needed
+```
+
+First, start Ollama and pull a model:
+
+```bash
+ollama serve
+ollama pull llama3
+```
+
+## Multiple Providers
+
+Configure multiple providers and switch between them:
+
+```toml
+[agent]
+provider = "anthropic"  # Default
+model = "claude-sonnet-4-20250514"
+
+[agent.providers.anthropic]
+api_key_env = "ANTHROPIC_API_KEY"
+
+[agent.providers.openai]
+api_key_env = "OPENAI_API_KEY"
+
+[agent.providers.ollama]
+type = "openai"
+base_url = "http://localhost:11434/v1"
+```
+
+Switch at runtime:
+
+```bash
+# Use OpenAI for this session
+OMNI_PROVIDER=openai OMNI_MODEL=gpt-4o omni
+```
+
+## Project-Specific Providers
+
+Override the provider for specific projects in `.omni/config.toml`:
+
+```toml
+[agent]
+provider = "anthropic"
+model = "claude-opus-4-20250514"  # Use Opus for this complex project
+```
+
+## Token Limits
+
+Configure max tokens per provider:
+
+```toml
+[agent]
+max_tokens = 8192  # Default for all providers
+
+[agent.providers.anthropic]
+max_tokens = 16384  # Higher limit for Anthropic
+```
+
+## Cost Considerations
+
+Different providers have different pricing. For cost-sensitive work:
+
+- Use **Groq** for fast, cheap inference
+- Use **Ollama** for free local inference
+- Use **Claude Haiku** or **GPT-3.5** for simple tasks
+- Reserve **Claude Opus** or **GPT-4** for complex reasoning

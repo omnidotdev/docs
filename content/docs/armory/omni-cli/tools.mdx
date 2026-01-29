@@ -1,0 +1,210 @@
+---
+title: Tools
+description: Built-in agent tools
+---
+
+# Tools
+
+The agent has access to a suite of built-in tools for interacting with the filesystem, web, and user.
+
+## File Operations
+
+### `read_file`
+
+Read the contents of a file.
+
+```json
+{
+  "path": "src/main.rs",
+  "line_start": 1,
+  "line_end": 50
+}
+```
+
+### `write_file`
+
+Create a new file with the given contents.
+
+```json
+{
+  "path": "src/new_file.rs",
+  "content": "// New file contents"
+}
+```
+
+### `edit_file`
+
+Modify an existing file using search and replace.
+
+```json
+{
+  "path": "src/main.rs",
+  "old_text": "fn old_function()",
+  "new_text": "fn new_function()"
+}
+```
+
+### `glob`
+
+Find files matching a glob pattern.
+
+```json
+{
+  "pattern": "src/**/*.rs"
+}
+```
+
+### `grep`
+
+Search file contents using regex patterns.
+
+```json
+{
+  "pattern": "TODO|FIXME",
+  "path": "src/",
+  "include": "*.rs"
+}
+```
+
+### `list_dir`
+
+List directory contents.
+
+```json
+{
+  "path": "src/",
+  "recursive": false
+}
+```
+
+## Shell
+
+### `shell`
+
+Execute shell commands.
+
+```json
+{
+  "command": "cargo build --release"
+}
+```
+
+The agent classifies commands as safe (read-only) or unsafe (writes, deletes). Safe commands may auto-execute based on your permission settings.
+
+## Web
+
+### `web_search`
+
+Search the web for information.
+
+```json
+{
+  "query": "rust async await tutorial"
+}
+```
+
+### `web_fetch`
+
+Fetch the contents of a URL.
+
+```json
+{
+  "url": "https://docs.rs/tokio/latest/tokio/"
+}
+```
+
+### `code_search`
+
+Search for code examples and API documentation.
+
+```json
+{
+  "query": "tokio spawn example",
+  "language": "rust"
+}
+```
+
+## User Interaction
+
+### `ask_user`
+
+Ask the user a question and wait for a response.
+
+```json
+{
+  "question": "Which database should we use?",
+  "options": ["PostgreSQL", "SQLite", "MySQL"]
+}
+```
+
+## Task Management
+
+### `todo_read`
+
+Read the current task list.
+
+```json
+{}
+```
+
+### `todo_write`
+
+Create, update, or delete tasks.
+
+```json
+{
+  "action": "create",
+  "task": {
+    "title": "Implement user authentication",
+    "status": "pending"
+  }
+}
+```
+
+## Planning
+
+### `plan_enter`
+
+Enter plan mode for read-only exploration.
+
+```json
+{
+  "reason": "Need to understand the codebase structure"
+}
+```
+
+### `plan_exit`
+
+Exit plan mode and begin implementation.
+
+```json
+{
+  "summary": "Ready to implement the feature"
+}
+```
+
+## Tool Availability by Mode
+
+| Tool | Build Mode | Plan Mode |
+|------|------------|-----------|
+| `read_file` | Yes | Yes |
+| `write_file` | Yes | No |
+| `edit_file` | Yes | No |
+| `glob` | Yes | Yes |
+| `grep` | Yes | Yes |
+| `list_dir` | Yes | Yes |
+| `shell` | Yes | Read-only |
+| `web_search` | Yes | Yes |
+| `web_fetch` | Yes | Yes |
+| `code_search` | Yes | Yes |
+| `ask_user` | Yes | Yes |
+| `todo_read` | Yes | Yes |
+| `todo_write` | Yes | No |
+
+## MCP Tools
+
+Omni CLI can discover and use tools from MCP (Model Context Protocol) servers. See [Configuration](/docs/armory/omni-cli/configuration) for setup.
+
+## Plugin Tools
+
+Plugins can register additional tools. See [Configuration](/docs/armory/omni-cli/configuration) for plugin setup.

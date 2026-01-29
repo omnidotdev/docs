@@ -1,0 +1,190 @@
+---
+title: Skills
+description: Reusable agent instructions
+---
+
+# Skills
+
+Skills are reusable instruction sets that teach the agent specialized behaviors. They're markdown files with YAML frontmatter that the agent can load on demand.
+
+## Overview
+
+Skills allow you to:
+
+- Define specialized workflows (TDD, debugging, code review)
+- Share best practices across projects
+- Create custom agent behaviors without modifying code
+
+## Skill File Format
+
+Skills are defined in `SKILL.md` files:
+
+```markdown
+---
+name: test-driven-development
+description: Use when implementing features - write tests first
+---
+
+# Test-Driven Development
+
+## Process
+
+1. Write a failing test for the feature
+2. Run the test to confirm it fails
+3. Write minimal code to make the test pass
+4. Run the test to confirm it passes
+5. Refactor if needed
+
+## Guidelines
+
+- Keep tests focused and isolated
+- Test behavior, not implementation
+- Use descriptive test names
+```
+
+### Frontmatter Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Unique skill identifier |
+| `description` | Yes | When to use this skill |
+
+## Skill Discovery
+
+Omni CLI discovers skills from these locations (in order):
+
+### Project-Local
+
+```
+your-project/
+├── .omni/skill/
+│   └── my-skill/
+│       └── SKILL.md
+└── .claude/skills/
+    └── shared-skill/
+        └── SKILL.md
+```
+
+### Global
+
+```
+~/.config/omni/skill/
+└── global-skill/
+    └── SKILL.md
+
+~/.claude/skills/
+└── claude-skill/
+    └── SKILL.md
+```
+
+Project-local skills take precedence over global skills with the same name.
+
+## Using Skills
+
+### Automatic Loading
+
+The agent automatically considers skills based on task context. If you ask to "implement a feature using TDD", a skill with that description will be loaded.
+
+### Manual Loading
+
+Use the `skill` tool to explicitly load a skill:
+
+```
+Load the code-review skill for this task
+```
+
+### Listing Skills
+
+```bash
+omni skill list
+```
+
+## Built-in Skills
+
+Omni CLI includes several built-in skills:
+
+| Skill | Description |
+|-------|-------------|
+| `test-driven-development` | Write tests before implementation |
+| `systematic-debugging` | Methodical bug investigation |
+| `code-review` | Review code for quality and issues |
+| `documentation` | Write clear documentation |
+
+## Creating Custom Skills
+
+### Basic Skill
+
+Create `.omni/skill/my-workflow/SKILL.md`:
+
+```markdown
+---
+name: my-workflow
+description: Use for my specific workflow
+---
+
+# My Custom Workflow
+
+Instructions for the agent...
+```
+
+### Skill with Checklist
+
+Skills can include checklists that the agent tracks:
+
+```markdown
+---
+name: release-checklist
+description: Use when preparing a release
+---
+
+# Release Checklist
+
+## Pre-Release
+
+- [ ] All tests pass
+- [ ] Version bumped
+- [ ] Changelog updated
+- [ ] Documentation current
+
+## Release
+
+- [ ] Create release branch
+- [ ] Build artifacts
+- [ ] Tag release
+- [ ] Publish
+```
+
+### Skill with Examples
+
+Include examples to guide the agent:
+
+```markdown
+---
+name: api-design
+description: Use when designing REST APIs
+---
+
+# API Design Guidelines
+
+## Endpoint Naming
+
+Use plural nouns:
+
+Good:
+- `GET /users`
+- `POST /users`
+- `GET /users/{id}`
+
+Bad:
+- `GET /user`
+- `POST /createUser`
+```
+
+## Compatibility
+
+Omni CLI supports skill directories from:
+
+- `.omni/skill/` (native)
+- `.claude/skills/` (Claude Code compatibility)
+
+This allows sharing skills across different AI coding tools.
