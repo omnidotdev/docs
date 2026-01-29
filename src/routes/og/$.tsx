@@ -5,6 +5,7 @@ import satori from "satori";
 import OgImage from "@/components/og/OgImage";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
+import stripEmojis from "@/lib/util/stripEmojis";
 import realmsData from "../../../realms.json";
 
 type Realm = (typeof realmsData.realms)[number];
@@ -27,17 +28,6 @@ const fetchFont = async (): Promise<ArrayBuffer> => {
 };
 
 // TODO: Add emoji support once Satori supports COLR font format.
-
-// TODO: Strip characters intelligently (e.g. detect unsupported glyphs dynamically)
-/** Strip emojis and symbols from text (color emoji fonts unreliable in Satori). */
-const stripEmojis = (text: string): string => {
-  return text
-    .replace(
-      /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2200}-\u{22FF}]|[\u{2300}-\u{23FF}]/gu,
-      "",
-    )
-    .trim();
-};
 
 /** Format a slug segment into a readable title. */
 const formatSlugToTitle = (slug: string): string => {
@@ -65,7 +55,10 @@ const getOgMetadata = (path: string): OgMetadata => {
   const segments = cleaned.split("/").filter(Boolean);
 
   // Handle homepage (empty path or "index")
-  if (segments.length === 0 || (segments.length === 1 && segments[0] === "index")) {
+  if (
+    segments.length === 0 ||
+    (segments.length === 1 && segments[0] === "index")
+  ) {
     return {
       realm: null,
       title: "Omni Docs",
