@@ -1,13 +1,41 @@
 ---
 title: Self-Hosting
-description: Run Omni products on your own infrastructure.
+description: Run Omni products on your own infrastructure
 ---
 
 <Callout type="info">
   These self-hosting docs are new and experimental. Have feedback or running into issues? [Join our Discord](https://discord.gg/omnidotdev) to let us know.
 </Callout>
 
-Many Omni products support self-hosting with Docker.
+Many Omni products support self-hosting. [Beacon](/grid/beacon) is designed specifically for local-first self-hosting with no cloud dependency.
+
+## Beacon (Local-First)
+
+[Beacon](/grid/beacon) is built for self-hosting from the ground up:
+
+```bash
+# Install the gateway
+cargo install beacon-gateway
+
+# Run with your persona
+beacon-gateway --persona orin
+```
+
+Key features for self-hosting:
+- **No cloud required**: Works completely offline
+- **Local SQLite**: All data stored locally
+- **mDNS discovery**: Apps find your gateway automatically
+- **Device pairing**: No accounts needed
+
+See the [Beacon documentation](/grid/beacon) for full setup instructions.
+
+## Docker-Based Products
+
+Other products support self-hosting with Docker:
+
+- [📣 Backfeed](/core/backfeed): Community feedback platform
+- [➰ Manifold](/armory/manifold/self-hosting): Artifact registry
+- [🌙 Runa](/core/runa): Business suite
 
 ## Quick Start
 
