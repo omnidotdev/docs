@@ -13,7 +13,6 @@
     "orin",
     "launcher",
     "lens",
-    "deployment/self-hosting",
     "...",
     "---Core---",
     "...core",
