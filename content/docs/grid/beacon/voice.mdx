@@ -1,0 +1,104 @@
+---
+title: Voice
+description: Hands-free voice interaction with Beacon
+---
+
+Beacon supports hands-free voice interaction — say a wake word, ask a question, and hear the answer spoken back.
+
+## How Voice Works
+
+Voice interaction follows three steps:
+
+1. **Wake word** — Beacon listens for a trigger phrase (e.g. "Hey Orin") using local detection
+2. **Speech-to-text** — Your spoken question is transcribed (locally or via a cloud provider)
+3. **Text-to-speech** — The assistant's response is spoken aloud
+
+Wake word detection always runs locally for instant response. Transcription and speech synthesis can run locally or through cloud providers depending on your setup.
+
+| Component | Local | Cloud |
+|-----------|-------|-------|
+| Wake word detection | Yes | - |
+| Speech-to-text | Optional | Default (Whisper) |
+| Text-to-speech | Optional | Default (OpenAI TTS) |
+
+## Setting Up Voice
+
+### 1. Add a voice provider
+
+You need at least one provider for speech-to-text (STT) and one for text-to-speech (TTS). The simplest setup is an OpenAI key, which covers both:
+
+| Provider | STT | TTS |
+|----------|-----|-----|
+| OpenAI | Whisper | OpenAI TTS |
+| Deepgram | Yes | - |
+| ElevenLabs | - | Yes |
+
+Add your keys in **Settings → Providers**.
+
+### 2. Enable voice
+
+Voice is enabled automatically when a voice provider is configured. You can toggle it in **Settings → Voice**.
+
+### 3. Test it
+
+Say your persona's wake word (default: **"Hey Orin"**), then ask a question.
+
+## Wake Words
+
+Each persona has its own wake words defined in its [persona.json](/codex/persona-json):
+
+```json
+{
+  "voice": {
+    "wakeWords": ["hey orin", "hi orin", "okay orin"]
+  }
+}
+```
+
+Wake word detection runs entirely on-device. No audio is sent anywhere until a wake word is detected.
+
+### Customizing wake words
+
+Edit your persona's `persona.json` to change or add wake words. See [Personas](/grid/beacon/personas) for details on persona customization.
+
+## Voice Settings Per Persona
+
+Voice settings live in the `voice` section of each persona's configuration:
+
+```json
+{
+  "voice": {
+    "wakeWords": ["hey orin"],
+    "tts": {
+      "provider": "openai",
+      "voice": "nova",
+      "speed": 1.0
+    },
+    "stt": {
+      "provider": "openai",
+      "model": "whisper-1"
+    }
+  }
+}
+```
+
+Different personas can use different voices and providers, so switching personas also changes the voice you hear.
+
+## Troubleshooting
+
+### No response after wake word
+
+- Check that your microphone is working and Beacon has permission to access it
+- Verify your STT provider key is configured in **Settings → Providers**
+- Try increasing the log level (`--verbose`) to see if the wake word is being detected
+
+### Wake word triggers too easily
+
+- Use longer, more distinct wake phrases (e.g. "Hey Orin" instead of just "Orin")
+- Reduce the sensitivity if your persona supports it
+
+### Voice sounds robotic or slow
+
+- Try a different TTS voice in your persona's `voice.tts.voice` setting
+- Adjust `voice.tts.speed` (1.0 is normal, 1.2 is slightly faster)
+- ElevenLabs generally produces more natural-sounding voices than the default

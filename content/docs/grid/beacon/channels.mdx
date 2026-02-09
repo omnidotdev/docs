@@ -1,0 +1,78 @@
+---
+title: Messaging Channels
+description: Multi-channel messaging integrations
+---
+
+Connect Beacon to your favorite messaging apps. Your assistant works the same way whether someone messages it on Discord, Slack, Telegram, or any other supported platform.
+
+Beacon connects your AI assistant to messaging platforms through a unified channel interface. Each channel implements the same trait, so personas behave consistently across platforms.
+
+## Supported Channels
+
+| Channel | Integration Type | Required Config |
+|---------|------------------|-----------------|
+| Discord | WebSocket (Serenity) | `DISCORD_TOKEN` |
+| Slack | WebSocket | `SLACK_BOT_TOKEN` |
+| Telegram | Webhook | `TELEGRAM_BOT_TOKEN` |
+| Teams | Microsoft Bot Framework | `TEAMS_TENANT_ID`, `TEAMS_CLIENT_ID`, `TEAMS_CLIENT_SECRET`, `TEAMS_BOT_ID` |
+| Signal | Signal CLI bridge | `SIGNAL_API_URL`, `SIGNAL_PHONE` |
+| iMessage | AppleScript bridge (macOS) | `IMESSAGE_ENABLED=true` |
+| WhatsApp | Cloud API | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` |
+| Matrix | Matrix client SDK | `MATRIX_HOMESERVER`, `MATRIX_ACCESS_TOKEN`, `MATRIX_USER_ID` |
+| Google Chat | Service account | `GOOGLE_CHAT_SERVICE_ACCOUNT` |
+
+## Channel Interface
+
+Every channel implements a common trait:
+
+- **connect** — Establish connection to the platform
+- **disconnect** — Close the connection
+- **send** — Send a message to a channel
+- **is_connected** — Check connection status
+- **send_typing** — Show typing indicator (optional)
+- **add_reaction** / **remove_reaction** — Emoji reactions (optional)
+
+## Message Model
+
+Messages flow through a unified structure regardless of the source channel:
+
+```
+IncomingMessage
+├── id             # Platform message ID
+├── channel_id     # Source channel/conversation
+├── sender_id      # Platform user ID
+├── sender_name    # Display name
+├── content        # Message text
+├── is_dm          # Direct message flag
+├── reply_to       # Thread/reply reference
+└── attachments[]  # Images, audio, video, files
+```
+
+Attachments support image, audio, video, and file types with optional inline data or URL references.
+
+## DM Security
+
+Beacon supports DM security policies to control who can interact with your assistant in direct messages:
+
+| Policy | Description |
+|--------|-------------|
+| `open` | Anyone can DM the assistant |
+| `pairing` | Users must pair with a 6-digit code before chatting |
+| `allowlist` | Only pre-approved users can DM |
+
+Configure via environment:
+
+```bash
+BEACON_DM_POLICY=pairing
+```
+
+## Voice Channel
+
+In addition to messaging channels, Beacon supports local voice interaction:
+
+- **Wake word detection** — Trigger listening with configurable wake words
+- **Speech-to-text** — Whisper (OpenAI) or Deepgram
+- **Text-to-speech** — OpenAI TTS or ElevenLabs
+- **Local audio capture** — Direct microphone input via CPAL
+
+Voice settings are configured per-persona in the `voice` section of [persona.json](/codex/persona-json).

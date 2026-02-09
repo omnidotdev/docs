@@ -1,0 +1,117 @@
+---
+title: Personas
+description: Customize your AI assistant's personality and voice
+---
+
+Personas define how your AI assistant sounds, behaves, and responds. Each persona has its own name, wake word, voice, and personality — so switching personas changes the entire experience.
+
+## What Is a Persona?
+
+A persona is a configuration file ([persona.json](/codex/persona-json)) that tells Beacon:
+
+- **Who** the assistant is (name, tagline, icon)
+- **How** it sounds (wake words, TTS voice, STT provider)
+- **What** its personality is like (system prompt, tone, traits)
+
+## Meet Orin
+
+[Orin](/orin) is Beacon's default persona — a friendly otter guide. Orin comes pre-installed with every gateway.
+
+```json
+{
+  "identity": {
+    "id": "orin",
+    "name": "Orin",
+    "tagline": "Your friendly otter guide",
+    "icon": "🦦",
+    "type": "assistant"
+  },
+  "voice": {
+    "wakeWords": ["hey orin", "hi orin", "okay orin"],
+    "tts": { "provider": "openai", "voice": "nova", "speed": 1.0 },
+    "stt": { "provider": "openai", "model": "whisper-1" }
+  },
+  "personality": {
+    "systemPrompt": "You are Orin, a friendly and helpful AI assistant...",
+    "tone": "friendly",
+    "verbosity": "minimal",
+    "traits": ["helpful", "curious", "playful", "knowledgeable"]
+  }
+}
+```
+
+## Customizing Your Persona
+
+### Change the wake word
+
+Edit the `voice.wakeWords` array in your persona's `persona.json`:
+
+```json
+{
+  "voice": {
+    "wakeWords": ["hey jarvis", "yo jarvis"]
+  }
+}
+```
+
+### Change the voice
+
+Pick a different TTS voice or provider:
+
+```json
+{
+  "voice": {
+    "tts": { "provider": "elevenlabs", "voice": "rachel" }
+  }
+}
+```
+
+### Change the personality
+
+Adjust the system prompt, tone, and traits:
+
+```json
+{
+  "personality": {
+    "systemPrompt": "You are a concise, technical assistant...",
+    "tone": "professional",
+    "verbosity": "concise",
+    "traits": ["precise", "efficient"]
+  }
+}
+```
+
+## Creating a New Persona
+
+1. Create a new directory in your personas folder (`~/.beacon/personas/my-persona/`)
+2. Add a `persona.json` file following the [persona.json spec](/codex/persona-json)
+3. Restart the gateway or reload personas from **Settings → Personas**
+
+Your new persona appears in the persona switcher in the app.
+
+## Installing from Manifold
+
+Browse and install community-created personas from [Manifold](https://manifold.omni.dev):
+
+1. Open **Settings → Personas → Browse Marketplace**
+2. Find a persona you like
+3. Click **Install**
+4. The persona is downloaded to your gateway and ready to use
+
+<Callout type="info">
+  Manifold access requires an Omni account. See [Cloud Features](/grid/beacon/cloud-features) for setup.
+</Callout>
+
+## Persona Storage
+
+Personas are loaded from these sources, in order of priority:
+
+| Source | Location |
+|--------|----------|
+| Local | `~/.beacon/personas/` (or custom `BEACON_PERSONAS_DIR`) |
+| Manifold | Installed from the persona marketplace |
+| Bundled | Built into the gateway binary (Orin) |
+
+## Advanced
+
+For the full persona configuration spec, including all available fields and options, see the [persona.json documentation](/codex/persona-json).

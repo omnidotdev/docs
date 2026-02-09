@@ -1,0 +1,202 @@
+---
+title: Cloud Features
+description: Optional cloud sync and remote access
+---
+
+Beacon is designed to work completely offline, but you can optionally connect your Omni account to unlock additional features.
+
+## Local vs Cloud
+
+| Feature | Local | Cloud |
+|---------|:-----:|:-----:|
+| Chat | ✅ | - |
+| Voice | ✅ | - |
+| Local personas | ✅ | - |
+| Device pairing | ✅ | - |
+| mDNS discovery | ✅ | - |
+| Messaging channels | ✅ | - |
+| Skills | ✅ | - |
+| Memory sync | - | ✅ |
+| Persona marketplace | - | ✅ |
+| Omni Credits | - | ✅ |
+| Remote access | - | ✅ |
+
+## Memory Sync
+
+Sync your memories and preferences across all your devices.
+
+**How it works:**
+1. Memories are stored locally on your gateway
+2. With cloud sync enabled, memories are encrypted and synced to Omni
+3. Other gateways you own can pull synced memories
+4. End-to-end encryption ensures only you can read your memories
+
+**Enable:**
+```toml
+[cloud]
+memory_sync = true
+```
+
+<Callout type="info">
+  Memory sync requires an Omni account. Your memories are encrypted before leaving your device.
+</Callout>
+
+## Persona Marketplace
+
+Browse and install personas created by the community.
+
+**Features:**
+- Discover new personas with different personalities and capabilities
+- One-click installation to your gateway
+- Rate and review personas
+- Share your own personas
+
+**Access:**
+Navigate to the Persona Marketplace in the Beacon app, or visit [personas.omni.dev](https://personas.omni.dev).
+
+## Omni Credits
+
+Use Omni-hosted AI models with pay-per-use credits instead of bringing your own API keys.
+
+**Benefits:**
+- No API key management
+- Automatic model selection
+- Usage tracking and budgets
+- Access to premium models
+
+**Configure:**
+```toml
+[cloud]
+use_omni_credits = true
+# Optional: set a monthly budget
+monthly_budget = 20.00
+```
+
+**BYOK (Bring Your Own Key):**
+If you prefer to use your own API keys, Beacon works without Omni Credits:
+
+```bash
+ANTHROPIC_API_KEY=your-key
+OPENAI_API_KEY=your-key
+```
+
+## Remote Access
+
+Access your gateway from anywhere via Omni relay.
+
+**How it works:**
+1. Your gateway establishes an outbound connection to Omni relay
+2. Remote clients connect to Omni relay
+3. Relay forwards traffic to your gateway
+4. Your gateway never exposes ports to the internet
+
+```
+┌─────────────┐     outbound     ┌─────────────┐
+│   Gateway   │─────────────────>│  Omni Relay │
+│   (home)    │                  │   (cloud)   │
+└─────────────┘                  └──────┬──────┘
+                                        │
+                                        ▼
+                                 ┌─────────────┐
+                                 │   Mobile    │
+                                 │   (remote)  │
+                                 └─────────────┘
+```
+
+**Enable:**
+```toml
+[cloud]
+remote_access = true
+```
+
+**Security:**
+- All traffic is encrypted end-to-end
+- Device authentication still required
+- Gateway never accepts inbound connections
+- You control which devices can connect remotely
+
+## Connecting Your Account
+
+### First Time Setup
+
+1. In the Beacon app, go to Settings → Cloud
+2. Click "Connect Omni Account"
+3. Sign in with your Omni account (or create one)
+4. Authorize Beacon to access your account
+5. Cloud features are now enabled
+
+### From Gateway
+
+```bash
+beacon-gateway auth login
+# Opens browser for OAuth flow
+```
+
+### Disconnecting
+
+```bash
+beacon-gateway auth logout
+```
+
+Or in the app: Settings → Cloud → Disconnect
+
+## Privacy
+
+Beacon is designed with privacy in mind:
+
+- **Local by default**: Everything works without cloud
+- **Opt-in sync**: You choose what to sync
+- **Encrypted data**: Cloud-synced data is encrypted
+- **No tracking**: We don't track your conversations
+- **Data export**: Export all your cloud data anytime
+- **Delete anytime**: Remove all cloud data with one click
+
+## Data Residency
+
+Cloud data is stored in:
+- **US**: Default for most users
+- **EU**: Available for EU users (GDPR compliant)
+
+Configure in your Omni account settings.
+
+## Pricing
+
+| Feature | Free | Pro |
+|---------|------|-----|
+| Memory sync | 1 gateway | Unlimited |
+| Remote access | 10 hrs/month | Unlimited |
+| Persona marketplace | Browse | Publish |
+| Omni Credits | - | Pay-per-use |
+
+See [omni.dev/pricing](https://omni.dev/pricing) for current pricing.
+
+## API Keys vs Omni Credits
+
+**Bring Your Own Keys (BYOK):**
+- Full control over API usage
+- Direct billing from providers
+- Works offline
+- No Omni account needed
+- Supports multiple providers simultaneously
+
+**Omni Credits:**
+- No API key management
+- Single bill for all models
+- Usage analytics
+- Automatic failover between models
+
+You can use both: BYOK as primary with Omni Credits as fallback.
+
+## Supported Providers (BYOK)
+
+Beacon supports multiple AI providers for LLM, voice, and transcription:
+
+| Provider | Services | Environment Variable |
+|----------|----------|---------------------|
+| OpenAI | LLM, TTS, STT (Whisper) | `OPENAI_API_KEY` |
+| Anthropic | LLM (Claude) | `ANTHROPIC_API_KEY` |
+| OpenRouter | LLM (multi-model) | `OPENROUTER_API_KEY` |
+| ElevenLabs | TTS | `ELEVENLABS_API_KEY` |
+| Deepgram | STT | `DEEPGRAM_API_KEY` |
+
+Requests are automatically routed to the correct provider based on the model name.

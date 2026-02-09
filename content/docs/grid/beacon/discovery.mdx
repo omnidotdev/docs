@@ -1,0 +1,215 @@
+---
+title: Gateway Discovery
+description: mDNS service discovery for Beacon gateways
+---
+
+Beacon gateways advertise themselves via mDNS (multicast DNS), allowing apps to automatically discover gateways on the local network without manual configuration.
+
+## How It Works
+
+```
+┌─────────────┐    mDNS     ┌─────────────┐
+│   Gateway   │────────────>│   Network   │
+│  Advertiser │  broadcast  │             │
+└─────────────┘             └──────┬──────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+                    ▼              ▼              ▼
+              ┌─────────┐   ┌─────────┐   ┌─────────┐
+              │ Desktop │   │ Mobile  │   │   Web   │
+              │   App   │   │   App   │   │   App   │
+              └─────────┘   └─────────┘   └─────────┘
+```
+
+## Service Advertisement
+
+Beacon uses DNS-SD (DNS Service Discovery) with the following service type:
+
+```
+_beacon-gateway._tcp.local
+```
+
+### Instance Name
+
+```
+{persona}-{device_id_short}
+
+Example: orin-a7b3c9d2
+```
+
+### TXT Records
+
+| Key | Description | Example |
+|-----|-------------|---------|
+| `version` | Gateway version | `0.1.0` |
+| `device_id` | Full device ID | `a7b3c9d2e1f4a8b6...` |
+| `persona` | Active persona | `orin` |
+| `voice` | Voice capability | `true` |
+| `tls` | TLS enabled | `false` |
+
+## Discovering Gateways
+
+### Native Apps (Tauri)
+
+Use the Tauri mDNS plugin:
+
+```typescript
+import { browse } from "@tauri-apps/plugin-mdns"
+
+const gateways = await browse("_beacon-gateway._tcp.local")
+
+for (const gateway of gateways) {
+  console.log({
+    name: gateway.name,
+    host: gateway.host,
+    port: gateway.port,
+    txt: gateway.txt,
+  })
+}
+```
+
+### Command Line
+
+Use `dns-sd` (macOS) or `avahi-browse` (Linux):
+
+```bash
+# macOS
+dns-sd -B _beacon-gateway._tcp local
+
+# Linux
+avahi-browse -r _beacon-gateway._tcp
+```
+
+### Web Apps
+
+Web browsers cannot directly access mDNS. Web apps must either:
+
+1. **Manual entry**: User enters gateway URL
+2. **Native bridge**: Use a native app to discover and share gateway info
+3. **QR code**: Scan QR code from desktop app with gateway URL
+
+## Gateway Discovery State Machine
+
+The client discovery flow:
+
+```
+┌──────────────┐
+│ Disconnected │
+└──────┬───────┘
+       │ start discovery
+       ▼
+┌──────────────┐
+│ Discovering  │──────────────────────┐
+└──────┬───────┘                      │
+       │ found gateway                │ timeout
+       ▼                              ▼
+┌──────────────┐               ┌──────────────┐
+│  Connecting  │               │    Error     │
+└──────┬───────┘               └──────────────┘
+       │ authenticated
+       ▼
+┌──────────────┐
+│  Connected   │
+└──────────────┘
+```
+
+## Configuration
+
+### Gateway
+
+mDNS is enabled by default. Configure in `config.toml`:
+
+```toml
+[discovery]
+enabled = true
+# Custom instance name (default: {persona}-{device_id_short})
+instance_name = "my-gateway"
+```
+
+Or disable:
+
+```toml
+[discovery]
+enabled = false
+```
+
+### Client
+
+```typescript
+const discovery = getGatewayDiscovery()
+
+// Start discovering
+discovery.startDiscovery()
+
+// Subscribe to state changes
+discovery.subscribe((state) => {
+  if (state.status === "connected") {
+    console.log("Connected to", state.gateway.name)
+  }
+})
+
+// Manually connect to a known URL
+discovery.connect("http://192.168.1.100:18790")
+```
+
+## Multiple Gateways
+
+If multiple gateways are discovered:
+
+1. **Saved gateway**: If the client has connected before, prefer the saved gateway
+2. **User selection**: Present a list for the user to choose
+3. **First found**: Connect to the first discovered gateway (not recommended)
+
+```typescript
+const discovery = getGatewayDiscovery()
+
+discovery.subscribe((state) => {
+  if (state.status === "discovering" && state.gateways.length > 1) {
+    // Show gateway selection UI
+    showGatewayPicker(state.gateways)
+  }
+})
+```
+
+## Network Considerations
+
+### Firewall
+
+mDNS uses UDP port 5353. Ensure your firewall allows:
+
+```bash
+# Linux (ufw)
+sudo ufw allow 5353/udp
+
+# Linux (firewalld)
+sudo firewall-cmd --add-service=mdns --permanent
+```
+
+### Router Settings
+
+Some routers block mDNS traffic between devices. If discovery doesn't work:
+
+1. Check router's "multicast" or "IGMP" settings
+2. Ensure devices are on the same subnet
+3. Try connecting directly via IP address
+
+### VLANs
+
+mDNS doesn't cross VLAN boundaries by default. For multi-VLAN setups:
+
+1. Use an mDNS reflector/repeater
+2. Configure direct IP addresses
+3. Use Omni relay for remote access
+
+## Fallback: Manual Connection
+
+If mDNS discovery fails, users can connect manually:
+
+```typescript
+// In settings or setup flow
+const gatewayUrl = prompt("Enter gateway URL:")
+discovery.connect(gatewayUrl)
+```
+
+The app should remember the manual URL for future connections.

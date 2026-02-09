@@ -1,0 +1,160 @@
+---
+title: Device Identity
+description: Cryptographic device identity with Ed25519
+---
+
+Beacon uses cryptographic device identity instead of traditional username/password authentication. Each device generates a unique Ed25519 keypair that serves as its identity.
+
+## How It Works
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│     Device      │     │     Gateway     │
+├─────────────────┤     ├─────────────────┤
+│ Private Key     │     │ Public Keys     │
+│ Public Key      │────>│ (paired devices)│
+│ Device ID       │     │ Trust Levels    │
+└─────────────────┘     └─────────────────┘
+```
+
+1. **Keypair Generation**: Device generates Ed25519 keypair on first run
+2. **Device ID**: SHA-256 hash of public key, truncated to 32 hex characters
+3. **Pairing**: Device shares public key with gateway during pairing
+4. **Authentication**: Device proves identity by signing challenges
+
+## Device ID Format
+
+```
+Device ID = SHA256(public_key)[0:32]
+
+Example: a7b3c9d2e1f4a8b6c3d9e2f1a4b7c8d9
+```
+
+The device ID is derived deterministically from the public key, so it's consistent across sessions and can be used for identification.
+
+## Trust Levels
+
+Paired devices have one of three trust levels:
+
+| Level | Description | Capabilities |
+|-------|-------------|--------------|
+| `Paired` | Basic paired device | Chat, voice, read data |
+| `Trusted` | Elevated trust | Execute tools, write data |
+| `Admin` | Full access | Manage devices, configure gateway |
+
+Trust levels can be changed by admin devices through the gateway API.
+
+## Challenge-Response Authentication
+
+When a device connects via WebSocket:
+
+```
+Device                          Gateway
+  │                                │
+  │─────── Connect ───────────────>│
+  │                                │
+  │<────── Challenge (nonce) ──────│
+  │                                │
+  │─────── Sign(nonce, privkey) ──>│
+  │                                │
+  │<────── Authenticated ──────────│
+```
+
+1. Gateway generates random nonce (32 bytes)
+2. Device signs nonce with private key
+3. Gateway verifies signature against stored public key
+4. Connection is authenticated
+
+## Device Pairing
+
+New devices pair using a 6-digit code:
+
+```
+1. Gateway: POST /api/pair/request
+   Response: { "code": "482719", "expiresAt": "..." }
+
+2. User: Enters code on new device
+
+3. Device: POST /api/pair/confirm
+   Body: { "code": "482719", "publicKey": "...", "name": "iPhone", "platform": "ios" }
+   Response: { "deviceId": "a7b3c9d2...", "trustLevel": "paired" }
+```
+
+Pairing codes expire after 10 minutes for security.
+
+## Storage
+
+### Gateway (Rust)
+
+Paired devices are stored in SQLite:
+
+```sql
+CREATE TABLE devices (
+    id TEXT PRIMARY KEY,           -- SHA-256(public_key)[0:32]
+    public_key BLOB NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    platform TEXT,                 -- ios, android, macos, linux, windows, web
+    trust_level TEXT NOT NULL DEFAULT 'paired',
+    paired_at TEXT NOT NULL,
+    last_seen TEXT NOT NULL
+);
+```
+
+The gateway also tracks DM-level pairing for messaging channels:
+
+```sql
+CREATE TABLE paired_users (
+    id TEXT PRIMARY KEY,
+    sender_id TEXT NOT NULL,       -- Platform user ID
+    channel TEXT NOT NULL,         -- discord, slack, etc
+    paired_at TEXT NOT NULL,
+    pairing_code TEXT,
+    code_expires_at TEXT,
+    UNIQUE(sender_id, channel)
+);
+```
+
+### Device (TypeScript)
+
+Device identity is stored in:
+- **Web**: localStorage (encrypted)
+- **Native**: Tauri secure storage
+
+```typescript
+type DeviceIdentity = {
+  deviceId: string
+  publicKey: string
+  privateKey: string
+  name: string
+  platform: string
+  createdAt: string
+}
+```
+
+## Security Considerations
+
+- **Private key never leaves device**: Only the public key is shared during pairing
+- **Keys are generated locally**: No server involvement in key generation
+- **Signatures are non-replayable**: Each challenge uses a unique nonce
+- **Trust can be revoked**: Admin devices can remove paired devices
+
+## Revoking Devices
+
+Remove a paired device:
+
+```bash
+DELETE /api/devices/{device_id}
+```
+
+The device's public key is removed from the gateway. The device will need to re-pair to connect again.
+
+## Migration from Password Auth
+
+If you're migrating from password-based auth:
+
+1. Generate device identity on each client
+2. Pair devices using the pairing flow
+3. Switch gateway to `DeviceOnly` mode
+4. Remove password from config
+
+This provides stronger security without the need to remember passwords.

@@ -1,0 +1,141 @@
+---
+title: Skills & Hooks
+description: Extend your assistant with skills, auto-reply rules, and event hooks
+---
+
+Extend what your assistant can do. Skills teach it new capabilities, while hooks let you set up automatic responses and custom logic.
+
+Beacon provides two extensibility systems: **skills** for adding capabilities to your assistant, and **hooks** for reacting to events with custom logic.
+
+## Skills
+
+Skills are markdown-based capability definitions that extend what your assistant can do. Each skill is a directory containing a `SKILL.md` file with YAML frontmatter.
+
+### Skill Structure
+
+```
+~/.beacon/skills/
+└── my-skill/
+    └── SKILL.md
+```
+
+```markdown
+---
+name: My Skill
+description: A custom skill for my assistant
+tags: [productivity, automation]
+---
+
+Skill instructions and content here...
+```
+
+### Skill Sources
+
+Skills can be loaded from multiple sources:
+
+| Source | Description |
+|--------|-------------|
+| Local | Directories on the gateway filesystem |
+| Manifold | Installed from the Omni persona marketplace |
+| Bundled | Built into the gateway binary |
+
+### Skill Registry
+
+The gateway maintains a skill registry in SQLite, tracking installed skills with their metadata, version, author, tags, permissions, and enabled status.
+
+### API
+
+Skills are accessible through the gateway API:
+
+- `GET /api/skills` — List installed skills
+- `POST /api/skills` — Install a skill
+- `DELETE /api/skills/{id}` — Remove a skill
+
+## Hooks
+
+Hooks let you run custom logic in response to gateway events. There are two types: built-in auto-reply rules and external hook scripts.
+
+### Auto-Reply Rules
+
+Define pattern-based auto-replies in your gateway config:
+
+```toml
+[[hooks.auto_reply]]
+pattern = "^(hello|hi|hey)$"
+reply = "Hey there! How can I help?"
+case_insensitive = true
+skip_agent = true
+
+[[hooks.auto_reply]]
+pattern = "office hours"
+reply = "Office hours are Monday–Friday, 9am–5pm"
+channels = ["discord", "slack"]
+```
+
+**Fields:**
+
+| Field | Description |
+|-------|-------------|
+| `pattern` | Regex pattern to match incoming messages |
+| `reply` | Response text |
+| `channels` | Optional channel filter |
+| `skip_agent` | Skip LLM processing if matched |
+| `case_insensitive` | Case-insensitive matching |
+
+### External Hooks
+
+Place executable hooks in `~/.beacon/hooks/`. Each hook is a directory containing a `HOOK.toml` manifest and an executable script:
+
+```
+~/.beacon/hooks/
+└── my-hook/
+    ├── HOOK.toml
+    └── handler.sh
+```
+
+### Hook Events
+
+| Event | Trigger |
+|-------|---------|
+| `message:received` | Incoming message from any channel |
+| `message:before_agent` | Before sending a message to the LLM |
+| `message:after_agent` | After receiving a response from the LLM |
+
+### Hook Results
+
+Hook scripts can return JSON to control processing:
+
+```json
+{
+  "reply": "Custom response",
+  "skip_agent": true,
+  "skip_processing": false
+}
+```
+
+- **reply** — Send a custom response instead of (or before) the LLM
+- **skip_agent** — Skip LLM processing for this message
+- **skip_processing** — Stop executing further hooks
+
+### Configuration
+
+```bash
+# Enable/disable hooks
+BEACON_HOOKS_ENABLED=true
+```
+
+The hooks directory path is configurable via the gateway config file (`hooks.path`).
+
+## Tools
+
+The gateway also includes built-in tools that the assistant can use during conversations:
+
+| Tool | Description |
+|------|-------------|
+| Web Search | Search the web for current information |
+| Web Fetch | Fetch and extract content from URLs |
+| Browser | Automated browser interaction via CDP |
+| Scheduling | Create and manage scheduled tasks (Vortex) |
+| Session Tools | Access conversation history and context |
+
+Tools are governed by a **tool policy** system that controls which tools are available per persona and context.
