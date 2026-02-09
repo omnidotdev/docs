@@ -1,43 +1,106 @@
 ---
-title: Beacon Overview
+title: 🗼 Beacon
 description: Local-first voice and messaging gateway
 ---
 
-**Beacon** is a local-first voice and messaging gateway. Get started with the guides below, or dive into the reference docs for deeper details.
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust } from "react-icons/si";
+import { FaMicrophone, FaComments, FaServer, FaShieldAlt, FaWifi } from "react-icons/fa";
 
-## Get Started
+<ProductOverview
+  tags={[
+    {
+      label: "Local-First",
+      icon: <FaServer />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Voice",
+      icon: <FaMicrophone />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Messaging",
+      icon: <FaComments />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://beacon.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/beacon`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+    {
+      href: "/orin",
+      label: "Meet Orin",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Local-First Architecture",
+      description:
+        "Beacon runs on your machine. Your data stays local. Cloud features are optional",
+    },
+    {
+      title: "Big Idea",
+      description:
+        "A gateway-centric platform where AI assistants run locally with device-based identity",
+    },
+  ]}
+/>
 
-<Cards>
-  <Card title="Getting Started" href="/grid/beacon/getting-started">
-    Download, install, and set up your first gateway
-  </Card>
-  <Card title="Voice" href="/grid/beacon/voice">
-    Wake words, speech-to-text, and text-to-speech
-  </Card>
-  <Card title="Personas" href="/grid/beacon/personas">
-    Customize your assistant's personality, voice, and wake word
-  </Card>
-  <Card title="Cloud Features" href="/grid/beacon/cloud-features">
-    Optional cloud sync, remote access, and Omni Credits
-  </Card>
-</Cards>
+**Omni Beacon** is a local-first voice and messaging gateway built in Rust. It runs on your machine or home server, keeping all your data local while providing seamless multi-device access through device-based identity and mDNS discovery.
 
-## Reference
+## Local-First Principles
 
-<Cards>
-  <Card title="Channels" href="/grid/beacon/channels">
-    Connect to Discord, Slack, Telegram, Teams, Signal, and more
-  </Card>
-  <Card title="Authentication" href="/grid/beacon/authentication">
-    Auth modes: Open, Token, Password, DeviceOnly
-  </Card>
-  <Card title="Device Identity" href="/grid/beacon/device-identity">
-    Ed25519 keypairs and cryptographic device authentication
-  </Card>
-  <Card title="Discovery" href="/grid/beacon/discovery">
-    mDNS service discovery for automatic gateway detection
-  </Card>
-  <Card title="Skills & Hooks" href="/grid/beacon/skills-and-hooks">
-    Extend your assistant with skills, auto-reply rules, and event hooks
-  </Card>
-</Cards>
+Beacon is designed around local-first principles:
+
+- **Gateway is the source of truth**: All data lives on your gateway
+- **No cloud account required**: Works completely offline
+- **Device identity, not user accounts**: Ed25519 keypairs per device
+- **mDNS auto-discovery**: Apps find your gateway automatically on LAN
+- **Optional cloud sync**: Connect to Omni for cross-device memory sync
+
+## Chat
+
+Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Connect your own AI provider keys or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
+
+## Voice
+
+Beacon supports hands-free interaction with wake word detection, speech-to-text, and text-to-speech. Say your persona's wake word, ask a question, and hear the answer spoken back. See the [Voice guide](/grid/beacon/voice) for setup details.
+
+| Component | Local | Cloud |
+|-----------|-------|-------|
+| Wake word detection | Yes | - |
+| Speech-to-text | Optional | Default (Whisper) |
+| Text-to-speech | Optional | Default (OpenAI TTS) |
+
+## Personas
+
+Beacon uses configurable [personas](/grid/beacon/personas) to shape how your assistant sounds and behaves. The default persona is [Orin](/orin), a friendly otter guide, but you can create your own or install community personas from [Manifold](https://manifold.omni.dev). Each persona has its own wake word, voice, and personality. See the [persona.json spec](/codex/persona-json) for advanced customization.
+
+## Channels
+
+Connect Beacon to your favorite messaging platforms. Your assistant works consistently across Discord, Slack, Telegram, Teams, Signal, and more. See [Channels](/grid/beacon/channels) for the full list and setup instructions.
+
+## Getting Started
+
+1. **Download**: Get the Beacon desktop app — the gateway runs automatically as a sidecar
+2. **Set up AI**: Add your own API keys or connect Omni Credits
+3. **Pair devices**: Use a 6-digit pairing code to add phones, tablets, or other computers
+4. **Customize**: Pick a persona, set your wake word, and configure voice
+5. **Start talking**: Say your wake word and go
+
+See the [Getting Started guide](/grid/beacon/getting-started) for a detailed walkthrough.
