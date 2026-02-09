@@ -1,0 +1,184 @@
+---
+title: 🎭 persona.json
+description: Portable non-human identity specification
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaRobot, FaLink, FaMask } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Non-Human Identity",
+      icon: <FaRobot />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Portability",
+      icon: <FaLink />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Persona",
+      icon: <FaMask />,
+      className: "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://persona.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/persona-json`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+/>
+
+**Omni persona.json** is a portable, composable JSON specification for defining non-human identities—AI assistants, brands, bots, mascots, characters, and any other non-human that presents a public-facing identity.
+
+## Relationship to life.json
+
+persona.json complements [life.json](/codex/life-json) as twin specifications for identity duality:
+
+| Spec | Describes | Owned By |
+|------|-----------|----------|
+| **life.json** | Human identity | The user |
+| **persona.json** | Non-human identity | The developer/operator |
+
+They meet in the middle: life.json's `assistants` slice stores the relationship between a specific human and a specific persona (learned facts, permissions, preferences).
+
+## Schema Slices
+
+persona.json uses a modular slice architecture. Only `identity` is required—include additional slices as needed:
+
+| Slice | Required | Description |
+|-------|----------|-------------|
+| `identity` | Yes | Core identity: id, name, tagline, icon, type, description, url |
+| `voice` | No | Wake words, TTS/STT provider configuration |
+| `personality` | No | System prompt, tone, verbosity, expertise, traits, mode-specific guidelines |
+| `branding` | No | Colors (hex), assets (avatar/logo/banner URLs), marketing description |
+| `capabilities` | No | Channel-specific tool profiles, permissions, integrations (MCP, APIs) |
+
+## Entity Types
+
+The `identity.type` field classifies the persona:
+
+- **assistant** — AI assistants (e.g. Orin)
+- **brand** — Company or product identities
+- **bot** — Discord bots, Slack bots, automation
+- **character** — NPCs, interactive fiction
+- **mascot** — Brand mascots
+- **service** — Service-level identity
+
+## Voice Configuration
+
+The `voice` slice configures speech interaction:
+
+- **Wake words** — Activation phrases for hands-free interaction
+- **TTS** — Text-to-speech with provider, voice, speed (0.25–4.0x), and pitch (0.5–2.0x)
+- **STT** — Speech-to-text with provider, model, and BCP 47 language code
+
+Supported TTS providers: `openai`, `elevenlabs`, `azure`, `google`, `custom`
+
+Supported STT providers: `openai`, `azure`, `google`, `deepgram`, `custom`
+
+## Capabilities
+
+The `capabilities` slice controls what a persona can do across channels:
+
+**Tool profiles** define available tool access per channel (`voice`, `discord`, `slack`, `telegram`, etc.) with a `default` fallback:
+
+| Profile | Description |
+|---------|-------------|
+| `none` | No tool access |
+| `minimal` | Basic tools only |
+| `messaging` | Messaging-appropriate tools |
+| `full` | All available tools |
+| `custom` | Custom tool configuration |
+
+**Permissions** set global flags: `canLearn`, `canAccessWeb`, `canExecuteCode`, `canAccessFiles`
+
+**Integrations** connect external services like MCP servers and APIs.
+
+## Examples
+
+### Minimal
+
+```json
+{
+  "$schema": "https://manifold.omni.dev/@omni/schemas/persona.schema.json",
+  "version": "1.0.0",
+  "identity": {
+    "id": "example",
+    "name": "Example Entity"
+  }
+}
+```
+
+### Full (Orin)
+
+```json
+{
+  "$schema": "https://manifold.omni.dev/@omni/schemas/persona.schema.json",
+  "version": "1.0.0",
+  "identity": {
+    "id": "orin",
+    "name": "Orin",
+    "tagline": "Your friendly otter guide",
+    "icon": "🦦",
+    "type": "assistant",
+    "description": "Omni's friendly otter mascot and AI assistant",
+    "url": "https://orin.omni.dev"
+  },
+  "voice": {
+    "wakeWords": ["hey orin", "hi orin", "okay orin"],
+    "tts": { "provider": "openai", "voice": "nova", "speed": 1.0 },
+    "stt": { "provider": "openai", "model": "whisper-1" }
+  },
+  "personality": {
+    "systemPrompt": "You are Orin, a friendly and helpful AI assistant...",
+    "tone": "friendly",
+    "verbosity": "minimal",
+    "expertise": ["general knowledge", "software development", "omni ecosystem", "productivity"],
+    "traits": ["helpful", "curious", "playful", "knowledgeable"]
+  },
+  "branding": {
+    "colors": { "primary": "#4ECDC4", "accent": "#1A535C" },
+    "assets": { "avatar": "/img/orin-avatar.png" },
+    "description": "Omni's friendly otter mascot and AI assistant"
+  },
+  "capabilities": {
+    "tools": {
+      "default": "messaging",
+      "voice": "full",
+      "discord": "messaging",
+      "telegram": "messaging",
+      "slack": "messaging"
+    },
+    "permissions": {
+      "canLearn": true,
+      "canAccessWeb": true,
+      "canExecuteCode": false
+    }
+  }
+}
+```
+
+## Used By
+
+| Product | Usage |
+|---------|-------|
+| [Beacon](/grid/beacon) | Loads persona definitions for AI assistants |
+| [Orin](/orin) | Defined as a persona.json instance |
+
+## Getting Started
+
+1. Create a JSON file with `$schema` pointing to `https://manifold.omni.dev/@omni/schemas/persona.schema.json`
+2. Add `version: "1.0.0"` and an `identity` slice with at least `id` and `name`
+3. Add optional slices (`voice`, `personality`, `branding`, `capabilities`) as needed
+4. Validate against the schema — see the [repository](https://github.com/omnidotdev/persona-json) for more examples
