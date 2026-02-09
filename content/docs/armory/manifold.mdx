@@ -1,0 +1,38 @@
+---
+title: Manifold
+description: OCI-compatible artifact registry for schemas, containers, and WASM modules
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaDatabase } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Registry",
+      icon: <FaDatabase />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://manifold.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/manifold`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Coming Soon",
+      description: "Manifold is currently in development.",
+    },
+  ]}
+/>
+
+**Omni Manifold** docs coming soon
