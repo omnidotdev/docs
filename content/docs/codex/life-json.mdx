@@ -1,0 +1,177 @@
+---
+title: 🧬 life.json
+description: Your portable digital identity specification
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaUser, FaLink, FaLock } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Identity",
+      icon: <FaUser />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Portability",
+      icon: <FaLink />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Privacy",
+      icon: <FaLock />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://life.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/life-json`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+/>
+
+**Omni life.json** is a portable, composable JSON specification for capturing your digital identity. Owned by the individual and consumed by any compatible platform, enabling true data portability and anti-vendor-lock-in.
+
+## Design Philosophy
+
+life.json separates **actual data** (small, truly portable) from **references** (pointers to where data lives). Your identity file stays lightweight while connecting to everything:
+
+- **Actual data** — Identity, preferences, and assistant context travel with you
+- **References** — Accounts, calendars, and knowledge bases are linked, not duplicated
+- **Export URLs** — Every external integration includes an export path for data portability
+
+## Schema Slices
+
+life.json uses a modular slice architecture. All slices are optional—include only what you need:
+
+### Actual Data (portable)
+
+| Slice | Description |
+|-------|-------------|
+| `identity` | Name, pronouns, timezone, locale, location, occupation, bio |
+| `preferences` | Language, theme, communication style, accessibility, privacy, units |
+| `assistants` | Per-assistant learned facts, preferences, context, permissions, and stats |
+
+### References (pointers to external data)
+
+| Slice | Description |
+|-------|-------------|
+| `accounts` | Connected platform accounts with export URLs |
+| `social` | Social profiles, primary link-in-bio, curated links |
+| `relationships` | Key people, contact methods, groups |
+| `calendar` | Calendar references, working hours, scheduling preferences |
+| `memories` | Photo/video source references, highlights, important dates |
+| `knowledge` | Knowledge base/vault references and topics |
+| `finances` | Account references (never balances), currency, budget categories |
+
+## The Assistants Bridge
+
+The `assistants` slice is the bridge between life.json and [persona.json](/codex/persona-json). While persona.json defines *what a persona is*, life.json stores *your relationship with it*:
+
+```
+persona.json (developer-owned)         life.json (user-owned)
+  ├─ identity                            ├─ identity
+  ├─ voice                               ├─ preferences
+  ├─ personality       ──────────>       ├─ assistants["orin"]
+  ├─ branding                            │   ├─ learnedFacts
+  └─ capabilities                        │   ├─ preferences
+                                         │   ├─ context
+                                         │   └─ permissions
+```
+
+Each assistant entry includes:
+
+- **Learned facts** — What the assistant knows about you, with confidence scores and source tracking (`explicit`, `inferred`, `corrected`)
+- **Per-assistant preferences** — Your verbosity, tone, and topic preferences for this assistant
+- **Context** — Current projects, goals, and notes
+- **Permissions** — What you allow this assistant to do (learn, access calendar, execute code, etc.)
+- **Stats** — Conversation count and interaction timestamps
+
+## Examples
+
+### Minimal
+
+```json
+{
+  "$schema": "https://manifold.omni.dev/@omni/schemas/life.schema.json",
+  "version": "1.0.0",
+  "identity": {
+    "name": "Brian",
+    "timezone": "America/Los_Angeles"
+  }
+}
+```
+
+### With Assistant
+
+```json
+{
+  "$schema": "https://manifold.omni.dev/@omni/schemas/life.schema.json",
+  "version": "1.0.0",
+  "identity": {
+    "name": "Brian",
+    "timezone": "America/Los_Angeles",
+    "locale": "en-US",
+    "occupation": "Software Engineer"
+  },
+  "preferences": {
+    "language": "en",
+    "theme": "dark",
+    "communication": { "style": "concise" },
+    "units": { "temperature": "fahrenheit", "timeFormat": "12h" }
+  },
+  "assistants": {
+    "orin": {
+      "enabled": true,
+      "learnedFacts": [
+        {
+          "fact": "Prefers Rust over Go for systems programming",
+          "confidence": 0.9,
+          "source": "explicit",
+          "learnedAt": "2024-01-15T10:30:00Z"
+        }
+      ],
+      "preferences": {
+        "verbosity": "minimal",
+        "tone": "friendly",
+        "expertise": ["rust", "typescript", "distributed-systems"]
+      },
+      "context": {
+        "currentProjects": ["beacon gateway", "persona marketplace"],
+        "goals": ["ship voice MVP", "launch persona.json spec"]
+      },
+      "permissions": {
+        "canLearn": true,
+        "canAccessCalendar": true,
+        "canBrowseWeb": true,
+        "canExecuteCode": false
+      }
+    }
+  }
+}
+```
+
+## File Discovery
+
+Beacon looks for life.json in this order:
+
+1. `LIFE_JSON_PATH` environment variable
+2. `~/.life.json`
+3. `~/.config/life.json`
+
+## Getting Started
+
+1. Create a JSON file with `$schema` pointing to `https://manifold.omni.dev/@omni/schemas/life.schema.json`
+2. Add `version: "1.0.0"` and an `identity` slice with at least your `name`
+3. Add optional slices as needed — start with `preferences` and `assistants`
+4. Place it at `~/.life.json` or set `LIFE_JSON_PATH`
+5. Validate against the schema — see the [repository](https://github.com/omnidotdev/life-json) for more examples
