@@ -1,0 +1,16 @@
+{
+  "title": "🗼 Beacon",
+  "pages": [
+    "index",
+    "getting-started",
+    "voice",
+    "personas",
+    "cloud-features",
+    "---Reference---",
+    "channels",
+    "authentication",
+    "device-identity",
+    "discovery",
+    "skills-and-hooks"
+  ]
+}

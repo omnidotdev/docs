@@ -1,5 +1,5 @@
 ---
-title: Beacon
+title: 🗼 Beacon
 description: Local-first voice and messaging gateway
 ---
 
@@ -63,46 +63,6 @@ import { FaMicrophone, FaComments, FaServer, FaShieldAlt, FaWifi } from "react-i
 
 **Omni Beacon** is a local-first voice and messaging gateway built in Rust. It runs on your machine or home server, keeping all your data local while providing seamless multi-device access through device-based identity and mDNS discovery.
 
-## Architecture
-
-Beacon uses a gateway-centric architecture where the gateway is the source of truth:
-
-```
-              ┌──────────────────────────────┐
-              │       AI Providers           │
-              │  (OpenAI, Anthropic, etc.)   │
-              └──────────────┬───────────────┘
-                             │
-┌────────────────────────────┼────────────────────────────────┐
-│                     beacon-gateway                          │
-│              (always-on daemon, runs locally)               │
-├─────────────────────────────────────────────────────────────┤
-│  Identity: Ed25519 keypairs, device-based auth              │
-│  Auth: Open / Token / Password / DeviceOnly modes           │
-│  Discovery: mDNS (_beacon-gateway._tcp.local)               │
-│  Storage: Local SQLite (sessions, memories, devices)        │
-│  Channels: Discord, Slack, Telegram, Teams, Signal, etc     │
-│  Tools: Web search, browser, scheduling                     │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ WebSocket + HTTP
-        ┌──────────────┼──────────────┐
-        ▼              ▼              ▼
-   Desktop App    Mobile App      Web App
-   (Tauri 2)      (Tauri 2)     (SSR/Nitro)
-        └──────────────┼──────────────┘
-                  beacon-app
-              (unified React app)
-                       │
-                       ▼
-                  beacon-api
-              (GraphQL / Elysia)
-```
-
-**Services:**
-- **beacon-gateway** (Rust) — Always-on daemon handling voice, messaging, tools, and persona management
-- **beacon-app** (TypeScript) — Unified app for desktop, mobile, and web built with React 19, TanStack Start, and Tauri 2
-- **beacon-api** (TypeScript) — GraphQL API built with Elysia and Drizzle ORM on PostgreSQL
-
 ## Local-First Principles
 
 Beacon is designed around local-first principles:
@@ -113,87 +73,13 @@ Beacon is designed around local-first principles:
 - **mDNS auto-discovery**: Apps find your gateway automatically on LAN
 - **Optional cloud sync**: Connect to Omni for cross-device memory sync
 
-## Device Identity
+## Chat
 
-Instead of usernames and passwords, Beacon uses cryptographic device identity:
+Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Connect your own AI provider keys or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
 
-- **Ed25519 keypairs**: Each device generates a unique keypair
-- **Device ID**: SHA-256 hash of public key (32 hex characters)
-- **Challenge-response auth**: Devices prove identity by signing challenges
-- **Trust levels**: Paired → Trusted → Admin
+## Voice
 
-This means:
-- No passwords to remember
-- No accounts to create
-- Cryptographically secure authentication
-- Easy device management
-
-## Gateway Discovery
-
-Beacon advertises itself via mDNS for automatic discovery:
-
-```
-Service: _beacon-gateway._tcp.local
-Instance: {persona}-{device_id_short}
-TXT records: version, device_id, persona, voice
-```
-
-Apps on your local network automatically find and connect to your gateway. No manual IP configuration needed.
-
-## Authentication Modes
-
-Choose the security level that fits your environment:
-
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `Open` | No authentication | Trusted home network |
-| `Token` | Static bearer token | Programmatic access |
-| `Password` | Password-based auth | Shared device |
-| `DeviceOnly` | Only paired devices | Maximum security |
-
-You can also enable local network bypass to trust LAN connections automatically.
-
-## Device Pairing
-
-New devices pair with a simple 6-digit code:
-
-1. Gateway generates pairing code (valid for 10 minutes)
-2. User enters code on new device
-3. Device sends public key, gateway stores it
-4. Device is now paired and can authenticate
-
-Revoke devices anytime through the gateway admin interface.
-
-## Local Features
-
-These features work completely offline:
-
-- **Chat**: Conversation with your AI assistant
-- **Voice**: Wake word detection, speech-to-text, text-to-speech
-- **Local Personas**: Use personas stored on your gateway
-- **Device Pairing**: Add new devices to your gateway
-- **mDNS Discovery**: Find gateways on your network
-- **Messaging Channels**: Discord, Slack, Telegram, Teams, Signal, iMessage, WhatsApp, Matrix, Google Chat
-- **Skills**: Extend your assistant with custom capabilities
-- **Hooks**: Auto-reply rules and custom event handlers
-- **Tools**: Web search, web fetching, browser automation, scheduling
-- **Canvas**: Collaborative drawing and whiteboard
-- **Extensions**: Plugin registry for extending functionality
-
-## Cloud Features (Optional)
-
-Connect your Omni account to unlock additional features:
-
-- **Memory Sync**: Sync memories across all your devices
-- **Persona Marketplace**: Browse and install community personas
-- **Omni Credits**: Use Omni-hosted AI models with pay-per-use credits
-- **Remote Access**: Access your gateway from anywhere via Omni relay
-
-Cloud features require Omni OAuth authentication but are completely optional.
-
-## Voice Processing
-
-Beacon uses a hybrid approach for optimal voice interaction:
+Beacon supports hands-free interaction with wake word detection, speech-to-text, and text-to-speech. Say your persona's wake word, ask a question, and hear the answer spoken back. See the [Voice guide](/grid/beacon/voice) for setup details.
 
 | Component | Local | Cloud |
 |-----------|-------|-------|
@@ -201,218 +87,20 @@ Beacon uses a hybrid approach for optimal voice interaction:
 | Speech-to-text | Optional | Default (Whisper) |
 | Text-to-speech | Optional | Default (OpenAI TTS) |
 
-This provides instant wake word response while leveraging cloud services for high-quality transcription and synthesis.
-
-## Messaging Channels
-
-| Channel | Status | Integration Type |
-|---------|--------|------------------|
-| Voice | Available | Local audio capture |
-| Discord | Available | WebSocket (Serenity) |
-| Slack | Available | WebSocket |
-| Telegram | Available | Webhook |
-| Teams | Available | Microsoft Bot Framework |
-| Signal | Available | Signal CLI bridge |
-| iMessage | Available | AppleScript bridge (macOS) |
-| WhatsApp | Available | Cloud API |
-| Matrix | Available | Matrix client SDK |
-| Google Chat | Available | Service account |
-
 ## Personas
 
-Beacon supports configurable personas using the [persona.json](/codex/persona-json) spec:
+Beacon uses configurable [personas](/grid/beacon/personas) to shape how your assistant sounds and behaves. The default persona is [Orin](/orin), a friendly otter guide, but you can create your own or install community personas from [Manifold](https://manifold.omni.dev). Each persona has its own wake word, voice, and personality. See the [persona.json spec](/codex/persona-json) for advanced customization.
 
-```json
-{
-  "$schema": "https://manifold.omni.dev/@omni/schemas/persona.schema.json",
-  "version": "1.0.0",
-  "identity": {
-    "id": "orin",
-    "name": "Orin",
-    "tagline": "Your friendly otter guide",
-    "icon": "🦦",
-    "type": "assistant"
-  },
-  "voice": {
-    "wakeWords": ["hey orin", "hi orin", "okay orin"],
-    "tts": { "provider": "openai", "voice": "nova", "speed": 1.0 },
-    "stt": { "provider": "openai", "model": "whisper-1" }
-  },
-  "personality": {
-    "systemPrompt": "You are Orin, a friendly and helpful AI assistant...",
-    "tone": "friendly",
-    "verbosity": "minimal",
-    "traits": ["helpful", "curious", "playful", "knowledgeable"]
-  }
-}
-```
+## Channels
 
-Personas are loaded from local files, the [Manifold](https://manifold.omni.dev) registry, or embedded defaults. [Orin](/orin) is the flagship persona, but you can create custom personas with their own wake words, voices, and personalities.
-
-## Database Schema
-
-Beacon uses SQLite for local persistence:
-
-- **users**: User identity and life.json path
-- **sessions**: Conversation sessions per channel and persona
-- **messages**: Message history per session (with threading support)
-- **user_context**: Key-value context extracted from conversations
-- **memories**: Long-term memory storage with vector embeddings (1536-dim)
-- **installed_skills**: Skill registry with metadata and permissions
-- **installed_personas**: Personas installed from the marketplace
-- **paired_users**: DM security pairing for messaging channels
-- **devices**: Paired device registry with trust levels
-
-## Running Beacon
-
-### Desktop App (Sidecar Mode)
-
-The desktop app manages the gateway as a sidecar process:
-
-```bash
-# Gateway starts automatically with the app
-# No separate installation needed
-```
-
-### Standalone Gateway
-
-Run the gateway directly on a server or Raspberry Pi:
-
-```bash
-# Install
-cargo install beacon-gateway
-
-# Run with default persona
-beacon-gateway --foreground --persona orin
-
-# Run with verbose logging
-beacon-gateway --foreground --verbose --persona orin
-```
-
-### Environment Variables
-
-**AI Providers:**
-
-| Variable | Description |
-|----------|-------------|
-| `ANTHROPIC_API_KEY` | Anthropic API key (Claude) |
-| `OPENAI_API_KEY` | OpenAI API key (GPT, Whisper, TTS) |
-| `OPENROUTER_API_KEY` | OpenRouter API key (multi-model) |
-| `ELEVENLABS_API_KEY` | ElevenLabs API key (TTS) |
-| `DEEPGRAM_API_KEY` | Deepgram API key (STT) |
-
-**Messaging Channels:**
-
-| Variable | Description |
-|----------|-------------|
-| `DISCORD_TOKEN` | Discord bot token |
-| `SLACK_BOT_TOKEN` | Slack bot token |
-| `TELEGRAM_BOT_TOKEN` | Telegram bot token |
-| `WHATSAPP_TOKEN` | WhatsApp Cloud API token |
-| `WHATSAPP_PHONE_ID` | WhatsApp phone number ID |
-| `SIGNAL_API_URL` | Signal CLI REST API URL |
-| `SIGNAL_PHONE` | Signal phone number |
-| `IMESSAGE_ENABLED` | Enable iMessage bridge (macOS) |
-| `MATRIX_HOMESERVER` | Matrix homeserver URL |
-| `MATRIX_ACCESS_TOKEN` | Matrix access token |
-| `MATRIX_USER_ID` | Matrix user ID |
-| `TEAMS_TENANT_ID` | Microsoft Teams tenant ID |
-| `TEAMS_CLIENT_ID` | Microsoft Teams client ID |
-| `TEAMS_CLIENT_SECRET` | Microsoft Teams client secret |
-| `TEAMS_BOT_ID` | Microsoft Teams bot ID |
-| `GOOGLE_CHAT_SERVICE_ACCOUNT` | Google Chat service account path |
-
-**Gateway Configuration:**
-
-| Variable | Description |
-|----------|-------------|
-| `BEACON_API_PORT` | HTTP API port (default: 18790) |
-| `BEACON_API_KEY` | Admin API key |
-| `BEACON_PERSONA` | Default persona ID (default: orin) |
-| `BEACON_PERSONAS_DIR` | Personas directory path |
-| `BEACON_LLM_PROVIDER` | LLM provider override (anthropic or openai) |
-| `BEACON_AUTH_MODE` | Auth mode (open, token, password, device_only) |
-| `BEACON_HOOKS_ENABLED` | Enable hooks system (default: true) |
-| `RUST_LOG` | Log level (default: info) |
-| `LIFE_JSON_PATH` | Path to life.json user identity file |
-
-## HTTP API
-
-Beacon exposes an HTTP API for webhooks, device communication, and management:
-
-- `GET /health` - Health check
-- `POST /api/pair/request` - Generate pairing code
-- `POST /api/pair/confirm` - Complete pairing
-- `GET /api/pair/pending` - List pending requests
-- `DELETE /api/devices/{id}` - Revoke device
-- `/api/admin` - Gateway administration
-- `/api/canvas` - Canvas operations
-- `/api/providers` - Provider management (BYOK)
-- `/api/skills` - Skill registry
-- `/api/personas/marketplace` - Persona marketplace
-- `/api/voice` - Voice control
-- `/api/webhooks` - Webhook handlers (Telegram, etc.)
-- `/ws` - WebSocket connection
-- `/ws/canvas` - Canvas WebSocket
-
-## WebSocket API
-
-Real-time communication uses WebSocket with challenge-response auth:
-
-```typescript
-// Connect
-const ws = new WebSocket("ws://gateway:18790/ws")
-
-// Receive challenge
-ws.onmessage = (e) => {
-  const { type, nonce } = JSON.parse(e.data)
-  if (type === "challenge") {
-    // Sign nonce with device private key
-    const signature = sign(nonce, privateKey)
-    ws.send(JSON.stringify({ type: "auth", deviceId, signature }))
-  }
-}
-```
-
-## Security
-
-Beacon is designed with security in mind:
-
-- **No cloud dependency**: Your data never leaves your network
-- **Ed25519 signatures**: Industry-standard cryptography
-- **Timing-safe comparison**: Prevents timing attacks on tokens
-- **Trust levels**: Fine-grained device permissions
-- **Local network detection**: Optional LAN bypass for convenience
-
-## Development
-
-Start all services locally with Tilt:
-
-```bash
-# Start all services (gateway, app, API)
-tilt up
-
-# Stop services
-tilt down
-```
-
-Or run individual services:
-
-```bash
-# Gateway
-cd services/beacon-gateway && cargo run -- --foreground --verbose --persona orin
-
-# App (web)
-cd services/beacon-app && bun run dev
-
-# API
-cd services/beacon-api && bun run dev
-```
+Connect Beacon to your favorite messaging platforms. Your assistant works consistently across Discord, Slack, Telegram, Teams, Signal, and more. See [Channels](/grid/beacon/channels) for the full list and setup instructions.
 
 ## Getting Started
 
-1. **Desktop**: Download the Beacon desktop app — gateway runs automatically
-2. **Server**: Install `beacon-gateway` and run as a systemd service
-3. **Pair devices**: Use the 6-digit pairing code to add devices
-4. **Configure persona**: Customize wake word, voice, and personality
+1. **Download**: Get the Beacon desktop app — the gateway runs automatically as a sidecar
+2. **Set up AI**: Add your own API keys or connect Omni Credits
+3. **Pair devices**: Use a 6-digit pairing code to add phones, tablets, or other computers
+4. **Customize**: Pick a persona, set your wake word, and configure voice
 5. **Start talking**: Say your wake word and go
+
+See the [Getting Started guide](/grid/beacon/getting-started) for a detailed walkthrough.

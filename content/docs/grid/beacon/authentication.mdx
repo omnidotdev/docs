@@ -1,0 +1,190 @@
+---
+title: Authentication
+description: Gateway authentication modes
+---
+
+Beacon supports multiple authentication modes to fit different security requirements and deployment scenarios.
+
+## Auth Modes
+
+| Mode | Security | Use Case |
+|------|----------|----------|
+| `Open` | None | Trusted home network, development |
+| `Token` | Medium | Programmatic access, scripts |
+| `Password` | Medium | Shared devices, simple setup |
+| `DeviceOnly` | High | Production, maximum security |
+
+## Configuration
+
+Set the auth mode in your gateway config:
+
+```toml
+[auth]
+mode = "device_only"  # open, token, password, device_only
+allow_local_bypass = true
+```
+
+Or via environment variable:
+
+```bash
+BEACON_AUTH_MODE=device_only
+```
+
+## Open Mode
+
+No authentication required. Any client can connect.
+
+```toml
+[auth]
+mode = "open"
+```
+
+<Callout type="warning">
+  Only use Open mode on trusted networks or for development
+</Callout>
+
+## Token Mode
+
+Static bearer token for authentication.
+
+```toml
+[auth]
+mode = "token"
+token = "your-secret-token-here"
+```
+
+Clients authenticate with the token:
+
+```typescript
+// HTTP
+fetch("/api/...", {
+  headers: { Authorization: "Bearer your-secret-token-here" }
+})
+
+// WebSocket
+ws.send(JSON.stringify({ type: "auth", token: "your-secret-token-here" }))
+```
+
+Generate a secure token:
+
+```bash
+openssl rand -base64 32
+```
+
+## Password Mode
+
+Password-based authentication with secure hashing.
+
+```toml
+[auth]
+mode = "password"
+password_hash = "$argon2id$v=19$m=65536,t=3,p=4$..."
+```
+
+Generate a password hash:
+
+```bash
+beacon-gateway hash-password
+# Enter password when prompted
+```
+
+Clients authenticate with the password:
+
+```typescript
+ws.send(JSON.stringify({ type: "auth", password: "user-password" }))
+```
+
+## DeviceOnly Mode
+
+Only paired devices can connect. This is the most secure mode.
+
+```toml
+[auth]
+mode = "device_only"
+```
+
+New devices must complete the pairing flow before they can authenticate. See [Device Identity](/grid/beacon/device-identity) for details.
+
+## Local Network Bypass
+
+Allow unauthenticated access from the local network:
+
+```toml
+[auth]
+mode = "device_only"
+allow_local_bypass = true
+local_networks = ["127.0.0.1", "192.168.0.0/16", "10.0.0.0/8"]
+```
+
+This is useful for:
+- Desktop apps running on the same machine as the gateway
+- Trusted home network devices
+- Development environments
+
+<Callout type="info">
+  Local bypass only skips authentication, not authorization. Bypassed connections have limited permissions by default.
+</Callout>
+
+## WebSocket Authentication Flow
+
+```
+Client                          Gateway
+  │                                │
+  │─────── Connect ───────────────>│
+  │                                │
+  │<────── { type: "challenge",    │
+  │          nonce: "..." } ───────│
+  │                                │
+  │─────── Auth Response ─────────>│
+  │        (varies by mode)        │
+  │                                │
+  │<────── { type: "authenticated",│
+  │          deviceId: "..." } ────│
+```
+
+### Auth Response by Mode
+
+**Open**:
+```json
+{ "type": "auth" }
+```
+
+**Token**:
+```json
+{ "type": "auth", "token": "your-token" }
+```
+
+**Password**:
+```json
+{ "type": "auth", "password": "your-password" }
+```
+
+**DeviceOnly**:
+```json
+{ "type": "auth", "deviceId": "...", "signature": "..." }
+```
+
+## HTTP Authentication
+
+For HTTP endpoints, use the `Authorization` header:
+
+```bash
+# Token mode
+curl -H "Authorization: Bearer your-token" http://gateway:18790/api/...
+
+# Device mode
+curl -H "X-Device-Id: ..." -H "X-Signature: ..." http://gateway:18790/api/...
+```
+
+## Security Best Practices
+
+1. **Use DeviceOnly in production**: Cryptographic auth is stronger than passwords
+2. **Enable local bypass carefully**: Only on trusted networks
+3. **Rotate tokens periodically**: If using token mode
+4. **Use strong passwords**: If using password mode, use a password manager
+5. **Revoke unused devices**: Regularly audit paired devices
+6. **Use TLS**: Enable HTTPS for remote access
+
+## Timing-Safe Comparison
+
+Beacon uses constant-time comparison for tokens and passwords to prevent timing attacks. This prevents attackers from guessing tokens by measuring response times.
