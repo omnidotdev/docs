@@ -1,0 +1,110 @@
+---
+title: 🌺 Zenpetal
+description: The canonical reference implementation of the Sigil design system in Panda CSS
+---
+
+import { SiFoodpanda, SiReact, SiCss3 } from "react-icons/si";
+import { PiPuzzlePiece, PiPaintBrush } from "react-icons/pi";
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Panda CSS",
+      icon: <SiFoodpanda />,
+      className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+    },
+    {
+      label: "React",
+      icon: <SiReact />,
+      className: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-300",
+    },
+    {
+      label: "CSS-in-JS",
+      icon: <SiCss3 />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://zenpetal.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/sigil`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Zenpetal is in active development. Expect this documentation to evolve.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Sigil meets Panda CSS — a canonical reference implementation of the Sigil design system",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Zenpetal bridges the gap between design tokens and implementation, providing a ready-to-use component library with Panda CSS that embodies Sigil's design principles out of the box.",
+    },
+  ]}
+/>
+
+**Omni Zenpetal** is the canonical reference implementation of the [🎨 Sigil](/sigil) design system built with [Panda CSS](https://panda-css.com) and [Ark UI](https://ark-ui.com). It provides styled components and design tokens for building modern, accessible interfaces with CSS-in-JS.
+
+## Key Features
+
+- **Design Token Integration**: Full implementation of Sigil's design tokens (colors, typography, spacing, etc.)
+- **Styled Components**: Pre-built, accessible React components powered by [Ark UI](https://ark-ui.com) primitives
+- **CSS-in-JS**: Type-safe styling with Panda CSS's zero-runtime approach
+- **Tree-Shakeable**: Import only the components and styles you need
+- **Accessible by Default**: Components built with WCAG accessibility standards in mind
+- **Themeable**: Easy theming with design token customization
+
+## Use Cases
+
+- **Application Development**: Build consistent UIs with pre-styled components
+- **Design System Adoption**: Use Zenpetal as a starting point for implementing Sigil
+- **Rapid Prototyping**: Quickly prototype interfaces with ready-to-use components
+- **Custom Theming**: Extend and customize the design tokens for your brand
+
+## How It Works
+
+Zenpetal uses Panda CSS to generate atomic CSS classes from design tokens defined in the Sigil design system, layered on top of Ark UI's accessible component primitives. Components are built with accessibility and consistency in mind, providing a seamless development experience.
+
+```tsx
+import { Button, Card, Text } from "@omnidotdev/zenpetal";
+
+function Example() {
+  return (
+    <Card>
+      <Text as="h2">Welcome to Zenpetal</Text>
+      <Text>Build beautiful, accessible interfaces with ease.</Text>
+      <Button colorPalette="accent">Get Started</Button>
+    </Card>
+  );
+}
+```
+
+## Design Tokens
+
+Zenpetal implements the full Sigil design token specification:
+
+- **Colors**: Semantic color scales with light/dark mode support
+- **Typography**: Font families, sizes, weights, and line heights
+- **Spacing**: Consistent spacing scale for margins and padding
+- **Radii**: Border radius values for consistent roundness
+- **Shadows**: Elevation system for depth and hierarchy
+- **Animations**: Motion tokens for transitions and animations
+
+## Getting Started
+
+Documentation and detailed guides coming soon!
