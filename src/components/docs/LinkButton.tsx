@@ -64,7 +64,11 @@ const LinkButton = ({ link, ...rest }: Props) => {
     );
 
   // render internal link
-  return <FumadocsLink {...rest}>{btn}</FumadocsLink>;
+  return (
+    <FumadocsLink href={link.href} {...rest}>
+      {btn}
+    </FumadocsLink>
+  );
 };
 
 export default LinkButton;
