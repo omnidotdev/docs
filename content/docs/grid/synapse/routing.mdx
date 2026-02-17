@@ -1,0 +1,157 @@
+---
+title: Routing
+description: Model profiles and intelligent routing strategies
+---
+
+Synapse routes requests to the best provider and model using configurable strategies. This page covers model profiles, routing strategies, and virtual model names.
+
+## Model Profiles
+
+A model profile maps a virtual model name to a set of candidate models with scores and metadata. Synapse evaluates the routing strategy to pick the best candidate at request time:
+
+```toml
+[[llm.profiles]]
+name = "auto"
+strategy = "threshold"
+
+[[llm.profiles.candidates]]
+provider = "anthropic"
+model = "claude-sonnet-4-20250514"
+quality = 0.9
+speed = 0.7
+cost_per_1k_input = 0.003
+cost_per_1k_output = 0.015
+
+[[llm.profiles.candidates]]
+provider = "openai"
+model = "gpt-4o"
+quality = 0.85
+speed = 0.8
+cost_per_1k_input = 0.005
+cost_per_1k_output = 0.015
+```
+
+## Routing Strategies
+
+### Threshold (default)
+
+Select the first candidate that meets minimum quality and speed thresholds. Candidates are evaluated in order:
+
+```toml
+[[llm.profiles]]
+name = "auto"
+strategy = "threshold"
+min_quality = 0.8
+min_speed = 0.5
+```
+
+If no candidate meets the thresholds, the first candidate in the list is used as a fallback.
+
+### Cost
+
+Always select the cheapest candidate:
+
+```toml
+[[llm.profiles]]
+name = "cheap"
+strategy = "cost"
+```
+
+Synapse compares `cost_per_1k_input` and `cost_per_1k_output` across all candidates and picks the lowest combined cost.
+
+### Cascade (Buffered Streaming)
+
+Try the fastest/cheapest model first. If the response quality is below a threshold, discard it and retry with a higher-quality model. Supports buffered streaming so the client sees a seamless stream:
+
+```toml
+[[llm.profiles]]
+name = "cascade"
+strategy = "cascade"
+quality_threshold = 0.7
+max_retries = 2
+buffer_tokens = 50
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `quality_threshold` | Minimum quality score to accept a response | 0.7 |
+| `max_retries` | Maximum cascade retries before accepting | 2 |
+| `buffer_tokens` | Tokens to buffer before committing to a response | 50 |
+
+<Callout type="info">
+  Cascade strategy buffers the initial response before streaming to the client. This adds slight latency but allows Synapse to transparently retry with a better model if needed.
+</Callout>
+
+### Score (Multi-Objective)
+
+Compute a weighted score across multiple dimensions and select the highest-scoring candidate:
+
+```toml
+[[llm.profiles]]
+name = "balanced"
+strategy = "score"
+
+[llm.profiles.weights]
+quality = 0.5
+speed = 0.3
+cost = 0.2
+```
+
+The final score for each candidate is `quality * w_quality + speed * w_speed + (1 - normalized_cost) * w_cost`. Weights are normalized to sum to 1.0.
+
+### ONNX (ML-Based)
+
+Use a custom ONNX model to make routing decisions based on request features (prompt length, token budget, modality, time of day, etc.):
+
+```toml
+[[llm.profiles]]
+name = "ml"
+strategy = "onnx"
+model_path = "/etc/synapse/routing_model.onnx"
+feature_config = "/etc/synapse/features.json"
+```
+
+<Callout type="warning">
+  ONNX routing is an advanced feature. You need to train and export your own routing model. See the repository for example training scripts.
+</Callout>
+
+## Virtual Model Names
+
+Synapse provides built-in virtual model names that map to profiles:
+
+| Virtual Model | Description |
+|---------------|-------------|
+| `auto` | Default profile, uses threshold strategy |
+| `fast` | Optimizes for lowest latency |
+| `best` | Optimizes for highest quality |
+| `cheap` | Optimizes for lowest cost |
+
+Clients can use these names directly:
+
+```bash
+curl http://localhost:6000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+Virtual models are configured as profiles. You can override the defaults or add your own:
+
+```toml
+[[llm.profiles]]
+name = "fast"
+strategy = "score"
+
+[llm.profiles.weights]
+quality = 0.2
+speed = 0.7
+cost = 0.1
+```
+
+## Passthrough Models
+
+If a request specifies a model name that doesn't match any profile, Synapse passes it through to the appropriate provider based on model name prefix matching (e.g. `claude-*` routes to Anthropic, `gpt-*` routes to OpenAI).
+
+See also: [Providers](/grid/synapse/providers) for configuring the upstream providers that routing selects from.

@@ -1,0 +1,179 @@
+---
+title: Configuration
+description: Full TOML configuration reference for Synapse
+---
+
+Synapse is configured via a TOML file passed with `--config`. This page covers every configuration section.
+
+## Server
+
+```toml
+[server]
+listen_address = "0.0.0.0:6000"
+```
+
+### TLS
+
+```toml
+[server.tls]
+cert_path = "/etc/synapse/cert.pem"
+key_path = "/etc/synapse/key.pem"
+```
+
+### Health Endpoint
+
+The health endpoint is always available at `GET /health` and returns `{"status": "ok"}` when the server is ready.
+
+### CORS
+
+```toml
+[server.cors]
+allowed_origins = ["https://app.omni.dev"]
+allowed_methods = ["GET", "POST", "OPTIONS"]
+allowed_headers = ["Content-Type", "Authorization"]
+max_age = 3600
+```
+
+### CSRF Protection
+
+```toml
+[server.csrf]
+enabled = true
+token_header = "X-CSRF-Token"
+```
+
+## Environment Variable Interpolation
+
+All string values in the config support `{{ env.VAR }}` syntax for environment variable substitution:
+
+```toml
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+```
+
+This keeps secrets out of config files. Variables are resolved at startup; missing variables cause Synapse to exit with an error.
+
+<Callout type="warning">
+  Never hardcode API keys or secrets in config files. Always use environment variable interpolation.
+</Callout>
+
+## Rate Limiting
+
+### In-memory
+
+```toml
+[rate_limit]
+backend = "memory"
+requests_per_minute = 60
+burst = 10
+```
+
+### Redis
+
+```toml
+[rate_limit]
+backend = "redis"
+redis_url = "{{ env.REDIS_URL }}"
+requests_per_minute = 120
+burst = 20
+key_prefix = "synapse:rl:"
+```
+
+<Callout type="info">
+  Redis-backed rate limiting is recommended for multi-instance deployments where limits should be shared across replicas.
+</Callout>
+
+## Failover
+
+### Equivalence Groups
+
+Group providers that can substitute for each other. If the primary provider fails, Synapse automatically falls back to the next in the group:
+
+```toml
+[[failover.equivalence_groups]]
+name = "chat"
+providers = ["anthropic", "openai", "google"]
+```
+
+### Circuit Breaker
+
+Prevent cascading failures by temporarily removing unhealthy providers:
+
+```toml
+[failover.circuit_breaker]
+failure_threshold = 5
+recovery_timeout_secs = 30
+half_open_max_requests = 3
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `failure_threshold` | Consecutive failures before opening the circuit | 5 |
+| `recovery_timeout_secs` | Seconds to wait before trying a failed provider again | 30 |
+| `half_open_max_requests` | Test requests allowed in half-open state | 3 |
+
+## Logging
+
+```toml
+[logging]
+level = "info"
+format = "json"
+```
+
+Supported levels: `trace`, `debug`, `info`, `warn`, `error`. The `json` format is recommended for production; use `pretty` for local development.
+
+## Production Example
+
+A full production config combining multiple sections:
+
+```toml
+[server]
+listen_address = "0.0.0.0:6000"
+
+[server.tls]
+cert_path = "/etc/synapse/cert.pem"
+key_path = "/etc/synapse/key.pem"
+
+[server.cors]
+allowed_origins = ["https://app.omni.dev"]
+
+[server.csrf]
+enabled = true
+
+[rate_limit]
+backend = "redis"
+redis_url = "{{ env.REDIS_URL }}"
+requests_per_minute = 120
+burst = 20
+
+[failover.circuit_breaker]
+failure_threshold = 5
+recovery_timeout_secs = 30
+
+[[failover.equivalence_groups]]
+name = "chat"
+providers = ["anthropic", "openai"]
+
+[logging]
+level = "info"
+format = "json"
+
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+
+[llm.providers.openai]
+type = "openai"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+[stt.providers.whisper]
+type = "whisper"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+[tts.providers.openai]
+type = "openai_tts"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+See also: [Routing](/grid/synapse/routing) for model selection configuration, [Telemetry](/grid/synapse/telemetry) for OpenTelemetry setup.

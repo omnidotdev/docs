@@ -1,0 +1,164 @@
+---
+title: Telemetry
+description: OpenTelemetry tracing, metrics, and logging configuration
+---
+
+Synapse supports [OpenTelemetry](https://opentelemetry.io) for distributed tracing, metrics, and structured logging. This page covers how to configure each telemetry signal.
+
+## Overview
+
+| Signal | Description | Use Case |
+|--------|-------------|----------|
+| Traces | Distributed request traces across providers | Debugging latency, understanding request flow |
+| Metrics | Counters, histograms, gauges | Monitoring throughput, error rates, costs |
+| Logs | Structured log output | Debugging, auditing |
+
+## Basic Configuration
+
+```toml
+[telemetry]
+service_name = "synapse"
+```
+
+The `service_name` appears in all telemetry data and is used to identify Synapse in your observability stack.
+
+## Tracing
+
+### OTLP gRPC Exporter
+
+```toml
+[telemetry.tracing]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://localhost:4317"
+```
+
+### OTLP HTTP Exporter
+
+```toml
+[telemetry.tracing]
+enabled = true
+exporter = "otlp_http"
+endpoint = "http://localhost:4318/v1/traces"
+```
+
+### Sampling
+
+```toml
+[telemetry.tracing]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://localhost:4317"
+sample_rate = 0.1
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `enabled` | Enable trace collection | false |
+| `exporter` | Exporter type: `otlp_grpc`, `otlp_http`, `stdout` | -- |
+| `endpoint` | Exporter endpoint URL | -- |
+| `sample_rate` | Fraction of requests to trace (0.0 to 1.0) | 1.0 |
+
+<Callout type="info">
+  Use `stdout` exporter during development to print traces to the console. Use `otlp_grpc` or `otlp_http` in production with a collector like Jaeger, Tempo, or the OpenTelemetry Collector.
+</Callout>
+
+### Trace Context
+
+Synapse propagates W3C Trace Context headers (`traceparent`, `tracestate`) to upstream providers. This enables end-to-end distributed tracing across your entire AI pipeline.
+
+## Metrics
+
+### OTLP gRPC Exporter
+
+```toml
+[telemetry.metrics]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://localhost:4317"
+export_interval_secs = 30
+```
+
+### Prometheus
+
+```toml
+[telemetry.metrics]
+enabled = true
+exporter = "prometheus"
+listen_address = "0.0.0.0:9090"
+```
+
+When using the Prometheus exporter, Synapse exposes a `/metrics` endpoint on the configured address.
+
+### Available Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `synapse_requests_total` | Counter | Total requests by endpoint and status |
+| `synapse_request_duration_seconds` | Histogram | Request latency by endpoint and provider |
+| `synapse_tokens_total` | Counter | Tokens processed (input and output) |
+| `synapse_provider_errors_total` | Counter | Provider errors by provider and error type |
+| `synapse_active_connections` | Gauge | Current active connections |
+| `synapse_circuit_breaker_state` | Gauge | Circuit breaker state per provider |
+
+## Logs
+
+Synapse uses [tracing](https://docs.rs/tracing) for structured logging. Log configuration controls the format and level:
+
+```toml
+[telemetry.logs]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://localhost:4317"
+```
+
+### Log Levels
+
+Set via the `logging.level` config or `RUST_LOG` environment variable:
+
+```bash
+# Config file
+[logging]
+level = "info"
+
+# Environment variable (overrides config)
+RUST_LOG=synapse=debug,tower_http=info
+```
+
+Supported levels: `trace`, `debug`, `info`, `warn`, `error`.
+
+<Callout type="warning">
+  Synapse redacts API keys and sensitive headers in all log output. Never set `trace` level in production as it may include request bodies.
+</Callout>
+
+## Full Example
+
+A complete telemetry configuration sending all signals to an OpenTelemetry Collector:
+
+```toml
+[telemetry]
+service_name = "synapse"
+
+[telemetry.tracing]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://otel-collector:4317"
+sample_rate = 0.1
+
+[telemetry.metrics]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://otel-collector:4317"
+export_interval_secs = 30
+
+[telemetry.logs]
+enabled = true
+exporter = "otlp_grpc"
+endpoint = "http://otel-collector:4317"
+
+[logging]
+level = "info"
+format = "json"
+```
+
+See also: [Configuration](/grid/synapse/configuration) for the full TOML reference.

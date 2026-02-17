@@ -1,0 +1,116 @@
+---
+title: "\u26A1 Synapse"
+description: Unified AI router for LLM, STT, TTS, and MCP provider management
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust } from "react-icons/si";
+import { FaNetworkWired, FaRobot, FaMicrophone } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "AI Router",
+      icon: <FaRobot />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "LLM Gateway",
+      icon: <FaNetworkWired />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Voice",
+      icon: <FaMicrophone />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: `${app.socials.github}/synapse-server`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "What is Synapse?",
+      description:
+        "A unified AI router that manages LLM, STT, TTS, and MCP providers in one place. Configure your API keys once and route all AI traffic through a single gateway",
+    },
+  ]}
+/>
+
+**Omni Synapse** is an AI router built in Rust that provides unified management for LLM, speech-to-text, text-to-speech, embeddings, image generation, and MCP tool providers. Configure your API keys in one place and let Synapse handle provider dispatch, model routing, and protocol translation.
+
+## Why Synapse?
+
+Without Synapse, each application manages its own provider keys, API clients, and routing logic. Synapse centralizes this:
+
+- **Single key store** -- configure API keys once, use them from any consumer
+- **Unified API** -- OpenAI-compatible and Anthropic-compatible endpoints for all modalities
+- **MCP aggregation** -- discover and call tools from multiple MCP servers
+- **Provider abstraction** -- switch providers without changing consumer code
+- **Intelligent routing** -- automatically select providers and models based on cost, quality, or custom strategies
+
+<Cards>
+  <Card title="Getting Started" href="/grid/synapse/getting-started">
+    Install, configure, and send your first request
+  </Card>
+  <Card title="Configuration" href="/grid/synapse/configuration">
+    Full TOML reference for server, rate limits, failover, and more
+  </Card>
+  <Card title="Routing" href="/grid/synapse/routing">
+    Model profiles and routing strategies (threshold, cost, cascade, ONNX)
+  </Card>
+  <Card title="Providers" href="/grid/synapse/providers">
+    Supported LLM, embeddings, image generation, STT, and TTS providers
+  </Card>
+  <Card title="Pricing" href="/grid/synapse/pricing">
+    BYOK, managed keys, Omni Credits, and subscription tiers
+  </Card>
+  <Card title="API Reference" href="/grid/synapse/api">
+    All endpoints with curl examples and request/response formats
+  </Card>
+  <Card title="MCP" href="/grid/synapse/mcp">
+    MCP transport types, tool access control, and rate limits
+  </Card>
+  <Card title="Authentication" href="/grid/synapse/authentication">
+    API key auth, OAuth2/JWT, CSRF protection, and security practices
+  </Card>
+  <Card title="Telemetry" href="/grid/synapse/telemetry">
+    OpenTelemetry tracing, metrics, and logging configuration
+  </Card>
+</Cards>
+
+## Consumers
+
+Synapse is used by:
+
+- **[Beacon](/grid/beacon)** -- routes all LLM, STT, and TTS traffic through Synapse
+- **[Omni CLI](/armory/omni-cli)** -- uses Synapse as an LLM provider via `provider = "synapse"`
+- **Any OpenAI-compatible client** -- point your base URL to Synapse and authenticate with your `synapse_` API key
+
+## Architecture
+
+```
+┌──────────────────────────────────┐
+│            Synapse                │ :6000
+│        Unified AI Router         │
+├──────────────────────────────────┤
+│   ┌───┬───┬───┬───┬───┬───┐     │
+│   │LLM│MCP│STT│TTS│EMB│IMG│     │
+│   └─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┘     │
+└─────┼───┼───┼───┼───┼───┼───────┘
+      │   │   │   │   │   │
+      ▼   ▼   ▼   ▼   ▼   ▼
+  Anthropic  OpenAI  Deepgram  ElevenLabs
+  Google     MCP     Whisper   DALL-E
+  Bedrock    Servers  ...      ...
+```

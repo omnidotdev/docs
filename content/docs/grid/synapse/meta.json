@@ -1,0 +1,15 @@
+{
+  "title": "Synapse",
+  "pages": [
+    "getting-started",
+    "configuration",
+    "routing",
+    "providers",
+    "pricing",
+    "---Reference---",
+    "api",
+    "mcp",
+    "authentication",
+    "telemetry"
+  ]
+}

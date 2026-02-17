@@ -1,0 +1,164 @@
+---
+title: Getting Started
+description: Install Synapse, configure a provider, and send your first request
+---
+
+Get up and running with Synapse in a few minutes. You can use the hosted service at [synapse.omni.dev](https://synapse.omni.dev) or self-host from source.
+
+## Hosted (Recommended)
+
+1. Create an account at [synapse.omni.dev](https://synapse.omni.dev)
+2. Go to the [API Keys dashboard](https://synapse.omni.dev/dashboard/keys) and create a key
+3. Send your first request:
+
+```bash
+curl https://synapse.omni.dev/v1/chat/completions \
+  -H "Authorization: Bearer synapse_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "claude-sonnet-4-20250514", "messages": [{"role": "user", "content": "Hello!"}]}'
+```
+
+## Self-Hosted
+
+### From source
+
+```bash
+git clone https://github.com/omnidotdev/synapse-server.git
+cd synapse-server
+cargo build --release
+```
+
+The binary is at `target/release/synapse`.
+
+### Docker
+
+```bash
+docker pull ghcr.io/omnidotdev/synapse-server:latest
+
+docker run -p 6000:6000 \
+  -v ./synapse.toml:/etc/synapse/synapse.toml \
+  ghcr.io/omnidotdev/synapse-server
+```
+
+### GitHub Releases
+
+Download prebuilt binaries from the [releases page](https://github.com/omnidotdev/synapse-server/releases). Binaries are available for Linux (x86_64, aarch64) and macOS (Apple Silicon).
+
+## Minimal Configuration
+
+Create a `synapse.toml` with one LLM provider:
+
+```toml
+[server]
+listen_address = "0.0.0.0:6000"
+
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+```
+
+<Callout type="info">
+  API keys support `{"{{ env.VAR }}"}` template syntax for environment variable substitution. Never hardcode secrets in config files.
+</Callout>
+
+## Start the Server
+
+```bash
+# Set your API key
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Start Synapse
+synapse --config synapse.toml
+```
+
+Synapse listens on the configured address (default `0.0.0.0:6000`).
+
+## Verify Health
+
+```bash
+curl http://localhost:6000/health
+```
+
+Expected response:
+
+```json
+{ "status": "ok" }
+```
+
+## Send Your First Request
+
+### OpenAI-compatible endpoint
+
+```bash
+curl http://localhost:6000/v1/chat/completions \
+  -H "Authorization: Bearer synapse_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+### Anthropic-compatible endpoint
+
+```bash
+curl http://localhost:6000/v1/messages \
+  -H "Authorization: Bearer synapse_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+### Streaming
+
+Both endpoints support streaming. Add `"stream": true` to the request body:
+
+```bash
+curl http://localhost:6000/v1/chat/completions \
+  -H "Authorization: Bearer synapse_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": true
+  }'
+```
+
+## Add More Providers
+
+Expand your config to include multiple modalities:
+
+```toml
+[server]
+listen_address = "0.0.0.0:6000"
+
+# LLM providers
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+
+[llm.providers.openai]
+type = "openai"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+# STT providers
+[stt.providers.whisper]
+type = "whisper"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+# TTS providers
+[tts.providers.openai]
+type = "openai_tts"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+## Next Steps
+
+- [Configuration](/grid/synapse/configuration) -- Full TOML reference with rate limits, failover, and TLS
+- [Routing](/grid/synapse/routing) -- Intelligent model selection strategies
+- [Providers](/grid/synapse/providers) -- All supported providers across every modality
+- [API Reference](/grid/synapse/api) -- Complete endpoint documentation with examples

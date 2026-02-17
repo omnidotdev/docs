@@ -1,0 +1,359 @@
+---
+title: API Reference
+description: Complete endpoint reference with request and response examples
+---
+
+Synapse exposes OpenAI-compatible and Anthropic-compatible endpoints. All endpoints accept JSON request bodies and return JSON responses.
+
+## Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/chat/completions` | POST | LLM chat (OpenAI-compatible, streaming) |
+| `/v1/messages` | POST | LLM chat (Anthropic-compatible, streaming) |
+| `/v1/models` | GET | List models from all configured providers |
+| `/v1/embeddings` | POST | Generate text embeddings |
+| `/v1/images/generations` | POST | Generate images |
+| `/v1/audio/transcriptions` | POST | Speech-to-text |
+| `/v1/audio/speech` | POST | Text-to-speech |
+| `/mcp/tools/list` | POST | List available MCP tools |
+| `/mcp/tools/call` | POST | Execute an MCP tool |
+| `/health` | GET | Health check |
+
+## POST /v1/chat/completions
+
+OpenAI-compatible chat completions endpoint. Supports streaming via `stream: true`.
+
+```bash
+curl http://localhost:6000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant"},
+      {"role": "user", "content": "Hello!"}
+    ],
+    "stream": false,
+    "max_tokens": 1024
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "chatcmpl-...",
+  "object": "chat.completion",
+  "model": "claude-sonnet-4-20250514",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 9,
+    "total_tokens": 24
+  }
+}
+```
+
+## POST /v1/messages
+
+Anthropic-compatible messages endpoint. Supports streaming via `stream: true`.
+
+```bash
+curl http://localhost:6000/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your-api-key" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ]
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "msg_...",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I help you today?"
+    }
+  ],
+  "model": "claude-sonnet-4-20250514",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 10,
+    "output_tokens": 9
+  }
+}
+```
+
+## GET /v1/models
+
+List all models available across configured providers.
+
+```bash
+curl http://localhost:6000/v1/models \
+  -H "Authorization: Bearer your-api-key"
+```
+
+Response:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "owned_by": "anthropic"
+    },
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "owned_by": "openai"
+    }
+  ]
+}
+```
+
+## POST /v1/embeddings
+
+Generate text embeddings. Requires an [embeddings provider](/grid/synapse/providers#embeddings-providers) configured.
+
+```bash
+curl http://localhost:6000/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "Hello world"
+  }'
+```
+
+Response:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0023, -0.0091, ...]
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 2,
+    "total_tokens": 2
+  }
+}
+```
+
+## POST /v1/images/generations
+
+Generate images. Requires an [image generation provider](/grid/synapse/providers#image-generation-providers) configured.
+
+```bash
+curl http://localhost:6000/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "model": "dall-e-3",
+    "prompt": "A sunset over mountains",
+    "n": 1,
+    "size": "1024x1024"
+  }'
+```
+
+Response:
+
+```json
+{
+  "created": 1700000000,
+  "data": [
+    {
+      "url": "https://..."
+    }
+  ]
+}
+```
+
+## POST /v1/audio/transcriptions
+
+Speech-to-text transcription. Requires an [STT provider](/grid/synapse/providers#stt-providers) configured. Accepts multipart form data.
+
+```bash
+curl http://localhost:6000/v1/audio/transcriptions \
+  -H "Authorization: Bearer your-api-key" \
+  -F "file=@recording.wav" \
+  -F "model=whisper-1"
+```
+
+Response:
+
+```json
+{
+  "text": "Hello, this is a test recording."
+}
+```
+
+## POST /v1/audio/speech
+
+Text-to-speech synthesis. Requires a [TTS provider](/grid/synapse/providers#tts-providers) configured. Returns audio bytes.
+
+```bash
+curl http://localhost:6000/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "model": "tts-1",
+    "input": "Hello world",
+    "voice": "nova"
+  }' \
+  --output speech.mp3
+```
+
+## POST /mcp/tools/list
+
+List all tools available from configured [MCP servers](/grid/synapse/mcp).
+
+```bash
+curl http://localhost:6000/mcp/tools/list \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{}'
+```
+
+Response:
+
+```json
+{
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read the contents of a file",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" }
+        },
+        "required": ["path"]
+      }
+    }
+  ]
+}
+```
+
+## POST /mcp/tools/call
+
+Execute a tool from a configured MCP server.
+
+```bash
+curl http://localhost:6000/mcp/tools/call \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "name": "read_file",
+    "arguments": {
+      "path": "/tmp/example.txt"
+    }
+  }'
+```
+
+Response:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "File contents here..."
+    }
+  ]
+}
+```
+
+## GET /health
+
+Health check endpoint. No authentication required.
+
+```bash
+curl http://localhost:6000/health
+```
+
+Response:
+
+```json
+{ "status": "ok" }
+```
+
+## SDK Compatibility
+
+Synapse is compatible with the standard OpenAI and Anthropic SDKs. Point the SDK's base URL at your Synapse instance:
+
+### OpenAI SDK (Python)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:6000/v1",
+    api_key="your-synapse-api-key",
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+
+### OpenAI SDK (TypeScript)
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "http://localhost:6000/v1",
+  apiKey: "your-synapse-api-key",
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [{ role: "user", content: "Hello!" }],
+});
+```
+
+### Anthropic SDK (Python)
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic(
+    base_url="http://localhost:6000",
+    api_key="your-synapse-api-key",
+)
+
+response = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```

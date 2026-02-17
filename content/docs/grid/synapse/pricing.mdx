@@ -1,0 +1,102 @@
+---
+title: Pricing
+description: Operating modes, managed keys, and Omni Credits
+---
+
+Synapse supports multiple operating modes depending on how you want to manage API keys and billing.
+
+## Operating Modes
+
+### BYOK (Bring Your Own Key)
+
+Configure your own API keys for each provider. Synapse routes requests using your keys with no markup or fees.
+
+```toml
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+```
+
+- **Cost**: You pay the provider directly at their standard rates
+- **Setup**: Requires creating accounts and API keys with each provider
+- **Best for**: Teams that already have provider accounts or want maximum cost control
+
+### Managed
+
+Omni provides API keys and handles billing. You pay Omni a single invoice with a small margin on top of provider costs.
+
+```toml
+[llm.providers.anthropic]
+type = "anthropic"
+managed = true
+```
+
+- **Cost**: Provider rates + Omni margin
+- **Setup**: Connect your Omni account, no provider accounts needed
+- **Best for**: Teams that want zero-config provider access
+
+<Callout type="info">
+  Managed mode requires an Omni account. Connect at **Settings -> Cloud -> Connect Omni Account** in Beacon, or configure the Omni API key in your Synapse config.
+</Callout>
+
+### Hybrid
+
+Mix BYOK and managed providers. Use your own key for some providers and let Omni manage others:
+
+```toml
+# BYOK -- use your own key
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+
+# Managed -- Omni provides the key
+[llm.providers.openai]
+type = "openai"
+managed = true
+```
+
+This is useful when you have a discount or enterprise agreement with one provider but want easy access to others.
+
+## Managed Margins
+
+Managed mode adds a configurable margin on top of provider costs. The default margin is set by Omni and varies by plan tier. Enterprise customers can negotiate custom margins.
+
+| Tier | Margin | Notes |
+|------|--------|-------|
+| Free | 20% | Limited monthly usage |
+| Pro | 10% | Higher limits, priority routing |
+| Enterprise | Custom | Volume discounts, SLA |
+
+## Omni Credits
+
+Omni Credits are a prepaid credit system for managed providers:
+
+1. Purchase credits through the Omni dashboard or API
+2. Credits are consumed as you make API requests through managed providers
+3. Usage is tracked per-request with full cost transparency
+4. Credits never expire
+
+### Credit Consumption
+
+Each request consumes credits based on the provider's per-token or per-request pricing, plus the managed margin. You can view real-time credit usage in the Omni dashboard.
+
+### Low Balance Alerts
+
+Configure alerts to notify you when credits are running low:
+
+- Email notifications at configurable thresholds
+- Webhook notifications for programmatic monitoring
+- Auto-recharge for uninterrupted service
+
+## Subscription Tiers
+
+| Feature | Free | Pro | Enterprise |
+|---------|------|-----|------------|
+| BYOK providers | Unlimited | Unlimited | Unlimited |
+| Managed providers | Limited | All | All |
+| Rate limits | Standard | Elevated | Custom |
+| Routing strategies | Threshold, Cost | All | All + ONNX |
+| Support | Community | Email | Dedicated |
+| SLA | -- | 99.9% | 99.99% |
+
+See [omni.dev/pricing](https://omni.dev/pricing) for current pricing details.

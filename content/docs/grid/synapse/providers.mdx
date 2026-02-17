@@ -1,0 +1,154 @@
+---
+title: Providers
+description: Supported LLM, embeddings, image generation, STT, and TTS providers
+---
+
+Synapse supports multiple providers across five modalities. This page covers configuration for each provider.
+
+## LLM Providers
+
+| Provider | Config `type` | Models |
+|----------|---------------|--------|
+| Anthropic | `anthropic` | Claude 4, Claude Sonnet, Claude Haiku |
+| OpenAI | `openai` | GPT-4o, GPT-4, GPT-3.5 |
+| Google | `google` | Gemini Pro, Gemini Flash |
+| AWS Bedrock | `bedrock` | Claude, Titan, and other Bedrock-hosted models |
+
+### Anthropic
+
+```toml
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+```
+
+### OpenAI
+
+```toml
+[llm.providers.openai]
+type = "openai"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+### Google
+
+```toml
+[llm.providers.google]
+type = "google"
+api_key = "{{ env.GOOGLE_API_KEY }}"
+```
+
+### AWS Bedrock
+
+```toml
+[llm.providers.bedrock]
+type = "bedrock"
+region = "us-east-1"
+access_key_id = "{{ env.AWS_ACCESS_KEY_ID }}"
+secret_access_key = "{{ env.AWS_SECRET_ACCESS_KEY }}"
+```
+
+<Callout type="info">
+  Bedrock authentication also supports IAM roles and instance profiles. Omit `access_key_id` and `secret_access_key` to use the default AWS credential chain.
+</Callout>
+
+## Embeddings Providers
+
+| Provider | Config `type` | Models |
+|----------|---------------|--------|
+| OpenAI | `openai_embeddings` | text-embedding-3-small, text-embedding-3-large |
+
+### OpenAI Embeddings
+
+```toml
+[embeddings.providers.openai]
+type = "openai_embeddings"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+## Image Generation Providers
+
+| Provider | Config `type` | Models |
+|----------|---------------|--------|
+| OpenAI (DALL-E) | `openai_imagegen` | dall-e-3, dall-e-2 |
+
+### OpenAI Image Generation
+
+```toml
+[imagegen.providers.openai]
+type = "openai_imagegen"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+## STT Providers
+
+| Provider | Config `type` | Models |
+|----------|---------------|--------|
+| OpenAI Whisper | `whisper` | whisper-1 |
+| Deepgram | `deepgram` | nova-2, nova |
+
+### OpenAI Whisper
+
+```toml
+[stt.providers.whisper]
+type = "whisper"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+### Deepgram
+
+```toml
+[stt.providers.deepgram]
+type = "deepgram"
+api_key = "{{ env.DEEPGRAM_API_KEY }}"
+```
+
+## TTS Providers
+
+| Provider | Config `type` | Models |
+|----------|---------------|--------|
+| OpenAI TTS | `openai_tts` | tts-1, tts-1-hd |
+| ElevenLabs | `elevenlabs` | eleven_monolingual_v1, eleven_multilingual_v2 |
+
+### OpenAI TTS
+
+```toml
+[tts.providers.openai]
+type = "openai_tts"
+api_key = "{{ env.OPENAI_API_KEY }}"
+```
+
+### ElevenLabs
+
+```toml
+[tts.providers.elevenlabs]
+type = "elevenlabs"
+api_key = "{{ env.ELEVENLABS_API_KEY }}"
+```
+
+## Common Provider Fields
+
+All providers share these optional configuration fields:
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `type` | Provider type identifier (required) | -- |
+| `api_key` | API key for authentication | -- |
+| `base_url` | Custom base URL for self-hosted or proxy endpoints | Provider default |
+| `timeout_secs` | Request timeout in seconds | 30 |
+| `max_retries` | Maximum retry attempts on transient failures | 2 |
+
+### Custom Base URL
+
+Use `base_url` to point at a self-hosted or proxy endpoint:
+
+```toml
+[llm.providers.local]
+type = "openai"
+base_url = "http://localhost:8080/v1"
+api_key = "not-needed"
+```
+
+## BYOK (Bring Your Own Key)
+
+Each provider is configured with your own API key. Synapse never stores or transmits keys except to the upstream provider. See [Pricing](/grid/synapse/pricing) for managed key alternatives.

@@ -1,0 +1,145 @@
+---
+title: "\U0001F9E0 Synapse"
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiLightningFill, PiBrainFill } from "react-icons/pi";
+import { FaRoute } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "AI Gateway",
+      icon: <PiBrainFill />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "LLM Router",
+      icon: <FaRoute />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Inference",
+      icon: <PiLightningFill />,
+      className: "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://synapse.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/synapse-stack`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+    {
+      href: "/grid/beacon",
+      label: "Powers Beacon",
+    },
+    {
+      href: "/armory/omni-cli",
+      label: "Powers Omni CLI",
+    },
+  ]}
+  alerts={[
+    {
+      title: "💡 Big Idea",
+      description:
+        "A unified AI inference gateway that routes requests to the best provider/model, handles billing, and lets users chat without managing API keys",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Synapse removes the biggest barrier to AI adoption: API key management. Users sign up, get free credits, and start chatting. Smart routing ensures optimal cost and quality.",
+    },
+  ]}
+/>
+
+**Omni Synapse** is a unified AI inference gateway that sits between user-facing applications (CLI, Beacon) and LLM providers. It handles authentication, billing, and intelligent routing so users don't need to manage API keys.
+
+## How It Works
+
+```
+User (CLI/Beacon) → Synapse Gateway → Best Provider/Model → Response
+                         │
+                    Auth (Gatekeeper JWT)
+                    Billing (Aether entitlements)
+                    Routing (smart model selection)
+```
+
+Synapse authenticates users via their Omni account, checks billing entitlements, and routes requests to the optimal provider based on the chosen routing strategy.
+
+## Supported Providers
+
+| Provider | Models | Capabilities |
+|----------|--------|-------------|
+| Anthropic | Claude family | Chat, vision |
+| OpenAI | GPT family, Whisper, TTS | Chat, STT, TTS, embeddings, image generation |
+| Google | Gemini family | Chat, vision |
+| Groq | Llama, Mixtral | Chat (fast inference) |
+| Mistral | Mistral family | Chat |
+| AWS Bedrock | Multi-provider | Chat |
+| ElevenLabs | | Text-to-speech |
+| Deepgram | | Speech-to-text |
+
+## Routing Strategies
+
+Synapse doesn't just proxy requests. It intelligently routes them:
+
+| Strategy | Description |
+|----------|-------------|
+| **Threshold** | Route by query complexity (simple → cheap model, complex → powerful model) |
+| **Cost** | Maximize quality within a budget constraint |
+| **Cascade** | Try cheap model first, escalate if confidence is low |
+| **Score-optimized** | Multi-objective scoring across quality, speed, and cost |
+
+## Access Tiers
+
+| Tier | How it works |
+|------|-------------|
+| **Free** | Limited credits on signup, no payment required |
+| **BYOK** | User provides their own provider API keys, Synapse provides routing only |
+| **Pro** | Managed keys with smart routing, monthly subscription via Aether |
+| **Team** | Shared organization billing with usage visibility |
+
+## Key Crates
+
+| Crate | Purpose |
+|-------|---------|
+| `synapse-llm` | Multi-backend LLM support |
+| `synapse-routing` | Smart routing engine |
+| `synapse-auth` | JWT validation via Gatekeeper |
+| `synapse-billing` | Usage metering via Aether |
+| `synapse-mcp` | Model Context Protocol support |
+| `synapse-client` | Client SDK (integrates with agent-core) |
+| `synapse-embeddings` | Embedding model support |
+| `synapse-imagegen` | Image generation providers |
+| `stt` / `tts` | Speech provider support |
+
+## Integration with Omni
+
+Synapse is deeply integrated with the Omni platform:
+
+- **Authentication**: Users authenticate with their Omni account (Gatekeeper JWT)
+- **Billing**: Usage metered through Aether, subscriptions via Stripe
+- **CLI**: `synapse-client` crate integrates directly with agent-core
+- **Beacon**: All voice (STT/TTS) and chat traffic routes through Synapse
+
+## Getting Started
+
+1. **Sign up** at [synapse.omni.dev](https://synapse.omni.dev) with your Omni account
+2. **Generate an API key** from the [dashboard](https://synapse.omni.dev/dashboard/keys)
+3. **Send a request** using the OpenAI-compatible endpoint:
+
+```bash
+curl https://synapse.omni.dev/v1/chat/completions \
+  -H "Authorization: Bearer synapse_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "claude-sonnet-4-20250514", "messages": [{"role": "user", "content": "Hello!"}]}'
+```
+
+For detailed setup instructions, see the [Getting Started guide](/grid/synapse/getting-started).
