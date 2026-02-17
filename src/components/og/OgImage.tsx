@@ -89,7 +89,9 @@ const DEFAULT_GRADIENT = {
   to: "#0f172a",
 };
 
-type Realm = (typeof realmsData.realms)[number];
+type Realm = (typeof realmsData.realms)[number] & {
+  ogColors?: { from: string; via: string; to: string };
+};
 
 interface OgImageProps {
   title: string;

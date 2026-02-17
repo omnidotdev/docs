@@ -11,6 +11,7 @@ Omni CLI supports multiple LLM providers through a unified interface, allowing y
 
 | Provider | Models | API Key Env |
 |----------|--------|-------------|
+| **[Synapse](/grid/synapse)** | All models via unified routing | (none, local) |
 | **Anthropic** | Claude 4, Claude 3.5, Claude 3 | `ANTHROPIC_API_KEY` |
 | **OpenAI** | GPT-4o, GPT-4, GPT-3.5 | `OPENAI_API_KEY` |
 | **Google** | Gemini 2.0, Gemini 1.5 | `GOOGLE_API_KEY` |
@@ -140,6 +141,18 @@ Available models:
 - `mistral-large-latest`
 - `mistral-medium-latest`
 - `mistral-small-latest`
+
+### Synapse (Recommended)
+
+Route through [Synapse](/grid/synapse) for unified provider management. Synapse handles API keys, model routing, and provider dispatch — configure your keys once in Synapse and use any model from any provider:
+
+```toml
+[agent]
+provider = "synapse"
+model = "claude-sonnet-4-20250514"
+```
+
+Synapse is preconfigured as a default provider at `http://localhost:6000/v1`. No API key is needed for local Synapse — keys are configured in Synapse's own config file.
 
 ### Ollama (Local)
 

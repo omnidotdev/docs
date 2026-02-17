@@ -28,8 +28,8 @@ A persona is a configuration file ([persona.json](/codex/persona-json)) that tel
   },
   "voice": {
     "wakeWords": ["hey orin", "hi orin", "okay orin"],
-    "tts": { "provider": "openai", "voice": "nova", "speed": 1.0 },
-    "stt": { "provider": "openai", "model": "whisper-1" }
+    "tts": { "voice": "nova", "speed": 1.0 },
+    "stt": { "model": "whisper-1" }
   },
   "personality": {
     "systemPrompt": "You are Orin, a friendly and helpful AI assistant...",
@@ -56,12 +56,12 @@ Edit the `voice.wakeWords` array in your persona's `persona.json`:
 
 ### Change the voice
 
-Pick a different TTS voice or provider:
+Pick a different TTS voice:
 
 ```json
 {
   "voice": {
-    "tts": { "provider": "elevenlabs", "voice": "rachel" }
+    "tts": { "voice": "rachel" }
   }
 }
 ```

@@ -111,9 +111,8 @@ The `capabilities` slice controls what a persona can do across channels:
 
 ```json
 {
-  "$schema": "https://manifold.omni.dev/@omni/schemas/persona.schema.json",
-  "version": "1.0.0",
-  "identity": {
+  "$schema": "https://persona.omni.dev/persona.schema.json",
+    "identity": {
     "id": "example",
     "name": "Example Entity"
   }
@@ -124,9 +123,8 @@ The `capabilities` slice controls what a persona can do across channels:
 
 ```json
 {
-  "$schema": "https://manifold.omni.dev/@omni/schemas/persona.schema.json",
-  "version": "1.0.0",
-  "identity": {
+  "$schema": "https://persona.omni.dev/persona.schema.json",
+    "identity": {
     "id": "orin",
     "name": "Orin",
     "tagline": "Your friendly otter guide",
@@ -137,8 +135,8 @@ The `capabilities` slice controls what a persona can do across channels:
   },
   "voice": {
     "wakeWords": ["hey orin", "hi orin", "okay orin"],
-    "tts": { "provider": "openai", "voice": "nova", "speed": 1.0 },
-    "stt": { "provider": "openai", "model": "whisper-1" }
+    "tts": { "voice": "nova", "speed": 1.0 },
+    "stt": { "model": "whisper-1" }
   },
   "personality": {
     "systemPrompt": "You are Orin, a friendly and helpful AI assistant...",
@@ -178,7 +176,7 @@ The `capabilities` slice controls what a persona can do across channels:
 
 ## Getting Started
 
-1. Create a JSON file with `$schema` pointing to `https://manifold.omni.dev/@omni/schemas/persona.schema.json`
-2. Add `version: "1.0.0"` and an `identity` slice with at least `id` and `name`
+1. Create a JSON file with `$schema` pointing to `https://persona.omni.dev/persona.schema.json`
+2. Add an `identity` slice with at least `id` and `name`
 3. Add optional slices (`voice`, `personality`, `branding`, `capabilities`) as needed
 4. Validate against the schema — see the [repository](https://github.com/omnidotdev/persona-json) for more examples

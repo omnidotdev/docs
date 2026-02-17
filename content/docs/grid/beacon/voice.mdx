@@ -10,22 +10,22 @@ Beacon supports hands-free voice interaction — say a wake word, ask a question
 Voice interaction follows three steps:
 
 1. **Wake word** — Beacon listens for a trigger phrase (e.g. "Hey Orin") using local detection
-2. **Speech-to-text** — Your spoken question is transcribed (locally or via a cloud provider)
-3. **Text-to-speech** — The assistant's response is spoken aloud
+2. **Speech-to-text** — Your spoken question is transcribed via [Synapse](/grid/synapse)
+3. **Text-to-speech** — The assistant's response is spoken aloud via [Synapse](/grid/synapse)
 
-Wake word detection always runs locally for instant response. Transcription and speech synthesis can run locally or through cloud providers depending on your setup.
+Wake word detection always runs locally for instant response. Transcription and speech synthesis route through Synapse, which dispatches to the configured upstream provider.
 
-| Component | Local | Cloud |
-|-----------|-------|-------|
+| Component | Local | Cloud (via Synapse) |
+|-----------|-------|---------------------|
 | Wake word detection | Yes | - |
-| Speech-to-text | Optional | Default (Whisper) |
-| Text-to-speech | Optional | Default (OpenAI TTS) |
+| Speech-to-text | - | Whisper, Deepgram |
+| Text-to-speech | - | OpenAI TTS, ElevenLabs |
 
 ## Setting Up Voice
 
-### 1. Add a voice provider
+### 1. Configure Synapse
 
-You need at least one provider for speech-to-text (STT) and one for text-to-speech (TTS). The simplest setup is an OpenAI key, which covers both:
+Voice requires a running [Synapse](/grid/synapse) instance with at least one STT and one TTS provider configured. The simplest setup is an OpenAI key, which covers both:
 
 | Provider | STT | TTS |
 |----------|-----|-----|
@@ -33,11 +33,11 @@ You need at least one provider for speech-to-text (STT) and one for text-to-spee
 | Deepgram | Yes | - |
 | ElevenLabs | - | Yes |
 
-Add your keys in **Settings → Providers**.
+Configure providers in your Synapse config file. See the [Synapse docs](/grid/synapse) for details.
 
 ### 2. Enable voice
 
-Voice is enabled automatically when a voice provider is configured. You can toggle it in **Settings → Voice**.
+Voice is enabled by default when Beacon starts with `--disable-voice` omitted. You can also toggle it in **Settings → Voice**.
 
 ### 3. Test it
 
@@ -70,26 +70,24 @@ Voice settings live in the `voice` section of each persona's configuration:
   "voice": {
     "wakeWords": ["hey orin"],
     "tts": {
-      "provider": "openai",
       "voice": "nova",
       "speed": 1.0
     },
     "stt": {
-      "provider": "openai",
       "model": "whisper-1"
     }
   }
 }
 ```
 
-Different personas can use different voices and providers, so switching personas also changes the voice you hear.
+Different personas can use different voices and STT models, so switching personas also changes the voice you hear. The TTS and STT model (e.g. `tts-1`, `whisper-1`) can be set globally via `BEACON_TTS_MODEL` and `BEACON_STT_MODEL` environment variables.
 
 ## Troubleshooting
 
 ### No response after wake word
 
 - Check that your microphone is working and Beacon has permission to access it
-- Verify your STT provider key is configured in **Settings → Providers**
+- Verify Synapse is running and has an STT provider configured
 - Try increasing the log level (`--verbose`) to see if the wake word is being detected
 
 ### Wake word triggers too easily
@@ -101,4 +99,4 @@ Different personas can use different voices and providers, so switching personas
 
 - Try a different TTS voice in your persona's `voice.tts.voice` setting
 - Adjust `voice.tts.speed` (1.0 is normal, 1.2 is slightly faster)
-- ElevenLabs generally produces more natural-sounding voices than the default
+- Configure an ElevenLabs provider in Synapse for more natural-sounding voices

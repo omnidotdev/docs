@@ -8,8 +8,8 @@ const knipConfig: KnipConfig = {
   entry: ["src/**/*.ts", "src/**/*.tsx", "src/router.tsx"],
   project: ["src/**/*.{ts,tsx,css,mdx}", "content/docs/**/*.mdx"],
   ignore: ["**/*.gen.*", "**/generated/**", "src/components/ui/*.tsx"],
-  // used in MDX files, not picked up by MDX compiler
-  ignoreDependencies: ["@omnidotdev/garden"],
+  // used in MDX files or dynamically loaded, not picked up by knip
+  ignoreDependencies: ["@omnidotdev/garden", "mermaid", "unleash-client"],
   tags: ["-knipignore"],
 };
 

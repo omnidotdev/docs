@@ -96,15 +96,26 @@ Each assistant entry includes:
 - **Permissions** — What you allow this assistant to do (learn, access calendar, execute code, etc.)
 - **Stats** — Conversation count and interaction timestamps
 
+## Product Integration
+
+| Product | Reads | Writes |
+|---------|-------|--------|
+| [Gatekeeper](/armory/hidra/gatekeeper) | identity, preferences, assistants | identity, preferences, assistants (host) |
+| [Beacon](/grid/beacon) | identity, preferences, calendar | assistants |
+| [Blink](/kindred/blink) | identity, social | social |
+| [Moment](/kindred/moment) | relationships | memories, relationships |
+| [Trellis](/fabric/trellis) | — | knowledge |
+| [MyFi](/core/myfi) | — | finances |
+| [Forever](/codex/forever) | identity, accounts, relationships | — |
+
 ## Examples
 
 ### Minimal
 
 ```json
 {
-  "$schema": "https://manifold.omni.dev/@omni/schemas/life.schema.json",
-  "version": "1.0.0",
-  "identity": {
+  "$schema": "https://life.omni.dev/life.schema.json",
+    "identity": {
     "name": "Brian",
     "timezone": "America/Los_Angeles"
   }
@@ -115,9 +126,8 @@ Each assistant entry includes:
 
 ```json
 {
-  "$schema": "https://manifold.omni.dev/@omni/schemas/life.schema.json",
-  "version": "1.0.0",
-  "identity": {
+  "$schema": "https://life.omni.dev/life.schema.json",
+    "identity": {
     "name": "Brian",
     "timezone": "America/Los_Angeles",
     "locale": "en-US",
@@ -170,8 +180,8 @@ Beacon looks for life.json in this order:
 
 ## Getting Started
 
-1. Create a JSON file with `$schema` pointing to `https://manifold.omni.dev/@omni/schemas/life.schema.json`
-2. Add `version: "1.0.0"` and an `identity` slice with at least your `name`
+1. Create a JSON file with `$schema` pointing to `https://life.omni.dev/life.schema.json`
+2. Add an `identity` slice with at least your `name`
 3. Add optional slices as needed — start with `preferences` and `assistants`
 4. Place it at `~/.life.json` or set `LIFE_JSON_PATH`
 5. Validate against the schema — see the [repository](https://github.com/omnidotdev/life-json) for more examples

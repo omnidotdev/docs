@@ -25,19 +25,20 @@ When you open Beacon for the first time:
 
 ## Set Up Your AI Provider
 
-Beacon needs an AI provider to power conversations and voice. You have two options:
+Beacon routes all AI traffic through [Synapse](/grid/synapse), which manages provider keys and model routing. You have two options:
 
 ### Bring Your Own Key (BYOK)
 
-Add API keys for the providers you want to use. Open **Settings → Providers** and enter your keys:
+Configure API keys in your Synapse config. Synapse dispatches requests to the appropriate provider:
 
 | Provider | What It Powers |
 |----------|---------------|
 | Anthropic | Chat (Claude) |
 | OpenAI | Chat (GPT), voice transcription (Whisper), speech (TTS) |
-| OpenRouter | Chat (multiple models) |
-| ElevenLabs | Speech (TTS) |
 | Deepgram | Voice transcription (STT) |
+| ElevenLabs | Speech (TTS) |
+
+See the [Synapse docs](/grid/synapse) for provider configuration.
 
 ### Omni Credits
 
@@ -60,7 +61,7 @@ Type a message in the chat box and press enter. Your assistant responds using wh
 
 ## Try Voice
 
-1. Make sure you have an OpenAI key (for Whisper and TTS) or another voice provider configured
+1. Make sure Synapse has an STT and TTS provider configured (e.g. OpenAI for both Whisper and TTS)
 2. Say your persona's wake word — the default is **"Hey Orin"**
 3. Ask a question
 4. Beacon transcribes your speech, sends it to the AI, and speaks the response back
