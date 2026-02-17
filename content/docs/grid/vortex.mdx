@@ -1,5 +1,6 @@
 ---
-title: 🌪️ Vortex
+title: Vortex
+description: Workflow automation and orchestration engine
 ---
 
 import { ProductOverview } from "@/components/docs";
@@ -26,12 +27,184 @@ import { FaNetworkWired } from "react-icons/fa";
       type: "repository",
     },
   ]}
-  alerts={[
-    {
-      title: "Coming Soon",
-      description: "Vortex is currently in development.",
-    },
-  ]}
 />
 
-**Omni Vortex** docs coming soon 🌪️
+**Vortex** is a workflow automation and orchestration engine. Define workflows visually in the UI, as JSON, or programmatically with the TypeScript SDK — and move freely between all three.
+
+## Key Features
+
+- **Visual editor** — drag-and-drop node canvas powered by React Flow
+- **JSON DSL** — portable `v1.0` definition format stored as JSONB
+- **TypeScript SDK** — fluent builder API (`@omnidotdev/vortex-sdk`)
+- **600+ connectors** — integrations via Activepieces ecosystem
+- **100+ built-in plugins** — cache, rate limiting, queues, LLM, code execution, and more
+- **Import / Export** — drag JSON into the editor, export as JSON or TypeScript
+- **Distributed execution** — Hatchet-backed workers with retry, parallelism, and cron scheduling
+
+## Workflow Authoring
+
+Vortex workflows can be authored three ways, and every format round-trips to the others:
+
+| Authoring mode | Format | Round-trip |
+|---|---|---|
+| **UI** | React Flow nodes/edges | UI &#8594; JSON &#8594; UI |
+| **JSON** | DSL v1.0 | JSON &#8594; UI &#8594; JSON |
+| **SDK** | TypeScript builder | SDK `.build()` &#8594; JSON &#8594; TypeScript export |
+
+### Visual Editor
+
+The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 100+ step types.
+
+Workflows built in the editor are automatically converted to the JSON DSL for storage and execution.
+
+### JSON DSL
+
+The DSL is a JSON-based workflow definition format. Every workflow — whether built in the UI, SDK, or hand-written — is stored and executed as this format:
+
+```json
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "trigger_1",
+      "type": "trigger",
+      "name": "Webhook",
+      "trigger": { "type": "webhook" }
+    },
+    {
+      "id": "notify",
+      "type": "action",
+      "name": "Send Slack message",
+      "integration": "slack",
+      "operation": "sendMessage",
+      "inputs": {
+        "channel": "#alerts",
+        "text": "New event: {{triggerData.body.event}}"
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e-trigger-notify", "source": "trigger_1", "target": "notify" }
+  ]
+}
+```
+
+### TypeScript SDK
+
+The SDK (`@omnidotdev/vortex-sdk`) provides a type-safe, fluent builder API:
+
+```typescript
+import { workflow, trigger, action } from "@omnidotdev/vortex-sdk";
+
+const definition = workflow("order-processor")
+  .trigger(trigger.webhook({ path: "/orders" }))
+  .step("validate", action("validator", "check", {
+    inputs: { id: "$.orderId" },
+  }))
+  .step("charge", action("stripe", "charge", {
+    inputs: { amount: "$.total" },
+  }))
+  .build();
+```
+
+## Import / Export
+
+The editor supports full round-trip between all formats:
+
+```
+UI canvas ──reactFlowToDsl()──► JSON DSL ──dslToTypeScript()──► TypeScript SDK
+    ▲                               │
+    │                               │
+    └────── dslToReactFlow() ───────┘
+```
+
+- Build a workflow visually, export as JSON, hand-edit, re-import
+- Build with the SDK, `.build()` to JSON, import into the editor to visualize
+- Export from the editor as TypeScript, iterate in code, deploy via API
+- Drag a `.json` file directly onto the import dialog
+
+## Architecture
+
+```
+vortex-app (UI)          vortex-api (GraphQL)         vortex-worker (executor)
+     │                        │                             │
+     │  React Flow canvas     │  CRUD + triggers            │  Hatchet workflows
+     │  Import/Export         │  Cron scheduler              │  DSL executor
+     │  dslToReactFlow()      │  Distributed locking         │  Plugin host
+     │  reactFlowToDsl()      │  Entitlement cache           │  Connector runtime
+     │                        │                             │
+     └────── GraphQL ─────────┘──── events ─────────────────┘
+```
+
+The API triggers workflow execution by pushing events to Hatchet. The worker picks up the event, loads the workflow definition, and walks through the step graph.
+
+## Step Types
+
+Vortex supports 100+ step types across several categories:
+
+| Category | Types |
+|---|---|
+| **Core** | `trigger`, `action`, `condition`, `switch`, `delay`, `loop`, `parallel`, `gate`, `plugin`, `code`, `subworkflow` |
+| **Data** | `map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group` |
+| **AI/ML** | `llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails` |
+| **Human** | `approval`, `input`, `notification` |
+| **Infra** | `cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify` |
+
+## Connectors
+
+Vortex integrates 600+ connectors from the Activepieces ecosystem. Each connector is an npm package that provides actions and triggers. Connectors are dynamically loaded at runtime based on the integration ID in the step definition.
+
+## Built-in Plugins
+
+| Plugin | Capabilities |
+|---|---|
+| **Cache** | Get, set, delete with optional TTL |
+| **Rate Limit** | Token bucket, sliding window, fixed window algorithms |
+| **Queue** | Push/pull with memory, Redis, SQS, or RabbitMQ backends |
+| **Database** | Query, insert, update, delete with parameterized SQL |
+| **Email** | Send emails via Resend |
+| **File** | Read, write, list, delete files |
+| **HTTP** | Make HTTP requests with auth and retry |
+| **Hash** | MD5, SHA-256, bcrypt, HMAC |
+| **JWT** | Sign and verify JSON Web Tokens |
+| **FTP** | Upload, download, list files |
+| **SSH** | Execute remote commands |
+
+## Error Handling
+
+Each step can define error behavior:
+
+- **Continue** — skip the error, proceed to the next step
+- **Stop** — halt the entire workflow
+- **Retry** — retry with configurable backoff (fixed, linear, exponential)
+- **Goto** — jump to a fallback step
+
+Connector actions are automatically retried up to 3 times for transient failures.
+
+## Execution
+
+The worker creates an `ExecutionContext` for each workflow run:
+
+- `workflowId` — the workflow being executed
+- `runId` — unique ID for this execution
+- `organizationId` — tenant scope for credential lookup
+- `triggerData` — payload from the trigger (webhook body, cron metadata, etc.)
+- `variables` — workflow variable state, updated as steps complete
+- `stepResults` — output from each completed step
+
+## Cron Scheduling
+
+The API service runs a cron scheduler that scans for active workflows with cron expressions every 60 seconds. A distributed lock (via cache) prevents duplicate triggers across multi-instance deployments.
+
+## MCP Integration
+
+The worker includes an MCP (Model Context Protocol) client for connecting to external tool servers:
+
+```json
+{
+  "type": "mcp",
+  "server": "my-mcp-server",
+  "tool": "search",
+  "arguments": { "query": "{{searchTerm}}" }
+}
+```

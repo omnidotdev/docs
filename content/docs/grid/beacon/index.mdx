@@ -75,17 +75,17 @@ Beacon is designed around local-first principles:
 
 ## Chat
 
-Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Connect your own AI provider keys or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
+Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Configure your providers in [Synapse](/grid/synapse) or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
 
 ## Voice
 
 Beacon supports hands-free interaction with wake word detection, speech-to-text, and text-to-speech. Say your persona's wake word, ask a question, and hear the answer spoken back. See the [Voice guide](/grid/beacon/voice) for setup details.
 
-| Component | Local | Cloud |
-|-----------|-------|-------|
+| Component | Local | Cloud (via [Synapse](/grid/synapse)) |
+|-----------|-------|--------------------------------------|
 | Wake word detection | Yes | - |
-| Speech-to-text | Optional | Default (Whisper) |
-| Text-to-speech | Optional | Default (OpenAI TTS) |
+| Speech-to-text | - | Whisper, Deepgram |
+| Text-to-speech | - | OpenAI TTS, ElevenLabs |
 
 ## Personas
 
@@ -98,7 +98,7 @@ Connect Beacon to your favorite messaging platforms. Your assistant works consis
 ## Getting Started
 
 1. **Download**: Get the Beacon desktop app — the gateway runs automatically as a sidecar
-2. **Set up AI**: Add your own API keys or connect Omni Credits
+2. **Set up AI**: Configure providers in [Synapse](/grid/synapse) or connect Omni Credits
 3. **Pair devices**: Use a 6-digit pairing code to add phones, tablets, or other computers
 4. **Customize**: Pick a persona, set your wake word, and configure voice
 5. **Start talking**: Say your wake word and go
