@@ -1,0 +1,123 @@
+---
+title: "\U0001F5FC Beacon"
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiRobotFill, PiChatCircle, PiMicrophoneFill } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "AI Gateway",
+      icon: <PiRobotFill />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Voice",
+      icon: <PiMicrophoneFill />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Multi-Channel",
+      icon: <PiChatCircle />,
+      className: "bg-teal-100 text-teal-800 dark:bg-teal-900/20 dark:text-teal-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://beacon.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/beacon-gateway`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+    {
+      href: "/orin",
+      label: "Meet Orin (flagship persona)",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Beacon is in active development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "An always-on, local-first AI assistant that works across voice, desktop, mobile, and messaging channels",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Beacon makes AI assistants accessible to everyone, not just developers. No API keys needed, no terminal required. Talk to it, message it, or use the app.",
+    },
+  ]}
+/>
+
+**Omni Beacon** is an always-on AI assistant gateway designed for everyday users. Think of it as your personal AI that lives on your machine, listens for your voice, and connects to all your messaging platforms.
+
+## Architecture
+
+Beacon consists of three services:
+
+| Service | Language | Purpose |
+|---------|----------|---------|
+| `beacon-gateway` | Rust | Core daemon: wake word detection, STT/TTS, channel routing, tool execution |
+| `beacon-api` | TypeScript (Elysia) | GraphQL API for session management and configuration |
+| `beacon-app` | React + Tauri | Cross-platform desktop and web app |
+
+All AI intelligence is powered by [agent-core](/armory/omni-cli), the shared Rust library also used by the Omni CLI.
+
+## Key Features
+
+- **Voice interface**: Wake word detection, speech-to-text, and text-to-speech via Synapse
+- **Multi-channel**: Chat across Discord, Slack, WhatsApp, Telegram, Teams, Google Chat, Signal, Matrix, and iMessage
+- **Browser automation**: Navigate, screenshot, interact with web pages via headless browser (chromiumoxide/CDP)
+- **Task scheduling**: Create and manage scheduled tasks via Vortex integration
+- **Persona system**: Customizable AI personalities following the [persona.json spec](https://persona.omni.dev)
+- **Local-first**: Runs on your machine, your data stays with you
+- **Cross-platform app**: Works in browser and as a native Tauri desktop app
+
+## Voice Pipeline
+
+| Stage | Implementation |
+|-------|---------------|
+| Wake word | Energy-based local detection (RMS thresholding) |
+| Audio capture | `cpal` library, 16kHz mono |
+| Speech-to-text | Via Synapse (OpenAI Whisper or Deepgram) |
+| Text-to-speech | Via Synapse (OpenAI TTS or ElevenLabs) |
+| Playback | `cpal` + `minimp3`, 24kHz |
+
+## Messaging Channels
+
+All 9 channels implement a unified `Channel` trait with attachment support, message threading, and user authentication:
+
+Discord, Slack, WhatsApp, Telegram, Microsoft Teams, Google Chat, Signal, Matrix, and iMessage (macOS only).
+
+## Web vs Desktop
+
+The Beacon app is a thin client. All AI processing, browser automation, and tool execution run on the gateway. Both web and Tauri desktop connect to the same gateway instance.
+
+| Capability | Web | Desktop (Tauri) |
+|---|---|---|
+| Voice | Web Audio API | Native via IPC |
+| Chat | WebSocket | Tauri event listeners |
+| Gateway discovery | Localhost / manual | mDNS auto-discovery |
+| Conversation storage | IndexedDB | IPC + local |
+
+## Mobile
+
+The gateway requires desktop hardware (audio capture via `cpal`). Mobile devices connect as thin clients to a running gateway:
+
+1. **Now**: Open the web app in a mobile browser, point at your gateway
+2. **Soon**: Tauri mobile builds (scaffolding exists for Android/iOS)
+3. **Later**: Cloud-hosted gateway at `beacon.omni.dev`
+
+## Getting Started
+
+Detailed setup guides and API documentation coming soon. See [Orin](/orin) to learn about the flagship persona that runs on Beacon.
