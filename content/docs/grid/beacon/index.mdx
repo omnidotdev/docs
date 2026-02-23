@@ -61,7 +61,7 @@ import { FaMicrophone, FaComments, FaServer, FaShieldAlt, FaWifi } from "react-i
   ]}
 />
 
-**Omni Beacon** is a local-first voice and messaging gateway built in Rust. It runs on your machine or home server, keeping all your data local while providing seamless multi-device access through device-based identity and mDNS discovery.
+**Omni Beacon** is a local-first voice and messaging gateway built in Rust. It ships as a single binary with an embedded AI router ([Synapse](/grid/synapse)) — no separate server needed. It runs on your machine or home server, keeping all your data local while providing seamless multi-device access through device-based identity and mDNS discovery.
 
 ## Local-First Principles
 
@@ -75,14 +75,14 @@ Beacon is designed around local-first principles:
 
 ## Chat
 
-Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Configure your providers in [Synapse](/grid/synapse) or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
+Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Synapse runs in-process by default, routing requests to your configured provider. Or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
 
 ## Voice
 
 Beacon supports hands-free interaction with wake word detection, speech-to-text, and text-to-speech. Say your persona's wake word, ask a question, and hear the answer spoken back. See the [Voice guide](/grid/beacon/voice) for setup details.
 
-| Component | Local | Cloud (via [Synapse](/grid/synapse)) |
-|-----------|-------|--------------------------------------|
+| Component | Local | Embedded (via [Synapse](/grid/synapse)) |
+|-----------|-------|----------------------------------------|
 | Wake word detection | Yes | - |
 | Speech-to-text | - | Whisper, Deepgram |
 | Text-to-speech | - | OpenAI TTS, ElevenLabs |
@@ -98,7 +98,7 @@ Connect Beacon to your favorite messaging platforms. Your assistant works consis
 ## Getting Started
 
 1. **Download**: Get the Beacon desktop app — the gateway runs automatically as a sidecar
-2. **Set up AI**: Configure providers in [Synapse](/grid/synapse) or connect Omni Credits
+2. **Set up AI**: Run `beacon setup` or configure `~/.config/omni/beacon/config.toml`
 3. **Pair devices**: Use a 6-digit pairing code to add phones, tablets, or other computers
 4. **Customize**: Pick a persona, set your wake word, and configure voice
 5. **Start talking**: Say your wake word and go

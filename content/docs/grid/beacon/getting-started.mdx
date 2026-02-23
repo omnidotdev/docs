@@ -5,6 +5,18 @@ description: Set up Beacon and start chatting
 
 Get up and running with Beacon in a few minutes.
 
+## Quick Start (Standalone)
+
+If you just want to get running from the command line:
+
+```bash
+cargo install beacon-gateway
+beacon setup
+beacon --foreground -v
+```
+
+`beacon setup` walks you through provider, API key, model, and voice configuration interactively, writing `~/.config/omni/beacon/config.toml`. After setup, run `beacon --foreground -v` to start the gateway.
+
 ## Download the Desktop App
 
 Beacon is available as a desktop app for macOS, Linux, and Windows. The app bundles the gateway as a sidecar process, so there's nothing else to install.
@@ -25,11 +37,11 @@ When you open Beacon for the first time:
 
 ## Set Up Your AI Provider
 
-Beacon routes all AI traffic through [Synapse](/grid/synapse), which manages provider keys and model routing. You have two options:
+Beacon includes [Synapse](/grid/synapse) as an embedded AI router — no separate service to install or manage. Configure your provider and API key via `beacon setup` or by editing `~/.config/omni/beacon/config.toml` directly.
 
 ### Bring Your Own Key (BYOK)
 
-Configure API keys in your Synapse config. Synapse dispatches requests to the appropriate provider:
+Synapse dispatches requests to the appropriate provider based on your config:
 
 | Provider | What It Powers |
 |----------|---------------|
@@ -37,8 +49,6 @@ Configure API keys in your Synapse config. Synapse dispatches requests to the ap
 | OpenAI | Chat (GPT), voice transcription (Whisper), speech (TTS) |
 | Deepgram | Voice transcription (STT) |
 | ElevenLabs | Speech (TTS) |
-
-See the [Synapse docs](/grid/synapse) for provider configuration.
 
 ### Omni Credits
 
@@ -76,11 +86,11 @@ If you'd rather run the gateway on a server or Raspberry Pi without the desktop 
 # Install
 cargo install beacon-gateway
 
-# Run with default persona
-beacon-gateway --foreground --persona orin
+# Interactive setup (provider, API key, model, voice)
+beacon setup
 
 # Run with verbose logging
-beacon-gateway --foreground --verbose --persona orin
+beacon --foreground -v
 ```
 
 Then point a Beacon app (desktop, mobile, or web) at your gateway. The app will discover it automatically via [mDNS](/grid/beacon/discovery), or you can enter the gateway's IP address manually.
