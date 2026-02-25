@@ -1,18 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 
-import { app } from "@/lib/config";
+import baseLayoutOptions from "@/lib/layout.base";
 
 /**
  * 404 not found.
  */
 const NotFound = () => (
-  <HomeLayout
-    nav={{
-      title: app.name.long,
-    }}
-    className="text-center"
-  >
+  <HomeLayout {...baseLayoutOptions()} className="text-center">
     <div className="mt-18 flex flex-col items-center gap-4">
       <h1 className="font-bold text-6xl text-fd-muted-foreground">404</h1>
 
