@@ -134,6 +134,19 @@ const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
       >
         {item.icon}
         <span className="flex-1 font-medium">{item.name}</span>
+
+        {isNew && (
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+            New! 🚀
+          </Badge>
+        )}
+
+        {isComingSoon && (
+          <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+            Coming Soon 🚧
+          </Badge>
+        )}
+
         <motion.div
           animate={{ rotate: open ? 90 : 0 }}
           transition={{ duration: 0.2 }}

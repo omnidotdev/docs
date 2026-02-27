@@ -12,7 +12,16 @@ import { REALMS } from "./sections";
 // then need to figure a way to grab the frontmatter here
 
 // TODO grab from Omni API
-export const NEW_PRODUCTS = ["Beacon", "Eden", "life.json", "Omni CLI", "persona.json", "RDK", "Runa"];
+export const NEW_PRODUCTS = [
+  "Beacon",
+  "Eden",
+  "life.json",
+  "Omni CLI",
+  "Omni Terminal",
+  "persona.json",
+  "RDK",
+  "Runa",
+];
 export const COMING_SOON_PRODUCTS = ["Manifold", "Thornberry", "Vortex"];
 
 // TODO augment section metadata directly (unsure if this is possible with Fumadocs)
