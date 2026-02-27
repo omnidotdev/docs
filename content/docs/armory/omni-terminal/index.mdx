@@ -1,0 +1,182 @@
+---
+title: "\u2389 Omni Terminal"
+description: A GPU-accelerated terminal emulator built with Rust and WebGPU
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust, SiWebgpu } from "react-icons/si";
+import { PiTerminalFill, PiGlobeFill } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Terminal",
+      icon: <PiTerminalFill />,
+      className: "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300",
+    },
+    {
+      label: "GPU-Accelerated",
+      icon: <SiWebgpu />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Cross-Platform",
+      icon: <PiGlobeFill />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://terminal.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Big Idea",
+      description:
+        "A terminal emulator that runs everywhere — desktop, web, mobile — powered by GPU rendering",
+    },
+    {
+      title: "Problem Solved",
+      description:
+        "Omni Terminal provides a fast, cross-platform terminal experience with GPU-accelerated rendering via WebGPU. It supports tabs, split panes, VI mode, customizable keybindings, and runtime opacity controls, all configured through a single TOML file",
+    },
+  ]}
+/>
+
+## Overview
+
+**Your horizon to the universe.**
+
+Omni Terminal is a GPU-accelerated terminal emulator built with Rust and WebGPU. It runs on desktop (macOS, Linux, Windows), web (WASM + WebSocket PTY server), and mobile (Android) — all from a single codebase.
+
+## Key Features
+
+- **GPU-accelerated rendering**: Powered by WebGPU via the Sugarloaf rendering engine
+- **Tabs**: Multiple tab modes (top, bottom, bookmark, native macOS) with color automation
+- **Split panes**: Horizontal and vertical splits with resizable dividers
+- **VI mode**: Full VI keybindings for navigation and selection
+- **Search**: Forward/backward regex search with history
+- **Hints**: URL detection and opening with customizable patterns
+- **Runtime opacity**: Adjust window transparency on the fly with keybindings
+- **Background images**: Support for background images with opacity blending
+- **Customizable keybindings**: Override any default binding through config
+- **Cross-platform**: Native rendering on macOS, Linux, Windows, web, and Android
+- **Web terminal**: Self-hostable web terminal with WebSocket PTY bridge and TLS
+- **Android terminal**: Full Arch Linux environment via PRoot with local filesystem access
+
+## Installation
+
+| Platform | Channel | Command / Link |
+| --- | --- | --- |
+| All | [GitHub Releases](https://github.com/omnidotdev/terminal/releases) | Download from releases page |
+| All | Source | `cargo install --git https://github.com/omnidotdev/terminal -p omni-terminal` |
+| macOS | [Homebrew](https://brew.sh) | `brew install --cask omnidotdev/tap/omni-terminal` |
+| Arch Linux | [AUR](https://aur.archlinux.org) | `yay -S omni-terminal` or `yay -S omni-terminal-bin` |
+| Debian/Ubuntu | .deb | Download x11 or wayland .deb from [releases](https://github.com/omnidotdev/terminal/releases) |
+| Windows | [WinGet](https://github.com/microsoft/winget-cli) | `winget install Omni.Terminal` |
+| Linux | [Flatpak](https://flatpak.org) | `flatpak install dev.omni.Terminal` |
+
+### Build from Source
+
+```bash
+# Linux: install system dependencies first
+# Debian/Ubuntu: sudo apt install libwayland-dev libxkbcommon-dev libfontconfig-dev
+# Arch: sudo pacman -S fontconfig freetype2 libxkbcommon wayland
+
+git clone https://github.com/omnidotdev/terminal
+cd terminal
+cargo build --release -p omni-terminal
+```
+
+### Web
+
+See the [Web](/armory/omni-terminal/web) page for self-hosting the web terminal.
+
+### Android
+
+See the [Android](/armory/omni-terminal/android) page for building and installing the Android app.
+
+## Quick Start
+
+Launch the terminal:
+
+```bash
+omni-terminal
+```
+
+Start in a specific directory:
+
+```bash
+omni-terminal -w ~/projects
+```
+
+Run a command directly:
+
+```bash
+omni-terminal -e htop
+```
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        Frontends                             │
+│  ┌──────────────┐  ┌───────────┐  ┌────────────────────┐    │
+│  │ omni-terminal│  │   WASM    │  │  android-lib (JNI) │    │
+│  │  (desktop)   │  │(browser)  │  │    + Kotlin app    │    │
+│  └──────┬───────┘  └─────┬─────┘  └─────────┬──────────┘    │
+├─────────┴────────────────┴───────────────────┴───────────────┤
+│                    terminal-backend                          │
+│            (PTY, grid, ANSI parsing, events)                 │
+├──────────────────────────────────────────────────────────────┤
+│                      Sugarloaf                               │
+│          (WebGPU rendering, font rasterization)              │
+├──────────────────────────────────────────────────────────────┤
+│  terminal-window │ copa (parser) │ teletypewriter │corcovado │
+└──────────────────────────────────────────────────────────────┘
+```
+
+| Crate | Purpose |
+|-------|---------|
+| **omni-terminal** | Desktop frontend — windowing, input, keybindings, tabs, splits |
+| **omni-terminal-wasm** | Web frontend — WebGPU rendering in browser, WebSocket PTY client |
+| **omni-terminal-android** | Android frontend — JNI bridge, PRoot PTY spawning, TLS/WSS client |
+| **web-server** | Web PTY server — Axum WebSocket bridge with TLS, session management |
+| **terminal-backend** | Terminal emulation — PTY management, ANSI parsing, grid state, events |
+| **sugarloaf** | GPU rendering engine — WebGPU text and shape rendering, font loading |
+| **terminal-window** | Window abstraction — cross-platform windowing (winit fork) |
+| **copa** | Terminal parser — high-performance ANSI/VT100 sequence parsing |
+| **teletypewriter** | PTY creation — pseudoterminal allocation and shell spawning |
+| **corcovado** | Non-blocking I/O — cross-platform async primitives |
+
+## CLI Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `-e, --command` | Command and args to execute (must be last) |
+| `-w, --working-dir` | Start shell in specified directory |
+| `--write-config` | Write default config to a given path |
+| `--enable-log-file` | Write logs to file in config directory |
+| `--title-placeholder` | Start window with specified title |
+| `--app-id` | Set Wayland app_id or X11 WM_CLASS (Linux/BSD) |
+
+## Platforms
+
+| Platform | Status | Backend |
+|----------|--------|---------|
+| macOS | Experimental | Native WebGPU |
+| Linux (X11/Wayland) | Experimental | Native WebGPU |
+| Windows | Experimental | Native WebGPU |
+| [Web (WASM)](/armory/omni-terminal/web) | Experimental | WebGPU in browser + WebSocket PTY |
+| [Android](/armory/omni-terminal/android) | Experimental | JNI + PRoot Arch Linux |
+
+See [Keybindings](/armory/omni-terminal/keybindings) for the full keybinding reference and [Configuration](/armory/omni-terminal/configuration) for all config options.
