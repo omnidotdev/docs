@@ -1,0 +1,289 @@
+---
+title: Configuration
+description: Config file reference for Omni Terminal
+---
+
+# Configuration
+
+Omni Terminal uses a single TOML config file for all settings.
+
+## Config Location
+
+| Platform | Path |
+|----------|------|
+| macOS | `~/.config/omni/terminal/config.toml` |
+| Linux | `$XDG_CONFIG_HOME/omni/terminal/config.toml` (default: `~/.config/omni/terminal/config.toml`) |
+| Windows | `%APPDATA%\Local\omni\terminal\config.toml` |
+
+Override with the `OMNI_TERMINAL_CONFIG_HOME` environment variable.
+
+Generate a default config:
+
+```bash
+omni-terminal --write-config ~/.config/omni/terminal/config.toml
+```
+
+## Full Configuration Reference
+
+```toml
+# =============================================================================
+# Shell
+# =============================================================================
+
+[shell]
+program = "/bin/zsh"       # shell executable
+args = ["-l"]              # shell arguments
+
+# =============================================================================
+# Window
+# =============================================================================
+
+[window]
+width = 800                # initial window width
+height = 600               # initial window height
+mode = "Windowed"          # Windowed | Maximized | Fullscreen
+opacity = 1.0              # window opacity (0.0–1.0)
+blur = false               # enable blur effect behind the window
+decorations = "Enabled"    # Enabled | Disabled | Transparent | Buttonless
+colorspace = "Srgb"        # Srgb | DisplayP3 | Rec2020
+
+# background image
+[window.background-image]
+path = "/path/to/image.png"
+opacity = 0.5              # image opacity (0.0–1.0)
+
+# macOS-specific
+macos-use-unified-titlebar = false
+macos-use-shadow = true
+
+# Windows-specific
+windows-corner-preference = "Default"  # Default | DoNotRound | Round | RoundSmall
+
+# =============================================================================
+# Navigation (Tabs & Splits)
+# =============================================================================
+
+[navigation]
+mode = "TopTab"               # Plain | TopTab | BottomTab | Bookmark | NativeTab (macOS)
+use-split = true              # enable split panes
+use-terminal-title = true     # use terminal-set titles in tabs
+clickable = true              # clickable tabs
+hide-if-single = true         # hide tab bar when only one tab
+open-config-with-split = true # open config editor in a split pane
+unfocused-split-opacity = 0.4 # opacity of unfocused splits (0.0–1.0)
+
+# auto-color tabs by program or path
+[[navigation.color-automation]]
+program = "ssh"
+color = "#ff6600"
+
+[[navigation.color-automation]]
+path = "/projects/important"
+color = "#00ff66"
+
+# =============================================================================
+# Cursor
+# =============================================================================
+
+[cursor]
+shape = "Block"            # Block | Underline | Beam | Hidden
+blinking = false
+blinking-interval = 800    # blink interval in ms
+
+# =============================================================================
+# Fonts
+# =============================================================================
+
+[fonts]
+family = "JetBrains Mono"
+size = 14.0
+weight = "Normal"          # Thin | ExtraLight | Light | Normal | Medium |
+                           # SemiBold | Bold | ExtraBold | Black
+
+# =============================================================================
+# Scroll
+# =============================================================================
+
+[scroll]
+multiplier = 3.0           # scroll speed multiplier
+divider = 1.0              # scroll divider
+
+# =============================================================================
+# Bell
+# =============================================================================
+
+[bell]
+visual = true              # flash screen on bell
+# animation = "..."        # bell animation effect
+
+# =============================================================================
+# Hints (URL Detection)
+# =============================================================================
+
+[hints]
+alphabet = "jfkdls;ahgurieowpq"  # characters used for hint labels
+
+# hint rules define patterns to detect and actions to take
+[[hints.rules]]
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|git://|ssh://|ftp://)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`]+"
+hyperlinks = true
+post-processing = true
+persist = false
+action = { action = "Copy" }     # Copy | Paste | Select | MoveViModeCursor
+# or: command = "xdg-open {}"    # run a command with the matched text
+
+[hints.rules.mouse]
+enabled = true
+mods = ["super"]           # modifiers to hold for mouse hints (macOS)
+# mods = ["alt"]           # Linux/Windows
+
+[hints.rules.binding]
+key = "O"
+mods = ["control", "shift"]
+
+# =============================================================================
+# Custom Keybindings
+# =============================================================================
+
+[[bindings.keys]]
+key = "t"
+with = "control|shift"
+action = "newTab"
+
+[[bindings.keys]]
+key = "n"
+with = "control|shift"
+action = "newWindow"
+
+# send an escape sequence instead of an action
+[[bindings.keys]]
+key = "f1"
+esc = "\x1bOP"
+
+# =============================================================================
+# Keyboard
+# =============================================================================
+
+[keyboard]
+disable-ctlseqs-alt = false    # disable control sequences for Alt key
+
+# =============================================================================
+# Appearance
+# =============================================================================
+
+theme = "omni"                 # theme name
+line-height = 1.0              # line height multiplier
+padding-x = 5.0                # horizontal padding (px)
+# padding-y = [5.0, 5.0]      # vertical padding [top, bottom]
+
+# =============================================================================
+# Renderer
+# =============================================================================
+
+[renderer]
+# backend = "..."             # rendering backend override
+# performance = "..."         # performance level
+
+# =============================================================================
+# Developer
+# =============================================================================
+
+[developer]
+log-level = "OFF"              # OFF | ERROR | WARN | INFO | DEBUG | TRACE
+enable-log-file = false        # write logs to file
+enable-fps-counter = false     # show FPS counter
+
+# =============================================================================
+# Title
+# =============================================================================
+
+[title]
+# template = "..."            # title template (supports variables)
+# placeholder = "Terminal"    # default title
+
+# =============================================================================
+# Behavior
+# =============================================================================
+
+use-fork = true                        # use fork for new shells
+option-as-alt = false                  # treat Option as Alt (macOS)
+confirm-before-quit = true             # confirm before quitting
+hide-mouse-cursor-when-typing = false  # hide cursor while typing
+draw-bold-text-with-light-colors = false
+working-dir = "~"                      # default working directory
+# editor = "vim"                       # config editor program
+
+# environment variables
+env-vars = [
+  "TERM=xterm-256color",
+]
+
+# =============================================================================
+# Platform Overrides
+# =============================================================================
+
+# override any setting per-platform
+[platform.macos.shell]
+program = "/bin/zsh"
+args = ["-l"]
+
+[platform.linux.shell]
+program = "/bin/bash"
+
+[platform.windows.shell]
+program = "powershell"
+```
+
+## Bindable Actions
+
+These action names can be used in custom keybindings:
+
+| Action | Description |
+|--------|-------------|
+| `copy` | Copy selection |
+| `paste` | Paste from clipboard |
+| `copyOrInterrupt` | Copy if selection exists, otherwise send `Ctrl+C` |
+| `pasteSelection` | Paste from X11 selection buffer |
+| `increaseFontSize` | Increase font size |
+| `decreaseFontSize` | Decrease font size |
+| `resetFontSize` | Reset font size to config value |
+| `increaseOpacity` | Increase window opacity |
+| `decreaseOpacity` | Decrease window opacity |
+| `resetOpacity` | Reset opacity to config value |
+| `scrollPageUp` | Scroll one page up |
+| `scrollPageDown` | Scroll one page down |
+| `scrollHalfPageUp` | Scroll half a page up |
+| `scrollHalfPageDown` | Scroll half a page down |
+| `scrollToTop` | Scroll to top of history |
+| `scrollToBottom` | Scroll to bottom |
+| `newTab` | Create a new tab |
+| `selectNextTab` | Switch to next tab |
+| `selectPrevTab` | Switch to previous tab |
+| `selectLastTab` | Switch to last tab |
+| `closeTab` | Close current tab |
+| `newWindow` | Create a new window |
+| `splitRight` | Split pane horizontally |
+| `splitDown` | Split pane vertically |
+| `selectNextSplit` | Focus next split |
+| `selectPrevSplit` | Focus previous split |
+| `searchForward` | Open forward search |
+| `searchBackward` | Open backward search |
+| `toggleViMode` | Enter/exit VI mode |
+| `toggleFullscreen` | Toggle fullscreen |
+| `clearHistory` | Clear terminal history |
+| `configEditor` | Open config in editor |
+| `quit` | Quit the application |
+
+## Binding Modes
+
+Bindings can be restricted to specific terminal modes:
+
+| Mode | Description |
+|------|-------------|
+| `APP_CURSOR` | Application cursor mode |
+| `APP_KEYPAD` | Application keypad mode |
+| `ALT_SCREEN` | Alternate screen buffer active |
+| `VI` | VI mode active |
+| `SEARCH` | Search mode active |
+
+Prefix a mode with `~` to match when it is **not** active (e.g. `~VI` means "not in VI mode").
