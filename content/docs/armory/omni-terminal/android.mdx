@@ -1,0 +1,149 @@
+---
+title: Android
+description: Omni Terminal on Android — local Arch Linux shell, remote connections, and full terminal experience
+---
+
+# Android
+
+Omni Terminal for Android provides a full terminal experience on mobile. It supports local shells via an Arch Linux environment (powered by PRoot), remote WebSocket connections over TLS, multi-session tabs, and persistent settings.
+
+## Requirements
+
+- Android 8.0+ (API level 26)
+- arm64 (aarch64) device
+
+## Features
+
+### Local Shell
+
+Omni Terminal ships with a lightweight busybox-based shell environment that installs automatically on first launch. This provides core Unix utilities (`ls`, `cat`, `grep`, `find`, `sed`, `tar`, etc.) without any additional downloads.
+
+### Arch Linux via PRoot
+
+For a full Linux environment, Omni Terminal can install Arch Linux ARM (~170 MB download) and run it via [PRoot](https://proot-me.github.io/). This gives you access to `pacman` and the entire Arch Linux package ecosystem.
+
+Once installed, the Arch environment provides:
+
+- **Full package manager**: `pacman -S <package>` to install anything from the Arch repos
+- **Development tools**: `gcc`, `rust`, `python`, `node`, `git`, `ssh`, and more
+- **Networking**: Outbound TCP/UDP works natively through Android's network stack
+- **Faked root**: PRoot's `-0` flag simulates root — `sudo` is unnecessary
+- **Filesystem access**: `/sdcard` is bound into the PRoot environment for access to local files
+
+```bash
+# inside the Arch environment
+pacman -S openssh git python
+ssh user@example.com
+```
+
+### Remote Connections
+
+Connect to a remote [Omni Terminal web server](/armory/omni-terminal/web) over secure WebSocket (WSS/TLS). Enter the server URL on the home screen and tap **Connect**.
+
+URL formats accepted:
+
+- `wss://hostname:port/ws`
+- `https://hostname:port` (auto-converted to `wss://`)
+- `ws://hostname:port` (unencrypted, local network only)
+
+### Multi-Session Tabs
+
+Create multiple terminal sessions within a single connection. The tab bar at the top shows all active sessions — tap **+** to add a new one, long-press a tab to close it.
+
+### Settings
+
+Access settings via the gear icon in the toolbar.
+
+| Setting | Options | Default |
+|---------|---------|---------|
+| Theme | Dark, Solarized Dark, Light | Dark |
+| Font size | Adjustable via pinch gesture or settings | 18 |
+
+Settings persist across app restarts.
+
+### Input
+
+**Toolbar buttons** provide quick access to modifier keys and special characters:
+
+| Button | Function |
+|--------|----------|
+| CTRL | Toggle Ctrl modifier |
+| ALT | Toggle Alt modifier |
+| ESC | Send Escape |
+| TAB | Send Tab |
+| Arrows | Send arrow key sequences |
+| `/` `-` `\|` `~` | Common shell characters |
+
+**Gestures:**
+
+| Gesture | Action |
+|---------|--------|
+| Tap | Focus terminal, show keyboard |
+| Pinch | Zoom font size |
+| Long-press | Begin text selection |
+| Drag (after long-press) | Extend selection (auto-copies on release) |
+| Scroll | Scroll through terminal history |
+
+**Hardware keyboard** support includes function keys, arrow keys, Ctrl+letter, and Alt+key combinations.
+
+### Storage Access
+
+Tap **Setup Storage** on the home screen to create symlinks from the terminal environment to common Android directories:
+
+| Symlink | Target |
+|---------|--------|
+| `~/storage/shared` | `/sdcard` |
+| `~/storage/downloads` | `/sdcard/Download` |
+| `~/storage/dcim` | `/sdcard/DCIM` |
+| `~/storage/pictures` | `/sdcard/Pictures` |
+| `~/storage/music` | `/sdcard/Music` |
+| `~/storage/movies` | `/sdcard/Movies` |
+
+### Background Service
+
+When the app is backgrounded, a foreground service keeps terminal sessions alive. A persistent notification shows the number of active sessions.
+
+## Building
+
+### Prerequisites
+
+- Android NDK (`ANDROID_NDK_HOME` set)
+- Rust with the `aarch64-linux-android` target
+- `cargo-ndk`
+
+### Build and Install
+
+```bash
+# build bootstrap archive (busybox + proot, one-time)
+just android-bootstrap
+
+# build native library + APK (debug)
+just android-build
+
+# build, install, and launch on connected device
+just android-deploy
+
+# watch for changes and auto-deploy
+just android-watch
+```
+
+### Release Build
+
+```bash
+just android-release
+```
+
+## Permissions
+
+| Permission | Purpose |
+|------------|---------|
+| `INTERNET` | Remote WebSocket connections |
+| `MANAGE_EXTERNAL_STORAGE` | Access to `/sdcard` for storage symlinks |
+| `FOREGROUND_SERVICE` | Keep sessions alive when backgrounded |
+| `WAKE_LOCK` | Prevent device sleep during active sessions |
+
+## Limitations
+
+- **PRoot overhead**: Syscall translation via ptrace adds ~5-15% overhead to syscall-heavy workloads (e.g. compiling large projects). Interactive use is unaffected
+- **No true root**: PRoot fakes root via UID/GID translation. Operations requiring real kernel privileges (e.g. mounting filesystems, loading kernel modules) are not supported
+- **arm64 only**: x86/x86_64 Android devices are not currently supported

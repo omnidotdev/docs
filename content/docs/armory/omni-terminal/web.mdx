@@ -1,0 +1,168 @@
+---
+title: Web
+description: Self-host Omni Terminal in the browser with WebGPU rendering and a WebSocket PTY server
+---
+
+# Web
+
+Omni Terminal runs in the browser via WebAssembly with GPU-accelerated rendering (WebGPU). A companion Rust server provides PTY sessions over secure WebSocket connections.
+
+## How It Works
+
+```
+┌─────────────────────────┐         ┌──────────────────────────┐
+│     Browser (WASM)      │  WSS    │      Web Server          │
+│                         │◄───────►│                          │
+│  WebGPU canvas render   │         │  Axum + TLS              │
+│  Terminal grid + parser │         │  PTY session broker      │
+│  Keyboard/mouse input   │         │  Output buffering        │
+│  Tab management         │         │  Stale session cleanup   │
+└─────────────────────────┘         └──────────────────────────┘
+```
+
+1. Browser loads the WASM frontend and initializes a WebGPU canvas
+2. WASM connects to the server via secure WebSocket (`wss://`)
+3. Server spawns a PTY shell session and brokers I/O over the WebSocket
+4. Terminal output is parsed and rendered at 60fps via WebGPU
+
+## Self-Hosting
+
+### Quick Start
+
+```bash
+# build the WASM frontend
+just wasm-build
+
+# start the web server (serves WASM + WebSocket PTY)
+cargo run -p web-server
+```
+
+The server starts on `https://localhost:3000` with an auto-generated self-signed TLS certificate.
+
+### Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `PORT` | `3000` | Server listen port |
+| `SHELL` | `/bin/sh` | Shell to spawn for PTY sessions |
+| `TLS_CERT` | (auto-generated) | Path to TLS certificate PEM file |
+| `TLS_KEY` | (auto-generated) | Path to TLS private key PEM file |
+
+### TLS Certificates
+
+By default, the server generates a self-signed certificate on startup that includes all local network interface IPs and `localhost` as Subject Alternative Names. This allows connections from any device on the local network.
+
+To use your own certificate:
+
+```bash
+TLS_CERT=/path/to/cert.pem TLS_KEY=/path/to/key.pem cargo run -p web-server
+```
+
+### Docker
+
+```bash
+docker build -t omni-terminal-web .
+docker run -p 3000:3000 omni-terminal-web
+```
+
+To use your own TLS certificates with Docker:
+
+```bash
+docker run -p 3000:3000 \
+  -v /path/to/cert.pem:/tls/cert.pem \
+  -v /path/to/key.pem:/tls/key.pem \
+  -e TLS_CERT=/tls/cert.pem \
+  -e TLS_KEY=/tls/key.pem \
+  omni-terminal-web
+```
+
+### Production Build (from source)
+
+```bash
+# build optimized WASM binary
+just wasm-build-release
+
+# optional: further optimize with wasm-opt (requires Binaryen)
+just wasm-opt
+
+# start server
+cargo run -p web-server --release
+```
+
+## Features
+
+### Multi-Tab Sessions
+
+Create and manage multiple terminal sessions from a single browser tab. Each session gets its own PTY process on the server.
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+T` | New tab |
+| `Ctrl+W` | Close tab |
+
+### Session Persistence
+
+Sessions survive WebSocket disconnections. The server buffers up to 1 MB of output per session and replays it on reconnect with automatic exponential backoff (1s to 30s).
+
+Stale sessions (disconnected for >60 seconds) are automatically cleaned up.
+
+### Input
+
+- Full keyboard support including function keys, Ctrl/Alt combinations, and arrow keys
+- IME (Input Method Editor) support for CJK input
+- Mouse click, drag selection, and scroll wheel
+- Paste with bracketed paste mode
+- Click-drag text selection with auto-copy to clipboard
+
+### Rendering
+
+- WebGPU-accelerated terminal rendering
+- High-DPI display support (device pixel ratio aware)
+- Configurable font size (default 16px)
+- Responsive resize via `ResizeObserver`
+
+## npm Package
+
+The WASM frontend is published as `@omnidotdev/terminal` for embedding in web applications.
+
+```bash
+bun add @omnidotdev/terminal
+```
+
+```typescript
+import { Terminal } from "@omnidotdev/terminal";
+
+// initialize terminal on a canvas element
+Terminal.init();
+```
+
+### Building the Package
+
+```bash
+just wasm-pack
+```
+
+## Connecting from Android
+
+The [Android app](/armory/omni-terminal/android) can connect to a self-hosted web server as a remote terminal client. Enter the server URL (e.g. `wss://192.168.1.100:3000/ws`) on the Android home screen and tap **Connect**.
+
+## Protocol
+
+The WebSocket connection uses a binary protocol for PTY I/O and a text (JSON) protocol for control messages.
+
+### Binary Frames
+
+Each binary frame is prefixed with a 16-byte session UUID followed by PTY data:
+
+```
+[16-byte UUID][PTY data bytes...]
+```
+
+### Control Messages (JSON)
+
+| Type | Direction | Fields | Description |
+|------|-----------|--------|-------------|
+| `create` | Client -> Server | — | Create a new PTY session |
+| `resize` | Client -> Server | `cols`, `rows` | Resize PTY dimensions |
+| `attach` | Client -> Server | `session_id` | Reattach to existing session |
+| `close` | Client -> Server | `session_id` | Close a session |
