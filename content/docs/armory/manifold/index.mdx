@@ -27,12 +27,7 @@ import { FaDatabase } from "react-icons/fa";
       type: "repository",
     },
   ]}
-  alerts={[
-    {
-      title: "Coming Soon",
-      description: "Manifold is currently in development.",
-    },
-  ]}
+  alerts={[]}
 />
 
 **Manifold** is an OCI-compatible artifact registry for schemas, containers, and WASM modules. This section covers the APIs, authentication, and deployment in detail.
@@ -46,6 +41,9 @@ import { FaDatabase } from "react-icons/fa";
   </Card>
   <Card title="Authentication" href="/armory/manifold/authentication">
     JWT and API token authentication
+  </Card>
+  <Card title="Storage" href="/armory/manifold/storage">
+    Configure blob storage backends (filesystem or S3-compatible)
   </Card>
   <Card title="Self-Hosting" href="/armory/manifold/self-hosting">
     Deploy your own Manifold instance with Docker Compose

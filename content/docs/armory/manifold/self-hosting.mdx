@@ -1,0 +1,105 @@
+---
+title: Self-Hosting
+description: Deploy your own Manifold instance
+---
+
+Manifold follows the standard Omni [self-hosting](/help/self-hosting) pattern. See those docs for general Docker Compose usage, upgrading, and backups.
+
+## Quick Start
+
+```bash
+# Download Compose file
+curl -sLO https://raw.githubusercontent.com/omnidotdev/manifold/master/compose.yaml
+
+# Download env var template
+curl -sLO https://raw.githubusercontent.com/omnidotdev/manifold/master/.env.local.template
+
+# Copy from template
+cp .env.local.template .env.local
+# Edit `.env.local` with your settings
+
+# Run
+docker compose --env-file .env.local up -d
+```
+
+Services start on:
+- **API**: `http://localhost:4000`
+- **App**: `http://localhost:3000`
+- **Database**: `localhost:5432`
+
+## Manifold Environment Variables
+
+### Compose Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DB_PASSWORD` | Yes | — | PostgreSQL password |
+| `CORS_ALLOWED_ORIGINS` | No | — | Comma-separated allowed origins |
+| `AUTH_BASE_URL` | No | — | OIDC provider base URL |
+| `VITE_API_BASE_URL` | No | `http://api:4000` | API URL for the web app |
+
+### API
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | — | PostgreSQL connection string |
+| `PORT` | `4000` | API server port |
+| `HOST` | `0.0.0.0` | API server host |
+| `CORS_ALLOWED_ORIGINS` | — | Comma-separated allowed CORS origins |
+| `AUTH_BASE_URL` | — | OIDC provider base URL for JWT verification |
+| `AUTH_WEBHOOK_SECRET` | — | Webhook secret for auth events |
+| `PROTECT_ROUTES` | `true` | Require authentication on all routes |
+| `SELF_HOSTED` | `false` | Enable self-hosted defaults |
+| `DEFAULT_ORG_ID` | — | Default organization ID for self-hosted mode |
+| `MAINTENANCE_ALLOWED_NAMESPACES` | — | Namespaces allowed during maintenance |
+
+### App
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_BASE_URL` | — | Manifold API base URL |
+| `AUTH_SECRET` | — | Better Auth session secret |
+| `STRIPE_API_KEY` | — | Stripe API key (for billing features) |
+| `VITE_FLAGS_CLIENT_KEY` | — | Unleash feature flag client key |
+
+### Storage
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BLOB_STORAGE_BACKEND` | `fs` | Storage backend: `fs` or `s3` |
+| `BLOB_STORAGE_DIR` | `/data/manifold/blobs` | Filesystem storage base directory |
+| `BLOB_S3_BUCKET` | — | S3 bucket name (required when backend is `s3`) |
+| `BLOB_S3_REGION` | `us-east-1` | S3 region |
+| `BLOB_S3_ENDPOINT` | — | Custom S3 endpoint (for MinIO, R2) |
+| `BLOB_S3_PREFIX` | `blobs` | S3 key prefix |
+
+See the [Storage](/armory/manifold/storage) guide for details.
+
+## Upload Session Cleanup
+
+Expired upload sessions are automatically cleaned up by a background job that runs every hour. The job deletes both the database records and any temporary chunk files on disk. No configuration is required.
+
+## Self-Hosted Mode
+
+For simpler deployments without an external identity provider, enable self-hosted mode:
+
+```yaml
+environment:
+  SELF_HOSTED: "true"
+  PROTECT_ROUTES: "false"
+  DEFAULT_ORG_ID: my-org
+```
+
+This disables JWT verification and allows unauthenticated access. API tokens still work for programmatic access.
+
+## Health Checks
+
+```bash
+# API health
+curl http://localhost:4000/health
+
+# API readiness (includes database check)
+curl http://localhost:4000/ready
+```
+
+The Compose configuration includes health checks that ensure services start in the correct order (`db` → `api` → `app`).

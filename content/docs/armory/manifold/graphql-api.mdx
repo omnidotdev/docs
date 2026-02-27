@@ -1,0 +1,280 @@
+---
+title: GraphQL API
+description: Query and manage registry data with GraphQL
+---
+
+Manifold exposes a GraphQL API powered by [PostGraphile](https://postgraphile.org) for querying and managing namespaces, repositories, artifacts, and tags.
+
+## Endpoint
+
+```
+POST /graphql
+```
+
+In development, the GraphiQL playground is available at the same path in your browser. Introspection is disabled in production.
+
+## Core Entities
+
+### Namespace
+
+Top-level organizational unit for grouping repositories.
+
+```graphql
+type Namespace {
+  rowId: UUID!
+  name: String!
+  description: String
+  createdAt: Datetime
+  updatedAt: Datetime
+  repositories: RepositoryConnection!
+  apiTokens: ApiTokenConnection!
+}
+```
+
+### Repository
+
+A collection of artifacts within a namespace. Each repository has a specific artifact type.
+
+```graphql
+type Repository {
+  rowId: UUID!
+  namespaceId: UUID!
+  name: String!
+  description: String
+  artifactType: String!
+  isPublic: Boolean!
+  createdAt: Datetime
+  updatedAt: Datetime
+  namespace: Namespace
+  artifacts: ArtifactConnection!
+  tags: TagConnection!
+  apiTokens: ApiTokenConnection!
+}
+```
+
+Artifact types: `openapi`, `graphql`, `jsonschema`, `oci`, `wasm`
+
+### Artifact
+
+A content-addressed object stored in a repository.
+
+```graphql
+type Artifact {
+  rowId: UUID!
+  repositoryId: UUID!
+  digest: String!
+  size: BigInt!
+  mediaType: String!
+  content: String
+  createdAt: Datetime
+  repository: Repository
+  tags: TagConnection!
+  containerMetadatum: ContainerMetadatum
+  schemaMetadatum: SchemaMetadatum
+  wasmMetadatum: WasmMetadatum
+}
+```
+
+### Tag
+
+A named reference pointing to a specific artifact.
+
+```graphql
+type Tag {
+  rowId: UUID!
+  repositoryId: UUID!
+  artifactId: UUID!
+  name: String!
+  createdAt: Datetime
+  updatedAt: Datetime
+  repository: Repository
+  artifact: Artifact
+}
+```
+
+### Metadata Types
+
+Artifacts can have type-specific metadata:
+
+- **ContainerMetadatum**: `schemaVersion`, `architecture`, `os`, `configDigest`, `layerDigests`
+- **SchemaMetadatum**: `version`, `title`, `isValid`, `validationErrors`
+- **WasmMetadatum**: `runtime`, `exports`, `imports`
+
+## Queries
+
+### List namespaces
+
+```graphql
+query {
+  namespaces(first: 10) {
+    nodes {
+      rowId
+      name
+      description
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+```
+
+### Get a namespace by name
+
+```graphql
+query {
+  namespaceByName(name: "myorg") {
+    rowId
+    name
+    repositories {
+      nodes {
+        name
+        artifactType
+      }
+    }
+  }
+}
+```
+
+### List artifacts in a repository
+
+```graphql
+query {
+  artifacts(
+    condition: { repositoryId: "..." }
+    first: 20
+  ) {
+    nodes {
+      digest
+      mediaType
+      size
+      tags {
+        nodes {
+          name
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+```
+
+### Get artifact with metadata
+
+```graphql
+query {
+  artifact(rowId: "...") {
+    digest
+    mediaType
+    size
+    containerMetadatum {
+      architecture
+      os
+      layerDigests
+    }
+    schemaMetadatum {
+      version
+      title
+      isValid
+    }
+    wasmMetadatum {
+      runtime
+      exports
+    }
+  }
+}
+```
+
+## Mutations
+
+### Create a namespace
+
+```graphql
+mutation {
+  createNamespace(input: {
+    namespace: {
+      name: "myorg"
+      description: "My organization"
+    }
+  }) {
+    namespace {
+      rowId
+      name
+    }
+  }
+}
+```
+
+### Create a repository
+
+```graphql
+mutation {
+  createRepository(input: {
+    repository: {
+      namespaceId: "..."
+      name: "schemas"
+      artifactType: "jsonschema"
+      isPublic: true
+      description: "Shared JSON Schemas"
+    }
+  }) {
+    repository {
+      rowId
+      name
+    }
+  }
+}
+```
+
+### Delete an artifact
+
+```graphql
+mutation {
+  deleteArtifactById(input: { rowId: "..." }) {
+    deletedArtifactId
+  }
+}
+```
+
+## Pagination
+
+All collection queries use Relay-style cursor pagination:
+
+```graphql
+query {
+  repositories(
+    first: 10
+    after: "WyJteW9yZy9teWFwcCJd"
+  ) {
+    nodes { name }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+```
+
+Parameters:
+- `first` / `last` — Page size
+- `after` / `before` — Cursor from `pageInfo`
+- `condition` — Exact field matching
+- `filter` — Advanced filtering
+
+## Authentication
+
+Include a JWT or API token in the `Authorization` header:
+
+```bash
+curl -X POST https://manifold.omni.dev/graphql \
+  -H "Authorization: Bearer mf_..." \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ namespaces { nodes { name } } }"}'
+```
+
+See [Authentication](/armory/manifold/authentication) for details on obtaining tokens.

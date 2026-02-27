@@ -1,0 +1,43 @@
+---
+title: Storage
+description: Configure blob storage backends for artifact content
+---
+
+## Storage backends
+
+Manifold supports pluggable blob storage. Small artifacts (manifests, schemas) are stored inline in the database. Large artifacts (container images, WASM modules) use a dedicated storage backend.
+
+### Filesystem (default)
+
+Stores blobs on the local filesystem in a content-addressed directory structure.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BLOB_STORAGE_BACKEND` | `fs` | Storage backend type |
+| `BLOB_STORAGE_DIR` | `/data/manifold/blobs` | Base directory for blob storage |
+
+### S3-compatible
+
+Works with AWS S3, MinIO, Cloudflare R2, and any S3-compatible endpoint.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BLOB_STORAGE_BACKEND` | Yes | Set to `s3` |
+| `BLOB_S3_BUCKET` | Yes | S3 bucket name |
+| `BLOB_S3_REGION` | No | AWS region (default: `us-east-1`) |
+| `BLOB_S3_ENDPOINT` | No | Custom endpoint URL (for MinIO, R2) |
+| `BLOB_S3_PREFIX` | No | Key prefix (default: `blobs`) |
+
+<Callout type="info">
+For self-hosted MinIO, set `BLOB_S3_ENDPOINT` to your MinIO URL (e.g. `http://minio:9000`).
+</Callout>
+
+## Content addressing
+
+Blobs are stored by their SHA-256 digest. The directory/key structure is:
+
+```
+{backend}/{algorithm}/{first-two-chars}/{full-hash}
+```
+
+This enables deduplication — identical content is stored only once regardless of how many repositories reference it.
