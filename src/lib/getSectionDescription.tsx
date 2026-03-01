@@ -22,7 +22,12 @@ export const NEW_PRODUCTS = [
   "RDK",
   "Runa",
 ];
-export const COMING_SOON_PRODUCTS = ["Manifold", "Thornberry", "Vortex"];
+export const COMING_SOON_PRODUCTS = [
+  "Manifold",
+  "Synapse",
+  "Thornberry",
+  "Vortex",
+];
 
 // TODO augment section metadata directly (unsure if this is possible with Fumadocs)
 
