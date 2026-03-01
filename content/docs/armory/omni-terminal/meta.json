@@ -1,4 +1,4 @@
 {
   "title": "⎉ Omni Terminal",
-  "pages": ["index", "android", "web", "keybindings", "configuration"]
+  "pages": ["android", "web", "keybindings", "configuration"]
 }
