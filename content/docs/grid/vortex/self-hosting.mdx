@@ -33,7 +33,7 @@ This starts six containers:
 | `events` | `apache/iggy:0.6.87` | 8080, 8090 |
 | `api` | `ghcr.io/omnidotdev/vortex-api:latest` | 4000 |
 | `app` | `ghcr.io/omnidotdev/vortex-app:latest` | 3000 |
-| `worker` | `ghcr.io/omnidotdev/vortex-worker:latest` | 8080 |
+| `worker` | `ghcr.io/omnidotdev/vortex-worker:latest` | 8080 (internal) |
 
 Health checks are configured for all services. The API waits for PostgreSQL, Valkey, and Iggy to be healthy before starting.
 
@@ -191,11 +191,11 @@ The production values file (`values.prod.yaml`) configures:
 
 All deployments include liveness and readiness probes:
 
-| Service | Liveness path | Readiness path | Initial delay |
-|---|---|---|---|
-| API | `/health` | `/ready` | 15s |
-| App | `/api/_health` | `/api/_health` | 15s |
-| Worker | `/health` | `/health` | 15s |
+| Service | Liveness path | Readiness path | Liveness delay | Readiness delay |
+|---|---|---|---|---|
+| API | `/health` | `/health` | 15s | 10s |
+| App | `/api/_health` | `/api/_health` | 10s | 5s |
+| Worker | `/health` | `/health` | 15s | 10s |
 
 ## Database migrations
 

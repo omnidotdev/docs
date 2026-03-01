@@ -74,7 +74,7 @@ Deploy workflows to the Vortex API or to an edge runtime.
 vortex deploy
 
 # Edge deploy to Cloudflare Workers
-vortex deploy --edge --platform cloudflare
+vortex deploy --edge --platform cf
 
 # Edge deploy to Deno Deploy
 vortex deploy --edge --platform deno
@@ -150,7 +150,7 @@ Publish a plugin to the Vortex plugin registry.
 vortex plugin publish
 ```
 
-Reads `manifest.json` and `build/plugin.wasm`, then uploads via `POST /api/v1/plugins/upload`. Returns the plugin ID on success.
+Reads `manifest.json` and `./plugin.wasm` (default path), then uploads via `POST /api/v1/plugins/upload`. Returns the plugin ID on success.
 
 ## Configuration file
 

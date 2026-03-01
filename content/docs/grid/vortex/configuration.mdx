@@ -28,11 +28,17 @@ The API handles GraphQL/REST requests, cron scheduling, event routing, and workf
 | `INTERNAL_API_SECRET` | No | — | Shared secret for internal service-to-service calls |
 | `CACHE_URL` | No | — | Valkey/Redis URL for distributed locking (required for multi-instance) |
 | `EVENTS_URL` | No | — | Iggy TCP connection string |
+| `EVENTS_URL` | No | — | Iggy TCP connection string |
 | `WORKER_URL` | No | — | Worker service URL for health forwarding |
-| `AETHER_BASE_URL` | No | — | Aether billing service URL |
+| `VORTEX_PUBLIC_URL` | No | — | Public-facing Vortex URL (used for OAuth callbacks, function invoke URLs) |
+| `BILLING_BASE_URL` | No | — | Aether billing service URL |
+| `BILLING_WEBHOOK_SECRET` | No | — | Aether billing webhook HMAC secret |
+| `IDP_WEBHOOK_SECRET` | No | — | Gatekeeper IDP webhook HMAC secret |
+| `AUTHZ_ENABLED` | No | — | Enable AuthZ (Warden) integration |
+| `AUTHZ_API_URL` | No | — | Warden AuthZ API URL |
 | `STRIPE_API_KEY` | No | — | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | No | — | Stripe webhook signing secret |
-| `GRAPHQL_COMPLEXITY_MAX_COST` | No | `2000` | Maximum GraphQL query cost |
+| `GRAPHQL_MAX_COMPLEXITY_COST` | No | `5000` | Maximum GraphQL query cost |
 | `PROTECT_ROUTES` | No | `true` | Enable auth middleware on API routes |
 | `AUTH_DEBUG` | No | — | Enable Better Auth debug logging |
 
@@ -51,12 +57,20 @@ The app is the React dashboard with visual workflow editor, user management, and
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `AUTH_SECRET` | Yes | — | Better Auth session secret (must match API) |
-| `VITE_API_URL` | No | — | Vortex API base URL |
+| `VITE_BASE_URL` | Yes | — | Public app URL (e.g., `https://vortex.omni.dev`) |
+| `VITE_API_BASE_URL` | Yes | — | Vortex API base URL |
+| `VITE_AUTH_BASE_URL` | Yes | — | OIDC identity provider URL |
+| `VITE_BILLING_BASE_URL` | No | — | Aether billing API URL |
+| `VITE_CONSOLE_URL` | No | — | Omni console URL |
+| `AUTH_CLIENT_ID` | No | — | OIDC client ID |
+| `AUTH_CLIENT_SECRET` | No | — | OIDC client secret |
 | `RESEND_API_KEY` | No | — | Resend API key for transactional email |
 | `STRIPE_API_KEY` | No | — | Stripe secret key for billing UI |
 | `HATCHET_CLIENT_TOKEN` | No | — | Hatchet token (for workflow status) |
 | `HATCHET_CLIENT_TLS_STRATEGY` | No | — | TLS mode for Hatchet connection |
 | `VITE_FLAGS_CLIENT_KEY` | No | — | Unleash feature flag client key |
+| `VITE_FLAGS_API_HOST` | No | — | Unleash API host URL |
+| `SELF_HOSTED` | No | — | Set to `true` when self-hosting (disables billing, cloud features) |
 
 ### OAuth providers
 
@@ -81,9 +95,12 @@ The worker executes workflow DSL definitions, manages trigger adapters, and runs
 | `IGGY_USERNAME` | No | — | Iggy authentication username |
 | `IGGY_PASSWORD` | No | — | Iggy authentication password |
 | `HATCHET_CLIENT_TLS_STRATEGY` | No | `none` | TLS mode for Hatchet connection |
+| `ENCRYPTION_KEY` | No | — | Base64-encoded 32-byte key for credential decryption |
+| `INTERNAL_API_SECRET` | No | — | Shared secret for internal service-to-service calls |
 | `TEMPORAL_ADDRESS` | No | — | Temporal server address (when using Temporal backend) |
 | `VORTEX_TRIGGER_PLUGINS_DIR` | No | — | Directory for external trigger adapter plugins |
 | `HEALTH_PORT` | No | `8080` | Port for the health check HTTP server |
+| `LOG_LEVEL` | No | — | Log level override |
 
 ## Iggy (event streaming)
 
@@ -116,4 +133,4 @@ openssl rand -hex 16
 
 ## Rate limiting
 
-The API enforces a default rate limit of **100 requests per minute per IP**. GraphQL queries are cost-limited to a configurable maximum (`GRAPHQL_COMPLEXITY_MAX_COST`, default 2000).
+The API enforces a default rate limit of **100 requests per minute per IP**. GraphQL queries are cost-limited to a configurable maximum (`GRAPHQL_MAX_COMPLEXITY_COST`, default 5000).
