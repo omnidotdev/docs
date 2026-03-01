@@ -1,13 +1,4 @@
 {
-  "title": "\u2389 Omni Terminal",
-  "pages": [
-    "---Overview---",
-    "index",
-    "---Platforms---",
-    "android",
-    "web",
-    "---Reference---",
-    "keybindings",
-    "configuration"
-  ]
+  "title": "⎉ Omni Terminal",
+  "pages": ["index", "android", "web", "keybindings", "configuration"]
 }
