@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 import { Badge } from "@/components/ui/badge";
 import {
   COMING_SOON_PRODUCTS,
@@ -13,11 +15,11 @@ const SidebarItem = ({ item, pathname }: SidebarItemProps) => {
   const isActive = item.url === pathname;
 
   return (
-    <a
+    <Link
       data-active={isActive}
       data-status={isActive && "active"}
       aria-current="page"
-      href={item.url}
+      to={item.url}
       className="wrap-anywhere active relative flex flex-row items-center justify-between gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors [&_svg]:size-4 [&_svg]:shrink-0"
     >
       <span
@@ -46,7 +48,7 @@ const SidebarItem = ({ item, pathname }: SidebarItemProps) => {
           Coming Soon 🚧
         </Badge>
       )}
-    </a>
+    </Link>
   );
 };
 
