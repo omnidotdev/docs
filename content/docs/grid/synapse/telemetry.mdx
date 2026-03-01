@@ -126,7 +126,7 @@ Supported levels: `trace`, `debug`, `info`, `warn`, `error`.
 
 ## Full Example
 
-A complete telemetry configuration sending all signals to an OpenTelemetry Collector:
+A complete telemetry configuration sending all signals to [ClickStack](https://clickhouse.com/clickstack):
 
 ```toml
 [telemetry]
@@ -135,19 +135,19 @@ service_name = "synapse"
 [telemetry.tracing]
 enabled = true
 exporter = "otlp_grpc"
-endpoint = "http://otel-collector:4317"
+endpoint = "http://clickstack:4317"
 sample_rate = 0.1
 
 [telemetry.metrics]
 enabled = true
 exporter = "otlp_grpc"
-endpoint = "http://otel-collector:4317"
+endpoint = "http://clickstack:4317"
 export_interval_secs = 30
 
 [telemetry.logs]
 enabled = true
 exporter = "otlp_grpc"
-endpoint = "http://otel-collector:4317"
+endpoint = "http://clickstack:4317"
 
 [logging]
 level = "info"
