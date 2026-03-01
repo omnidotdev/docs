@@ -1,4 +1,16 @@
 {
   "title": "🌪️ Vortex",
-  "pages": ["index", "triggers", "events", "dsl", "sdk", "editor", "execution"]
+  "pages": [
+    "index",
+    "getting-started",
+    "triggers",
+    "events",
+    "dsl",
+    "sdk",
+    "editor",
+    "execution",
+    "cli",
+    "configuration",
+    "self-hosting"
+  ]
 }

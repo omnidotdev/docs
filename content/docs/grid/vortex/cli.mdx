@@ -1,0 +1,166 @@
+---
+title: CLI
+description: Workflow management and plugin development from the terminal
+---
+
+The Vortex CLI (`@omnidotdev/vortex-cli`) provides commands for workflow management, validation, deployment, code generation, and WASM plugin development.
+
+## Installation
+
+```bash
+bun add -g @omnidotdev/vortex-cli
+```
+
+## Project setup
+
+### `vortex init`
+
+Initialize a Vortex project in the current directory.
+
+```bash
+vortex init
+```
+
+Prompts for:
+- **API URL** — Vortex API endpoint (e.g., `https://api.vortex.omni.dev`)
+- **API Key** — Authentication token
+
+Creates:
+- `.vortex/config.json` — project configuration (auto-added to `.gitignore`)
+- `.vortex/workflows/` — directory for workflow definitions
+- An example workflow file
+
+## Workflow commands
+
+### `vortex validate`
+
+Validate all workflow files against the DSL schema.
+
+```bash
+vortex validate
+```
+
+Loads `.ts` files from `.vortex/workflows/`, imports each module, and validates against the `WorkflowDefinitionSchema` from `@omnidotdev/vortex-sdk`. Prints pass/fail status for each file.
+
+### `vortex push`
+
+Push validated workflows to the Vortex API.
+
+```bash
+vortex push
+```
+
+Validates all workflows first, then upserts each via `PUT /api/v1/workflows/{name}`. Reports the count of successfully upserted and failed workflows.
+
+### `vortex dev`
+
+Start a local development server with hot reload.
+
+```bash
+vortex dev
+```
+
+- Starts an HTTP server on port **4321**
+- Loads all workflow definitions and builds a route map
+- Watches for file changes and reloads automatically
+- Responds to `POST` requests matching workflow webhook paths
+
+### `vortex deploy`
+
+Deploy workflows to the Vortex API or to an edge runtime.
+
+```bash
+# Standard deploy (same as push)
+vortex deploy
+
+# Edge deploy to Cloudflare Workers
+vortex deploy --edge --platform cloudflare
+
+# Edge deploy to Deno Deploy
+vortex deploy --edge --platform deno
+```
+
+Edge deployment validates workflows, fetches a WASM export from the API, and uploads via the platform CLI (`wrangler` or `deployctl`).
+
+## Code generation
+
+### `vortex codegen`
+
+Generate TypeScript types from event schemas.
+
+```bash
+vortex codegen
+```
+
+Fetches event schemas from `/api/v1/schemas`, converts each JSON Schema to TypeScript using `json-schema-to-typescript`, and writes an `OmniEventMap` type map to:
+
+```
+src/lib/vortex/events.generated.ts
+```
+
+Deduplicates by latest version per schema name.
+
+## Plugin commands
+
+### `vortex plugin init`
+
+Scaffold a new WASM plugin project.
+
+```bash
+vortex plugin init
+```
+
+Prompts for:
+- **Plugin name**
+- **Language** — Rust, JavaScript/TypeScript (Extism JS PDK), or AssemblyScript
+
+Creates a plugin directory with `manifest.json` and language-specific template code.
+
+### `vortex plugin build`
+
+Compile a plugin to WebAssembly.
+
+```bash
+vortex plugin build
+```
+
+Detects the language from project structure:
+- **Rust** — `cargo build --target wasm32-unknown-unknown --release`
+- **JavaScript/TypeScript** — Extism JS PDK, falls back to AssemblyScript compiler
+
+Outputs `build/plugin.wasm` with file size reported.
+
+### `vortex plugin test`
+
+Run plugin functions in the Extism runtime.
+
+```bash
+vortex plugin test
+```
+
+Loads the compiled WASM file, validates declared functions from the manifest, calls each with an empty input, and reports pass/fail status.
+
+Requires optional peer dependency `@extism/extism`.
+
+### `vortex plugin publish`
+
+Publish a plugin to the Vortex plugin registry.
+
+```bash
+vortex plugin publish
+```
+
+Reads `manifest.json` and `build/plugin.wasm`, then uploads via `POST /api/v1/plugins/upload`. Returns the plugin ID on success.
+
+## Configuration file
+
+The CLI stores project config at `.vortex/config.json`:
+
+```json
+{
+  "apiUrl": "https://api.vortex.omni.dev",
+  "apiKey": "vx_..."
+}
+```
+
+This file is automatically added to `.gitignore` during `vortex init`.

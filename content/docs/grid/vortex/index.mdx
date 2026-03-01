@@ -37,7 +37,7 @@ import { FaNetworkWired } from "react-icons/fa";
 - **JSON DSL** — portable `v1.0` definition format stored as JSONB
 - **TypeScript SDK** — fluent builder API (`@omnidotdev/vortex-sdk`)
 - **600+ connectors** — integrations via Activepieces ecosystem
-- **100+ built-in plugins** — cache, rate limiting, queues, LLM, code execution, and more
+- **68 built-in plugins** — cache, rate limiting, queues, LLM, code execution, and more
 - **Import / Export** — drag JSON into the editor, export as JSON or TypeScript
 - **Distributed execution** — Hatchet-backed workers with retry, parallelism, and cron scheduling
 
@@ -53,7 +53,7 @@ Vortex workflows can be authored three ways, and every format round-trips to the
 
 ### Visual Editor
 
-The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 100+ step types.
+The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 150+ step types.
 
 Workflows built in the editor are automatically converted to the JSON DSL for storage and execution.
 
@@ -140,7 +140,7 @@ The API triggers workflow execution by pushing events to Hatchet. The worker pic
 
 ## Step Types
 
-Vortex supports 100+ step types across several categories:
+Vortex supports 150+ step types across several categories:
 
 | Category | Types |
 |---|---|
@@ -210,6 +210,9 @@ The worker includes an MCP (Model Context Protocol) client for connecting to ext
 ```
 
 <Cards>
+  <Card title="Getting Started" href="/grid/vortex/getting-started">
+    Create and run your first workflow in minutes
+  </Card>
   <Card title="Triggers" href="/grid/vortex/triggers">
     All trigger types — webhook, cron, event, Kafka, SQS, MQTT, NATS, AMQP, gRPC, and more
   </Card>
@@ -227,5 +230,14 @@ The worker includes an MCP (Model Context Protocol) client for connecting to ext
   </Card>
   <Card title="Execution" href="/grid/vortex/execution">
     Worker architecture, plugins, WASM, and execution backends
+  </Card>
+  <Card title="CLI" href="/grid/vortex/cli">
+    Workflow management and plugin development from the terminal
+  </Card>
+  <Card title="Configuration" href="/grid/vortex/configuration">
+    Environment variables and service configuration
+  </Card>
+  <Card title="Self-Hosting" href="/grid/vortex/self-hosting">
+    Docker Compose and Kubernetes deployment
   </Card>
 </Cards>

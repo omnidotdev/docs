@@ -1,0 +1,260 @@
+---
+title: Self-Hosting
+description: Deploy Vortex on your own infrastructure
+---
+
+Vortex can be deployed with Docker Compose or Helm on Kubernetes.
+
+## Docker Compose
+
+### Quick start
+
+```bash
+# Clone the repository
+git clone https://github.com/omnidotdev/vortex vortex-stack
+cd vortex-stack
+
+# Configure environment
+cp .env.local.template .env.local
+# Edit .env.local — set DB_PASSWORD, AUTH_SECRET, CACHE_PASSWORD, IGGY_USERNAME, IGGY_PASSWORD
+```
+
+```bash
+# Start all services (pulls pre-built images from GHCR)
+docker compose up -d
+```
+
+This starts six containers:
+
+| Container | Image | Port |
+|---|---|---|
+| `db` | `postgres:16-alpine` | 5432 |
+| `cache` | `valkey/valkey:8-alpine` | 6379 |
+| `events` | `apache/iggy:0.6.87` | 8080, 8090 |
+| `api` | `ghcr.io/omnidotdev/vortex-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/vortex-app:latest` | 3000 |
+| `worker` | `ghcr.io/omnidotdev/vortex-worker:latest` | 8080 |
+
+Health checks are configured for all services. The API waits for PostgreSQL, Valkey, and Iggy to be healthy before starting.
+
+### Building from source
+
+Use the development override to build images locally:
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+```
+
+### Environment variables
+
+See [Configuration](/grid/vortex/configuration) for the full reference. At minimum, set:
+
+| Variable | Description |
+|---|---|
+| `DB_PASSWORD` | PostgreSQL password |
+| `AUTH_SECRET` | Better Auth session secret |
+| `CACHE_PASSWORD` | Valkey password |
+| `IGGY_USERNAME` | Iggy admin username |
+| `IGGY_PASSWORD` | Iggy admin password |
+
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `CACHE_PORT`, and OAuth provider credentials (`GOOGLE_*`, `GITHUB_*`, `OIDC_*`).
+
+### Volumes
+
+Three named volumes persist data across restarts:
+
+| Volume | Backing service | Content |
+|---|---|---|
+| `db_data` | PostgreSQL | Database files |
+| `cache_data` | Valkey | Cache state |
+| `events_data` | Iggy | Event stream segments |
+
+## Kubernetes (Helm)
+
+### Prerequisites
+
+- Kubernetes 1.27+
+- Helm 3.x
+- `kubectl` configured for your cluster
+
+### Installation
+
+```bash
+cd vortex-stack
+
+# Install with default values (bundled PostgreSQL)
+helm install vortex ./charts/vortex
+
+# Install with production overrides
+helm install vortex ./charts/vortex -f charts/vortex/values.prod.yaml
+```
+
+### Chart structure
+
+The Helm chart deploys three application pods (API, app, worker) and optionally a Bitnami PostgreSQL instance:
+
+```
+charts/vortex/
+  Chart.yaml          # v0.1.0, appVersion 0.1.0
+  values.yaml         # Default values
+  values.prod.yaml    # Production overrides
+  templates/
+    api-deployment.yaml
+    api-service.yaml
+    app-deployment.yaml
+    app-service.yaml
+    worker-deployment.yaml
+    worker-service.yaml
+    ingress.yaml
+    secret.yaml
+    _helpers.tpl
+```
+
+### Resource defaults
+
+| Service | CPU request | Memory request | CPU limit | Memory limit |
+|---|---|---|---|---|
+| API | 250m | 256Mi | 1 | 512Mi |
+| App | 100m | 128Mi | 500m | 256Mi |
+| Worker | 500m | 512Mi | 2 | 1Gi |
+
+### Secrets
+
+All secrets are stored in a single Kubernetes Secret managed by the chart:
+
+| Key | Description |
+|---|---|
+| `authSecret` | Better Auth session secret |
+| `encryptionKey` | Base64-encoded 32-byte key for credential encryption |
+| `hatchetClientToken` | Hatchet workflow engine token |
+| `internalApiSecret` | Service-to-service shared secret |
+| `billingWebhookSecret` | Aether billing webhook HMAC secret |
+| `idpWebhookSecret` | Gatekeeper IDP webhook HMAC secret |
+| `iggyUsername` | Iggy admin username |
+| `iggyPassword` | Iggy admin password |
+
+### Database
+
+By default, the chart provisions a Bitnami PostgreSQL instance with 10Gi storage:
+
+```yaml
+postgresql:
+  enabled: true
+  auth:
+    database: vortex
+    username: postgres
+    password: ""
+  primary:
+    persistence:
+      size: 10Gi
+```
+
+To use an external database, disable the bundled instance:
+
+```yaml
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: "db.example.com"
+  port: 5432
+  database: "vortex"
+  username: "vortex"
+  password: ""
+```
+
+### Ingress
+
+Ingress is disabled by default. Enable it and set hostnames for the API and app:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  api:
+    host: api.vortex.example.com
+  app:
+    host: vortex.example.com
+  tls:
+    - secretName: vortex-tls
+      hosts:
+        - api.vortex.example.com
+        - vortex.example.com
+```
+
+The production values file (`values.prod.yaml`) configures:
+- `api.vortex.omni.dev` and `vortex.omni.dev` as hosts
+- nginx ingress class
+- TLS via `vortex-tls` secret
+
+### Health probes
+
+All deployments include liveness and readiness probes:
+
+| Service | Liveness path | Readiness path | Initial delay |
+|---|---|---|---|
+| API | `/health` | `/ready` | 15s |
+| App | `/api/_health` | `/api/_health` | 15s |
+| Worker | `/health` | `/health` | 15s |
+
+## Database migrations
+
+Migrations run automatically when the API starts (`bun db:migrate:only`). No manual migration step is required.
+
+## Multi-instance safety
+
+The cron scheduler uses a Valkey distributed lock with a 90-second TTL. Only one API instance runs the scheduler at a time across a multi-instance deployment. Requires `CACHE_URL` to be configured.
+
+## Graceful shutdown
+
+Both the API and worker handle `SIGTERM` and `SIGINT` signals, closing database connections and finishing in-progress work before exiting. Kubernetes preStop hooks allow inflight requests to drain.
+
+## Observability
+
+Vortex supports [OpenTelemetry](https://opentelemetry.io) for distributed tracing. Configure the OTLP exporter on the API service:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-collector.example.com
+OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer <token>"
+OTEL_SERVICE_NAME=vortex-api
+```
+
+## Backup and restore
+
+### PostgreSQL
+
+With Docker Compose:
+
+```bash
+# Backup
+docker compose exec db pg_dump -U postgres vortex > backup.sql
+
+# Restore
+docker compose exec -T db psql -U postgres vortex < backup.sql
+```
+
+With Kubernetes (Bitnami PostgreSQL):
+
+```bash
+# Backup
+kubectl exec deploy/vortex-postgresql -- pg_dump -U postgres vortex > backup.sql
+
+# Restore
+kubectl exec -i deploy/vortex-postgresql -- psql -U postgres vortex < backup.sql
+```
+
+### Iggy
+
+Event data is stored on disk in the `events_data` volume. Back up the volume contents or configure Iggy's retention policy for your needs (default: 90-day retention).
+
+## Upgrading
+
+```bash
+# Docker Compose — pull latest images
+docker compose pull && docker compose up -d
+
+# Helm — upgrade the release
+helm upgrade vortex ./charts/vortex -f your-values.yaml
+```
+
+Migrations run automatically on API startup, so database schema updates are applied during the upgrade.

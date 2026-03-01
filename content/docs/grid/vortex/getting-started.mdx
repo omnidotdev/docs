@@ -1,0 +1,146 @@
+---
+title: Getting Started
+description: Create and run your first workflow
+---
+
+Get up and running with Vortex in a few minutes. Choose between Docker Compose for local development or Helm for Kubernetes deployments.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2
+- A copy of the [vortex-stack](https://github.com/omnidotdev/vortex) repository
+
+## 1. Start the stack
+
+```bash
+# Clone the repository
+git clone https://github.com/omnidotdev/vortex vortex-stack
+cd vortex-stack
+
+# Copy the environment template and fill in secrets
+cp .env.local.template .env.local
+
+# Start all services
+docker compose up
+```
+
+This starts PostgreSQL, Valkey (cache), Iggy (event streaming), and the three Vortex services (API, app, worker). Once healthy, the dashboard is available at `http://localhost:3000` and the API at `http://localhost:4000`.
+
+See [Self-Hosting](/grid/vortex/self-hosting) for Kubernetes and production deployment options.
+
+## 2. Create a workflow
+
+Vortex supports three authoring modes. Every format round-trips to the others.
+
+### Visual editor
+
+Open the dashboard at `http://localhost:3000`, navigate to **Workflows**, and click **New Workflow**. Drag steps from the sidebar, connect them with edges, and configure each step inline.
+
+### JSON DSL
+
+Paste or import a JSON definition into the editor's import dialog:
+
+```json
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "trigger_1",
+      "type": "trigger",
+      "name": "Webhook",
+      "trigger": { "type": "webhook" }
+    },
+    {
+      "id": "notify",
+      "type": "action",
+      "name": "Send Slack message",
+      "integration": "slack",
+      "operation": "sendMessage",
+      "inputs": {
+        "channel": "#alerts",
+        "text": "New event: {{triggerData.body.event}}"
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e-trigger-notify", "source": "trigger_1", "target": "notify" }
+  ]
+}
+```
+
+### TypeScript SDK
+
+Install the SDK and define workflows programmatically:
+
+```bash
+bun add @omnidotdev/vortex-sdk
+```
+
+```typescript
+import { workflow, trigger, action } from "@omnidotdev/vortex-sdk";
+
+const definition = workflow("order-processor")
+  .trigger(trigger.webhook({ path: "/orders" }))
+  .step("validate", action("validator", "check", {
+    inputs: { id: "$.orderId" },
+  }))
+  .step("charge", action("stripe", "charge", {
+    inputs: { amount: "$.total" },
+  }))
+  .build();
+```
+
+## 3. Trigger a run
+
+### Webhook
+
+Every workflow with a webhook trigger gets a unique URL:
+
+```bash
+curl -X POST http://localhost:4000/webhooks/workflow/<workflowId>/<secret> \
+  -H "Content-Type: application/json" \
+  -d '{"event": "order.created", "orderId": "ord_123"}'
+```
+
+### Cron
+
+Set a cron expression on the trigger and Vortex fires the workflow automatically. The scheduler uses distributed locking for multi-instance safety.
+
+### Event
+
+Subscribe to events from any Omni service. The event router matches incoming events by type pattern, optional conditions, and optional transforms.
+
+### Manual
+
+Trigger a run from the UI or via API:
+
+```bash
+curl -X POST http://localhost:4000/api/v1/workflows/<workflowId>/trigger \
+  -H "Authorization: Bearer <api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"data": {"userId": "u_123"}}'
+```
+
+## 4. Monitor execution
+
+The dashboard shows real-time workflow run status, step-by-step execution traces, and variable state. Runs also emit lifecycle events (`vortex.workflow.started`, `vortex.workflow.completed`, `vortex.workflow.failed`) that can trigger other workflows.
+
+## Next steps
+
+<Cards>
+  <Card title="Workflow DSL" href="/grid/vortex/dsl">
+    JSON definition format and step type reference
+  </Card>
+  <Card title="TypeScript SDK" href="/grid/vortex/sdk">
+    Programmatic workflow builder with fluent API
+  </Card>
+  <Card title="Configuration" href="/grid/vortex/configuration">
+    Environment variables and service configuration
+  </Card>
+  <Card title="Self-Hosting" href="/grid/vortex/self-hosting">
+    Docker Compose and Kubernetes deployment
+  </Card>
+  <Card title="CLI" href="/grid/vortex/cli">
+    Workflow management and plugin development from the terminal
+  </Card>
+</Cards>

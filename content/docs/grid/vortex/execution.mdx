@@ -1,0 +1,228 @@
+---
+title: Execution
+description: Worker architecture, plugins, WASM, and execution backends
+---
+
+Vortex workflows are executed by the **vortex-worker** service. The API dispatches each run to one of four pluggable backends — Hatchet, Temporal, Local, or a custom BYOK cluster — then the worker processes the DSL step-by-step.
+
+## Architecture
+
+```
+vortex-api                              vortex-worker
+    │                                         │
+    ├── Hatchet event ────────────────────────►│
+    │   (workflow:execute)                     │
+    │                                          │  DSL executor
+    ├── Temporal workflow.start ──────────────►│  ├── step dispatcher
+    │   (dslWorkflow)                          │  ├── plugin host (WASM + native)
+    │                                          │  ├── connector runtime
+    │◄── vortex.workflow.* lifecycle events ───│  ├── MCP client
+         (via Iggy)                            │  └── state store
+```
+
+The API dispatches to the appropriate backend and immediately publishes a `vortex.workflow.started` lifecycle event. The worker publishes `vortex.workflow.completed` or `vortex.workflow.failed` when execution finishes.
+
+## Execution Backends
+
+The backend is selected per workflow via the `executor` field (default: `hatchet`).
+
+| Backend | `executor` value | Use case |
+|---|---|---|
+| **Hatchet** | `"hatchet"` | Event-driven workflows, cron, short-to-medium runs |
+| **Temporal** | `"temporal"` | Durable long-running workflows, signals, sagas |
+| **Local** | `"local"` | In-process execution for development and testing |
+| **BYOK Temporal** | custom slug | Bring-your-own Temporal cluster per org |
+
+### Hatchet
+
+The default backend. The API pushes a `workflow:execute` event and Hatchet routes it to an available worker.
+
+```json
+{
+  "executor": "hatchet"
+}
+```
+
+### Temporal
+
+For workflows that need durability, signals, or multi-day execution. The API starts a `dslWorkflow` Temporal workflow directly.
+
+```json
+{
+  "executor": "temporal"
+}
+```
+
+Requires `TEMPORAL_ADDRESS` to be configured. The platform Temporal cluster runs `temporalio/auto-setup` alongside vortex-api.
+
+### Local
+
+In-process execution with no external dependencies. Designed for development, testing, and CI. Runs synchronously when needed, with full event streaming support and memory-backed run storage.
+
+```json
+{
+  "executor": "local"
+}
+```
+
+### BYOK Temporal
+
+Organizations can register their own Temporal cluster via the `workflow_executor_config` table. The API looks up the encrypted config by the executor slug and connects to the custom cluster.
+
+```json
+{
+  "executor": "my-org-temporal"
+}
+```
+
+## Execution Context
+
+Each workflow run creates an `ExecutionContext`:
+
+- `workflowId` — the workflow being executed
+- `runId` — unique ID for this execution
+- `organizationId` — tenant scope for credential lookup
+- `triggerData` — payload from the trigger (webhook body, cron metadata, etc.)
+- `variables` — workflow variable state, updated as steps complete
+- `stepResults` — output from each completed step
+
+## Step Dispatch
+
+The executor processes each step by type. For an `action` step, it:
+
+1. Resolves the integration connector (e.g., `slack` &#8594; `@activepieces/piece-slack`)
+2. Decrypts stored credentials for the organization
+3. Builds the Activepieces-compatible context
+4. Executes the action with retry support
+5. Maps outputs to workflow variables
+
+## Connectors
+
+Vortex integrates **600+ connectors** from the Activepieces ecosystem. Each connector is an npm package that provides actions and triggers.
+
+### Connector mapping
+
+Integration IDs map to Activepieces piece packages:
+
+| Integration | Package |
+|---|---|
+| `slack` | `@activepieces/piece-slack` |
+| `github` | `@activepieces/piece-github` |
+| `stripe` | `@activepieces/piece-stripe` |
+| `google-sheets` | `@activepieces/piece-google-sheets` |
+| ... | 600+ total |
+
+Connectors are dynamically loaded at runtime based on the integration ID in the step definition.
+
+## Built-in Plugins
+
+Plugins provide infrastructure capabilities that don't require external connectors:
+
+| Plugin | Capabilities |
+|---|---|
+| **Cache** | Get, set, delete with optional TTL |
+| **Rate Limit** | Token bucket, sliding window, fixed window algorithms |
+| **Queue** | Push/pull with memory, Redis, SQS, or RabbitMQ backends |
+| **Database** | Query, insert, update, delete with parameterized SQL |
+| **Email** | Send emails via Resend |
+| **File** | Read, write, list, delete files |
+| **HTTP** | Make HTTP requests with auth and retry |
+| **Hash** | MD5, SHA-256, bcrypt, HMAC |
+| **JWT** | Sign and verify JSON Web Tokens |
+| **FTP** | Upload, download, list files |
+| **SSH** | Execute remote commands |
+
+All plugins use a distributed cache when available and fall back to in-memory storage in development.
+
+## WASM Plugins
+
+Vortex includes an [Extism](https://extism.org) v2 plugin host for running user-supplied WebAssembly plugins in sandboxed isolation.
+
+### Running a WASM plugin
+
+```json
+{
+  "type": "plugin",
+  "plugin": "my-transform",
+  "action": "transform",
+  "input": { "data": "{{triggerData}}" }
+}
+```
+
+The plugin host validates input/output against JSON schemas, enforces configurable memory and timeout limits, and discovers available functions via `function_discovery`.
+
+### Host functions
+
+WASM plugins can call back into the Vortex runtime via the `vortex_host` namespace:
+
+| Function | Description |
+|---|---|
+| `vortex_log` | Emit a log message visible in the run trace |
+| `vortex_state_get` | Read a key from the org-scoped state store |
+| `vortex_state_set` | Write a key to the org-scoped state store |
+| `vortex_http` | Make an outbound HTTP request |
+
+Host functions that perform I/O (`vortex_state_get`, `vortex_state_set`, `vortex_http`) run in a worker thread via Bun's `SharedArrayBuffer` support.
+
+### Native plugins
+
+68 built-in native plugins ship alongside WASM support, covering the same capabilities as external WASM plugins but implemented in TypeScript for zero cold-start overhead.
+
+## MCP Integration
+
+The worker includes an MCP (Model Context Protocol) client for connecting to external tool servers:
+
+```json
+{
+  "type": "mcp",
+  "server": "my-mcp-server",
+  "tool": "search",
+  "arguments": { "query": "{{searchTerm}}" }
+}
+```
+
+## Cron Scheduling
+
+The API service runs a cron scheduler that:
+
+1. Scans for active workflows with cron expressions every 60 seconds
+2. Acquires a distributed lock (via cache) to prevent duplicate triggers
+3. Pushes execution events to Hatchet for matching workflows
+4. Releases the lock after the scan
+
+In production, the distributed lock ensures only one API instance runs the scheduler across a multi-instance deployment.
+
+## Error Handling
+
+Each step can define error behavior:
+
+- **Continue** — skip the error, proceed to the next step
+- **Stop** — halt the entire workflow
+- **Retry** — retry with configurable backoff (fixed, linear, exponential)
+- **Goto** — jump to a fallback step
+
+Connector actions are automatically retried up to 3 times for transient failures.
+
+## Streaming Trigger Adapters
+
+In addition to poll-based triggers, the worker manages long-lived streaming connections for push-based trigger types. Each adapter implements a common `EventAdapter` interface:
+
+- `start()` — connect and begin consuming
+- `stop()` — gracefully disconnect
+- `onEvent(handler)` — register a callback for normalized events
+
+The trigger runner scans active workflows every 60 seconds, starting new adapters and stopping removed ones. All streaming events are normalized to a consistent `NormalizedEvent` format before dispatch.
+
+Supported streaming adapters: MQTT, WebSocket, Redis Pub/Sub, Kafka, NATS, AMQP, gRPC stream, SQS, S3, CDC, and HTTP polling.
+
+External trigger adapters can be loaded from `VORTEX_TRIGGER_PLUGINS_DIR` — each file exports a `createAdapter(config)` factory function.
+
+## State Store
+
+The worker provides an org-scoped key-value store for sharing data across workflows:
+
+- `get(orgId, key)` — retrieve a value
+- `set(orgId, key, value, ttl?)` — store a value with optional TTL
+- `increment(orgId, key, by)` — atomic counter
+- `append(orgId, key, value)` — push to a list
+- `publish(orgId, channel, message)` — pub/sub messaging
