@@ -91,7 +91,7 @@ key_prefix = "synapse:rl:"
 Group providers that can substitute for each other. If the primary provider fails, Synapse automatically falls back to the next in the group:
 
 ```toml
-[[failover.equivalence_groups]]
+[[llm.failover.equivalence_groups]]
 name = "chat"
 providers = ["anthropic", "openai", "google"]
 ```
@@ -101,17 +101,17 @@ providers = ["anthropic", "openai", "google"]
 Prevent cascading failures by temporarily removing unhealthy providers:
 
 ```toml
-[failover.circuit_breaker]
-failure_threshold = 5
-recovery_timeout_secs = 30
-half_open_max_requests = 3
+[llm.failover.circuit_breaker]
+error_threshold = 5
+window_seconds = 60
+recovery_seconds = 30
 ```
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `failure_threshold` | Consecutive failures before opening the circuit | 5 |
-| `recovery_timeout_secs` | Seconds to wait before trying a failed provider again | 30 |
-| `half_open_max_requests` | Test requests allowed in half-open state | 3 |
+| `error_threshold` | Errors within the window before opening the circuit | 5 |
+| `window_seconds` | Sliding window duration in seconds | 60 |
+| `recovery_seconds` | Seconds to wait before probing a tripped provider | 30 |
 
 ## Logging
 
@@ -147,11 +147,12 @@ redis_url = "{{ env.REDIS_URL }}"
 requests_per_minute = 120
 burst = 20
 
-[failover.circuit_breaker]
-failure_threshold = 5
-recovery_timeout_secs = 30
+[llm.failover.circuit_breaker]
+error_threshold = 5
+window_seconds = 60
+recovery_seconds = 30
 
-[[failover.equivalence_groups]]
+[[llm.failover.equivalence_groups]]
 name = "chat"
 providers = ["anthropic", "openai"]
 

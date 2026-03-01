@@ -79,27 +79,20 @@ endpoint = "http://localhost:4317"
 export_interval_secs = 30
 ```
 
-### Prometheus
-
-```toml
-[telemetry.metrics]
-enabled = true
-exporter = "prometheus"
-listen_address = "0.0.0.0:9090"
-```
-
-When using the Prometheus exporter, Synapse exposes a `/metrics` endpoint on the configured address.
-
 ### Available Metrics
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `synapse_requests_total` | Counter | Total requests by endpoint and status |
-| `synapse_request_duration_seconds` | Histogram | Request latency by endpoint and provider |
-| `synapse_tokens_total` | Counter | Tokens processed (input and output) |
-| `synapse_provider_errors_total` | Counter | Provider errors by provider and error type |
-| `synapse_active_connections` | Gauge | Current active connections |
-| `synapse_circuit_breaker_state` | Gauge | Circuit breaker state per provider |
+| `http.server.request.duration` | Histogram | HTTP request latency |
+| `http.server.request.count` | Counter | Total HTTP requests by endpoint and status |
+| `llm.request.duration` | Histogram | LLM provider request latency |
+| `llm.request.count` | Counter | LLM requests by provider and model |
+| `llm.token.usage` | Counter | Tokens processed (input and output) |
+| `llm.streaming.duration` | Histogram | End-to-end streaming duration |
+| `llm.time_to_first_token` | Histogram | Time to first token in streaming responses |
+| `mcp.tool_call.duration` | Histogram | MCP tool call latency |
+| `mcp.tool_call.count` | Counter | MCP tool calls by tool name |
+| `mcp.search.duration` | Histogram | MCP tool search latency |
 
 ## Logs
 

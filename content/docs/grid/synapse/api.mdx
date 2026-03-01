@@ -18,6 +18,7 @@ Synapse exposes OpenAI-compatible and Anthropic-compatible endpoints. All endpoi
 | `/v1/audio/speech` | POST | Text-to-speech |
 | `/mcp/tools/list` | POST | List available MCP tools |
 | `/mcp/tools/call` | POST | Execute an MCP tool |
+| `/mcp/search` | GET | Search MCP tools by query |
 | `/health` | GET | Health check |
 
 ## POST /v1/chat/completions
@@ -286,6 +287,40 @@ Response:
     {
       "type": "text",
       "text": "File contents here..."
+    }
+  ]
+}
+```
+
+## GET /mcp/search
+
+Search available MCP tools by query string.
+
+```bash
+curl "http://localhost:6000/mcp/search?q=file&limit=5" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `q` | string | yes | Search query |
+| `limit` | integer | no | Max results (default: 10) |
+
+Response:
+
+```json
+{
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read the contents of a file",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" }
+        },
+        "required": ["path"]
+      }
     }
   ]
 }
