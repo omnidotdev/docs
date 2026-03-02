@@ -27,36 +27,46 @@ Omni Terminal runs in the browser via WebAssembly with GPU-accelerated rendering
 
 ## Self-Hosting
 
+The web terminal is built into the `omni-terminal` binary via the `serve` subcommand. The WASM frontend is embedded at compile time — no separate build step is needed when using a prebuilt binary.
+
 ### Quick Start
 
 ```bash
-# build the WASM frontend
-just wasm-build
+# if installed via package manager (Homebrew, AUR, etc.)
+omni-terminal serve
 
-# start the web server (serves WASM + WebSocket PTY)
-cargo run -p web-server
+# or from source
+cargo run -p omni-terminal -- serve
 ```
 
 The server starts on `https://localhost:3000` with an auto-generated self-signed TLS certificate.
 
-### Configuration
+### Options
 
-| Environment Variable | Default | Description |
-|---------------------|---------|-------------|
-| `PORT` | `3000` | Server listen port |
-| `SHELL` | `/bin/sh` | Shell to spawn for PTY sessions |
-| `TLS_CERT` | (auto-generated) | Path to TLS certificate PEM file |
-| `TLS_KEY` | (auto-generated) | Path to TLS private key PEM file |
+| Flag / Env | Default | Description |
+|------------|---------|-------------|
+| `--host` | `127.0.0.1` | Host address to bind to |
+| `-p, --port` / `PORT` | `3000` | Server listen port |
+| `--tls-cert` / `TLS_CERT` | (auto-generated) | Path to TLS certificate PEM file |
+| `--tls-key` / `TLS_KEY` | (auto-generated) | Path to TLS private key PEM file |
+| `--no-tls` | — | Serve plain HTTP (skip TLS) |
+
+#### Examples
+
+```bash
+# bind to all interfaces on port 8080
+omni-terminal serve --host 0.0.0.0 --port 8080
+
+# use custom TLS certificates
+omni-terminal serve --tls-cert /path/to/cert.pem --tls-key /path/to/key.pem
+
+# plain HTTP (no TLS)
+omni-terminal serve --no-tls
+```
 
 ### TLS Certificates
 
 By default, the server generates a self-signed certificate on startup that includes all local network interface IPs and `localhost` as Subject Alternative Names. This allows connections from any device on the local network.
-
-To use your own certificate:
-
-```bash
-TLS_CERT=/path/to/cert.pem TLS_KEY=/path/to/key.pem cargo run -p web-server
-```
 
 ### Docker
 
@@ -76,17 +86,14 @@ docker run -p 3000:3000 \
   omni-terminal-web
 ```
 
-### Production Build (from source)
+### Build from Source
 
 ```bash
-# build optimized WASM binary
-just wasm-build-release
+# build the WASM frontend (required before compiling the binary)
+just wasm-build
 
-# optional: further optimize with wasm-opt (requires Binaryen)
-just wasm-opt
-
-# start server
-cargo run -p web-server --release
+# build and run the server
+cargo run -p omni-terminal --release -- serve
 ```
 
 ## Features
