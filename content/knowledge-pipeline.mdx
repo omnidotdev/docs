@@ -1,0 +1,139 @@
+---
+title: Knowledge Pipeline Architecture
+description: How agent-core powers knowledge retrieval across CLI and Beacon
+---
+
+# Knowledge Pipeline
+
+The knowledge retrieval pipeline lives in `agent-core/src/knowledge/` and is consumed by both the CLI and Beacon Gateway. It transforms raw knowledge packs into contextually relevant chunks injected into LLM prompts.
+
+## Architecture
+
+```
+User message
+     │
+     ▼
+┌─────────────────┐
+│ Query Condenser  │  LLM rewrites multi-turn conversation
+│ (condenser.rs)   │  into a standalone retrieval query
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Embedding        │  OpenAI text-embedding-3-small
+│ (embedder.rs)    │  with in-process cache (mini-moka)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│ Hybrid Scoring (selection.rs)            │
+│                                          │
+│  BM25 (bm25.rs)  +  Cosine Similarity   │
+│  k1=1.2, b=0.75     on embeddings       │
+│                                          │
+│  Fused via Reciprocal Rank Fusion (k=60) │
+└────────┬────────────────────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Cross-Encoder    │  Optional reranking via Cohere API
+│ Reranker         │  Over-fetches 3x, reranks, trims
+│ (reranker.rs)    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Budget Trimming  │  Fit selected chunks into
+│                  │  max_context_tokens budget
+└────────┬────────┘
+         │
+         ▼
+  <knowledge> XML block injected into system prompt
+```
+
+## Components
+
+### Embedding Cache (`embedder.rs`)
+
+Wraps the OpenAI embeddings API with an in-process cache using `mini-moka`. Deterministic embeddings (same model + input = same vector) are cached for 1 hour with a capacity of 256 entries. Batch embedding checks the cache per-item and only sends uncached texts to the API.
+
+Also provides `contextual_text()` for Anthropic's contextual retrieval pattern — prepending pack/topic metadata to chunks before embedding for better semantic matching.
+
+### Query Condenser (`condenser.rs`)
+
+Resolves anaphoric references ("tell me more about that") by rewriting multi-turn conversation into a standalone retrieval query using a fast LLM (gpt-4o-mini). Falls back to simple concatenation if the LLM call fails or no condenser is configured.
+
+Implements the `QueryCondenser` async trait. The `LlmCondenser` struct calls any OpenAI-compatible chat completions endpoint.
+
+### BM25 Scorer (`bm25.rs`)
+
+Pure Rust implementation of Okapi BM25 term-frequency scoring. Precomputes IDF from chunk content, topic, and tags at construction time. Tokenizes with lowercase + punctuation stripping.
+
+Parameters: k1=1.2, b=0.75 (standard values).
+
+### Hybrid Selection (`selection.rs`)
+
+Combines BM25 lexical scoring with cosine similarity on embeddings using Reciprocal Rank Fusion:
+
+```
+score = 1/(k + bm25_rank) + 1/(k + embedding_rank)
+```
+
+Where k=60 (standard RRF constant). Chunks with `priority: Always` bypass scoring entirely and are always included. The fused scores determine which `Relevant`-priority chunks fill the remaining token budget.
+
+When no embeddings are available, BM25 alone drives ranking.
+
+### Cross-Encoder Reranker (`reranker.rs`)
+
+Optional second-stage reranking using a cross-encoder model (Cohere rerank-v3.5 or compatible API). Over-fetches 3x candidates from the fast path, reranks with query-document pair scoring, and trims to the actual token budget.
+
+Implements the `Reranker` async trait. Falls back to fast-path results if the reranking API fails.
+
+### Knowledge Pack Resolution (`resolver.rs`)
+
+Resolves knowledge packs from the filesystem cache. Each pack is a TOML file containing chunks with optional pre-computed embeddings. The resolver hydrates embeddings from a separate `PackEmbeddings` file.
+
+## Chunk Priority Model
+
+| Priority | Behavior |
+|----------|----------|
+| `Always` | Included unconditionally, no scoring needed |
+| `Relevant` | Scored via BM25 + embedding, included if above threshold and within budget |
+
+## Configuration
+
+### CLI (`~/.config/omni/cli/config.toml`)
+
+```toml
+[knowledge]
+max_context_tokens = 4000
+
+# Optional: enable embeddings for semantic search
+[providers.openai]
+api_key = "sk-..."  # Also powers the condenser
+```
+
+### Beacon (`ApiState`)
+
+```rust
+ApiState {
+    embedder: Option<Embedder>,        // Semantic search
+    condenser: Option<Arc<dyn QueryCondenser>>,  // Query rewriting
+    reranker: Option<Arc<dyn Reranker>>,         // Cross-encoder
+    max_context_tokens: usize,
+    // ...
+}
+```
+
+All three optional components degrade gracefully — BM25 alone works without any API keys.
+
+## Graceful Degradation
+
+The pipeline is designed to work at every capability level:
+
+| Available | Retrieval Strategy |
+|-----------|-------------------|
+| Nothing (no API keys) | BM25 keyword scoring only |
+| OpenAI key | BM25 + embedding hybrid via RRF |
+| OpenAI key + condenser | Condensed queries + hybrid search |
+| OpenAI + Cohere key | Full pipeline: condense → embed → hybrid → rerank |
