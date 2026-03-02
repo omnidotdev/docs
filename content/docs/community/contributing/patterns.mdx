@@ -1,0 +1,79 @@
+---
+title: Patterns
+---
+
+Architectural patterns used across Omni services.
+
+## Observer Pattern (GraphQL)
+
+All Omni GraphQL APIs use an **observer** pattern for authenticated user context, inspired by the [WunderGraph Viewer pattern](https://wundergraph.com/blog/graphql_federation_viewer_pattern) and the physics **observer effect** — the principle that measurement shapes what is observed. In an API, the authenticated observer shapes what data the system returns. Omni standardizes on the term "observer" rather than "viewer", "me", or "currentUser".
+
+### Context-level observer (universal)
+
+Every GraphQL API uses [Envelop's `useGenericAuth`](https://the-guild.dev/graphql/envelop/plugins/use-generic-auth) to inject the authenticated user into the GraphQL context as `observer`:
+
+```typescript
+useGenericAuth({
+  contextFieldName: "observer",
+  resolveUserFn: resolveUser,
+  mode: "protect-all", // or "resolve-only"
+});
+```
+
+Resolvers access the current user via `ctx.observer`:
+
+```typescript
+async resolveItems(_source: unknown, _args: unknown, ctx: GraphQLContext) {
+  const { observer, db } = ctx;
+
+  if (!observer) {
+    throw new GraphQLError("Authentication required", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+
+  return db
+    .select()
+    .from(itemTable)
+    .where(eq(itemTable.userId, observer.id));
+}
+```
+
+### Schema-level `observer` query
+
+Expose the observer's own data via an `observer` root query field with nested domain fields:
+
+```graphql
+extend type Query {
+  observer: Observer
+}
+
+type Observer {
+  apiKeys(workspaceId: UUID): [ApiKey!]!
+  preferences: UserPreferences
+  providerKeys: [ProviderKey!]!
+}
+```
+
+Do **not** use `currentUser`, `viewer`, `me`, or `my*`-prefixed root fields. The `observer` root keeps all authenticated user data scoped under a single, consistent entry point.
+
+### `createObserverPlugin` (opt-in)
+
+For services that need to expose the `observer` root field, the `@omnidotdev/providers` package provides a reusable PostGraphile plugin:
+
+```typescript
+import { createObserverPlugin } from "@omnidotdev/providers";
+
+const ObserverPlugin = createObserverPlugin({
+  extraFields: [{ name: "username", type: "String" }],
+});
+```
+
+This adds the `observer` root query field with basic profile data (rowId, name, email, plus any extra fields) and can be extended with domain-specific nested fields.
+
+### Summary
+
+| Layer | Pattern | Usage |
+|-------|---------|-------|
+| **Context** | `ctx.observer` | Universal, all resolvers |
+| **Schema** | `observer { ... }` | Scoped data for current user |
