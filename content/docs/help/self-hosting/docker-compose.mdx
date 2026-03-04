@@ -7,16 +7,14 @@ Most Omni products follow a standard Docker Compose pattern for self-hosting. Th
 
 ## Standard Pattern
 
-Every Docker-compatible Omni product ships a `compose.yaml` and `.env.local.template` in its repository:
+Every Docker-compatible Omni product ships a `compose.yaml` in its stack repository. Most also include a `.env.local.template` with required and optional environment variables:
 
 ```bash
-# Download Compose file
-curl -sLO https://raw.githubusercontent.com/omnidotdev/<product>/master/compose.yaml
+# Clone the stack repo
+git clone https://github.com/omnidotdev/<product>-stack.git
+cd <product>-stack
 
-# Download env var template
-curl -sLO https://raw.githubusercontent.com/omnidotdev/<product>/master/.env.local.template
-
-# Copy from template
+# Copy env template (if present) and configure
 cp .env.local.template .env.local
 # Edit .env.local with your settings
 
@@ -24,13 +22,15 @@ cp .env.local.template .env.local
 docker compose --env-file .env.local up -d
 ```
 
+If a stack doesn't include `.env.local.template`, check the `compose.yaml` for required environment variables and create `.env.local` manually.
+
 ## Building from Source
 
 To build images locally instead of pulling pre-built images, use the development override:
 
 ```bash
-git clone https://github.com/omnidotdev/<product>.git
-cd <product>
+git clone https://github.com/omnidotdev/<product>-stack.git
+cd <product>-stack
 
 cp .env.local.template .env.local
 docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --build
@@ -49,9 +49,11 @@ docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --bu
 | `app` | `ghcr.io/omnidotdev/runa-app:latest` | 3000 |
 
 ```bash
-curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/compose.yaml
-curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/.env.local.template
+git clone https://github.com/omnidotdev/runa-stack.git
+cd runa-stack
+
 cp .env.local.template .env.local
+# Set DB_PASSWORD, AUTH_SECRET, AUTH_CLIENT_ID, AUTH_CLIENT_SECRET
 
 docker compose --env-file .env.local up -d
 ```
@@ -76,7 +78,7 @@ Health checks are configured for all services. The API waits for PostgreSQL, Val
 </Callout>
 
 ```bash
-git clone https://github.com/omnidotdev/vortex vortex-stack
+git clone https://github.com/omnidotdev/vortex-stack.git
 cd vortex-stack
 
 cp .env.local.template .env.local
@@ -118,10 +120,10 @@ Three named volumes persist data across restarts:
 | `app` | 3000 | Manifold web UI |
 
 ```bash
-curl -sLO https://raw.githubusercontent.com/omnidotdev/manifold/master/compose.yaml
-curl -sLO https://raw.githubusercontent.com/omnidotdev/manifold/master/.env.local.template
-cp .env.local.template .env.local
+git clone https://github.com/omnidotdev/manifold-stack.git
+cd manifold-stack
 
+# Configure required env vars (DB_PASSWORD)
 docker compose --env-file .env.local up -d
 ```
 
@@ -165,4 +167,4 @@ See [Synapse Getting Started](/grid/synapse/getting-started) for configuration f
 
 ## Database Migrations
 
-Products that use PostgreSQL (Runa, Vortex, Manifold) run database migrations automatically on API startup. No manual migration step is required.
+Products that use PostgreSQL run database migrations automatically on API startup. No manual migration step is required.
