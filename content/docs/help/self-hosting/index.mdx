@@ -1,0 +1,120 @@
+---
+title: Self-Hosting
+description: Run Omni products on your own infrastructure
+---
+
+<Callout type="info">
+  These self-hosting docs are new and experimental. Have feedback or running into issues? [Join our Discord](https://discord.gg/omnidotdev) to let us know.
+</Callout>
+
+Omni products are designed to run on your infrastructure. No vendor lock-in, no cloud dependency — your data stays yours. See our [Ethos](/ethos) for more on why sovereignty matters to us.
+
+## Product Support Matrix
+
+| Product | Deployment Method | Guide |
+|---------|-------------------|-------|
+| [Runa](/core/runa) | Docker Compose | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Vortex](/grid/vortex) | Docker Compose, Helm | [Docker Compose](/help/self-hosting/docker-compose), [Kubernetes](/help/self-hosting/kubernetes) |
+| [Fractal](/grid/fractal) | Kubernetes | [Kubernetes](/help/self-hosting/kubernetes) |
+| [Manifold](/armory/manifold) | Docker Compose | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Synapse](/grid/synapse) | Binary, Docker | [Binary installs](#synapse) |
+| [Beacon](/grid/beacon) | Binary (cargo) | [Binary installs](#beacon) |
+| [Omni Terminal](/armory/omni-terminal) | Binary, Docker | [Binary installs](#omni-terminal) |
+| [Backfeed](/core/backfeed) | Docker Compose | [Docker Compose](/help/self-hosting/docker-compose) |
+
+## Binary Installs
+
+Some products ship as standalone binaries and don't require Docker or Kubernetes.
+
+### Beacon
+
+[Beacon](/grid/beacon) is built for local-first self-hosting with no cloud dependency:
+
+```bash
+# Install the gateway
+cargo install beacon-gateway
+
+# Run with your persona
+beacon-gateway --persona orin
+```
+
+Key features for self-hosting:
+- **No cloud required**: Works completely offline
+- **Local SQLite**: All data stored locally
+- **mDNS discovery**: Apps find your gateway automatically
+- **Device pairing**: No accounts needed
+
+See the [Beacon documentation](/grid/beacon) for full setup instructions.
+
+### Synapse
+
+[Synapse](/grid/synapse) is available as a prebuilt binary, from source, or as a Docker image:
+
+```bash
+# From source
+git clone https://github.com/omnidotdev/synapse-server.git
+cd synapse-server
+cargo build --release
+# Binary at target/release/synapse
+
+# Or via Docker
+docker pull ghcr.io/omnidotdev/synapse-server:latest
+docker run -p 6000:6000 \
+  -v ./synapse.toml:/etc/synapse/synapse.toml \
+  ghcr.io/omnidotdev/synapse-server
+```
+
+Prebuilt binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse-server/releases).
+
+See [Synapse Getting Started](/grid/synapse/getting-started) for configuration and first-request guides.
+
+### Omni Terminal
+
+[Omni Terminal](/armory/omni-terminal) runs in the browser via the `serve` subcommand. The WASM frontend is embedded at compile time:
+
+```bash
+# Via package manager (Homebrew, AUR, etc.)
+omni-terminal serve
+
+# Or from source
+just wasm-build
+cargo run -p omni-terminal --release -- serve
+```
+
+The server starts on `https://localhost:3000` with an auto-generated self-signed TLS certificate.
+
+| Flag / Env | Default | Description |
+|------------|---------|-------------|
+| `--host` | `127.0.0.1` | Host address to bind to |
+| `-p, --port` / `PORT` | `3000` | Server listen port |
+| `--tls-cert` / `TLS_CERT` | (auto-generated) | Path to TLS certificate PEM file |
+| `--tls-key` / `TLS_KEY` | (auto-generated) | Path to TLS private key PEM file |
+| `--no-tls` | — | Serve plain HTTP (skip TLS) |
+
+Docker is also supported:
+
+```bash
+docker build -t omni-terminal-web .
+docker run -p 3000:3000 omni-terminal-web
+```
+
+See the [Omni Terminal Web docs](/armory/omni-terminal/web) for full details including TLS configuration and the npm package.
+
+## Self-Hosting Simplification
+
+[Run](/grid/run) is Omni's tool for simplifying self-hosted deployments. Check its documentation for the latest on streamlining multi-product setups.
+
+<Cards>
+  <Card title="Docker Compose" href="/help/self-hosting/docker-compose">
+    Standard Omni Docker Compose pattern and product-specific quickstarts
+  </Card>
+  <Card title="Kubernetes" href="/help/self-hosting/kubernetes">
+    Fractal platform provisioning and Vortex Helm chart
+  </Card>
+  <Card title="Configuration" href="/help/self-hosting/configuration">
+    Authentication, OAuth, URLs, and self-hosted mode flags
+  </Card>
+  <Card title="Operations" href="/help/self-hosting/operations">
+    Backup, restore, upgrading, health checks, and observability
+  </Card>
+</Cards>

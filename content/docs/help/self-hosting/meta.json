@@ -1,0 +1,10 @@
+{
+  "title": "Self-Hosting",
+  "pages": [
+    "index",
+    "docker-compose",
+    "kubernetes",
+    "configuration",
+    "operations"
+  ]
+}

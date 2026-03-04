@@ -1,0 +1,234 @@
+---
+title: Kubernetes
+description: Deploy Omni products on Kubernetes
+---
+
+This page covers Kubernetes-based deployments: Fractal for full platform provisioning and Helm charts for individual products.
+
+## Fractal
+
+[Fractal](/grid/fractal) is Omni's self-hostable application deployment platform built on Kubernetes. It can provision a cluster from scratch or install on an existing one.
+
+### Installation Modes
+
+#### Quick Start (k3s)
+
+Provision a k3s cluster and install Fractal in one command:
+
+```bash
+fractal install \
+  --provider hetzner \
+  --distribution k3s \
+  --nodes 1 \
+  --domain example.com
+```
+
+Best for development and testing. k3s runs on a single node, supports SSH for debugging, and has a low barrier to entry.
+
+#### Production (Talos)
+
+Provision a hardened Talos Linux cluster:
+
+```bash
+fractal install \
+  --provider hetzner \
+  --distribution talos \
+  --nodes 3 \
+  --node-type cpx31 \
+  --region ash \
+  --domain example.com \
+  --cloudflare-token $CF_TOKEN
+```
+
+Best for production. Talos is an immutable, API-managed OS with no SSH and no shell. Minimizes attack surface and eliminates configuration drift.
+
+#### Existing Cluster (BYOC)
+
+Install Fractal on any conformant Kubernetes cluster:
+
+```bash
+fractal install --existing-cluster --domain example.com
+```
+
+Installs the Fractal operator and its dependencies (CloudNativePG, cert-manager, Infisical). Detects existing components and skips them.
+
+### Platform Components
+
+A full Fractal installation includes:
+
+| Component | Purpose |
+|-----------|---------|
+| **Fractal operator** | Reconciles `FractalProject`, `FractalService`, and `FractalDatabase` CRDs into K8s resources |
+| **Cilium** | eBPF-based CNI with network policies and Hubble observability (provisioned installs only) |
+| **Gateway API** | Ingress routing via Cilium's native Gateway API implementation |
+| **cert-manager** | Automatic TLS certificate provisioning via Let's Encrypt |
+| **CloudNativePG** | Production-grade Postgres operator with HA, automated failover, and PITR backups |
+| **Infisical** | Secret management with UI, versioning, and environment scoping |
+| **External Secrets Operator** | Syncs secrets from Infisical into K8s Secret objects |
+
+### Supported Providers
+
+| Provider | Flag | Notes |
+|----------|------|-------|
+| **Hetzner Cloud** | `--provider hetzner` | Recommended. Best price/performance |
+| **AWS** | `--provider aws` | EC2 instances with EBS storage |
+| **Custom** | `--existing-cluster` | Any K8s cluster |
+
+### Minimum Requirements
+
+| Mode | Nodes | CPU | RAM | Storage |
+|------|-------|-----|-----|---------|
+| Quick start (k3s) | 1 | 2 vCPU | 4 GB | 40 GB |
+| Production (Talos) | 3 | 4 vCPU each | 8 GB each | 80 GB each |
+| Existing cluster | — | 2 vCPU available | 4 GB available | 20 GB |
+
+### Networking
+
+#### DNS
+
+Fractal creates Gateway API `HTTPRoute` resources for each exposed service. Point a wildcard DNS record at your cluster's load balancer IP:
+
+```
+*.example.com  →  A  →  <load-balancer-ip>
+```
+
+For Cloudflare users, `fractal install` configures this automatically when a `--cloudflare-token` is provided.
+
+#### TLS
+
+cert-manager provisions Let's Encrypt certificates automatically. With Cloudflare DNS, Fractal uses DNS-01 challenges to support wildcard certificates. Otherwise, HTTP-01 challenges are used per-hostname.
+
+#### Network Policies
+
+Fractal applies default-deny Cilium network policies per project namespace. Each service gets explicit allowlists for:
+- Ingress from the Gateway
+- Egress to its database
+- DNS resolution
+- OTEL collector (observability)
+
+See the [Fractal documentation](/grid/fractal) for configuration and CLI reference.
+
+## Vortex Helm Chart
+
+[Vortex](/grid/vortex) ships a Helm chart for Kubernetes deployments.
+
+### Prerequisites
+
+- Kubernetes 1.27+
+- Helm 3.x
+- `kubectl` configured for your cluster
+
+### Installation
+
+```bash
+cd vortex-stack
+
+# Install with default values (bundled PostgreSQL)
+helm install vortex ./charts/vortex
+
+# Install with production overrides
+helm install vortex ./charts/vortex -f charts/vortex/values.prod.yaml
+```
+
+### Chart Structure
+
+The Helm chart deploys three application pods (API, app, worker) and optionally a Bitnami PostgreSQL instance:
+
+```
+charts/vortex/
+  Chart.yaml          # v0.1.0, appVersion 0.1.0
+  values.yaml         # Default values
+  values.prod.yaml    # Production overrides
+  templates/
+    api-deployment.yaml
+    api-service.yaml
+    app-deployment.yaml
+    app-service.yaml
+    worker-deployment.yaml
+    worker-service.yaml
+    ingress.yaml
+    secret.yaml
+    _helpers.tpl
+```
+
+### Resource Defaults
+
+| Service | CPU request | Memory request | CPU limit | Memory limit |
+|---------|-------------|----------------|-----------|--------------|
+| API | 250m | 256Mi | 1 | 512Mi |
+| App | 100m | 128Mi | 500m | 256Mi |
+| Worker | 500m | 512Mi | 2 | 1Gi |
+
+### Secrets
+
+All secrets are stored in a single Kubernetes Secret managed by the chart:
+
+| Key | Description |
+|-----|-------------|
+| `authSecret` | Better Auth session secret |
+| `encryptionKey` | Base64-encoded 32-byte key for credential encryption |
+| `hatchetClientToken` | Hatchet workflow engine token |
+| `internalApiSecret` | Service-to-service shared secret |
+| `billingWebhookSecret` | Aether billing webhook HMAC secret |
+| `idpWebhookSecret` | Gatekeeper IDP webhook HMAC secret |
+| `iggyUsername` | Iggy admin username |
+| `iggyPassword` | Iggy admin password |
+
+### Database
+
+By default, the chart provisions a Bitnami PostgreSQL instance with 10Gi storage:
+
+```yaml
+postgresql:
+  enabled: true
+  auth:
+    database: vortex
+    username: postgres
+    password: ""
+  primary:
+    persistence:
+      size: 10Gi
+```
+
+To use an external database, disable the bundled instance:
+
+```yaml
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: "db.example.com"
+  port: 5432
+  database: "vortex"
+  username: "vortex"
+  password: ""
+```
+
+### Ingress
+
+Ingress is disabled by default. Enable it and set hostnames for the API and app:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  api:
+    host: api.vortex.example.com
+  app:
+    host: vortex.example.com
+  tls:
+    - secretName: vortex-tls
+      hosts:
+        - api.vortex.example.com
+        - vortex.example.com
+```
+
+### Health Probes
+
+All deployments include liveness and readiness probes:
+
+| Service | Liveness path | Readiness path | Liveness delay | Readiness delay |
+|---------|---------------|----------------|----------------|-----------------|
+| API | `/health` | `/ready` | 15s | 10s |
+| App | `/api/_health` | `/api/_health` | 10s | 5s |
+| Worker | `/health` | `/health` | 15s | 10s |

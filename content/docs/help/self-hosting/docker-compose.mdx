@@ -1,0 +1,168 @@
+---
+title: Docker Compose
+description: Deploy Omni products with Docker Compose
+---
+
+Most Omni products follow a standard Docker Compose pattern for self-hosting. This page covers the general approach and product-specific quickstarts.
+
+## Standard Pattern
+
+Every Docker-compatible Omni product ships a `compose.yaml` and `.env.local.template` in its repository:
+
+```bash
+# Download Compose file
+curl -sLO https://raw.githubusercontent.com/omnidotdev/<product>/master/compose.yaml
+
+# Download env var template
+curl -sLO https://raw.githubusercontent.com/omnidotdev/<product>/master/.env.local.template
+
+# Copy from template
+cp .env.local.template .env.local
+# Edit .env.local with your settings
+
+# Run
+docker compose --env-file .env.local up -d
+```
+
+## Building from Source
+
+To build images locally instead of pulling pre-built images, use the development override:
+
+```bash
+git clone https://github.com/omnidotdev/<product>.git
+cd <product>
+
+cp .env.local.template .env.local
+docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --build
+```
+
+## Product Quickstarts
+
+### Runa
+
+[Runa](/core/runa) runs three containers:
+
+| Container | Image | Port |
+|-----------|-------|------|
+| `db` | `postgres:16-alpine` | 5432 |
+| `api` | `ghcr.io/omnidotdev/runa-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/runa-app:latest` | 3000 |
+
+```bash
+curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/compose.yaml
+curl -sLO https://raw.githubusercontent.com/omnidotdev/runa/master/.env.local.template
+cp .env.local.template .env.local
+
+docker compose --env-file .env.local up -d
+```
+
+### Vortex
+
+[Vortex](/grid/vortex) runs six containers:
+
+| Container | Image | Port |
+|-----------|-------|------|
+| `db` | `postgres:16-alpine` | 5432 |
+| `cache` | `valkey/valkey:8-alpine` | 6379 |
+| `events` | `apache/iggy:0.7.0` | 8090 (TCP) |
+| `api` | `ghcr.io/omnidotdev/vortex-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/vortex-app:latest` | 3000 |
+| `worker` | `ghcr.io/omnidotdev/vortex-worker:latest` | 8080 (internal) |
+
+Health checks are configured for all services. The API waits for PostgreSQL, Valkey, and Iggy to be healthy before starting.
+
+<Callout type="info">
+  Iggy requires elevated capabilities for optimal performance: `SYS_NICE` (cap_add), `seccomp:unconfined`, and unlimited `memlock` ulimits. These are pre-configured in the default `compose.yaml`. If your container runtime restricts these, Iggy may still start but with degraded throughput.
+</Callout>
+
+```bash
+git clone https://github.com/omnidotdev/vortex vortex-stack
+cd vortex-stack
+
+cp .env.local.template .env.local
+# Set DB_PASSWORD, AUTH_SECRET, CACHE_PASSWORD, IGGY_USERNAME, IGGY_PASSWORD
+
+docker compose up -d
+```
+
+#### Required environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DB_PASSWORD` | PostgreSQL password |
+| `AUTH_SECRET` | Better Auth session secret |
+| `CACHE_PASSWORD` | Valkey password |
+| `IGGY_USERNAME` | Iggy admin username |
+| `IGGY_PASSWORD` | Iggy admin password |
+
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `CACHE_PORT`, and OAuth provider credentials (`GOOGLE_*`, `GITHUB_*`, `OIDC_*`). See the full [Vortex configuration reference](/grid/vortex/configuration).
+
+#### Volumes
+
+Three named volumes persist data across restarts:
+
+| Volume | Backing service | Content |
+|--------|----------------|---------|
+| `db_data` | PostgreSQL | Database files |
+| `cache_data` | Valkey | Cache state |
+| `events_data` | Iggy | Event stream segments |
+
+### Manifold
+
+[Manifold](/armory/manifold) runs three containers:
+
+| Container | Port | Description |
+|-----------|------|-------------|
+| `db` | 5432 | PostgreSQL |
+| `api` | 4000 | Manifold API |
+| `app` | 3000 | Manifold web UI |
+
+```bash
+curl -sLO https://raw.githubusercontent.com/omnidotdev/manifold/master/compose.yaml
+curl -sLO https://raw.githubusercontent.com/omnidotdev/manifold/master/.env.local.template
+cp .env.local.template .env.local
+
+docker compose --env-file .env.local up -d
+```
+
+#### Required environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DB_PASSWORD` | Yes | PostgreSQL password |
+| `CORS_ALLOWED_ORIGINS` | No | Comma-separated allowed origins |
+| `AUTH_BASE_URL` | No | OIDC provider base URL |
+| `VITE_API_BASE_URL` | No | API URL for the web app (default: `http://api:4000`) |
+
+#### Storage backend
+
+Manifold supports filesystem or S3-compatible blob storage:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BLOB_STORAGE_BACKEND` | `fs` | Storage backend: `fs` or `s3` |
+| `BLOB_STORAGE_DIR` | `/data/manifold/blobs` | Filesystem storage base directory |
+| `BLOB_S3_BUCKET` | — | S3 bucket name (required when backend is `s3`) |
+| `BLOB_S3_REGION` | `us-east-1` | S3 region |
+| `BLOB_S3_ENDPOINT` | — | Custom S3 endpoint (for MinIO, R2) |
+| `BLOB_S3_PREFIX` | `blobs` | S3 key prefix |
+
+See the [Manifold Storage guide](/armory/manifold/storage) for details.
+
+### Synapse
+
+[Synapse](/grid/synapse) runs as a single container with an optional config volume:
+
+```bash
+docker pull ghcr.io/omnidotdev/synapse-server:latest
+
+docker run -p 6000:6000 \
+  -v ./synapse.toml:/etc/synapse/synapse.toml \
+  ghcr.io/omnidotdev/synapse-server
+```
+
+See [Synapse Getting Started](/grid/synapse/getting-started) for configuration file setup and provider configuration.
+
+## Database Migrations
+
+Products that use PostgreSQL (Runa, Vortex, Manifold) run database migrations automatically on API startup. No manual migration step is required.
