@@ -11,40 +11,48 @@ Omni products are designed to run on your infrastructure. No vendor lock-in, no 
 
 ## Product Support Matrix
 
-| Product | Deployment Method | Guide |
-|---------|-------------------|-------|
-| [Runa](/core/runa) | Docker Compose | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Vortex](/grid/vortex) | Docker Compose, Helm | [Docker Compose](/help/self-hosting/docker-compose), [Kubernetes](/help/self-hosting/kubernetes) |
-| [Fractal](/grid/fractal) | Kubernetes | [Kubernetes](/help/self-hosting/kubernetes) |
-| [Manifold](/armory/manifold) | Docker Compose | [Docker Compose](/help/self-hosting/docker-compose) |
+### Docker Compose
+
+Most Omni products follow a [standard Docker Compose pattern](/help/self-hosting/docker-compose) for self-hosting.
+
+| Product | Realm | Guide |
+|---------|-------|-------|
+| [Runa](/core/runa) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Backfeed](/core/backfeed) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Channel](/core/channel) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Crystal](/core/crystal) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Mantle](/core/mantle) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [MyFi](/core/myfi) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Halo](/core/halo) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Blink](/kindred/blink) | Kindred | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Creator](/fabric/creator) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Gaia](/fabric/gaia) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Trellis](/fabric/trellis) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Beacon](/grid/beacon) | Grid | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Vortex](/grid/vortex) | Grid | [Docker Compose](/help/self-hosting/docker-compose), [Helm](/help/self-hosting/kubernetes) |
+| [Lattice](/grid/lattice) | Grid | [Docker Compose](/help/self-hosting/docker-compose) |
+| [HIDRA](/armory/hidra) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Aether](/armory/aether) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Arbor](/armory/arbor) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Manifold](/armory/manifold) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+
+### Kubernetes
+
+| Product | Guide |
+|---------|-------|
+| [Fractal](/grid/fractal) | [Kubernetes](/help/self-hosting/kubernetes) |
+| [Vortex](/grid/vortex) | [Helm chart](/help/self-hosting/kubernetes#vortex-helm-chart) |
+
+### Binary / Docker
+
+| Product | Methods | Guide |
+|---------|---------|-------|
 | [Synapse](/grid/synapse) | Binary, Docker | [Binary installs](#synapse) |
-| [Beacon](/grid/beacon) | Binary (cargo) | [Binary installs](#beacon) |
 | [Omni Terminal](/armory/omni-terminal) | Binary, Docker | [Binary installs](#omni-terminal) |
-| [Backfeed](/core/backfeed) | Docker Compose | [Docker Compose](/help/self-hosting/docker-compose) |
 
 ## Binary Installs
 
 Some products ship as standalone binaries and don't require Docker or Kubernetes.
-
-### Beacon
-
-[Beacon](/grid/beacon) is built for local-first self-hosting with no cloud dependency:
-
-```bash
-# Install the gateway
-cargo install beacon-gateway
-
-# Run with your persona
-beacon-gateway --persona orin
-```
-
-Key features for self-hosting:
-- **No cloud required**: Works completely offline
-- **Local SQLite**: All data stored locally
-- **mDNS discovery**: Apps find your gateway automatically
-- **Device pairing**: No accounts needed
-
-See the [Beacon documentation](/grid/beacon) for full setup instructions.
 
 ### Synapse
 
