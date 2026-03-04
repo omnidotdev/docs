@@ -9,47 +9,430 @@ Beacon provides two extensibility systems: **skills** for adding capabilities to
 
 ## Skills
 
-Skills are markdown-based capability definitions that extend what your assistant can do. Each skill is a directory containing a `SKILL.md` file with YAML frontmatter.
+Skills are markdown-based capability definitions that extend what your assistant can do. Each skill lives in its own directory containing a `SKILL.md` file with YAML frontmatter for metadata and markdown body for instructions.
 
-### Skill Structure
+### Skill structure
+
+A skill is a directory with a single `SKILL.md` file:
 
 ```
-~/.beacon/skills/
-└── my-skill/
-    └── SKILL.md
+my-skill/
+└── SKILL.md
 ```
 
-```markdown
+Here is a full example covering every available frontmatter field:
+
+````markdown
 ---
-name: My Skill
-description: A custom skill for my assistant
-tags: [productivity, automation]
+name: Git Helper
+description: Assist with git operations and PR reviews
+version: 1.2.0
+author: omni
+tags: [dev-tools, git]
+permissions: [shell]
+always: false
+user_invocable: true
+disable_model_invocation: false
+emoji: "\U0001F4E6"
+requires_env: [GITHUB_TOKEN]
+os: [linux, darwin]
+requires_bins: [git]
+requires_any_bins: [gh, hub]
+primary_env: GITHUB_TOKEN
+command-dispatch: tool
+command-tool: web_search
+requires_config: []
+install:
+  - kind: brew
+    formula: gh
+    bins: [gh]
+  - kind: download
+    url: https://example.com/gh.tar.gz
+    archive: tar.gz
+    bins: [gh]
+    os: [linux]
 ---
 
-Skill instructions and content here...
+You are a git expert. When the user asks about git operations, provide
+clear commands and explain what each flag does.
+````
+
+Most fields are optional — only `name` and `description` are required.
+
+### OpenClaw compatibility
+
+Beacon can consume skills authored in [OpenClaw](https://clawhub.dev) format. OpenClaw skills use a nested `metadata.openclaw` structure for runtime fields — Beacon automatically maps these to flat frontmatter fields at parse time. The aliases `metadata.clawdbot` and `metadata.clawdis` are also recognized.
+
+If both flat Beacon fields and nested OpenClaw fields are present, flat fields always take precedence.
+
+| OpenClaw nested path | Beacon flat field |
+|---|---|
+| `metadata.openclaw.requires.env` | `requires_env` |
+| `metadata.openclaw.requires.bins` | `requires_bins` |
+| `metadata.openclaw.requires.anyBins` | `requires_any_bins` |
+| `metadata.openclaw.requires.config` | `requires_config` |
+| `metadata.openclaw.primaryEnv` | `primary_env` |
+| `metadata.openclaw.always` | `always` |
+| `metadata.openclaw.emoji` | `emoji` |
+| `metadata.openclaw.os` | `os` |
+| `metadata.openclaw.install` | `install` |
+
+### Frontmatter reference
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `name` | string | **required** | Skill display name |
+| `description` | string | **required** | Short purpose description |
+| `version` | string | — | Semantic version |
+| `author` | string | — | Author name |
+| `tags` | string[] | `[]` | Classification tags |
+| `permissions` | string[] | `[]` | Required permissions |
+| `always` | bool | `false` | Always include in prompt regardless of budget |
+| `user_invocable` | bool | `true` | Register as a `/command` |
+| `disable_model_invocation` | bool | `false` | Exclude from system prompt (command-only) |
+| `emoji` | string | — | Emoji shown in command listings |
+| `requires_env` | string[] | `[]` | Env vars that must be set for eligibility |
+| `os` | string[] | `[]` | OS restrictions (`linux`, `darwin`, `windows`). Empty = all |
+| `requires_bins` | string[] | `[]` | **All** listed binaries must be on PATH |
+| `requires_any_bins` | string[] | `[]` | **At least one** listed binary must be on PATH |
+| `primary_env` | string | — | Env var name for API key injection |
+| `command-dispatch` | string | — | Set to `tool` to dispatch slash command to a tool |
+| `command-tool` | string | — | Target tool name for dispatch (used with `command-dispatch`) |
+| `install` | object[] | `[]` | Install automation specs (see [install automation](#install-automation)) |
+| `requires_config` | string[] | `[]` | Config paths for eligibility (e.g. `voice.enabled`) |
+
+### Discovery roots
+
+On startup, Beacon scans multiple root directories for skills. When no skills are found in a root, a `skills/` subdirectory is checked automatically (nested root detection).
+
+**Precedence order** (later sources override earlier by name):
+
+| Priority | Source | Default path |
+|----------|--------|-------------|
+| 1 (lowest) | Bundled | Compiled into the binary |
+| 2 | Extra dirs | `BEACON_SKILLS_EXTRA_DIRS` (comma-separated) |
+| 3 | Managed | `~/.config/omni/beacon/skills/` |
+| 4 | Personal | `~/.agents/skills/` |
+| 5 (highest) | Plugin | Loaded from plugin directories |
+
+Each root scans subdirectories looking for `SKILL.md` files. Safety limits prevent runaway scans:
+
+| Limit | Default | Env var |
+|-------|---------|---------|
+| Max candidate dirs per root | 1,000 | `BEACON_MAX_CANDIDATES_PER_ROOT` |
+| Max skills per source | 200 | `BEACON_MAX_SKILLS_PER_SOURCE` |
+| Max skill file size | 256 KB | — |
+
+Discovered skills are synced into the SQLite registry. Bundled skills are upserted (preserving your enabled/priority settings), while local skills are only installed if not already present by name.
+
+### Eligibility system
+
+A skill must pass **all** of the following checks to be included in the system prompt:
+
+1. **Enabled** — `enabled` is `true` in the registry
+2. **Model invocation** — `disable_model_invocation` is `false`
+3. **Environment** — every var in `requires_env` is set (or satisfied by `api_key` for `primary_env`)
+4. **OS** — `os` is empty or includes the current platform
+5. **Binaries (all)** — every binary in `requires_bins` exists on PATH with execute permission
+6. **Binaries (any)** — at least one binary in `requires_any_bins` exists on PATH (empty = pass)
+7. **Config** — all paths in `requires_config` are satisfied at runtime (e.g. `voice.enabled`)
+
+<Callout type="info">
+  Use `GET /api/skills/status` to see a per-skill eligibility breakdown including which requirements are missing.
+</Callout>
+
+### Priority and prompt budget
+
+Each skill has a **priority tier** that controls where it appears in the system prompt:
+
+| Priority | Placement | Purpose |
+|----------|-----------|---------|
+| `override` | Before persona | Behavioral overrides — highest authority |
+| `standard` (default) | After persona | Capability extensions |
+| `supplementary` | End of prompt | Background context / reference |
+
+Skills with `always: true` or `override` priority are **must-include** — they bypass the budget. All other skills are filled in order: standard first, then supplementary.
+
+**Budget limits:**
+
+| Limit | Default | Env var |
+|-------|---------|---------|
+| Max skills in prompt | 50 | `BEACON_MAX_SKILLS_PROMPT` |
+| Max total chars | 30,000 | `BEACON_MAX_SKILLS_CHARS` |
+
+When the budget is exceeded, supplementary skills are dropped first, then standard.
+
+### Slash commands
+
+Every skill with `user_invocable: true` (the default) is registered as a slash command. The command name is derived from the skill name: non-alphanumeric characters become `_`, lowercased, max 32 characters. Collisions are deduplicated with `_2`, `_3`, etc.
+
+For example, a skill named `Git Helper` becomes `/git_helper`.
+
+Use `GET /api/skills/commands` to list all available commands.
+
+### Command dispatch
+
+Set `command-dispatch: tool` and `command-tool: <tool_name>` to make a slash command dispatch directly to a built-in tool instead of injecting the skill into the prompt:
+
+```yaml
+command-dispatch: tool
+command-tool: web_search
 ```
 
-### Skill Sources
+When the user runs this skill's slash command, Beacon invokes the specified tool directly.
 
-Skills can be loaded from multiple sources:
+### Per-skill environment
 
-| Source | Description |
-|--------|-------------|
-| Local | Directories on the gateway filesystem |
-| Manifold | Installed from the Omni persona marketplace |
-| Bundled | Built into the gateway binary |
+You can configure environment context per skill through the API:
 
-### Skill Registry
+- **`primary_env`** — declares which env var the skill's API key maps to. When you set an `api_key` via `PATCH /api/skills/{id}`, it satisfies `primary_env` in eligibility checks without requiring the actual env var to be set
+- **`api_key`** — stored per-skill API key value (set via the update endpoint)
+- **`skill_env`** — arbitrary key-value environment overrides per skill (set via the `env` field in the update endpoint)
 
-The gateway maintains a skill registry in SQLite, tracking installed skills with their metadata, version, author, tags, permissions, and enabled status.
+```bash
+# Inject an API key for a skill's primary_env
+curl -X PATCH http://localhost:18790/api/skills/{id} \
+  -H "Authorization: Bearer $BEACON_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"api_key": "ghp_abc123"}'
 
-### API
+# Set custom env vars for a skill
+curl -X PATCH http://localhost:18790/api/skills/{id} \
+  -H "Authorization: Bearer $BEACON_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"env": {"CUSTOM_VAR": "value"}}'
+```
 
-Skills are accessible through the gateway API:
+### Install automation
 
-- `GET /api/skills` — List installed skills
-- `POST /api/skills` — Install a skill
-- `DELETE /api/skills/{id}` — Remove a skill
+Skills can declare dependency install specs in frontmatter. Each spec targets a package manager or download method:
+
+| Kind | Required field | Command |
+|------|---------------|---------|
+| `brew` | `formula` | `brew install <formula>` |
+| `node` | `package` | `<manager> install -g <package>` |
+| `go` | `module` | `go install <module>` |
+| `uv` | `package` | `uv tool install <package>` |
+| `download` | `url` | Download + optional archive extraction |
+
+**Spec selection logic:** Beacon picks the best spec for the current platform using this preference chain:
+
+1. Homebrew (if `prefer_brew` is true and `brew` is on PATH)
+2. uv (if on PATH)
+3. Node (if preferred node manager is on PATH)
+4. Go (if on PATH)
+5. Download (always available)
+6. First compatible fallback
+
+Each spec can include an `os` filter, `bins` list for post-install verification, and archive settings (`archive`, `strip_components`, `target_dir`) for downloads.
+
+```yaml
+install:
+  - kind: brew
+    formula: jq
+    bins: [jq]
+  - kind: download
+    url: https://github.com/jqlang/jq/releases/download/jq-1.7/jq-linux-amd64
+    bins: [jq]
+    os: [linux]
+```
+
+Trigger installation via `POST /api/skills/{id}/install-deps`.
+
+### Agent-level filtering
+
+Use include/exclude glob patterns to control which skills are visible to the agent:
+
+```bash
+# Only load skills matching these patterns
+BEACON_SKILLS_INCLUDE="dev-*,git-*"
+
+# Exclude specific skills
+BEACON_SKILLS_EXCLUDE="*-beta,experimental"
+```
+
+Pattern syntax:
+
+| Pattern | Matches |
+|---------|---------|
+| `*` | Everything |
+| `prefix*` | Names starting with `prefix` |
+| `*suffix` | Names ending with `suffix` |
+| `exact` | Exact name match |
+
+Include is checked first (empty = all), then exclude. A skill must pass both to appear.
+
+### Workspace snapshots
+
+Export and import your entire skill configuration:
+
+```bash
+# Export current state
+curl http://localhost:18790/api/skills/snapshot \
+  -H "Authorization: Bearer $BEACON_API_KEY" \
+  -o snapshot.json
+
+# Import on another instance
+curl -X POST http://localhost:18790/api/skills/snapshot \
+  -H "Authorization: Bearer $BEACON_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d @snapshot.json
+```
+
+A snapshot captures each skill's name, version, source, enabled state, priority, API key, and custom env vars. On import, only Manifold-sourced skills can be fetched automatically — local and bundled skills are skipped. Already-installed skills are not overwritten.
+
+### Configuration reference
+
+**Environment variables:**
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `BEACON_SKILLS_DIR` | Managed skills directory | `~/.config/omni/beacon/skills/` |
+| `BEACON_SKILLS_PERSONAL_DIR` | Personal agent skills directory | `~/.agents/skills/` |
+| `BEACON_SKILLS_EXTRA_DIRS` | Additional scan directories (comma-separated) | — |
+| `BEACON_ALLOW_BUNDLED` | Bundled skill allowlist (comma-separated, empty = all) | — |
+| `BEACON_MAX_SKILLS_PROMPT` | Max skills in system prompt | `50` |
+| `BEACON_MAX_SKILLS_CHARS` | Max total skill chars in prompt | `30000` |
+| `BEACON_MAX_CANDIDATES_PER_ROOT` | Max candidate dirs per root | `1000` |
+| `BEACON_MAX_SKILLS_PER_SOURCE` | Max skills per source dir | `200` |
+| `BEACON_SKILLS_INCLUDE` | Include filter patterns (comma-separated) | — |
+| `BEACON_SKILLS_EXCLUDE` | Exclude filter patterns (comma-separated) | — |
+| `BEACON_SKILLS_PREFER_BREW` | Prefer Homebrew for installs | `true` |
+| `BEACON_SKILLS_NODE_MANAGER` | Node package manager (`npm`, `pnpm`, `yarn`, `bun`) | `npm` |
+
+**TOML config keys** (in `~/.config/omni/beacon/config.toml` under `[skills]`):
+
+| Key | Maps to |
+|-----|---------|
+| `managed_dir` | `BEACON_SKILLS_DIR` |
+| `personal_dir` | `BEACON_SKILLS_PERSONAL_DIR` |
+| `extra_dirs` | `BEACON_SKILLS_EXTRA_DIRS` |
+| `allow_bundled` | `BEACON_ALLOW_BUNDLED` |
+| `max_skills_in_prompt` | `BEACON_MAX_SKILLS_PROMPT` |
+| `max_skills_prompt_chars` | `BEACON_MAX_SKILLS_CHARS` |
+| `max_skill_file_bytes` | Max individual skill file size |
+| `max_candidates_per_root` | `BEACON_MAX_CANDIDATES_PER_ROOT` |
+| `max_skills_per_source` | `BEACON_MAX_SKILLS_PER_SOURCE` |
+| `skill_include` | `BEACON_SKILLS_INCLUDE` |
+| `skill_exclude` | `BEACON_SKILLS_EXCLUDE` |
+| `prefer_brew` | `BEACON_SKILLS_PREFER_BREW` |
+| `node_manager` | `BEACON_SKILLS_NODE_MANAGER` |
+
+Priority: env vars override TOML, TOML overrides defaults.
+
+### API reference
+
+All skill endpoints live under `/api/skills` and require an `Authorization: Bearer <key>` header (set via `BEACON_API_KEY`).
+
+**List installed skills**
+
+```
+GET /api/skills
+```
+
+Returns `{ skills: [...], total: number }`. Each skill includes `id`, `name`, `description`, `version`, `author`, `tags`, `permissions`, `source`, `enabled`, `priority`, `installed_at`, `always`, `user_invocable`, `command_name`, and `emoji`.
+
+**Get a single skill**
+
+```
+GET /api/skills/{skill_id}
+```
+
+**List slash commands**
+
+```
+GET /api/skills/commands
+```
+
+Returns an array of `{ command, name, description, emoji }` for all enabled, user-invocable skills.
+
+**Eligibility status**
+
+```
+GET /api/skills/status
+```
+
+Returns `{ managed_dir, personal_dir, skills: [...] }` where each skill entry includes `eligible`, `always`, full `requirements`, and `missing` requirements breakdown.
+
+**Search Manifold registry**
+
+```
+GET /api/skills/search?q=weather&namespace=community
+```
+
+**Install from Manifold**
+
+```
+POST /api/skills/install
+```
+
+Body: `{ "namespace": "community", "skill_id": "weather" }`
+
+**Install local skill**
+
+```
+POST /api/skills/install/local
+```
+
+Body: `{ "name": "...", "description": "...", "content": "...", "version": "...", "author": "...", "tags": [...], "priority": "standard", "always": false, "user_invocable": true, "disable_model_invocation": false, "emoji": "...", "requires_env": [...] }`
+
+Only `name`, `description`, and `content` are required.
+
+**Update skill (unified)**
+
+```
+PATCH /api/skills/{skill_id}
+```
+
+Body: `{ "enabled": true, "priority": "override", "api_key": "sk-...", "env": {"KEY": "value"} }`. All fields are optional.
+
+**Delete skill**
+
+```
+DELETE /api/skills/{skill_id}
+```
+
+Returns `204 No Content` on success.
+
+**Toggle enabled**
+
+```
+PATCH /api/skills/{skill_id}/enabled
+```
+
+Body: `{ "enabled": true }`
+
+**Set priority**
+
+```
+PATCH /api/skills/{skill_id}/priority
+```
+
+Body: `{ "priority": "override" }` — one of `override`, `standard`, `supplementary`.
+
+**Install dependencies**
+
+```
+POST /api/skills/{skill_id}/install-deps
+```
+
+Selects the best install spec for the current platform and executes it. Returns `{ skill_id, result: { ok, message, stdout, stderr, code, warnings } }`.
+
+**Export snapshot**
+
+```
+GET /api/skills/snapshot
+```
+
+Returns `{ version, created_at, skills: [...] }`.
+
+**Import snapshot**
+
+```
+POST /api/skills/snapshot
+```
+
+Body: a snapshot object. Returns `{ imported, skipped, errors, total }`.
 
 ## Hooks
 
