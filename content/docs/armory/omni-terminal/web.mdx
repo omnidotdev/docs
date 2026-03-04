@@ -27,74 +27,7 @@ Omni Terminal runs in the browser via WebAssembly with GPU-accelerated rendering
 
 ## Self-Hosting
 
-The web terminal is built into the `omni-terminal` binary via the `serve` subcommand. The WASM frontend is embedded at compile time — no separate build step is needed when using a prebuilt binary.
-
-### Quick Start
-
-```bash
-# if installed via package manager (Homebrew, AUR, etc.)
-omni-terminal serve
-
-# or from source
-cargo run -p omni-terminal -- serve
-```
-
-The server starts on `https://localhost:3000` with an auto-generated self-signed TLS certificate.
-
-### Options
-
-| Flag / Env | Default | Description |
-|------------|---------|-------------|
-| `--host` | `127.0.0.1` | Host address to bind to |
-| `-p, --port` / `PORT` | `3000` | Server listen port |
-| `--tls-cert` / `TLS_CERT` | (auto-generated) | Path to TLS certificate PEM file |
-| `--tls-key` / `TLS_KEY` | (auto-generated) | Path to TLS private key PEM file |
-| `--no-tls` | — | Serve plain HTTP (skip TLS) |
-
-#### Examples
-
-```bash
-# bind to all interfaces on port 8080
-omni-terminal serve --host 0.0.0.0 --port 8080
-
-# use custom TLS certificates
-omni-terminal serve --tls-cert /path/to/cert.pem --tls-key /path/to/key.pem
-
-# plain HTTP (no TLS)
-omni-terminal serve --no-tls
-```
-
-### TLS Certificates
-
-By default, the server generates a self-signed certificate on startup that includes all local network interface IPs and `localhost` as Subject Alternative Names. This allows connections from any device on the local network.
-
-### Docker
-
-```bash
-docker build -t omni-terminal-web .
-docker run -p 3000:3000 omni-terminal-web
-```
-
-To use your own TLS certificates with Docker:
-
-```bash
-docker run -p 3000:3000 \
-  -v /path/to/cert.pem:/tls/cert.pem \
-  -v /path/to/key.pem:/tls/key.pem \
-  -e TLS_CERT=/tls/cert.pem \
-  -e TLS_KEY=/tls/key.pem \
-  omni-terminal-web
-```
-
-### Build from Source
-
-```bash
-# build the WASM frontend (required before compiling the binary)
-just wasm-build
-
-# build and run the server
-cargo run -p omni-terminal --release -- serve
-```
+The web terminal is self-hostable via the `omni-terminal serve` subcommand or Docker. See the [Self-Hosting guide](/help/self-hosting#omni-terminal) for installation options, TLS configuration, and Docker setup.
 
 ## Features
 

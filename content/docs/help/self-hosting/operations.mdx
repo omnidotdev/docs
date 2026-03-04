@@ -1,0 +1,124 @@
+---
+title: Operations
+description: Upgrading, backups, health checks, and observability for self-hosted deployments
+---
+
+This page covers day-to-day operations for self-hosted Omni deployments: upgrading, backup and restore, health checks, observability, and production considerations.
+
+## Upgrading
+
+### Docker Compose
+
+```bash
+docker compose pull
+docker compose --env-file .env.local up -d
+```
+
+### Helm
+
+```bash
+helm upgrade vortex ./charts/vortex -f your-values.yaml
+```
+
+### Binary
+
+Reinstall via your package manager or rebuild from source:
+
+```bash
+# Cargo
+cargo install <product> --force
+
+# Or rebuild
+git pull
+cargo build --release
+```
+
+Database migrations run automatically on API startup for all PostgreSQL-backed products, so schema updates are applied during the upgrade.
+
+## Backup and Restore
+
+### PostgreSQL (Docker Compose)
+
+```bash
+# Backup
+docker compose exec db pg_dump -U postgres <database> > backup.sql
+
+# Restore
+docker compose exec -T db psql -U postgres <database> < backup.sql
+```
+
+Replace `<database>` with the product database name (e.g. `runa`, `vortex`, `manifold`).
+
+### PostgreSQL (Kubernetes)
+
+```bash
+# Backup
+kubectl exec deploy/<product>-postgresql -- pg_dump -U postgres <database> > backup.sql
+
+# Restore
+kubectl exec -i deploy/<product>-postgresql -- psql -U postgres <database> < backup.sql
+```
+
+### Volume Backups
+
+Products that use named Docker volumes (e.g. Vortex's `db_data`, `cache_data`, `events_data`) can be backed up by copying the volume contents:
+
+```bash
+docker run --rm -v <volume>:/data -v $(pwd):/backup alpine tar czf /backup/<volume>.tar.gz -C /data .
+```
+
+#### Iggy Event Data
+
+Vortex's Iggy event data is stored in the `events_data` volume. Back up the volume contents or configure Iggy's retention policy for your needs (default: 90-day retention).
+
+## Health Checks
+
+Omni products expose standard health and readiness endpoints:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/health` | Liveness — service is running |
+| `/ready` | Readiness — service and dependencies are healthy |
+
+```bash
+# API health
+curl http://localhost:4000/health
+
+# API readiness (includes database check)
+curl http://localhost:4000/ready
+```
+
+The Compose configurations include health checks that ensure services start in the correct order (e.g. `db` → `api` → `app`).
+
+### Manifold
+
+Manifold uses the same pattern:
+
+```bash
+curl http://localhost:4000/health
+curl http://localhost:4000/ready
+```
+
+Upload session cleanup runs automatically as a background job every hour, requiring no manual intervention.
+
+## Observability
+
+### OpenTelemetry
+
+Vortex supports [OpenTelemetry](https://opentelemetry.io) for distributed tracing. Configure the OTLP exporter on the API service:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otel-collector.example.com
+OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer <token>"
+OTEL_SERVICE_NAME=vortex-api
+```
+
+Fractal includes OTEL collector integration as part of its platform stack, with Cilium/Hubble providing network-level observability.
+
+## Multi-Instance Safety
+
+When running multiple API instances (e.g. behind a load balancer), Vortex's cron scheduler uses a Valkey distributed lock with a 90-second TTL. Only one API instance runs the scheduler at a time. Requires `CACHE_URL` to be configured.
+
+## Graceful Shutdown
+
+Both the Vortex API and worker handle `SIGTERM` and `SIGINT` signals, closing database connections and finishing in-progress work before exiting. In Kubernetes, preStop hooks allow inflight requests to drain before the pod is terminated.

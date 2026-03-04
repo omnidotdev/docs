@@ -1,0 +1,96 @@
+---
+title: Configuration
+description: Authentication, URLs, and self-hosted mode configuration
+---
+
+This page covers configuration patterns common across self-hosted Omni products: URL setup, authentication, OAuth providers, and self-hosted mode flags.
+
+## URL Configuration
+
+For production deployments, configure your public URLs in `.env.local`:
+
+```bash
+BASE_URL=https://runa.example.com
+API_BASE_URL=https://api.runa.example.com
+```
+
+For local development, the defaults work out of the box.
+
+## Authentication
+
+Email/password authentication is enabled by default. OAuth providers activate automatically when credentials are provided.
+
+### AUTH_SECRET
+
+`AUTH_SECRET` is always required for session encryption. Generate one with:
+
+```bash
+openssl rand -base64 32
+```
+
+### OAuth Providers
+
+| Provider | Environment Variables |
+|----------|----------------------|
+| Google | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| GitHub | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` |
+| Generic OIDC | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` |
+
+### Google OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create OAuth 2.0 Client ID (Web application)
+3. Add authorized redirect URI: `https://your-domain.com/api/auth/callback/google`
+4. Copy Client ID and Secret to your `.env.local`
+
+### GitHub OAuth Setup
+
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Create new OAuth App
+3. Set callback URL: `https://your-domain.com/api/auth/callback/github`
+4. Copy Client ID and Secret to your `.env.local`
+
+### Generic OIDC (Enterprise SSO)
+
+For enterprise identity providers (Okta, Azure AD, Keycloak, etc.):
+
+```bash
+OIDC_ISSUER=https://your-idp.com
+OIDC_CLIENT_ID=your-client-id
+OIDC_CLIENT_SECRET=your-client-secret
+```
+
+The issuer URL should support OIDC discovery (`/.well-known/openid-configuration`).
+
+## Self-Hosted Mode Flags
+
+Some products provide flags to simplify self-hosted deployments by disabling cloud-only features.
+
+### Vortex
+
+Set `SELF_HOSTED=true` to disable billing and cloud features:
+
+```bash
+SELF_HOSTED=true
+```
+
+See the full [Vortex configuration reference](/grid/vortex/configuration) for all available variables.
+
+### Manifold
+
+Enable self-hosted mode for simpler deployments without an external identity provider:
+
+```yaml
+environment:
+  SELF_HOSTED: "true"
+  PROTECT_ROUTES: "false"
+  DEFAULT_ORG_ID: my-org
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SELF_HOSTED` | `false` | Enable self-hosted defaults |
+| `PROTECT_ROUTES` | `true` | Require authentication on all routes |
+| `DEFAULT_ORG_ID` | — | Default organization ID for self-hosted mode |
+
+This disables JWT verification and allows unauthenticated access. API tokens still work for programmatic access.
