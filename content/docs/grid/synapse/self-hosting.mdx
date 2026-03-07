@@ -1,0 +1,154 @@
+---
+title: Self-Hosting
+description: Run Synapse on your own infrastructure
+---
+
+<Callout type="info">
+  Synapse is MIT licensed. Self-host freely, modify as needed.
+</Callout>
+
+## Docker Compose
+
+Synapse runs five containers:
+
+| Container | Image | Port |
+|-----------|-------|------|
+| `db` | `postgres:16-alpine` | 5432 |
+| `valkey` | `valkey/valkey:8-alpine` | 6379 |
+| `gateway` | `ghcr.io/omnidotdev/synapse-gateway:latest` | 6000 |
+| `api` | `ghcr.io/omnidotdev/synapse-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/synapse-app:latest` | 3000 |
+
+Health checks are configured for all services. The gateway waits for the API and Valkey to be healthy before starting. The API waits for PostgreSQL.
+
+```bash
+git clone https://github.com/omnidotdev/synapse-stack.git
+cd synapse-stack
+
+cp .env.example .env.local
+# Set required values (see below)
+
+docker compose --env-file .env.local up -d
+```
+
+### Required environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DB_PASSWORD` | PostgreSQL password |
+| `AUTH_SECRET` | Session signing secret (`openssl rand -hex 32`) |
+| `GATEWAY_SECRET` | Internal gateway auth secret (`openssl rand -hex 32`) |
+| `ENCRYPTION_KEY` | Provider key encryption at rest (`openssl rand -base64 32`) |
+| `AUTH_BASE_URL` | URL of HIDRA Gatekeeper instance |
+
+At least one LLM provider API key is required: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `NVIDIA_API_KEY`.
+
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, and billing credentials (`AETHER_*`, `BILLING_*`). See the [full .env.example](https://github.com/omnidotdev/synapse-stack/blob/master/.env.example).
+
+### Without authentication
+
+Set `PROTECT_ROUTES=false` and omit `AUTH_BASE_URL` to bypass JWT verification. The API accepts unauthenticated requests. Billing features return 503 gracefully.
+
+Suitable for: local development, internal networks behind a VPN, testing.
+
+### Volumes
+
+Two named volumes persist data across restarts:
+
+| Volume | Backing service | Content |
+|--------|----------------|---------|
+| `db_data` | PostgreSQL | Database files |
+| `valkey_data` | Valkey | Rate limit state and cache |
+
+### Verify
+
+```bash
+curl http://localhost:6000/health
+# {"status":"ok"}
+
+curl http://localhost:4000/health
+# {"status":"ok","timestamp":...,"service":"Synapse"}
+```
+
+### Send a request
+
+```bash
+curl http://localhost:6000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "anthropic/claude-sonnet-4-20250514",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "max_tokens": 50
+  }'
+```
+
+### Database migrations
+
+Run after first deploy or upgrade:
+
+```bash
+docker compose exec api bun db:migrate
+```
+
+## Kubernetes (Helm)
+
+A Helm chart is included at `charts/synapse/`.
+
+```bash
+helm install synapse ./charts/synapse \
+  --set secrets.authSecret=$(openssl rand -hex 32) \
+  --set secrets.gatewaySecret=$(openssl rand -hex 32) \
+  --set secrets.encryptionKey=$(openssl rand -base64 32) \
+  --set gateway.providers.anthropic=sk-ant-... \
+  --set postgresql.auth.postgresPassword=your-db-password
+```
+
+See `charts/synapse/values.prod.yaml` for production-tuned ingress, TLS, and auth configuration.
+
+Override the auto-generated gateway TOML with a custom config:
+
+```bash
+helm install synapse ./charts/synapse \
+  --set-file gateway.configOverride=path/to/synapse.toml
+```
+
+### Migrations on Kubernetes
+
+```bash
+kubectl exec -it deploy/synapse-api -- bun db:migrate
+```
+
+## Gateway Configuration
+
+The gateway reads its config from `/etc/synapse.toml` (mounted from `config/synapse.toml` in docker-compose). Copy `config/synapse.example.toml` to `config/synapse.toml` to customize providers, routing, MCP servers, and failover.
+
+See [Configuration](/grid/synapse/configuration) for the full TOML reference.
+
+## Optional integrations
+
+| Service | Env Var | Purpose | Required? |
+|---------|---------|---------|-----------|
+| Gatekeeper (HIDRA) | `AUTH_BASE_URL` | JWT auth, user management | No (set `PROTECT_ROUTES=false`) |
+| Aether | `AETHER_SERVICE_API_KEY` | Billing, subscriptions | No (returns 503) |
+| Valkey/Redis | `VALKEY_URL` | Rate limiting, caching | Included in docker-compose |
+
+## Binary Install
+
+The gateway is also available as a standalone binary for running without Docker:
+
+```bash
+# From source
+git clone https://github.com/omnidotdev/synapse-gateway.git
+cd synapse-gateway
+cargo build --release
+# Binary at target/release/synapse
+
+# Run
+./target/release/synapse --config synapse.toml
+```
+
+Prebuilt binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse-gateway/releases).
+
+<Callout type="info">
+  The binary install runs only the gateway. For the full stack (dashboard, API key management, usage tracking), use Docker Compose or Helm.
+</Callout>

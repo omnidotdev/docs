@@ -1,0 +1,146 @@
+---
+title: MCP
+description: Model Context Protocol server configuration, transports, and access control
+---
+
+Synapse aggregates tools from multiple [MCP](https://modelcontextprotocol.io) servers and exposes them through unified endpoints. Clients can discover and call tools from any configured MCP server without knowing which server provides each tool.
+
+## Transport Types
+
+Synapse supports three MCP transport types for connecting to upstream MCP servers.
+
+### STDIO
+
+Launch an MCP server as a child process. Synapse communicates over stdin/stdout:
+
+```toml
+[mcp.servers.filesystem.type]
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/documents"]
+```
+
+### SSE (Server-Sent Events)
+
+Connect to an MCP server over HTTP using server-sent events:
+
+```toml
+[mcp.servers.remote_tools.type]
+transport = "sse"
+url = "http://localhost:8080/sse"
+```
+
+### Streamable HTTP
+
+Connect to an MCP server using the streamable HTTP transport:
+
+```toml
+[mcp.servers.remote_tools.type]
+transport = "streamable_http"
+url = "http://localhost:8080/mcp"
+```
+
+<Callout type="info">
+  Streamable HTTP is the recommended transport for remote MCP servers. It supports bidirectional communication over a single HTTP connection.
+</Callout>
+
+## Multiple Servers
+
+Configure as many MCP servers as needed. Synapse merges all tools into a single namespace:
+
+```toml
+[mcp.servers.filesystem.type]
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/docs"]
+
+[mcp.servers.github.type]
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+env = { GITHUB_TOKEN = "{{ env.GITHUB_TOKEN }}" }
+
+[mcp.servers.database.type]
+transport = "sse"
+url = "http://localhost:9090/sse"
+```
+
+## Access Control
+
+Control which tools are available to clients using allow and deny lists.
+
+### Allow List
+
+Only expose specific tools:
+
+```toml
+[mcp.servers.filesystem.type]
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+
+[mcp.servers.filesystem.access]
+allow = ["read_file", "list_directory"]
+```
+
+### Deny List
+
+Expose all tools except specific ones:
+
+```toml
+[mcp.servers.filesystem.type]
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+
+[mcp.servers.filesystem.access]
+deny = ["write_file", "delete_file"]
+```
+
+<Callout type="warning">
+  If both `allow` and `deny` are specified, `allow` takes precedence. Only tools in the allow list are exposed; the deny list is ignored.
+</Callout>
+
+## Per-Tool Rate Limits
+
+Apply rate limits to individual tools to prevent abuse:
+
+```toml
+[mcp.servers.database.type]
+transport = "sse"
+url = "http://localhost:9090/sse"
+
+[mcp.servers.database.tool_rate_limits.execute_query]
+requests = 10
+window = "1m"
+
+[mcp.servers.database.tool_rate_limits.list_tables]
+requests = 60
+window = "1m"
+```
+
+## Environment Variables
+
+Pass environment variables to STDIO MCP servers:
+
+```toml
+[mcp.servers.github.type]
+transport = "stdio"
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+env = { GITHUB_TOKEN = "{{ env.GITHUB_TOKEN }}" }
+```
+
+Environment variables in the `env` table support the same `{{ env.VAR }}` interpolation as the rest of the config.
+
+## MCP Endpoints
+
+Synapse exposes three endpoints for MCP tool interaction:
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /mcp/tools/list` | List all available tools across configured servers |
+| `POST /mcp/tools/call` | Execute a tool by name |
+| `GET /mcp/search` | Search available tools by query |
+
+See the [API Reference](/grid/synapse/api#post-mcptoolslist) for request and response examples.
