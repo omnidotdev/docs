@@ -1,0 +1,334 @@
+---
+title: Triggers
+description: All trigger types for starting workflow execution
+---
+
+A **trigger** is the entry point for a workflow run. Vortex supports many trigger types, all producing a consistent `triggerData` payload available to every subsequent step.
+
+## Webhook
+
+An HTTP POST to a secret-scoped endpoint starts a workflow run. The request body becomes `triggerData`.
+
+```
+POST /webhooks/workflow/:workflowId/:secret
+```
+
+Webhooks support arbitrary payloads. The secret is generated per workflow and rotatable without redeploying.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "webhook",
+    "method": "POST"
+  }
+}
+```
+
+## Cron
+
+Schedule workflows using standard cron expressions. The scheduler runs on a 60-second tick with distributed locking — only one API instance fires per interval in multi-instance deployments.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "cron",
+    "expression": "0 9 * * 1-5"
+  }
+}
+```
+
+`triggerData` includes `{ trigger: "cron", scheduledAt: "<ISO8601>" }`.
+
+## Event
+
+Subscribe to the Iggy event stream. A routing rule matches incoming events by type glob, source glob, optional JSONPath condition, and optional JSONata transform — then dispatches this workflow.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "event",
+    "eventType": "beacon.conversation.ended"
+  }
+}
+```
+
+See [Events](/grid/vortex/events) for routing rule configuration, conditions, transforms, and idempotency.
+
+## Manual
+
+API-triggered execution with an arbitrary payload. Used for on-demand runs from code or the UI.
+
+```bash
+POST /api/v1/workflows/:workflowId/trigger
+Authorization: Bearer <api-key>
+
+{ "data": { "userId": "u_123" } }
+```
+
+```json
+{
+  "type": "trigger",
+  "trigger": { "type": "manual" }
+}
+```
+
+## Polling
+
+Vortex polls an HTTP endpoint on a schedule and deduplicates by content hash or a specific field value. Only fires the workflow when the content changes.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "polling",
+    "url": "https://api.example.com/status",
+    "interval": 300,
+    "dedup": { "field": "$.version" }
+  }
+}
+```
+
+`dedup.field` is a JSONPath expression. Omit for hash-based deduplication of the full response body.
+
+## S3
+
+Fires when a file is uploaded or modified in an S3-compatible bucket. Events arrive via a webhook from your S3 event notification configuration:
+
+```
+POST /webhooks/s3/:secret
+```
+
+`triggerData` contains the S3 event record including bucket name, key, size, and ETag.
+
+## CDC (Database Change Capture)
+
+Receives change events from a [Debezium](https://debezium.io) connector. Fires on inserts, updates, and deletes from any database table Debezium is configured to watch.
+
+```
+POST /webhooks/cdc/:secret
+```
+
+`triggerData` contains the Debezium envelope with `before`, `after`, `op` (create/update/delete), and source metadata.
+
+## Kafka
+
+Consumes messages from a Kafka topic. Vortex manages the consumer lifecycle per workflow — starting and stopping consumers as workflows are enabled or disabled.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "kafka",
+    "brokers": ["kafka.example.com:9092"],
+    "topic": "orders",
+    "groupId": "vortex-orders",
+    "fromBeginning": false
+  }
+}
+```
+
+`triggerData` contains the Kafka message value, key, partition, and offset.
+
+## SQS
+
+Polls an AWS SQS queue and automatically deletes messages after the workflow completes successfully. Failed runs leave the message in the queue for retry via the visibility timeout.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "sqs",
+    "queueUrl": "https://sqs.us-east-1.amazonaws.com/123456789/my-queue",
+    "region": "us-east-1"
+  }
+}
+```
+
+## MQTT
+
+Subscribes to an MQTT broker topic. Supports wildcard subscriptions (`#`, `+`) and configurable QoS levels. Ideal for IoT and smart home integrations.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "mqtt",
+    "brokerUrl": "mqtt://broker.example.com:1883",
+    "topic": "sensors/temperature/#",
+    "qos": 1
+  }
+}
+```
+
+`triggerData` contains the message payload, topic, and QoS level.
+
+## WebSocket
+
+Connects to a WebSocket server and fires a workflow run on each incoming message.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "websocket",
+    "url": "wss://stream.example.com/events",
+    "protocols": ["json"]
+  }
+}
+```
+
+Supports automatic reconnection on disconnect.
+
+## Redis Pub/Sub
+
+Subscribes to Redis Pub/Sub channels and fires on each published message. Supports pattern-based subscriptions.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "redis",
+    "url": "redis://localhost:6379",
+    "channels": ["events:*", "notifications"]
+  }
+}
+```
+
+## NATS
+
+Subscribes to a NATS subject with optional queue group for load-balanced consumption across multiple workers.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "nats",
+    "servers": "nats://localhost:4222",
+    "subject": "orders.>",
+    "queue": "vortex-workers"
+  }
+}
+```
+
+`triggerData` contains the message payload, subject, and headers.
+
+## AMQP (RabbitMQ)
+
+Consumes messages from an AMQP queue with automatic acknowledgment on successful workflow completion and negative acknowledgment (requeue) on failure.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "amqp",
+    "url": "amqp://guest:guest@localhost:5672",
+    "queue": "orders",
+    "exchange": "events",
+    "routingKey": "order.#",
+    "prefetch": 10
+  }
+}
+```
+
+Supports exchange binding, routing keys, prefetch limits, and durable queues.
+
+## gRPC Stream
+
+Opens a server-streaming gRPC call and fires a workflow run on each streamed response.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "grpc_stream",
+    "address": "localhost:50051",
+    "protoPath": "/protos/events.proto",
+    "service": "events.EventService",
+    "method": "StreamEvents"
+  }
+}
+```
+
+Requires a `.proto` file defining the service. Supports TLS and custom metadata headers.
+
+## GraphQL Subscription
+
+Subscribes to a GraphQL API and fires a workflow run on each subscription event.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "graphql_subscription",
+    "url": "wss://api.example.com/graphql",
+    "query": "subscription { orderUpdated { id status } }",
+    "headers": { "Authorization": "Bearer {{secrets.token}}" }
+  }
+}
+```
+
+## SSE (Server-Sent Events)
+
+Connects to an SSE endpoint and fires a workflow run on each incoming event. Supports filtering by event type and automatic reconnection with configurable delay.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "sse",
+    "url": "https://api.example.com/events",
+    "headers": { "Authorization": "Bearer {{secrets.token}}" },
+    "eventTypes": ["order.created", "order.updated"],
+    "reconnectDelayMs": 5000
+  }
+}
+```
+
+`triggerData` contains the event data, event type, and last event ID.
+
+## Email
+
+Fires when an inbound email is received via Resend webhook. Supports glob-pattern filters on sender address and subject line.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "email",
+    "address": "workflows@omni.dev",
+    "provider": "resend",
+    "filters": {
+      "from": "*@stripe.com",
+      "subject": "Invoice*"
+    }
+  }
+}
+```
+
+`triggerData` contains the full email payload: `from`, `to`, `subject`, `textBody`, `htmlBody`, `attachments`, `headers`, and `messageId`. Emails are deduplicated by `messageId`.
+
+## Trigger Comparison
+
+| Trigger | Push/Pull | Retries | Dedup |
+|---|---|---|---|
+| Webhook | Push | No (fire-and-forget) | Via `correlationId` |
+| Cron | Pull (internal) | No | Distributed lock |
+| Event | Push (Iggy) | No | `correlationId` SET NX |
+| Manual | Push (API) | No | — |
+| Polling | Pull | Configurable | Content hash or field |
+| S3 | Push | No | — |
+| CDC | Push | No | — |
+| Kafka | Pull | Via visibility | Kafka offsets |
+| SQS | Pull | Via visibility timeout | SQS dedup ID |
+| MQTT | Push | QoS-based | Topic + timestamp |
+| WebSocket | Push | On reconnect | — |
+| Redis | Push | On reconnect | — |
+| NATS | Push | Queue group | Subject + timestamp |
+| AMQP | Pull | Via nack/requeue | Delivery tag |
+| gRPC Stream | Push | On reconnect | — |
+| SSE | Push | On reconnect | Last event ID |
+| Email | Push (webhook) | No | `messageId` |
+| GraphQL Subscription | Push (WebSocket) | On reconnect | — |

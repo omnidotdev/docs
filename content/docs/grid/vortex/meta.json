@@ -1,0 +1,14 @@
+{
+  "title": "🌪️ Vortex",
+  "pages": [
+    "getting-started",
+    "triggers",
+    "events",
+    "dsl",
+    "sdk",
+    "editor",
+    "execution",
+    "cli",
+    "configuration"
+  ]
+}

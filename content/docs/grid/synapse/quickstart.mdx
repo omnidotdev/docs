@@ -1,0 +1,86 @@
+---
+title: Quickstart
+description: Make your first API call in 2 minutes
+---
+
+## 1. Get an API key
+
+Sign up at [synapse.omni.dev](https://synapse.omni.dev) and create an API key at **Dashboard > Keys > Create Key**.
+
+Copy the key (starts with `synapse_`). You'll only see it once.
+
+## 2. Send a chat completion
+
+```bash
+curl https://gateway.synapse.omni.dev/v1/chat/completions \
+  -H "Authorization: Bearer synapse_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "anthropic/claude-sonnet-4-20250514",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+Synapse uses the OpenAI-compatible API format. Any OpenAI SDK works — just change the base URL.
+
+## 3. Use with the OpenAI SDK
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://gateway.synapse.omni.dev/v1",
+  apiKey: "synapse_YOUR_KEY",
+});
+
+const response = await client.chat.completions.create({
+  model: "anthropic/claude-sonnet-4-20250514",
+  messages: [{ role: "user", content: "Hello" }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+## 4. Use with the Anthropic SDK
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  baseURL: "https://gateway.synapse.omni.dev",
+  apiKey: "synapse_YOUR_KEY",
+});
+
+const message = await client.messages.create({
+  model: "claude-sonnet-4-20250514",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Hello" }],
+});
+
+console.log(message.content[0].text);
+```
+
+## 5. Model naming
+
+Use `provider/model` format for explicit routing:
+
+| Model | Provider |
+|-------|----------|
+| `anthropic/claude-sonnet-4-20250514` | Anthropic |
+| `openai/gpt-4o` | OpenAI |
+| `openai/gpt-4o-mini` | OpenAI |
+
+Or use virtual names for smart routing (Pro tier):
+
+| Name | Behavior |
+|------|----------|
+| `auto` | Best model for the query |
+| `fast` | Lowest latency |
+| `cheap` | Lowest cost |
+
+## Next steps
+
+- [Configuration](/grid/synapse/configuration) -- full TOML reference
+- [Routing](/grid/synapse/routing) -- customize how requests are routed
+- [Providers](/grid/synapse/providers) -- add your own API keys for BYOK mode
+- [Self-hosting](/grid/synapse/self-hosting) -- run Synapse on your own infrastructure

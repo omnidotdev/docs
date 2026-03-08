@@ -1,0 +1,166 @@
+---
+title: Events
+description: Event-driven workflow routing, the OmniEvent schema, and the Universal Workflow Hub
+---
+
+Vortex is built on **Apache Iggy**, a high-performance streaming server. Every Omni product publishes structured events to a shared stream, and Vortex routes them to workflows automatically.
+
+## OmniEvent Schema
+
+Every event in the Omni platform follows a standard envelope:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | UUID generated at publish time |
+| `type` | `string` | Dot-namespaced event type (e.g., `beacon.conversation.ended`) |
+| `source` | `string` | Service that emitted the event |
+| `subject` | `string?` | Optional subject for partitioning (e.g., run ID) |
+| `data` | `object` | Event-specific payload |
+| `timestamp` | `string` | ISO 8601 timestamp |
+| `organizationId` | `string` | Tenant scope |
+| `correlationId` | `string?` | Tracing ID for idempotency |
+| `schemaId` | `string?` | Schema registry reference |
+
+## Streaming Infrastructure
+
+Events flow through a single Iggy stream (`omni-events`) with per-organization topics:
+
+- **3 partitions** per topic for parallel consumption
+- **90-day retention** across all topics
+- **System topic** for platform-level events (accessible to all consumers)
+- TCP transport — Vortex workers connect directly to the Iggy server
+
+## Event Routing
+
+Routing rules match incoming events to workflows. Each rule is an `event_routing_rule` record:
+
+| Field | Description |
+|---|---|
+| `typePattern` | Glob pattern matched against `event.type` (e.g., `beacon.*`, `synapse.usage.*`) |
+| `sourcePattern` | Optional glob on `event.source` |
+| `condition` | Optional JSONPath expression — rule only fires if the path returns a result |
+| `transform` | Optional JSONata expression — reshapes `event.data` before it reaches the workflow |
+| `celCondition` | Optional CEL expression for complex boolean filtering (takes precedence over `condition`) |
+| `batch` | Optional batch configuration for event accumulation before triggering |
+| `priority` | Higher priority rules are evaluated first |
+| `enabled` | Toggle without deleting |
+
+### Conditions
+
+Conditions filter events before dispatch. Vortex supports two expression languages:
+
+**JSONPath** — evaluated against `event.data`. An empty result skips the rule.
+
+```json
+"$.user.role"
+```
+
+This fires only when `event.data.user.role` exists. Non-empty results (including `false`) match — conditions are presence checks, not boolean expressions.
+
+**CEL** — [Common Expression Language](https://cel.dev) for complex boolean filtering. When both `condition` and `celCondition` are set, CEL takes precedence.
+
+```json
+"data.user.role == 'admin' && data.total > 100"
+```
+
+CEL conditions support full boolean logic, comparisons, and string operations.
+
+### Transforms
+
+Transforms are [JSONata](https://jsonata.org) expressions that reshape `event.data` before it enters the workflow input. If the transform errors or returns `undefined`, the original data is used.
+
+```json
+"{ 'userId': data.user.id, 'plan': data.subscription.tier }"
+```
+
+### Idempotency
+
+When `correlationId` is present, Vortex uses Redis `SET NX` to deduplicate events within a **24-hour window** per organization. Re-delivering the same event with the same `correlationId` is a no-op.
+
+## Publishing Events
+
+### REST API
+
+```bash
+POST /api/v1/events
+Authorization: Bearer <api-key>
+
+{
+  "type": "order.created",
+  "source": "my-service",
+  "data": { "orderId": "ord_123", "total": 99.00 }
+}
+```
+
+### GraphQL
+
+```graphql
+mutation {
+  publishEvent(input: {
+    type: "order.created"
+    source: "my-service"
+    data: { orderId: "ord_123", total: 99.00 }
+  }) {
+    event { id type timestamp }
+  }
+}
+```
+
+### Webhooks
+
+All Vortex webhook endpoints publish to Iggy on receipt, making every incoming webhook replayable:
+
+- `POST /webhooks/workflow/:id/:secret` — workflow trigger
+- `POST /webhooks/s3/:secret` — S3 file events
+- `POST /webhooks/cdc/:secret` — Debezium database change capture
+- `POST /webhooks/audit/:secret` — Chronicle audit logs
+- `POST /webhooks/authz/:secret` — AuthZ tuple sync
+
+## Event Replay
+
+The event log captures every event that flows through Vortex (both incoming trigger events and outgoing lifecycle events). Use the replay API to re-trigger any matching set:
+
+```bash
+POST /api/v1/events/replay
+Authorization: Bearer <api-key>
+
+{
+  "type": "beacon.conversation.ended",
+  "since": "2026-01-01T00:00:00Z",
+  "until": "2026-01-02T00:00:00Z",
+  "limit": 100
+}
+```
+
+Returns `{ replayed, failed, total }`. Replayed events are published back to Iggy and re-routed by the event router — existing idempotency deduplication applies.
+
+## Lifecycle Events
+
+Vortex publishes its own events to the `vortex.*` namespace:
+
+| Event | Published by | When |
+|---|---|---|
+| `vortex.workflow.started` | vortex-api | After successful dispatch to any executor |
+| `vortex.workflow.completed` | vortex-worker | After DSL execution succeeds |
+| `vortex.workflow.failed` | vortex-api or vortex-worker | On dispatch error or execution failure |
+
+These can trigger other workflows — Vortex workflows can react to themselves.
+
+## Universal Workflow Hub
+
+Vortex is the event backbone for the entire Omni platform. Every product publishes to the shared stream:
+
+| Namespace | Product | Example events |
+|---|---|---|
+| `synapse.*` | Synapse (AI router) | `synapse.provider.error`, `synapse.usage.threshold` |
+| `beacon.*` | Beacon (voice/messaging) | `beacon.conversation.started`, `beacon.conversation.ended`, `beacon.tool.executed` |
+| `gatekeeper.*` | HIDRA (identity) | `gatekeeper.user.created`, `gatekeeper.member.role_changed` |
+| `warden.*` | Warden (authZ) | `warden.policy.created`, `warden.role.updated` |
+| `aether.*` | Aether (billing) | `aether.subscription.created`, `aether.entitlement.deleted` |
+| `vortex.*` | Vortex (workflows) | `vortex.workflow.started`, `vortex.workflow.completed` |
+
+Any workflow can subscribe to any of these event types via routing rules. Omni product teams can trigger cross-product automation without any direct service coupling.
+
+<Callout type="info">
+  For streaming triggers (MQTT, NATS, AMQP, gRPC, WebSocket, Redis), events are normalized to a `NormalizedEvent` envelope before routing. The original protocol-specific metadata is preserved in `metadata.raw`. See [Triggers](/grid/vortex/triggers) for configuration details.
+</Callout>

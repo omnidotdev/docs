@@ -1,0 +1,132 @@
+---
+title: Authentication
+description: API key auth, OAuth2/JWT, CSRF protection, and security practices
+---
+
+Synapse supports multiple authentication methods to secure access to its API endpoints.
+
+## API Key Authentication
+
+The default authentication method. Clients pass an API key in the request header, and Synapse validates it against the configured key store.
+
+### Header Format
+
+```bash
+# OpenAI-compatible endpoints
+curl -H "Authorization: Bearer your-api-key" \
+  http://localhost:6000/v1/chat/completions ...
+
+# Anthropic-compatible endpoints
+curl -H "x-api-key: your-api-key" \
+  http://localhost:6000/v1/messages ...
+```
+
+### Configuration
+
+```toml
+[auth]
+method = "api_key"
+
+# Static key list
+[[auth.api_keys]]
+key = "{{ env.SYNAPSE_API_KEY }}"
+name = "production"
+```
+
+<Callout type="warning">
+  Always use environment variable interpolation for API keys. Never hardcode secrets in config files.
+</Callout>
+
+### Key Validation
+
+When Synapse runs alongside the Omni API (synapse-api), keys are validated against the API's key store. This enables per-key rate limits, usage tracking, and key rotation without restarting Synapse.
+
+## OAuth2 / JWT
+
+For applications that use OAuth2 or JWT-based authentication, Synapse can validate tokens against a JWKS endpoint.
+
+### Configuration
+
+```toml
+[auth]
+method = "jwt"
+
+[auth.jwt]
+jwks_url = "https://auth.omni.dev/.well-known/jwks.json"
+issuer = "https://auth.omni.dev"
+audience = "synapse"
+```
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| `jwks_url` | URL to the JWKS endpoint for public key discovery | Yes |
+| `issuer` | Expected `iss` claim in the JWT | Yes |
+| `audience` | Expected `aud` claim in the JWT | No |
+
+### Token Usage
+
+```bash
+curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIs..." \
+  http://localhost:6000/v1/chat/completions ...
+```
+
+Synapse caches the JWKS response and refreshes it periodically. Tokens are validated for signature, expiry, issuer, and audience.
+
+## CSRF Protection
+
+Synapse includes CSRF protection for browser-based clients.
+
+### Configuration
+
+```toml
+[server.csrf]
+enabled = true
+token_header = "X-CSRF-Token"
+```
+
+When enabled, non-GET requests from browser clients must include a valid CSRF token in the configured header. Tokens are issued via a dedicated endpoint or embedded in the initial page load.
+
+<Callout type="info">
+  CSRF protection is primarily relevant when Synapse is accessed directly from a browser. API clients using `Authorization` headers are not affected.
+</Callout>
+
+## Client Identification
+
+Synapse tracks which client is making each request for usage analytics and rate limiting. Clients are identified by:
+
+1. **API key** -- each key maps to a client identity
+2. **JWT claims** -- `sub` or `client_id` claim
+3. **IP address** -- fallback when no other identifier is available
+
+### Custom Client Header
+
+```toml
+[auth]
+client_id_header = "X-Client-Id"
+```
+
+When set, Synapse uses the value of this header as the client identifier, regardless of the authentication method.
+
+## Security Best Practices
+
+1. **Use TLS in production** -- configure TLS in the [server section](/grid/synapse/configuration#tls) or terminate TLS at a reverse proxy
+2. **Rotate API keys regularly** -- use the Omni dashboard or API to rotate keys without downtime
+3. **Use JWT for multi-tenant deployments** -- JWTs carry identity and scope, reducing key management overhead
+4. **Enable CSRF for browser access** -- protect against cross-site request forgery
+5. **Limit CORS origins** -- only allow trusted origins in [CORS configuration](/grid/synapse/configuration#cors)
+6. **Monitor authentication failures** -- use [telemetry](/grid/synapse/telemetry) to track and alert on auth failures
+7. **Never log API keys or tokens** -- Synapse redacts sensitive values in logs by default
+
+## Unauthenticated Endpoints
+
+The following endpoints do not require authentication:
+
+- `GET /health` -- health check
+- `GET /v1/models` -- model list (configurable, can require auth)
+
+To require authentication on all endpoints:
+
+```toml
+[auth]
+require_auth_for_models = true
+```
