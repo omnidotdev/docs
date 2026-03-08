@@ -78,8 +78,24 @@ import {
 - **Prioritization Tools**: Rank posts based on user demand, impact, and urgency, making it easier to decide what to build next.
 - **Roadmap Planning**: Communicate product direction by turning posts into actionable roadmap items.
 - **User Voting & Discussion**: Each post includes upvotes/downvotes and a community discussion section for comments.
+- **Public & Private Boards**: Control project visibility with a per-project toggle.
 - **Analytics & Insights**: Gain deep insights into user needs and engagement trends (planned).
 - **API Access**: Integrate Backfeed seamlessly into your existing infrastructure with a powerful API (planned).
+
+## Board Visibility
+
+Backfeed projects are **public by default** — this is intentional, since the primary use case is collecting feedback from external users who may not have accounts.
+
+Admins can toggle any project to **private** in **Project Settings → Visibility**. When a project is private:
+
+- Only authenticated organization members can access it
+- Unauthenticated visitors see a 404
+- Useful for internal feedback boards or pre-launch projects
+
+When a project is public:
+
+- Anyone can view the board and submit feedback without signing in
+- The project appears at its shareable workspace URL
 
 ## Getting Started
 

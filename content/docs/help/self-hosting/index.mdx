@@ -47,7 +47,7 @@ Most Omni products follow a [standard Docker Compose pattern](/help/self-hosting
 
 | Product | Methods | Guide |
 |---------|---------|-------|
-| [Synapse](/grid/synapse) | Binary, Docker | [Binary installs](#synapse) |
+| [Synapse](/grid/synapse) | Docker Compose, Helm, Binary | [Docker Compose](/help/self-hosting/docker-compose#synapse), [Self-Hosting](/grid/synapse/self-hosting) |
 | [Omni Terminal](/armory/omni-terminal) | Binary, Docker | [Binary installs](#omni-terminal) |
 
 ## Binary Installs
@@ -56,25 +56,26 @@ Some products ship as standalone binaries and don't require Docker or Kubernetes
 
 ### Synapse
 
-[Synapse](/grid/synapse) is available as a prebuilt binary, from source, or as a Docker image:
+[Synapse](/grid/synapse) runs as a full stack (gateway + API + dashboard) via Docker Compose, or the gateway alone as a standalone binary:
 
 ```bash
-# From source
-git clone https://github.com/omnidotdev/synapse-server.git
-cd synapse-server
+# Full stack (Docker Compose)
+git clone https://github.com/omnidotdev/synapse-stack.git
+cd synapse-stack
+cp .env.example .env.local
+# Set required values (DB_PASSWORD, AUTH_SECRET, GATEWAY_SECRET, ENCRYPTION_KEY)
+docker compose --env-file .env.local up -d
+
+# Gateway only (from source)
+git clone https://github.com/omnidotdev/synapse-gateway.git
+cd synapse-gateway
 cargo build --release
 # Binary at target/release/synapse
-
-# Or via Docker
-docker pull ghcr.io/omnidotdev/synapse-server:latest
-docker run -p 6000:6000 \
-  -v ./synapse.toml:/etc/synapse/synapse.toml \
-  ghcr.io/omnidotdev/synapse-server
 ```
 
-Prebuilt binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse-server/releases).
+Prebuilt gateway binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse-gateway/releases).
 
-See [Synapse Getting Started](/grid/synapse/getting-started) for configuration and first-request guides.
+See the [Synapse self-hosting guide](/grid/synapse/self-hosting) for full configuration and environment variable reference.
 
 ### Omni Terminal
 
