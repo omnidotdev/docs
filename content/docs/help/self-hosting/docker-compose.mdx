@@ -153,17 +153,45 @@ See the [Manifold Storage guide](/armory/manifold/storage) for details.
 
 ### Synapse
 
-[Synapse](/grid/synapse) runs as a single container with an optional config volume:
+[Synapse](/grid/synapse) runs five containers:
+
+| Container | Image | Port |
+|-----------|-------|------|
+| `db` | `postgres:16-alpine` | 5432 |
+| `valkey` | `valkey/valkey:8-alpine` | 6379 |
+| `gateway` | `ghcr.io/omnidotdev/synapse-gateway:latest` | 6000 |
+| `api` | `ghcr.io/omnidotdev/synapse-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/synapse-app:latest` | 3000 |
 
 ```bash
-docker pull ghcr.io/omnidotdev/synapse-server:latest
+git clone https://github.com/omnidotdev/synapse-stack.git
+cd synapse-stack
 
-docker run -p 6000:6000 \
-  -v ./synapse.toml:/etc/synapse/synapse.toml \
-  ghcr.io/omnidotdev/synapse-server
+cp .env.example .env.local
+# Set DB_PASSWORD, AUTH_SECRET, GATEWAY_SECRET, ENCRYPTION_KEY, and at least one LLM provider key
+
+docker compose --env-file .env.local up -d
 ```
 
-See [Synapse Getting Started](/grid/synapse/getting-started) for configuration file setup and provider configuration.
+#### Required environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DB_PASSWORD` | PostgreSQL password |
+| `AUTH_SECRET` | Session signing secret |
+| `GATEWAY_SECRET` | Internal gateway auth secret |
+| `ENCRYPTION_KEY` | Provider key encryption at rest |
+
+Optional: `AUTH_BASE_URL` (HIDRA Gatekeeper), `AETHER_*` (billing), `CORS_ALLOWED_ORIGINS`, port overrides. Set `PROTECT_ROUTES=false` to run without an identity provider.
+
+#### Volumes
+
+| Volume | Backing service | Content |
+|--------|----------------|---------|
+| `db_data` | PostgreSQL | Database files |
+| `valkey_data` | Valkey | Rate limit state and cache |
+
+See the [Synapse self-hosting guide](/grid/synapse/self-hosting) for Helm charts, gateway configuration, and binary installs.
 
 ## Database Migrations
 
