@@ -1,0 +1,17 @@
+{
+  "title": "🧠 Synapse",
+  "pages": [
+    "quickstart",
+    "getting-started",
+    "configuration",
+    "routing",
+    "providers",
+    "pricing",
+    "self-hosting",
+    "---Reference---",
+    "api",
+    "mcp",
+    "authentication",
+    "telemetry"
+  ]
+}

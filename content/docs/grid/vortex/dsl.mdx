@@ -1,0 +1,181 @@
+---
+title: Workflow DSL
+description: JSON definition format and step type reference
+---
+
+The Vortex DSL is a JSON-based workflow definition format. Every workflow — whether built in the UI, SDK, or hand-written — is stored and executed as this format.
+
+## Schema
+
+```json
+{
+  "version": "1.0",
+  "steps": [],
+  "edges": [],
+  "variables": {},
+  "settings": {}
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `version` | `"1.0"` | Yes | Schema version |
+| `steps` | `Step[]` | Yes | Ordered array of workflow steps |
+| `edges` | `Edge[]` | Yes | Connections between steps |
+| `variables` | `Record<string, VariableDefinition>` | No | Workflow-level variables |
+| `settings` | `WorkflowSettings` | No | Timeout and retry policies |
+
+## Steps
+
+Every step has a common shape:
+
+```json
+{
+  "id": "step_1",
+  "type": "action",
+  "name": "Send notification",
+  "description": "Notify the team on Slack",
+  "position": { "x": 250, "y": 0 },
+  "next": "step_2",
+  "onError": { "action": "continue" }
+}
+```
+
+### Step types
+
+**Core**
+
+| Type | Description |
+|---|---|
+| `trigger` | Entry point — webhook, cron, event, manual, polling, email, Kafka, SQS, S3, CDC, MQTT, WebSocket, Redis, NATS, AMQP, gRPC stream |
+| `action` | Execute a connector integration (Slack, GitHub, Stripe, etc.) |
+| `condition` | If/else branch based on an expression |
+| `switch` | Multi-way branch with named cases |
+| `delay` | Pause execution for a duration |
+| `loop` | Iterate with `forEach`, `while`, or `times` |
+| `parallel` | Run branches concurrently, wait for all/any/N |
+| `gate` | Approval or signal-based human-in-the-loop |
+| `plugin` | Execute a built-in plugin |
+| `code` | Run sandboxed JavaScript/TypeScript |
+| `subworkflow` | Invoke another workflow |
+
+**Data transformation**
+
+`map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group`
+
+**AI / ML**
+
+`llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`
+
+**Human-in-the-loop**
+
+`approval`, `input`, `notification`
+
+**Infrastructure**
+
+`cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`
+
+## Edges
+
+Edges connect steps by their IDs:
+
+```json
+{
+  "id": "e-step_1-step_2",
+  "source": "step_1",
+  "target": "step_2",
+  "sourceHandle": "default",
+  "label": "on success"
+}
+```
+
+For conditions, use `sourceHandle` to distinguish branches (`"true"` / `"false"`). For switches, use the case name.
+
+## Variables
+
+Workflow-level variables with types and defaults:
+
+```json
+{
+  "variables": {
+    "orderId": { "type": "string" },
+    "total": { "type": "number", "default": 0 },
+    "items": { "type": "array", "default": [] }
+  }
+}
+```
+
+Step outputs can be mapped to variables, and variable values are available in subsequent steps via `{{variableName}}` template syntax or JSONPath expressions (`$.user.plan`).
+
+## Settings
+
+```json
+{
+  "settings": {
+    "timeout": "1h",
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffCoefficient": 2,
+      "initialInterval": "1s",
+      "maxInterval": "1m"
+    }
+  }
+}
+```
+
+## Error Handling
+
+Each step can define an `onError` handler:
+
+```json
+{
+  "onError": {
+    "action": "retry",
+    "maxRetries": 3,
+    "retryDelay": "5s",
+    "backoff": "exponential",
+    "fallbackStepId": "handle_error"
+  }
+}
+```
+
+| Action | Behavior |
+|---|---|
+| `continue` | Skip the error and proceed to the next step |
+| `stop` | Halt workflow execution |
+| `retry` | Retry the step with backoff |
+| `goto` | Jump to a specific step via `fallbackStepId` |
+
+## Example
+
+A complete workflow that listens for webhooks and sends a Slack message:
+
+```json
+{
+  "version": "1.0",
+  "steps": [
+    {
+      "id": "trigger_1",
+      "type": "trigger",
+      "name": "Webhook",
+      "position": { "x": 0, "y": 0 },
+      "trigger": { "type": "webhook" }
+    },
+    {
+      "id": "notify",
+      "type": "action",
+      "name": "Send Slack message",
+      "position": { "x": 250, "y": 0 },
+      "integration": "slack",
+      "operation": "sendMessage",
+      "inputs": {
+        "channel": "#alerts",
+        "text": "New event: {{triggerData.body.event}}"
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e-trigger-notify", "source": "trigger_1", "target": "notify" }
+  ]
+}
+```

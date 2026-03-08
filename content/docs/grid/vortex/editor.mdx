@@ -1,0 +1,111 @@
+---
+title: Visual Editor
+description: UI canvas, import/export, and drag-and-drop
+---
+
+The Vortex visual editor is a node-based workflow canvas powered by React Flow. Workflows built in the editor are automatically converted to the JSON DSL for storage and execution.
+
+## Canvas
+
+The editor provides a drag-and-drop canvas where each workflow step is a node. Nodes are connected by edges that define execution order. The canvas supports:
+
+- **Node palette** — add steps by type from the sidebar
+- **Edge drawing** — connect nodes by dragging between handles
+- **Branching** — conditions and switches expose multiple output handles
+- **Pan and zoom** — navigate large workflows
+- **Selection and multi-select** — batch move or delete nodes
+- **Undo/redo** — track canvas changes
+
+## Import
+
+Import existing workflow definitions into the editor via the Import dialog.
+
+### Supported formats
+
+- **JSON DSL** — paste or upload a `v1.0` workflow definition
+- **Drag-and-drop** — drag a `.json` file directly onto the import dialog
+
+### Validation
+
+Before loading, the importer validates:
+
+1. Valid JSON syntax
+2. `version: "1.0"` is present
+3. `steps` and `edges` arrays exist
+4. Format detection (DSL vs ReactFlow — only DSL is accepted)
+
+A preview shows the step count and step names before confirming the import.
+
+### How it works
+
+```
+JSON file/paste → parse → validate schema → dslToReactFlow() → load into canvas
+```
+
+The `dslToReactFlow()` conversion uses dagre (directed acyclic graph layout) to automatically position nodes if the imported definition has no position data.
+
+## Export
+
+Export workflows from the editor in two formats:
+
+### JSON
+
+- **Copy to clipboard** — the raw DSL definition, 2-space indented
+- **Download as `.json`** — save to disk for version control, sharing, or re-import
+
+### TypeScript
+
+Generate copy-pasteable `@omnidotdev/vortex-sdk` code:
+
+```typescript
+import { workflow, webhookTrigger } from "@omnidotdev/vortex-sdk";
+
+export default workflow
+  .name("My Workflow")
+  .trigger(webhookTrigger({ path: "/orders" }))
+  .step("action", "Validate Order")
+    .config({ integration: "validator", operation: "check", inputs: { id: "$.orderId" } })
+  .build();
+```
+
+The TypeScript export topologically sorts steps for logical ordering and generates proper builder calls for each step type.
+
+## Round-tripping
+
+The editor supports full round-trip between all formats:
+
+```
+UI canvas ──reactFlowToDsl()──► JSON DSL ──dslToTypeScript()──► TypeScript SDK
+    ▲                               │
+    │                               │
+    └────── dslToReactFlow() ───────┘
+```
+
+- Build a workflow visually, export as JSON, hand-edit, re-import
+- Build with the SDK, `.build()` to JSON, import into the editor to visualize
+- Export from the editor as TypeScript, iterate in code, deploy via API
+
+## Conversion Functions
+
+| Function | Location | Direction |
+|---|---|---|
+| `reactFlowToDsl()` | `vortex-app` + `vortex-worker` | Canvas nodes/edges &#8594; DSL |
+| `dslToReactFlow()` | `vortex-app` | DSL &#8594; Canvas nodes/edges |
+| `dslToTypeScript()` | `vortex-app` | DSL &#8594; SDK code string |
+
+## Edge Export
+
+Workflows can be exported as [Fermyon Spin](https://www.fermyon.com/spin) bundles for edge execution. The export produces a ZIP containing:
+
+- `spin.toml` — Spin manifest (v2) with the workflow definition embedded
+- `workflow.json` — the raw DSL definition
+- `README.md` — deployment instructions
+
+Export via the API:
+
+```bash
+POST /api/v1/workflows/:workflowId/export/spin
+Authorization: Bearer <api-key>
+```
+
+Returns a `application/zip` download.

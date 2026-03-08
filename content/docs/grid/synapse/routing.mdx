@@ -1,0 +1,175 @@
+---
+title: Routing
+description: Intelligent model routing strategies and configuration
+---
+
+Synapse routes requests to the best provider and model using configurable strategies. This page covers routing configuration, strategies, and virtual model names.
+
+## Routing Configuration
+
+Enable routing and choose a strategy in the `[llm.routing]` section. Register available models with cost and quality metadata:
+
+```toml
+[llm.routing]
+enabled = true
+strategy = "threshold"
+
+[llm.routing.threshold]
+low_complexity_model = "openai/gpt-4o-mini"
+high_complexity_model = "anthropic/claude-sonnet-4-20250514"
+quality_floor = 0.7
+
+[[llm.routing.models]]
+provider = "openai"
+model = "gpt-4o-mini"
+input_per_mtok = 0.15
+output_per_mtok = 0.60
+quality = 0.7
+context_window = 128000
+
+[llm.routing.models.capabilities]
+tool_calling = true
+vision = true
+
+[[llm.routing.models]]
+provider = "anthropic"
+model = "claude-sonnet-4-20250514"
+input_per_mtok = 3.00
+output_per_mtok = 15.00
+quality = 0.92
+context_window = 200000
+
+[llm.routing.models.capabilities]
+tool_calling = true
+vision = true
+long_context = true
+```
+
+### Model Fields
+
+| Field | Description |
+|-------|-------------|
+| `provider` | Provider name matching a configured `[llm.providers.*]` entry |
+| `model` | Model identifier as the provider expects it |
+| `input_per_mtok` | Cost per million input tokens (USD) |
+| `output_per_mtok` | Cost per million output tokens (USD) |
+| `quality` | Quality score from 0.0 to 1.0 |
+| `context_window` | Maximum context length in tokens |
+| `capabilities` | Optional capability flags (`tool_calling`, `vision`, `long_context`) |
+
+## Routing Strategies
+
+### Threshold (default)
+
+Routes low-complexity requests to a fast/cheap model and high-complexity requests to a frontier model, based on a quality floor:
+
+```toml
+[llm.routing]
+enabled = true
+strategy = "threshold"
+
+[llm.routing.threshold]
+low_complexity_model = "openai/gpt-4o-mini"
+high_complexity_model = "anthropic/claude-sonnet-4-20250514"
+quality_floor = 0.7
+```
+
+### Cost
+
+Always select the cheapest model that meets minimum capability requirements:
+
+```toml
+[llm.routing]
+enabled = true
+strategy = "cost"
+```
+
+Synapse compares `input_per_mtok` and `output_per_mtok` across all registered models and picks the lowest combined cost.
+
+### Cascade (Buffered Streaming)
+
+Try the fastest/cheapest model first. If the response quality is below a threshold, discard it and retry with a higher-quality model. Supports buffered streaming so the client sees a seamless stream:
+
+```toml
+[llm.routing]
+enabled = true
+strategy = "cascade"
+
+[llm.routing.cascade]
+quality_threshold = 0.7
+max_retries = 2
+buffer_tokens = 50
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `quality_threshold` | Minimum quality score to accept a response | 0.7 |
+| `max_retries` | Maximum cascade retries before accepting | 2 |
+| `buffer_tokens` | Tokens to buffer before committing to a response | 50 |
+
+<Callout type="info">
+  Cascade strategy buffers the initial response before streaming to the client. This adds slight latency but allows Synapse to transparently retry with a better model if needed.
+</Callout>
+
+### Score (Multi-Objective)
+
+Compute a weighted score across multiple dimensions and select the highest-scoring model:
+
+```toml
+[llm.routing]
+enabled = true
+strategy = "score"
+
+[llm.routing.score]
+quality = 0.5
+speed = 0.3
+cost = 0.2
+```
+
+The final score for each model is `quality * w_quality + speed * w_speed + (1 - normalized_cost) * w_cost`. Weights are normalized to sum to 1.0.
+
+### ONNX (ML-Based)
+
+Use a custom ONNX model to make routing decisions based on request features (prompt length, token budget, modality, time of day, etc.):
+
+```toml
+[llm.routing]
+enabled = true
+strategy = "onnx"
+
+[llm.routing.onnx]
+model_path = "/etc/synapse/routing_model.onnx"
+feature_config = "/etc/synapse/features.json"
+```
+
+<Callout type="warning">
+  ONNX routing is an advanced feature. You need to train and export your own routing model. See the repository for example training scripts.
+</Callout>
+
+## Virtual Model Names
+
+Synapse provides built-in virtual model names that map to routing strategies:
+
+| Virtual Model | Description |
+|---------------|-------------|
+| `auto` | Default routing, uses threshold strategy |
+| `fast` | Optimizes for lowest latency |
+| `best` | Optimizes for highest quality |
+| `cheap` | Optimizes for lowest cost |
+
+Clients can use these names directly:
+
+```bash
+curl http://localhost:6000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+## Passthrough Models
+
+If a request specifies a model name that doesn't match any virtual name, Synapse passes it through to the appropriate provider based on model name prefix matching (e.g. `claude-*` routes to Anthropic, `gpt-*` routes to OpenAI) or explicit `provider/model` format (e.g. `anthropic/claude-sonnet-4-20250514`).
+
+See also: [Providers](/grid/synapse/providers) for configuring the upstream providers that routing selects from.

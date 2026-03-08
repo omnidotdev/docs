@@ -1,0 +1,329 @@
+---
+title: TypeScript SDK
+description: Programmatic workflow builder with a fluent API
+---
+
+The Vortex SDK (`@omnidotdev/vortex-sdk`) provides a type-safe, fluent builder API for composing workflows in TypeScript. Every SDK-built workflow outputs the same JSON DSL that the UI and executor use.
+
+## Installation
+
+```bash
+bun add @omnidotdev/vortex-sdk
+```
+
+## Quick Start
+
+```typescript
+import { workflow, webhookTrigger } from "@omnidotdev/vortex-sdk";
+
+const definition = workflow
+  .name("Order Processor")
+  .trigger(webhookTrigger({ path: "/orders" }))
+  .step("action", "Validate Order")
+    .config({ integration: "validator", operation: "check", inputs: { id: "$.orderId" } })
+  .end()
+  .step("action", "Charge Payment")
+    .config({ integration: "stripe", operation: "charge", inputs: { amount: "$.total" } })
+  .build();
+
+// `definition` is a valid WorkflowDefinition JSON object
+console.log(JSON.stringify(definition, null, 2));
+```
+
+## API Reference
+
+### `workflow`
+
+A pre-created `WorkflowBuilder` instance. All methods are chainable and return `this`. For multiple workflow definitions in the same file, create separate instances with `new WorkflowBuilder()`.
+
+```typescript
+import { workflow, WorkflowBuilder } from "@omnidotdev/vortex-sdk";
+
+workflow
+  .name("my-workflow")
+  .description("A workflow that does things")
+  .version("1.0");
+```
+
+### `.name(name)`
+
+Set the workflow name (required).
+
+### `.description(description)`
+
+Set an optional description.
+
+### `.version(version)`
+
+Set the schema version (defaults to `"1.0"`).
+
+### `.trigger(triggerOrType, config?)`
+
+Set the workflow trigger. Exactly one trigger is required. Pass a trigger builder or a string type with config.
+
+```typescript
+import {
+  webhookTrigger,
+  cronTrigger,
+  eventTrigger,
+  manualTrigger,
+  pollingTrigger,
+  kafkaTrigger,
+  sqsTrigger,
+  s3Trigger,
+  cdcTrigger,
+  mqttTrigger,
+  websocketTrigger,
+  redisTrigger,
+  natsTrigger,
+  amqpTrigger,
+  grpcStreamTrigger,
+  graphqlSubscriptionTrigger,
+} from "@omnidotdev/vortex-sdk";
+
+// Webhook trigger
+workflow.trigger(webhookTrigger({ path: "/events", method: "POST" }))
+
+// Cron trigger
+workflow.trigger(cronTrigger("0 9 * * MON"))
+
+// Event trigger
+workflow.trigger(eventTrigger({ type: "order.created", source: "my-service" }))
+
+// Manual trigger
+workflow.trigger(manualTrigger())
+
+// Polling trigger
+workflow.trigger(pollingTrigger({ url: "https://api.example.com/status", intervalMs: 300_000 }))
+
+// Streaming triggers
+workflow.trigger(natsTrigger({ servers: "nats://localhost:4222", subject: "orders.>" }))
+workflow.trigger(amqpTrigger({ url: "amqp://localhost:5672", queue: "tasks" }))
+workflow.trigger(grpcStreamTrigger({
+  address: "localhost:50051",
+  protoPath: "./events.proto",
+  service: "events.EventService",
+  method: "StreamEvents",
+}))
+
+// IoT / messaging triggers
+workflow.trigger(mqttTrigger({ brokerUrl: "mqtt://broker:1883", topic: "sensors/#" }))
+workflow.trigger(websocketTrigger({ url: "wss://stream.example.com" }))
+workflow.trigger(redisTrigger({ url: "redis://localhost:6379", channels: ["events:*"] }))
+
+// Cloud triggers
+workflow.trigger(kafkaTrigger({ brokers: ["kafka:9092"], topic: "orders", groupId: "vortex" }))
+workflow.trigger(sqsTrigger({ queueUrl: "https://sqs.us-east-1.amazonaws.com/123/queue", region: "us-east-1" }))
+
+// String-based alternative
+workflow.trigger("webhook", { method: "POST" })
+```
+
+### `.step(type, name?)`
+
+Add a step. Returns a `StepBuilder` with `.config()`, `.name()`, `.next()`, and `.end()` methods. Call `.end()` to return to the workflow builder for chaining.
+
+Step IDs are auto-generated (e.g., `action-1`, `transform-2`).
+
+```typescript
+workflow
+  .step("action", "Send Email")
+    .config({
+      integration: "email",
+      operation: "send",
+      inputs: { to: "{{user.email}}", subject: "Order confirmed" },
+    })
+  .end()
+  .step("action", "Log Event")
+    .config({ integration: "log", operation: "write" })
+    .next("action-1") // explicit ordering via step ID
+  .end()
+```
+
+### `.build()`
+
+Validate the workflow against the Zod schema and return the `WorkflowDefinition` JSON object. Throws if the definition is invalid.
+
+## Step Types
+
+Steps are added via `.step(type, name?)`. The `type` determines what kind of step it is.
+
+### Actions
+
+```typescript
+workflow
+  .step("action", "Send Slack Message")
+    .config({
+      integration: "slack",
+      operation: "sendMessage",
+      inputs: { channel: "#general", text: "Hello" },
+      onError: { action: "continue" },
+    })
+  .end()
+```
+
+### Conditions
+
+```typescript
+// If/else branch
+workflow
+  .step("condition", "Check Total")
+    .config({
+      expression: "$.total > 100",
+      trueStepId: "apply-discount",
+      falseStepId: "skip",
+    })
+  .end()
+
+// Multi-way switch
+workflow
+  .step("switch", "Route by Status")
+    .config({
+      expression: "$.status",
+      cases: { active: "handle-active", pending: "handle-pending" },
+      defaultCase: "handle-unknown",
+    })
+  .end()
+```
+
+### Control Flow
+
+```typescript
+// Delay
+workflow.step("delay").config({ duration: "30s" }).end()
+
+// Loop over array
+workflow
+  .step("loop", "Process Items")
+    .config({
+      forEach: { collection: "$.items", iteratorVariable: "item" },
+    })
+  .end()
+
+// Parallel branches
+workflow
+  .step("parallel", "Notify All")
+    .config({ waitFor: "all" })
+  .end()
+
+// Human approval gate
+workflow
+  .step("gate", "Manager Approval")
+    .config({
+      approvers: ["admin@example.com"],
+      timeout: "24h",
+    })
+  .end()
+```
+
+### AI / LLM
+
+```typescript
+// LLM inference
+workflow
+  .step("llm", "Summarize Document")
+    .config({
+      model: "gpt-4",
+      prompt: "Summarize: {{document}}",
+    })
+  .end()
+
+// Inline code
+workflow
+  .step("code", "Calculate Total")
+    .config({
+      language: "typescript",
+      source: `return { result: inputs.a + inputs.b };`,
+      inputs: { a: "$.x", b: "$.y" },
+    })
+  .end()
+
+// MCP server call
+workflow
+  .step("mcp", "Search")
+    .config({
+      server: "my-mcp-server",
+      tool: "search",
+      arguments: { query: "{{searchTerm}}" },
+    })
+  .end()
+
+// Database query
+workflow
+  .step("database", "Fetch Order")
+    .config({
+      connectionString: "{{DB_URL}}",
+      query: "SELECT * FROM orders WHERE id = $1",
+      params: ["{{orderId}}"],
+    })
+  .end()
+```
+
+### Standalone Steps
+
+Steps can also be built independently with the `step` factory:
+
+```typescript
+import { step } from "@omnidotdev/vortex-sdk";
+
+const emailStep = step("action", "Send Email")
+  .config({ integration: "email", operation: "send", inputs: { to: "user@example.com" } })
+  .build();
+```
+
+## Deploying Workflows
+
+The SDK builds `WorkflowDefinition` objects. Deploy them via the Vortex API or CLI:
+
+```typescript
+import { workflow, manualTrigger } from "@omnidotdev/vortex-sdk";
+
+const definition = workflow
+  .name("My Workflow")
+  .trigger(manualTrigger())
+  .step("action", "Greet")
+    .config({ integration: "slack", operation: "sendMessage", inputs: { channel: "#general", text: "Hello" } })
+  .build();
+
+// Deploy via GraphQL
+await fetch("https://api.vortex.omni.dev/graphql", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", Authorization: "Bearer ..." },
+  body: JSON.stringify({
+    query: `mutation($input: CreateWorkflowInput!) { createWorkflow(input: $input) { id } }`,
+    variables: { input: { name: "my-workflow", definition } },
+  }),
+});
+```
+
+Or use the CLI:
+
+```bash
+vortex push
+```
+
+## Plugin SDK
+
+The SDK also exports types for building WASM plugins via `@omnidotdev/vortex-sdk/plugin`:
+
+```typescript
+import type {
+  PluginHandler,
+  PluginInput,
+  PluginOutput,
+  VortexPluginManifest,
+} from "@omnidotdev/vortex-sdk/plugin";
+```
+
+## Schema Exports
+
+The SDK re-exports the Zod schema for runtime validation:
+
+```typescript
+import { WorkflowDefinitionSchema } from "@omnidotdev/vortex-sdk";
+
+const result = WorkflowDefinitionSchema.safeParse(someJson);
+if (!result.success) {
+  console.error(result.error);
+}
+```
