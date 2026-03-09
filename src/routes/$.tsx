@@ -9,6 +9,7 @@ import {
   DocsTitle,
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
@@ -27,7 +28,7 @@ import { useSidebarEscClose } from "@/lib/hooks/useSidebarEscClose";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
-import { getRealmByPath } from "@/lib/sections";
+import { getRealmByPath, getRealmIds } from "@/lib/sections";
 import source from "@/lib/source";
 import seo from "@/lib/util/seo";
 
@@ -63,26 +64,44 @@ const Page = () => {
 
   const { pathname } = useLocation();
 
-  // Use ref to track open section without causing re-renders
-  const openSectionRef = useRef<string>(activeSection || "welcome");
+  // Track which sections are open (supports multiple)
+  const openSectionsRef = useRef<Set<string>>(
+    new Set([activeSection || "welcome"]),
+  );
   const [, forceUpdate] = useState({});
 
-  // Update open section when navigating to a page in a different section
+  const allSectionIds = useMemo(() => getRealmIds(), []);
+
+  // Ensure the active section is open when navigating
   useEffect(() => {
     const newActiveSection = getSectionFromPath(pathname);
-    if (openSectionRef.current !== newActiveSection) {
-      openSectionRef.current = newActiveSection;
+    if (!openSectionsRef.current.has(newActiveSection)) {
+      openSectionsRef.current.add(newActiveSection);
       forceUpdate({});
     }
   }, [pathname]);
 
   const handleSectionToggle = useCallback(
     (sectionId: string, newOpen: boolean) => {
-      openSectionRef.current = newOpen ? sectionId : "none";
+      if (newOpen) {
+        openSectionsRef.current.add(sectionId);
+      } else {
+        openSectionsRef.current.delete(sectionId);
+      }
       forceUpdate({});
     },
     [],
   );
+
+  const handleExpandAll = useCallback(() => {
+    openSectionsRef.current = new Set(allSectionIds);
+    forceUpdate({});
+  }, [allSectionIds]);
+
+  const handleCollapseAll = useCallback(() => {
+    openSectionsRef.current = new Set();
+    forceUpdate({});
+  }, []);
 
   const memoizedBaseOptions = useMemo(() => baseLayoutOptions(), []);
 
@@ -95,24 +114,47 @@ const Page = () => {
         tree={patchedTree}
         sidebar={{
           banner: (
-            <span className="text-xs">
-              We turn ideas into products, from apps to websites to email
-              automation.
-              <a
-                href="https://omni.dev/#contact"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="ml-2 cursor-pointer px-0 text-fd-primary text-xs"
+            <div className="text-xs">
+              <span>
+                We turn ideas into products, from apps to websites to email
+                automation.
+                <a
+                  href="https://omni.dev/#contact"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Hire Us →
-                </Button>
-              </a>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="ml-2 cursor-pointer px-0 text-fd-primary text-xs"
+                  >
+                    Hire Us →
+                  </Button>
+                </a>
+              </span>
+
+              <div className="mb-1.5 -ml-1.5 flex gap-1">
+                <button
+                  type="button"
+                  onClick={handleExpandAll}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+                >
+                  <ChevronsUpDown className="h-3 w-3" />
+                  Expand all
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCollapseAll}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded px-1.5 py-0.5 text-2xs text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+                >
+                  <ChevronsDownUp className="h-3 w-3" />
+                  Collapse all
+                </button>
+              </div>
+
               <hr />
-            </span>
+            </div>
           ),
           footer: (
             <div className="mt-3 flex justify-end gap-2 text-2xs text-fd-accent-foreground/80">
@@ -141,7 +183,9 @@ const Page = () => {
                 const virtualItem =
                   item as import("@/lib/pageTreeTransform").VirtualFolder;
 
-                const isOpen = openSectionRef.current === virtualItem.sectionId;
+                const isOpen = openSectionsRef.current.has(
+                  virtualItem.sectionId,
+                );
 
                 return (
                   <SidebarSection
