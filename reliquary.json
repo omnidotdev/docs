@@ -1,0 +1,74 @@
+{
+  "relics": [
+    {
+      "id": "drizma",
+      "name": "Drizma",
+      "type": "experiment",
+      "description": "A playful meme project that riffs on Drizzle ORM and Prisma, created for fun and developer humor.",
+      "tagline": "Drizzle + Prisma meme project",
+      "repoUrl": "https://github.com/omnidotdev/drizma",
+      "license": "Apache-2.0",
+      "status": "archived"
+    },
+    {
+      "id": "typespec-drizzle",
+      "name": "typespec-drizzle",
+      "type": "library",
+      "description": "A TypeSpec emitter for generating Drizzle ORM schemas from TypeSpec definitions.",
+      "tagline": "TypeSpec to Drizzle codegen",
+      "repoUrl": "https://github.com/omnidotdev/typespec-drizzle",
+      "license": "Apache-2.0",
+      "status": "active"
+    },
+    {
+      "id": "tilt-extensions",
+      "name": "Tilt Extensions",
+      "type": "extension",
+      "description": "Custom Tilt extensions for Omni development workflows.",
+      "tagline": "Tilt development extensions",
+      "repoUrl": "https://github.com/omnidotdev/tilt-extensions",
+      "license": "Apache-2.0",
+      "status": "active"
+    },
+    {
+      "id": "template-rust-cli",
+      "name": "Rust CLI Template",
+      "type": "template",
+      "description": "Starter template for Rust CLI applications using Omni conventions.",
+      "tagline": "Rust CLI starter",
+      "repoUrl": "https://github.com/omnidotdev/template-rust-cli",
+      "license": "Apache-2.0",
+      "status": "active"
+    },
+    {
+      "id": "template-rust-lib",
+      "name": "Rust Library Template",
+      "type": "template",
+      "description": "Starter template for Rust libraries using Omni conventions.",
+      "tagline": "Rust library starter",
+      "repoUrl": "https://github.com/omnidotdev/template-rust-lib",
+      "license": "Apache-2.0",
+      "status": "active"
+    },
+    {
+      "id": "template-ts",
+      "name": "TypeScript Template",
+      "type": "template",
+      "description": "Starter template for TypeScript projects using Omni conventions.",
+      "tagline": "TypeScript starter",
+      "repoUrl": "https://github.com/omnidotdev/template-ts",
+      "license": "Apache-2.0",
+      "status": "active"
+    },
+    {
+      "id": "template-next",
+      "name": "Next.js Template",
+      "type": "template",
+      "description": "Starter template for Next.js applications using Omni conventions and Sigil design system.",
+      "tagline": "Next.js starter",
+      "repoUrl": "https://github.com/omnidotdev/template-next",
+      "license": "Apache-2.0",
+      "status": "active"
+    }
+  ]
+}
