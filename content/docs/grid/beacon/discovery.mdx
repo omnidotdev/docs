@@ -3,11 +3,7 @@ title: Gateway Discovery
 description: mDNS service discovery for Beacon gateways
 ---
 
-Beacon gateways will advertise themselves via mDNS (multicast DNS), allowing apps to automatically discover gateways on the local network without manual configuration.
-
-<Callout type="warning">
-  mDNS discovery is **planned** and not yet implemented. For now, connect to your gateway directly via its IP address and port.
-</Callout>
+Beacon gateways advertise themselves via mDNS (multicast DNS), allowing apps to automatically discover gateways on the local network without manual configuration.
 
 ## How It Works
 
@@ -31,7 +27,7 @@ Beacon gateways will advertise themselves via mDNS (multicast DNS), allowing app
 Beacon uses DNS-SD (DNS Service Discovery) with the following service type:
 
 ```
-_beacon-gateway._tcp.local
+_beacon._tcp.local
 ```
 
 ### Instance Name
@@ -61,7 +57,7 @@ Use the Tauri mDNS plugin:
 ```typescript
 import { browse } from "@tauri-apps/plugin-mdns"
 
-const gateways = await browse("_beacon-gateway._tcp.local")
+const gateways = await browse("_beacon._tcp.local")
 
 for (const gateway of gateways) {
   console.log({
@@ -79,10 +75,10 @@ Use `dns-sd` (macOS) or `avahi-browse` (Linux):
 
 ```bash
 # macOS
-dns-sd -B _beacon-gateway._tcp local
+dns-sd -B _beacon._tcp local
 
 # Linux
-avahi-browse -r _beacon-gateway._tcp
+avahi-browse -r _beacon._tcp
 ```
 
 ### Web Apps
