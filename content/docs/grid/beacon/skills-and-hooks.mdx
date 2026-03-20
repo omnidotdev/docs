@@ -483,6 +483,22 @@ Place executable hooks in `~/.beacon/hooks/`. Each hook is a directory containin
 | `message:received` | Incoming message from any channel |
 | `message:before_agent` | Before sending a message to the LLM |
 | `message:after_agent` | After receiving a response from the LLM |
+| `session:created` | When a new session is created |
+| `session:ended` | When a session ends |
+| `channel:connected` | When a channel successfully connects |
+| `channel:disconnected` | When a channel disconnects |
+
+Hook patterns support wildcards for matching multiple events:
+
+| Pattern | Matches |
+|---------|---------|
+| `message:received` | Exact match |
+| `message:*` | All message events |
+| `session:*` | All session events |
+| `channel:*` | All channel events |
+| `*` | All events |
+
+Custom event names are also supported — any string not matching a built-in event is treated as a custom event.
 
 ### Hook Results
 
@@ -511,13 +527,15 @@ The hooks directory path is configurable via the gateway config file (`hooks.pat
 
 ## Tools
 
-The gateway also includes built-in tools that the assistant can use during conversations:
+The gateway includes built-in tools that the assistant can use during conversations:
 
 | Tool | Description |
 |------|-------------|
 | Web Search | Search the web for current information |
 | Web Fetch | Fetch and extract content from URLs |
-| Browser | Automated browser interaction via CDP |
+| Browser | Automated browser interaction via CDP (chromiumoxide) |
+| Memory | Semantic memory storage and retrieval with vector search |
+| Command Execution | Run shell commands (sandboxable) |
 | Scheduling | Create and manage scheduled tasks (Vortex) |
 | Session Tools | Access conversation history and context |
 
