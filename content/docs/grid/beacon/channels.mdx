@@ -3,9 +3,9 @@ title: Messaging Channels
 description: Multi-channel messaging integrations
 ---
 
-Connect Beacon to your favorite messaging apps. Your assistant works the same way whether someone messages it on Discord, Slack, Telegram, or any other supported platform.
+Connect Beacon to your favorite messaging apps. Your assistant works the same way whether someone messages it on Discord, Slack, Telegram, or any of the 14 supported platforms.
 
-Beacon connects your AI assistant to messaging platforms through a unified channel interface. Each channel implements the same trait, so personas behave consistently across platforms.
+Beacon connects your AI assistant to messaging platforms through a unified channel interface. Each channel implements the same trait so personas behave consistently, and channels declare their own capabilities (reactions, streaming, media support, etc.).
 
 ## Supported Channels
 
@@ -13,13 +13,34 @@ Beacon connects your AI assistant to messaging platforms through a unified chann
 |---------|------------------|-----------------|
 | Discord | WebSocket (Serenity) | `DISCORD_TOKEN` |
 | Slack | WebSocket | `SLACK_BOT_TOKEN` |
-| Telegram | Webhook | `TELEGRAM_BOT_TOKEN` |
+| Telegram | Long polling | `TELEGRAM_BOT_TOKEN` |
 | Teams | Microsoft Bot Framework | `TEAMS_TENANT_ID`, `TEAMS_CLIENT_ID`, `TEAMS_CLIENT_SECRET`, `TEAMS_BOT_ID` |
 | Signal | Signal CLI bridge | `SIGNAL_API_URL`, `SIGNAL_PHONE` |
 | iMessage | AppleScript bridge (macOS) | `IMESSAGE_ENABLED=true` |
-| WhatsApp | Cloud API | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` |
+| WhatsApp | Cloud API (Webhook) | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` |
 | Matrix | Matrix client SDK | `MATRIX_HOMESERVER`, `MATRIX_ACCESS_TOKEN`, `MATRIX_USER_ID` |
 | Google Chat | Service account | `GOOGLE_CHAT_SERVICE_ACCOUNT` |
+| Gmail | OAuth2 polling | `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` |
+| IRC | IRC client | `IRC_SERVER`, `IRC_NICK`, `IRC_CHANNELS` |
+| Twilio | SMS Webhook | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE` |
+| Feishu/Lark | Webhook | `FEISHU_APP_ID`, `FEISHU_APP_SECRET` |
+| Line | Webhook | `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_TOKEN` |
+
+## Channel Capabilities
+
+Channels may support optional capabilities beyond basic messaging:
+
+| Capability | Description | Channels |
+|------------|-------------|----------|
+| Streaming | Real-time token streaming | Telegram |
+| Reactions | Emoji reactions | Discord, Slack, Telegram, Matrix |
+| InlineKeyboards | Button attachments | Telegram |
+| MediaSend | Images, audio, video, files | Telegram |
+| MessageEdit | Edit previously sent messages | Telegram |
+| MessageDelete | Delete messages | Telegram |
+| VoiceTranscribe | Voice-to-text transcription | Telegram |
+| ForumTopics | Thread/topic support | Telegram |
+| Stickers | Sticker messages | Telegram |
 
 ## Channel Interface
 
@@ -29,6 +50,7 @@ Every channel implements a common trait:
 - **disconnect** — Close the connection
 - **send** — Send a message to a channel
 - **is_connected** — Check connection status
+- **capabilities** — Declare supported capabilities
 - **send_typing** — Show typing indicator (optional)
 - **add_reaction** / **remove_reaction** — Emoji reactions (optional)
 

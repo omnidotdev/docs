@@ -1,6 +1,6 @@
 ---
 title: 🗼 Beacon
-description: Local-first voice and messaging gateway
+description: Local-first AI assistant gateway
 ---
 
 import { ProductOverview } from "@/components/docs";
@@ -16,12 +16,17 @@ import { FaMicrophone, FaComments, FaServer, FaShieldAlt, FaWifi } from "react-i
       className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
     },
     {
+      label: "Agentic",
+      icon: <FaShieldAlt />,
+      className: "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300",
+    },
+    {
       label: "Voice",
       icon: <FaMicrophone />,
       className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
     },
     {
-      label: "Messaging",
+      label: "Multi-Channel",
       icon: <FaComments />,
       className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
     },
@@ -38,7 +43,7 @@ import { FaMicrophone, FaComments, FaServer, FaShieldAlt, FaWifi } from "react-i
       type: "website",
     },
     {
-      href: `${app.socials.github}/beacon-gateway`,
+      href: `${app.socials.github}/beacon`,
       label: "Visit Repository",
       type: "repository",
     },
@@ -56,12 +61,14 @@ import { FaMicrophone, FaComments, FaServer, FaShieldAlt, FaWifi } from "react-i
     {
       title: "Big Idea",
       description:
-        "A gateway-centric platform where AI assistants run locally with device-based identity",
+        "A complete AI assistant platform — voice, 14+ messaging channels, agentic tools, semantic memory, and extensible skills — running locally with device-based identity",
     },
   ]}
 />
 
-**Omni Beacon** is a local-first voice and messaging gateway built in Rust. It ships as a single binary with an embedded AI router ([Synapse](/grid/synapse)) — no separate server needed. It runs on your machine or home server, keeping all your data local while providing seamless multi-device access through device-based identity and mDNS discovery.
+**Omni Beacon** is a local-first AI assistant gateway built in Rust. It ships as a single binary with an embedded AI router ([Synapse](/grid/synapse)) — no separate server needed. It runs on your machine or home server, keeping all your data local while providing seamless multi-device access through device-based identity and mDNS discovery.
+
+Beacon goes beyond simple chat — it's a complete platform for running AI assistants across voice, 14+ messaging channels, and a WebSocket API, with agentic tool execution, semantic memory, rule-based routing, attachment processing, and extensible skills.
 
 ## Local-First Principles
 
@@ -75,7 +82,16 @@ Beacon is designed around local-first principles:
 
 ## Chat
 
-Talk to your AI assistant through a familiar chat interface. Beacon keeps your conversation history locally on your gateway, with support for sessions, threading, and long-term memory. Synapse runs in-process by default, routing requests to your configured provider. Or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
+Talk to your AI assistant through a familiar chat interface or the WebSocket API. Beacon keeps your conversation history locally in SQLite, with support for sessions, threading, and long-term semantic memory with vector search. Synapse runs in-process by default, routing requests to your configured provider. Or use [Omni Credits](/grid/beacon/cloud-features) for a zero-config experience.
+
+## Agents
+
+Beacon supports a multi-agent architecture with pluggable execution backends:
+
+- **Built-in agent**: Runs agentic tool-use loops directly via Synapse with configurable model, system prompt, max tokens, and iteration limits
+- **Harness adapters**: Delegate agent execution to external CLI tools (e.g. Claude Code) with session resumption, MCP server config, and environment variable passthrough
+- **Agent registry**: Register multiple named agents and route messages to specific agents via routing rules
+- **Agent binding**: Route messages to the appropriate agent based on context
 
 ## Voice
 
@@ -93,7 +109,33 @@ Beacon uses configurable [personas](/grid/beacon/personas) to shape how your ass
 
 ## Channels
 
-Connect Beacon to your favorite messaging platforms. Your assistant works consistently across Discord, Slack, Telegram, Teams, Signal, and more. See [Channels](/grid/beacon/channels) for the full list and setup instructions.
+Connect Beacon to 14+ messaging platforms. Your assistant works consistently across Discord, Slack, Telegram, Teams, Signal, Gmail, IRC, Twilio (SMS), WhatsApp, Matrix, Google Chat, iMessage, Feishu/Lark, and Line. Each channel declares its own capabilities (reactions, streaming, media, etc.). See [Channels](/grid/beacon/channels) for the full list and setup instructions.
+
+## Routing
+
+Rule-based message routing lets you control how incoming messages are handled before they reach the agent:
+
+- **Allow/deny rules** with priority ordering
+- **Match conditions**: filter by channel, sender ID, content pattern (regex), or DM-only
+- **Actions**: allow, deny, deny with reply, redirect to agent, or rate limit
+- **Per-sender rate limiting** with rolling 60-second windows
+
+## Attachments
+
+Beacon processes attachments inline during the message flow:
+
+- **Vision**: Image and video analysis via configurable vision providers
+- **PDF**: Text extraction from PDF attachments
+- **Video**: Keyframe extraction (configurable max frames)
+- **Media limits**: Configurable max image size (default 10 MB) and video frame count
+
+## Memory
+
+Semantic memory powered by vector embeddings (via OpenAI or compatible providers):
+
+- **Post-turn extraction**: Automatically extracts and stores relevant memories after each conversation turn
+- **Vector search**: Retrieve contextually relevant memories using `sqlite-vec`
+- **Memory sync**: Optionally sync memories across devices via Omni cloud
 
 ## Getting Started
 
