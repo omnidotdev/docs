@@ -1,0 +1,184 @@
+---
+title: Guardrails
+description: Content filtering, PII detection, and token limits at the gateway layer
+---
+
+Guardrails run at the gateway layer, inspecting request content before it reaches an upstream provider (and optionally after the provider responds). Rules can block requests outright or log a warning and allow them through.
+
+## Configuration
+
+Enable guardrails in the `[guardrails]` section of your Synapse config:
+
+```toml
+[guardrails]
+enabled = true
+check_input = true   # inspect content before routing (default: true)
+check_output = false # inspect provider responses (default: false)
+```
+
+Rules are defined as an array of `[[guardrails.rules]]` tables. Each rule requires a `type` field that determines its behavior.
+
+<Callout type="info">
+  When `check_input` is true and a rule with `action = "block"` matches, Synapse returns a 403 response and never forwards the request to the provider.
+</Callout>
+
+## Rule Types
+
+### Keyword Blocklist
+
+Performs a case-insensitive substring match against a list of keywords:
+
+```toml
+[[guardrails.rules]]
+type = "keyword_blocklist"
+name = "prohibited-topics"
+keywords = ["jailbreak", "ignore previous instructions", "DAN mode"]
+action = "block"
+```
+
+All keywords are matched case-insensitively. A single match is sufficient to trigger the rule.
+
+### Regex Pattern
+
+Matches the input against a compiled regular expression:
+
+```toml
+[[guardrails.rules]]
+type = "regex_pattern"
+name = "sql-injection"
+pattern = 'DROP\s+TABLE'
+action = "block"
+
+[[guardrails.rules]]
+type = "regex_pattern"
+name = "suspicious-encoding"
+pattern = 'base64,[A-Za-z0-9+/]{50,}'
+action = "warn"
+```
+
+Patterns are standard Rust regex syntax. An invalid pattern will prevent Synapse from starting.
+
+### Max Input Tokens
+
+Rejects requests whose estimated token count exceeds a limit. Token count is estimated as `word_count * 1.3`:
+
+```toml
+[[guardrails.rules]]
+type = "max_input_tokens"
+name = "token-limit"
+limit = 8000
+action = "block"
+```
+
+Use this to prevent prompt injection via extremely long inputs, or to enforce cost caps before the request reaches a provider.
+
+### PII Detection
+
+Detects common personally identifiable information patterns:
+
+```toml
+[[guardrails.rules]]
+type = "pii"
+name = "no-pii"
+detect = ["ssn", "credit_card", "email", "phone"]
+action = "block"
+```
+
+| PII Type | Pattern |
+|----------|---------|
+| `ssn` | US Social Security numbers (`XXX-XX-XXXX`) |
+| `credit_card` | 13–19 digit sequences |
+| `email` | Standard email addresses |
+| `phone` | US phone numbers (with or without country code) |
+
+You can specify any subset of PII types. A single detected pattern is sufficient to trigger the rule.
+
+## Actions
+
+Each rule has an `action` field that controls what happens when it matches:
+
+| Action | Behavior |
+|--------|----------|
+| `block` | Return 403 immediately; request is not forwarded to the provider |
+| `warn` | Log a warning via tracing and allow the request through |
+
+`block` is the default when `action` is omitted.
+
+When a blocking rule matches, Synapse stops evaluating subsequent rules. Warning rules continue to accumulate until a block is encountered or all rules are evaluated.
+
+## Example: Full Configuration
+
+A typical production setup combining multiple rule types:
+
+```toml
+[guardrails]
+enabled = true
+check_input = true
+check_output = false
+
+# Hard block on known prompt injection patterns
+[[guardrails.rules]]
+type = "keyword_blocklist"
+name = "prompt-injection"
+keywords = [
+  "ignore previous instructions",
+  "jailbreak",
+  "DAN mode",
+  "pretend you have no restrictions",
+]
+action = "block"
+
+# Block requests that are suspiciously large
+[[guardrails.rules]]
+type = "max_input_tokens"
+name = "input-size-limit"
+limit = 16000
+action = "block"
+
+# Block requests containing PII
+[[guardrails.rules]]
+type = "pii"
+name = "pii-filter"
+detect = ["ssn", "credit_card"]
+action = "block"
+
+# Warn (but allow) if email addresses appear in prompts
+[[guardrails.rules]]
+type = "pii"
+name = "pii-email-warn"
+detect = ["email", "phone"]
+action = "warn"
+
+# Warn on SQL-like patterns that may indicate injection attempts
+[[guardrails.rules]]
+type = "regex_pattern"
+name = "sql-pattern"
+pattern = '(?i)(drop|truncate|delete)\s+(table|from|database)'
+action = "warn"
+```
+
+## Output Checking
+
+Set `check_output = true` to run the same rule engine against provider responses before they are returned to the client. This is useful for catching model outputs that contain PII or prohibited content:
+
+```toml
+[guardrails]
+enabled = true
+check_input = true
+check_output = true
+```
+
+<Callout type="warning">
+  Output checking adds latency proportional to response size. For streaming responses, Synapse buffers the full output before evaluating rules. Consider using targeted rules (e.g. PII only) rather than broad keyword lists on the output path.
+</Callout>
+
+## Observability
+
+All rule matches are emitted as structured tracing events at the `WARN` level:
+
+```
+guardrail blocked request  rule=prompt-injection  reason="matched keyword: jailbreak"
+guardrail warning          rule=pii-email-warn    reason="detected Email pattern"
+```
+
+These events include the rule name and the specific match reason, making them easy to filter in your log aggregator or alerting system. See [Telemetry](/grid/synapse/telemetry) for configuration details.

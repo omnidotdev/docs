@@ -328,13 +328,17 @@ Response:
 
 ## GET /health
 
-Health check endpoint. No authentication required.
+Health check endpoint. No authentication required. The gateway binary listens on port 3000 by default; Docker Compose maps host port 6000 to container port 3000.
 
 ```bash
+# Docker Compose (host port)
 curl http://localhost:6000/health
+
+# Binary (default port)
+curl http://localhost:3000/health
 ```
 
-Response:
+Response (plain text):
 
 ```
 ok

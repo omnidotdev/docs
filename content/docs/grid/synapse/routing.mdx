@@ -88,7 +88,7 @@ Synapse compares `input_per_mtok` and `output_per_mtok` across all registered mo
 
 ### Cascade (Buffered Streaming)
 
-Try the fastest/cheapest model first. If the response quality is below a threshold, discard it and retry with a higher-quality model. Supports buffered streaming so the client sees a seamless stream:
+Try the fastest/cheapest model first. If the response confidence is below a threshold, discard it and escalate to a stronger model. Supports buffered streaming so the client sees a seamless stream:
 
 ```toml
 [llm.routing]
@@ -96,24 +96,28 @@ enabled = true
 strategy = "cascade"
 
 [llm.routing.cascade]
-quality_threshold = 0.7
-max_retries = 2
-buffer_tokens = 50
+initial_model = "openai/gpt-4o-mini"
+escalation_model = "anthropic/claude-sonnet-4-20250514"
+confidence_threshold = 0.5
+max_buffer_bytes = 32768
+buffer_timeout_secs = 10
 ```
 
 | Field | Description | Default |
 |-------|-------------|---------|
-| `quality_threshold` | Minimum quality score to accept a response | 0.7 |
-| `max_retries` | Maximum cascade retries before accepting | 2 |
-| `buffer_tokens` | Tokens to buffer before committing to a response | 50 |
+| `initial_model` | Cheap model to try first (`"provider/model"`) | Cheapest registered model |
+| `escalation_model` | Stronger model to escalate to (`"provider/model"`) | Best quality registered model |
+| `confidence_threshold` | Confidence score below which to escalate (0.0 to 1.0) | 0.5 |
+| `max_buffer_bytes` | Maximum bytes to buffer before committing | 32768 (32 KB) |
+| `buffer_timeout_secs` | Seconds to wait for buffered response before committing | 10 |
 
 <Callout type="info">
-  Cascade strategy buffers the initial response before streaming to the client. This adds slight latency but allows Synapse to transparently retry with a better model if needed.
+  Cascade strategy buffers the initial response before streaming to the client. This adds slight latency but allows Synapse to transparently escalate to a better model if the initial response shows low confidence (hedging language, insufficient detail).
 </Callout>
 
 ### Score (Multi-Objective)
 
-Compute a weighted score across multiple dimensions and select the highest-scoring model:
+Compute a weighted score across quality, cost, and latency dimensions and select the highest-scoring model:
 
 ```toml
 [llm.routing]
@@ -121,29 +125,42 @@ enabled = true
 strategy = "score"
 
 [llm.routing.score]
-quality = 0.5
-speed = 0.3
-cost = 0.2
+weight_quality = 0.5
+weight_cost = 0.3
+weight_latency = 0.2
+error_penalty = 1.0
+min_samples = 10
 ```
 
-The final score for each model is `quality * w_quality + speed * w_speed + (1 - normalized_cost) * w_cost`. Weights are normalized to sum to 1.0.
+| Field | Description | Default |
+|-------|-------------|---------|
+| `weight_quality` | Weight for quality component (0.0 to 1.0) | 0.5 |
+| `weight_cost` | Weight for cost component (0.0 to 1.0) | 0.3 |
+| `weight_latency` | Weight for latency component (0.0 to 1.0) | 0.2 |
+| `error_penalty` | Error rate penalty multiplier | 1.0 |
+| `min_samples` | Minimum request samples before feedback influences scoring | 10 |
+
+The final score for each model is `weight_quality * quality + weight_cost * (1 - normalized_cost) + weight_latency * (1 - normalized_latency)`, with an optional error rate penalty applied from runtime feedback.
 
 ### ONNX (ML-Based)
 
-Use a custom ONNX model to make routing decisions based on request features (prompt length, token budget, modality, time of day, etc.):
+Use a custom ONNX model to classify query complexity and select the optimal model. The ONNX strategy extracts features from each query (token count, task type, complexity, capabilities, message count) and runs inference via the `ort` runtime.
 
-```toml
-[llm.routing]
-enabled = true
-strategy = "onnx"
+ONNX routing requires building Synapse with the `onnx` feature flag:
 
-[llm.routing.onnx]
-model_path = "/etc/synapse/routing_model.onnx"
-feature_config = "/etc/synapse/features.json"
+```bash
+cargo build --release --features onnx
+```
+
+Then load a pre-trained model at startup:
+
+```rust
+// ONNX strategy is loaded programmatically, not via TOML config
+let strategy = OnnxStrategy::load("/etc/synapse/routing_model.onnx")?;
 ```
 
 <Callout type="warning">
-  ONNX routing is an advanced feature. You need to train and export your own routing model. See the repository for example training scripts.
+  ONNX routing requires the `onnx` compile-time feature flag. Without it, the strategy returns a feature-not-available error. You need to train and export your own routing model offline in Python; see the repository for example training scripts.
 </Callout>
 
 ## Virtual Model Names

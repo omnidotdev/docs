@@ -12,6 +12,7 @@ Synapse supports multiple providers across five modalities. This page covers con
 | Anthropic | `anthropic` | Claude 4, Claude Sonnet, Claude Haiku |
 | OpenAI | `openai` | GPT-4o, GPT-4, GPT-3.5 |
 | Google | `google` | Gemini Pro, Gemini Flash |
+| NVIDIA | `openai` (with custom `base_url`) | Any model on NVIDIA NIM |
 | AWS Bedrock | `bedrock` | Claude, Titan, and other Bedrock-hosted models |
 
 ### Anthropic
@@ -38,6 +39,17 @@ type = "google"
 api_key = "{{ env.GOOGLE_API_KEY }}"
 ```
 
+### NVIDIA
+
+NVIDIA NIM exposes an OpenAI-compatible API, so use the `openai` type with a custom `base_url`:
+
+```toml
+[llm.providers.nvidia]
+type = "openai"
+base_url = "https://integrate.api.nvidia.com/v1"
+api_key = "{{ env.NVIDIA_API_KEY }}"
+```
+
 ### AWS Bedrock
 
 ```toml
@@ -56,13 +68,13 @@ secret_access_key = "{{ env.AWS_SECRET_ACCESS_KEY }}"
 
 | Provider | Config `type` | Models |
 |----------|---------------|--------|
-| OpenAI | `openai_embeddings` | text-embedding-3-small, text-embedding-3-large |
+| OpenAI | `openai` | text-embedding-3-small, text-embedding-3-large |
 
 ### OpenAI Embeddings
 
 ```toml
 [embeddings.providers.openai]
-type = "openai_embeddings"
+type = "openai"
 api_key = "{{ env.OPENAI_API_KEY }}"
 ```
 
@@ -70,13 +82,13 @@ api_key = "{{ env.OPENAI_API_KEY }}"
 
 | Provider | Config `type` | Models |
 |----------|---------------|--------|
-| OpenAI (DALL-E) | `openai_imagegen` | dall-e-3, dall-e-2 |
+| OpenAI (DALL-E) | `openai` | dall-e-3, dall-e-2 |
 
 ### OpenAI Image Generation
 
 ```toml
 [imagegen.providers.openai]
-type = "openai_imagegen"
+type = "openai"
 api_key = "{{ env.OPENAI_API_KEY }}"
 ```
 
