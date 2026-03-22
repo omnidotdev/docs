@@ -7,7 +7,7 @@ Synapse supports multiple authentication methods to secure access to its API end
 
 ## API Key Authentication
 
-The default authentication method. Clients pass an API key in the request header, and Synapse validates it against the configured key store.
+The default authentication method. Clients pass an API key in the request header, and Synapse validates it by calling the synapse-api service's `/internal/resolve-key` endpoint.
 
 ### Header Format
 
@@ -25,52 +25,45 @@ curl -H "x-api-key: your-api-key" \
 
 ```toml
 [auth]
-method = "api_key"
-
-# Static key list
-[[auth.api_keys]]
-key = "{{ env.SYNAPSE_API_KEY }}"
-name = "production"
+enabled = true
+api_url = "http://synapse-api:4000"
+gateway_secret = "{{ env.GATEWAY_SECRET }}"
+cache_ttl_seconds = 30
+cache_capacity = 10000
+public_paths = ["/health"]
 ```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `enabled` | Enable API key auth | false |
+| `api_url` | URL of the synapse-api service | -- (required) |
+| `gateway_secret` | Shared secret for gateway-to-API authentication | -- (required) |
+| `cache_ttl_seconds` | How long to cache resolved API keys | 30 |
+| `cache_capacity` | Maximum number of cached key resolutions | 10000 |
+| `public_paths` | Paths that skip authentication | `["/health"]` |
+| `tls_skip_verify` | Skip TLS verification for API calls (dev only) | false |
 
 <Callout type="warning">
-  Always use environment variable interpolation for API keys. Never hardcode secrets in config files.
+  Always use environment variable interpolation for the gateway secret. Never hardcode secrets in config files.
 </Callout>
 
-### Key Validation
+### How It Works
 
-When Synapse runs alongside the Omni API (synapse-api), keys are validated against the API's key store. This enables per-key rate limits, usage tracking, and key rotation without restarting Synapse.
+When a request arrives with an API key, Synapse calls synapse-api's `/internal/resolve-key` endpoint (authenticated with `gateway_secret`) to validate the key and resolve the associated client identity. Resolved keys are cached locally for `cache_ttl_seconds` to avoid per-request API calls.
 
-## OAuth2 / JWT
+The synapse-api can push cache invalidations to the gateway via the `/internal/invalidate-key` endpoint when keys are rotated or revoked.
 
-For applications that use OAuth2 or JWT-based authentication, Synapse can validate tokens against a JWKS endpoint.
+### BYOK Vault Integration
 
-### Configuration
+When configured, Synapse resolves BYOK (Bring Your Own Key) provider keys from a Gatekeeper vault instead of the synapse-api database:
 
 ```toml
-[auth]
-method = "jwt"
-
-[auth.jwt]
-jwks_url = "https://auth.omni.dev/.well-known/jwks.json"
-issuer = "https://auth.omni.dev"
-audience = "synapse"
+[auth.vault]
+url = "https://gatekeeper.omni.dev"
+service_key = "{{ env.GATEKEEPER_SERVICE_KEY }}"
+cache_ttl_seconds = 300
+cache_capacity = 10000
 ```
-
-| Field | Description | Required |
-|-------|-------------|----------|
-| `jwks_url` | URL to the JWKS endpoint for public key discovery | Yes |
-| `issuer` | Expected `iss` claim in the JWT | Yes |
-| `audience` | Expected `aud` claim in the JWT | No |
-
-### Token Usage
-
-```bash
-curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIs..." \
-  http://localhost:6000/v1/chat/completions ...
-```
-
-Synapse caches the JWKS response and refreshes it periodically. Tokens are validated for signature, expiry, issuer, and audience.
 
 ## CSRF Protection
 
@@ -81,10 +74,10 @@ Synapse includes CSRF protection for browser-based clients.
 ```toml
 [server.csrf]
 enabled = true
-token_header = "X-CSRF-Token"
+header_name = "X-Synapse-CSRF-Protection"
 ```
 
-When enabled, non-GET requests from browser clients must include a valid CSRF token in the configured header. Tokens are issued via a dedicated endpoint or embedded in the initial page load.
+When enabled, non-GET requests from browser clients must include a valid CSRF token in the configured header.
 
 <Callout type="info">
   CSRF protection is primarily relevant when Synapse is accessed directly from a browser. API clients using `Authorization` headers are not affected.
@@ -98,11 +91,13 @@ Synapse tracks which client is making each request for usage analytics and rate 
 2. **JWT claims** -- `sub` or `client_id` claim
 3. **IP address** -- fallback when no other identifier is available
 
-### Custom Client Header
+### Custom Client Identification
+
+Client identification is configured separately under `[server.client_identification]`:
 
 ```toml
-[auth]
-client_id_header = "X-Client-Id"
+[server.client_identification]
+header_name = "X-Client-Id"
 ```
 
 When set, Synapse uses the value of this header as the client identifier, regardless of the authentication method.
@@ -119,14 +114,9 @@ When set, Synapse uses the value of this header as the client identifier, regard
 
 ## Unauthenticated Endpoints
 
-The following endpoints do not require authentication:
-
-- `GET /health` -- health check
-- `GET /v1/models` -- model list (configurable, can require auth)
-
-To require authentication on all endpoints:
+Paths listed in `public_paths` skip authentication. By default, only `/health` is public:
 
 ```toml
 [auth]
-require_auth_for_models = true
+public_paths = ["/health"]
 ```

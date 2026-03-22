@@ -15,7 +15,7 @@ Synapse runs five containers:
 |-----------|-------|------|
 | `db` | `postgres:16-alpine` | 5432 |
 | `valkey` | `valkey/valkey:8-alpine` | 6379 |
-| `gateway` | `ghcr.io/omnidotdev/synapse-gateway:latest` | 6000 |
+| `gateway` | `ghcr.io/omnidotdev/synapse:latest` | 6000 |
 | `api` | `ghcr.io/omnidotdev/synapse-api:latest` | 4000 |
 | `app` | `ghcr.io/omnidotdev/synapse-app:latest` | 3000 |
 
@@ -64,10 +64,10 @@ Two named volumes persist data across restarts:
 
 ```bash
 curl http://localhost:6000/health
-# {"status":"ok"}
+# ok
 
 curl http://localhost:4000/health
-# {"status":"ok","timestamp":...,"service":"Synapse"}
+# {"status":"ok","timestamp":...,"service":"Synapse API"}
 ```
 
 ### Send a request
@@ -138,8 +138,8 @@ The gateway is also available as a standalone binary for running without Docker:
 
 ```bash
 # From source
-git clone https://github.com/omnidotdev/synapse-gateway.git
-cd synapse-gateway
+git clone https://github.com/omnidotdev/synapse.git
+cd synapse
 cargo build --release
 # Binary at target/release/synapse
 
@@ -147,7 +147,7 @@ cargo build --release
 ./target/release/synapse --config synapse.toml
 ```
 
-Prebuilt binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse-gateway/releases).
+Prebuilt binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse/releases).
 
 <Callout type="info">
   The binary install runs only the gateway. For the full stack (dashboard, API key management, usage tracking), use Docker Compose or Helm.
