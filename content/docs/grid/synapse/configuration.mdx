@@ -58,6 +58,15 @@ This keeps secrets out of config files. Variables are resolved at startup; missi
   Never hardcode API keys or secrets in config files. Always use environment variable interpolation.
 </Callout>
 
+## Billing Modes
+
+Synapse supports two billing modes that can be mixed per API key:
+
+- **BYOK (Bring Your Own Key)** — configure your own provider API keys. Synapse routes requests using your keys with no markup
+- **Managed credits** — use Synapse's provider keys with no setup required. Requests are billed at provider cost plus a small margin
+
+See [synapse.omni.dev/pricing](https://synapse.omni.dev/pricing) for current plan details.
+
 ## Rate Limiting
 
 ### In-memory
