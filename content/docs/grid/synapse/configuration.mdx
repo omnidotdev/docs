@@ -9,8 +9,10 @@ Synapse is configured via a TOML file passed with `--config`. This page covers e
 
 ```toml
 [server]
-listen_address = "0.0.0.0:6000"
+listen_address = "0.0.0.0:3000"
 ```
+
+The binary listens on port 3000 by default. In Docker Compose, port 6000 on the host is mapped to 3000 inside the container.
 
 ### TLS
 
@@ -22,7 +24,13 @@ key_path = "/etc/synapse/key.pem"
 
 ### Health Endpoint
 
-The health endpoint is always available at `GET /health` and returns `ok` (plain text) when the server is ready.
+The health endpoint is enabled by default at `GET /health` and returns `ok` (plain text) when the server is ready. The path and enabled state are configurable:
+
+```toml
+[server.health]
+enabled = true
+path = "/health"
+```
 
 ### CORS
 
@@ -39,7 +47,7 @@ max_age = 3600
 ```toml
 [server.csrf]
 enabled = true
-token_header = "X-CSRF-Token"
+header_name = "X-Synapse-CSRF-Protection"
 ```
 
 ## Environment Variable Interpolation
@@ -69,28 +77,68 @@ See [synapse.omni.dev/pricing](https://synapse.omni.dev/pricing) for current pla
 
 ## Rate Limiting
 
-### In-memory
+Rate limiting lives under `[server.rate_limit]`. It supports global and per-IP request limits with either in-memory or cache-backed (distributed) storage.
+
+### In-memory (default)
 
 ```toml
-[rate_limit]
-backend = "memory"
-requests_per_minute = 60
-burst = 10
+[server.rate_limit]
+
+[server.rate_limit.storage]
+type = "memory"
+
+[server.rate_limit.global]
+requests = 60
+window = "1m"
 ```
 
-### Redis
+### Cache-backed (distributed)
 
 ```toml
-[rate_limit]
-backend = "redis"
-redis_url = "{{ env.REDIS_URL }}"
-requests_per_minute = 120
-burst = 20
-key_prefix = "synapse:rl:"
+[server.rate_limit]
+
+[server.rate_limit.storage]
+type = "cache"
+url = "{{ env.VALKEY_URL }}"
+pool_size = 10
+connect_timeout = 5
+
+[server.rate_limit.global]
+requests = 120
+window = "1m"
+
+[server.rate_limit.per_ip]
+requests = 30
+window = "1m"
 ```
+
+### Token-based rate limits
+
+For LLM token budgets, configure `[server.rate_limit.tokens]`:
+
+```toml
+[server.rate_limit.tokens.default]
+tokens = 100000
+window = "1h"
+
+[server.rate_limit.tokens.groups.premium]
+tokens = 1000000
+window = "1h"
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `storage.type` | `memory` or `cache` | `memory` |
+| `storage.url` | Cache connection URL (required for `cache` type) | -- |
+| `storage.pool_size` | Connection pool size | 10 |
+| `storage.connect_timeout` | Connection timeout in seconds | 5 |
+| `global.requests` | Max requests per window (all clients) | -- |
+| `global.window` | Window duration (e.g. `"1m"`, `"1h"`) | -- |
+| `per_ip.requests` | Max requests per IP per window | -- |
+| `per_ip.window` | Window duration for per-IP limit | -- |
 
 <Callout type="info">
-  Redis-backed rate limiting is recommended for multi-instance deployments where limits should be shared across replicas.
+  Cache-backed rate limiting is recommended for multi-instance deployments where limits should be shared across replicas.
 </Callout>
 
 ## Failover
@@ -124,13 +172,13 @@ recovery_seconds = 30
 
 ## Logging
 
-```toml
-[logging]
-level = "info"
-format = "json"
+Log level is controlled by the `RUST_LOG` environment variable:
+
+```bash
+RUST_LOG=synapse=info,tower_http=info
 ```
 
-Supported levels: `trace`, `debug`, `info`, `warn`, `error`. The `json` format is recommended for production; use `pretty` for local development.
+Supported levels: `trace`, `debug`, `info`, `warn`, `error`.
 
 ## Production Example
 
@@ -138,7 +186,7 @@ A full production config combining multiple sections:
 
 ```toml
 [server]
-listen_address = "0.0.0.0:6000"
+listen_address = "0.0.0.0:3000"
 
 [server.tls]
 cert_path = "/etc/synapse/cert.pem"
@@ -150,11 +198,22 @@ allowed_origins = ["https://app.omni.dev"]
 [server.csrf]
 enabled = true
 
-[rate_limit]
-backend = "redis"
-redis_url = "{{ env.REDIS_URL }}"
-requests_per_minute = 120
-burst = 20
+[server.rate_limit]
+[server.rate_limit.storage]
+type = "cache"
+url = "{{ env.VALKEY_URL }}"
+
+[server.rate_limit.global]
+requests = 120
+window = "1m"
+
+[server.rate_limit.per_ip]
+requests = 30
+window = "1m"
+
+[llm.failover]
+enabled = true
+max_attempts = 2
 
 [llm.failover.circuit_breaker]
 error_threshold = 5
@@ -165,10 +224,6 @@ recovery_seconds = 30
 name = "frontier"
 models = ["openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"]
 
-[logging]
-level = "info"
-format = "json"
-
 [llm.providers.anthropic]
 type = "anthropic"
 api_key = "{{ env.ANTHROPIC_API_KEY }}"
@@ -176,6 +231,11 @@ api_key = "{{ env.ANTHROPIC_API_KEY }}"
 [llm.providers.openai]
 type = "openai"
 api_key = "{{ env.OPENAI_API_KEY }}"
+
+[auth]
+enabled = true
+api_url = "http://synapse-api:4000"
+gateway_secret = "{{ env.GATEWAY_SECRET }}"
 
 [stt.providers.whisper]
 type = "whisper"
