@@ -55,7 +55,22 @@ All contributions go through code review. Reviewers will check for:
 
 ### AI-Assisted Development
 
-If you use AI coding tools, see [golden/AGENTS.md](https://github.com/omnidotdev/golden/blob/master/AGENTS.md) for Omni-specific agent rules. These complement the style guide with conventions for error handling, infrastructure, and event systems.
+Omni maintains shared conventions for AI coding tools in [golden/AGENTS.md](https://github.com/omnidotdev/golden/blob/master/AGENTS.md). These cover Git, TypeScript, Rust, Drizzle, infrastructure, and more.
+
+#### Setup
+
+1. Clone the [golden](https://github.com/omnidotdev/golden) repo
+2. Configure your AI tool to load the rules:
+
+**Claude Code**: Add this line to your `~/.claude/CLAUDE.md` (create the file if it doesn't exist):
+
+```markdown
+@/path/to/golden/CLAUDE.md
+```
+
+Replace the path with wherever you cloned golden. The rules load automatically at the start of every session.
+
+**Other tools**: Point your AI tool's system prompt or rules file at `AGENTS.md` in the golden repo.
 
 ## What's Next?
 
