@@ -47,7 +47,8 @@ const viteConfig = defineConfig({
     }),
     react(),
     // see https://tanstack.com/start/latest/docs/framework/react/guide/hosting for hosting config
-    nitro(),
+    // Force node-server preset so the build output runs on Node, not Bun
+    nitro({ preset: "node-server" }),
   ],
 });
 
