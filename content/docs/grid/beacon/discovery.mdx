@@ -27,7 +27,7 @@ Beacon gateways advertise themselves via mDNS (multicast DNS), allowing apps to 
 Beacon uses DNS-SD (DNS Service Discovery) with the following service type:
 
 ```
-_beacon._tcp.local
+_beacon-gateway._tcp.local
 ```
 
 ### Instance Name
@@ -57,7 +57,7 @@ Use the Tauri mDNS plugin:
 ```typescript
 import { browse } from "@tauri-apps/plugin-mdns"
 
-const gateways = await browse("_beacon._tcp.local")
+const gateways = await browse("_beacon-gateway._tcp.local")
 
 for (const gateway of gateways) {
   console.log({
@@ -75,10 +75,10 @@ Use `dns-sd` (macOS) or `avahi-browse` (Linux):
 
 ```bash
 # macOS
-dns-sd -B _beacon._tcp local
+dns-sd -B _beacon-gateway._tcp local
 
 # Linux
-avahi-browse -r _beacon._tcp
+avahi-browse -r _beacon-gateway._tcp
 ```
 
 ### Web Apps
@@ -150,7 +150,7 @@ discovery.subscribe((state) => {
 })
 
 // Manually connect to a known URL
-discovery.connect("http://192.168.1.100:18790")
+discovery.connect("http://192.168.1.100:18789")
 ```
 
 ## Multiple Gateways

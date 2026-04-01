@@ -83,11 +83,11 @@ Adjust the system prompt, tone, and traits:
 
 ## Creating a New Persona
 
-1. Create a new directory in your personas folder (`~/.beacon/personas/my-persona/`)
-2. Add a `persona.json` file following the [persona.json spec](/codex/persona-json)
-3. Restart the gateway or reload personas from **Settings → Personas**
+1. Set the `BEACON_PERSONAS_DIR` environment variable to a directory of your choice (e.g. `~/.config/omni/beacon/personas/`)
+2. Create a `<persona-id>.json` file in that directory following the [persona.json spec](/codex/persona-json)
+3. Restart the gateway
 
-Your new persona appears in the persona switcher in the app.
+Personas are flat JSON files (e.g. `my-persona.json`), not subdirectories.
 
 ## Installing from Manifold
 
@@ -108,8 +108,9 @@ Personas are loaded from these sources, in order of priority:
 
 | Source | Location |
 |--------|----------|
-| Local | `~/.beacon/personas/` (or custom `BEACON_PERSONAS_DIR`) |
-| Manifold | Installed from the persona marketplace |
+| Local | Custom directory via `BEACON_PERSONAS_DIR` env var |
+| Manifold | Fetched from the persona marketplace, cached at `~/.cache/omni/beacon/personas/` |
+| Cache | `~/.cache/omni/beacon/personas/` (previously fetched personas) |
 | Bundled | Built into the gateway binary (Orin) |
 
 ## Advanced
