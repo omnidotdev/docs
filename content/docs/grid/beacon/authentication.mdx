@@ -81,11 +81,17 @@ mode = "password"
 password_hash = "$argon2id$v=19$m=65536,t=3,p=4$..."
 ```
 
-Generate a password hash:
+Generate a password hash using an external tool:
 
 ```bash
-beacon-gateway hash-password
-# Enter password when prompted
+# Using openssl
+echo -n "your-password" | argon2 $(openssl rand -base64 16) -id -e
+```
+
+Set the hash via environment variable or config:
+
+```bash
+BEACON_AUTH_PASSWORD_HASH="$argon2id$v=19$m=65536,t=3,p=4$..."
 ```
 
 Clients authenticate with the password:
@@ -170,10 +176,10 @@ For HTTP endpoints, use the `Authorization` header:
 
 ```bash
 # Token mode
-curl -H "Authorization: Bearer your-token" http://gateway:18790/api/...
+curl -H "Authorization: Bearer your-token" http://gateway:18789/api/...
 
 # Device mode
-curl -H "X-Device-Id: ..." -H "X-Signature: ..." http://gateway:18790/api/...
+curl -H "X-Device-Id: ..." -H "X-Signature: ..." http://gateway:18789/api/...
 ```
 
 ## Security Best Practices

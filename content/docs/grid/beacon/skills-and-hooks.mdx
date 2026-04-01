@@ -191,13 +191,13 @@ You can configure environment context per skill through the API:
 
 ```bash
 # Inject an API key for a skill's primary_env
-curl -X PATCH http://localhost:18790/api/skills/{id} \
+curl -X PATCH http://localhost:18789/api/skills/{id} \
   -H "Authorization: Bearer $BEACON_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"api_key": "ghp_abc123"}'
 
 # Set custom env vars for a skill
-curl -X PATCH http://localhost:18790/api/skills/{id} \
+curl -X PATCH http://localhost:18789/api/skills/{id} \
   -H "Authorization: Bearer $BEACON_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"env": {"CUSTOM_VAR": "value"}}'
@@ -268,12 +268,12 @@ Export and import your entire skill configuration:
 
 ```bash
 # Export current state
-curl http://localhost:18790/api/skills/snapshot \
+curl http://localhost:18789/api/skills/snapshot \
   -H "Authorization: Bearer $BEACON_API_KEY" \
   -o snapshot.json
 
 # Import on another instance
-curl -X POST http://localhost:18790/api/skills/snapshot \
+curl -X POST http://localhost:18789/api/skills/snapshot \
   -H "Authorization: Bearer $BEACON_API_KEY" \
   -H "Content-Type: application/json" \
   -d @snapshot.json
