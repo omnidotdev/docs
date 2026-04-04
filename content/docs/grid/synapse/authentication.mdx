@@ -60,7 +60,7 @@ When configured, Synapse resolves BYOK (Bring Your Own Key) provider keys from a
 ```toml
 [auth.vault]
 url = "https://gatekeeper.omni.dev"
-service_key = "{{ env.GATEKEEPER_SERVICE_KEY }}"
+service_key = "{{ env.AUTH_SERVICE_KEY }}"
 cache_ttl_seconds = 300
 cache_capacity = 10000
 ```
