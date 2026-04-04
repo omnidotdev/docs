@@ -45,8 +45,8 @@ docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --bu
 | Container | Image | Port |
 |-----------|-------|------|
 | `db` | `postgres:16-alpine` | 5432 |
-| `api` | `ghcr.io/omnidotdev/runa-api:latest` | 4000 |
-| `app` | `ghcr.io/omnidotdev/runa-app:latest` | 3000 |
+| `api` | `manifold.omni.dev/omnidotdev/runa-api:latest` | 4000 |
+| `app` | `manifold.omni.dev/omnidotdev/runa-app:latest` | 3000 |
 
 ```bash
 git clone https://github.com/omnidotdev/runa-stack.git
@@ -67,9 +67,9 @@ docker compose --env-file .env.local up -d
 | `db` | `postgres:16-alpine` | 5432 |
 | `cache` | `valkey/valkey:8-alpine` | 6379 |
 | `events` | `apache/iggy:0.7.0` | 8090 (TCP) |
-| `api` | `ghcr.io/omnidotdev/vortex-api:latest` | 4000 |
-| `app` | `ghcr.io/omnidotdev/vortex-app:latest` | 3000 |
-| `worker` | `ghcr.io/omnidotdev/vortex-worker:latest` | 8080 (internal) |
+| `api` | `manifold.omni.dev/omnidotdev/vortex-api:latest` | 4000 |
+| `app` | `manifold.omni.dev/omnidotdev/vortex-app:latest` | 3000 |
+| `worker` | `manifold.omni.dev/omnidotdev/vortex-worker:latest` | 8080 (internal) |
 
 Health checks are configured for all services. The API waits for PostgreSQL, Valkey, and Iggy to be healthy before starting.
 
@@ -159,9 +159,9 @@ See the [Manifold Storage guide](/armory/manifold/storage) for details.
 |-----------|-------|------|
 | `db` | `postgres:16-alpine` | 5432 |
 | `valkey` | `valkey/valkey:8-alpine` | 6379 |
-| `gateway` | `ghcr.io/omnidotdev/synapse-gateway:latest` | 6000 |
-| `api` | `ghcr.io/omnidotdev/synapse-api:latest` | 4000 |
-| `app` | `ghcr.io/omnidotdev/synapse-app:latest` | 3000 |
+| `gateway` | `manifold.omni.dev/omnidotdev/synapse-gateway:latest` | 6000 |
+| `api` | `manifold.omni.dev/omnidotdev/synapse-api:latest` | 4000 |
+| `app` | `manifold.omni.dev/omnidotdev/synapse-app:latest` | 3000 |
 
 ```bash
 git clone https://github.com/omnidotdev/synapse-stack.git
