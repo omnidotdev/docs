@@ -1,0 +1,119 @@
+---
+title: 🔲 Lattice
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiGraphql, SiApollographql } from "react-icons/si";
+import { FaNetworkWired } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "GraphQL",
+      icon: <SiGraphql />,
+      className: "bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300",
+    },
+    {
+      label: "Federation",
+      icon: <SiApollographql />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "API Gateway",
+      icon: <FaNetworkWired />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+  ]}
+  links={[
+    {
+      href: `${app.socials.github}/lattice`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "💡 What is Lattice?",
+      description: "GraphQL Federation gateway for composing multiple services into a unified API",
+    },
+  ]}
+/>
+
+**Omni Lattice** is a GraphQL Federation gateway that composes multiple subgraph services into a unified supergraph API. Built from the ground up in Rust with an MIT license.
+
+## Quick Start
+
+### 1. Install
+
+```bash
+# Build from source
+cargo install --git https://github.com/omnidotdev/lattice lattice-cli
+cargo install --git https://github.com/omnidotdev/lattice lattice
+
+# Or use Docker
+docker pull manifold.omni.dev/omnidotdev/lattice:latest
+```
+
+### 2. Create Config
+
+Lattice supports **YAML**, **JSON**, and **JSONC** (JSON with comments) config formats. Create `lattice.yaml`:
+
+```yaml
+server:
+  listen: "0.0.0.0:4000"
+  playground: true
+
+supergraph:
+  path: ./supergraph.graphql
+
+subgraphs:
+  aether:
+    url: http://localhost:4001/graphql
+  warden:
+    url: http://localhost:4002/graphql
+```
+
+### 3. Compose Supergraph
+
+```bash
+lattice compose --config lattice.yaml --output supergraph.graphql
+```
+
+This introspects each subgraph and composes them into a federated supergraph schema.
+
+### 4. Run Gateway
+
+```bash
+lattice serve --config lattice.yaml
+```
+
+Your unified GraphQL API is now available at `http://localhost:4000` with the GraphiQL playground at the root.
+
+## Docker Deployment
+
+```bash
+docker run -p 4000:4000 \
+  -v ./lattice.yaml:/etc/lattice/lattice.yaml \
+  -v ./supergraph.graphql:/etc/lattice/supergraph.graphql \
+  manifold.omni.dev/omnidotdev/lattice
+```
+
+## Key Features
+
+- **GraphQL Federation v2**: Query planning and execution across subgraphs
+- **`@defer` Support**: Incremental delivery via `multipart/mixed` responses
+- **Request Deduplication**: Coalesce identical in-flight subgraph fetches
+- **Directive-Based Authorization**: Enforce `@requiresScopes` and `@requiresAuthentication`
+- **WebSocket Subscriptions**: Real-time data via `graphql-transport-ws` protocol
+- **JWT Authentication**: JWKS-based token validation with multi-provider support
+- **Entity Caching**: Valkey/Redis-backed response caching
+- **Rate Limiting**: Per-client request throttling
+- **WASI Plugins**: 9 hook points via Extism (request, parse, validation, plan, subgraph, response)
+- **OpenTelemetry**: Distributed tracing and observability
+- **GraphiQL Playground**: Built-in IDE at `GET /`
+- **Native Schema Composition**: Built-in `lattice compose` command
+- **Multiple Config Formats**: YAML, JSON, and JSONC support
+- **In-Process Subgraphs**: Run subgraphs without HTTP via `SubgraphExecutor` trait
+- **Environment Variables**: `${VAR}` substitution in config files
+- **High Performance**: Written in Rust for minimal latency
