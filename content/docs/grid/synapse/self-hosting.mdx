@@ -43,7 +43,7 @@ docker compose --env-file .env.local up -d
 
 At least one LLM provider API key is required: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `NVIDIA_API_KEY`.
 
-Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, and billing credentials (`AETHER_*`, `BILLING_*`). See the [full .env.example](https://github.com/omnidotdev/synapse-stack/blob/master/.env.example).
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, and billing credentials (`BILLING_*`). See the [full .env.example](https://github.com/omnidotdev/synapse-stack/blob/master/.env.example).
 
 ### Without authentication
 
@@ -129,7 +129,7 @@ See [Configuration](/grid/synapse/configuration) for the full TOML reference.
 | Service | Env Var | Purpose | Required? |
 |---------|---------|---------|-----------|
 | Gatekeeper (HIDRA) | `AUTH_BASE_URL` | JWT auth, user management | No (set `PROTECT_ROUTES=false`) |
-| Aether | `AETHER_SERVICE_API_KEY` | Billing, subscriptions | No (returns 503) |
+| Aether | `BILLING_SERVICE_API_KEY` | Billing, subscriptions | No (returns 503) |
 | Valkey/Redis | `VALKEY_URL` | Rate limiting, caching | Included in docker-compose |
 
 ## Binary Install
