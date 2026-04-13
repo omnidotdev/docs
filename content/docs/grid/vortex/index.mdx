@@ -33,12 +33,12 @@ import { VscWorkspaceTrusted } from "react-icons/vsc";
       className: "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
     },
     {
-      label: "600+ Connectors",
+      label: "15+ Integrations",
       icon: <VscWorkspaceTrusted />,
       className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
     },
     {
-      label: "Decentralized Web",
+      label: "Visual + Code",
       icon: <TbWorldBolt />,
       className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
     },
@@ -58,7 +58,7 @@ import { VscWorkspaceTrusted } from "react-icons/vsc";
   alerts={[
     {
       title: "Big Idea",
-      description: "A workflow automation engine built for the decentralized web — visual editor, JSON DSL, and TypeScript SDK with full round-trip between all three",
+      description: "A workflow automation engine with a visual editor, JSON DSL, and TypeScript SDK with full round-trip between all three",
     },
     {
       title: "Universal Workflow Hub",
@@ -67,17 +67,19 @@ import { VscWorkspaceTrusted } from "react-icons/vsc";
   ]}
 />
 
-**Vortex** is a workflow automation and orchestration engine. Define workflows visually in the UI, as JSON, or programmatically with the TypeScript SDK — and move freely between all three.
+**Vortex** is a workflow automation and orchestration engine. Define workflows visually in the UI, as JSON, or programmatically with the TypeScript SDK, and move freely between all three.
 
 ## Key Features
 
-- **Visual editor** — drag-and-drop node canvas powered by React Flow
+- **Visual editor** — drag-and-drop node canvas powered by React Flow with 140+ node types across 15 categories
 - **JSON DSL** — portable `v1.0` definition format stored as JSONB
 - **TypeScript SDK** — fluent builder API (`@omnidotdev/vortex-sdk`)
-- **600+ connectors** — integrations via Activepieces ecosystem
-- **68 built-in plugins** — cache, rate limiting, queues, LLM, code execution, and more
+- **15+ integrations** — Slack, GitHub, Stripe, Google Sheets, and more
+- **Built-in plugins** — cache, rate limiting, queues, LLM, code execution, and more (Pro+ gated)
 - **Import / Export** — drag JSON into the editor, export as JSON or TypeScript
 - **Distributed execution** — Hatchet-backed workers with retry, parallelism, and cron scheduling
+- **Execution monitoring** — real-time run status, step traces, and aggregate stats
+- **Events catalog** — browse and inspect all event schemas across the platform
 
 ## Workflow Authoring
 
@@ -91,13 +93,13 @@ Vortex workflows can be authored three ways, and every format round-trips to the
 
 ### Visual Editor
 
-The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 150+ step types.
+The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 80+ step types across 15 categories.
 
 Workflows built in the editor are automatically converted to the JSON DSL for storage and execution.
 
 ### JSON DSL
 
-The DSL is a JSON-based workflow definition format. Every workflow — whether built in the UI, SDK, or hand-written — is stored and executed as this format:
+The DSL is a JSON-based workflow definition format. Every workflow, whether built in the UI, SDK, or hand-written, is stored and executed as this format:
 
 ```json
 {
@@ -178,19 +180,23 @@ The API triggers workflow execution by pushing events to Hatchet. The worker pic
 
 ## Step Types
 
-Vortex supports 150+ step types across several categories:
+Vortex supports 80+ step types across 15 categories:
 
 | Category | Types |
 |---|---|
-| **Core** | `trigger`, `action`, `condition`, `switch`, `delay`, `loop`, `parallel`, `gate`, `plugin`, `code`, `subworkflow` |
-| **Data** | `map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group` |
-| **AI/ML** | `llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails` |
+| **Core** | `trigger`, `action`, `condition`, `switch`, `delay`, `loop`, `parallel`, `gate`, `plugin`, `code`, `subworkflow`, `noop`, `stop` |
+| **Data** | `map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group`, `set`, `template`, `parse`, `format`, `validate` |
+| **AI/ML** | `llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`, `rivet` |
 | **Human** | `approval`, `input`, `notification` |
-| **Infra** | `cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify` |
+| **Infra** | `cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`, `file`, `log` |
+| **Security** | `encrypt`, `decrypt`, `sign`, `jwt`, `hash` |
+| **Flow Control** | `try_catch`, `race`, `retry`, `timeout`, `sleep`, `wait`, `debounce` |
+| **Events** | `event`, `aggregate`, `window`, `collect`, `diff`, `change_detector`, `time_window` |
+| **Orchestration** | `saga`, `mcp`, `comment`, `error`, `webhookResponse` |
 
-## Connectors
+## Integrations
 
-Vortex integrates 600+ connectors from the Activepieces ecosystem. Each connector is an npm package that provides actions and triggers. Connectors are dynamically loaded at runtime based on the integration ID in the step definition.
+Vortex ships with 15+ built-in integrations (Slack, GitHub, Stripe, Google Sheets, and more) with additional connectors available through the integrations page. Integrations are loaded at runtime based on the integration ID in the step definition.
 
 ## Built-in Plugins
 
@@ -247,12 +253,25 @@ The worker includes an MCP (Model Context Protocol) client for connecting to ext
 }
 ```
 
+## Plans and Pricing
+
+Vortex offers four tiers, plus custom Enterprise plans. All tiers include the visual editor, JSON DSL, and TypeScript SDK.
+
+| Plan | Workflows | Runs/month | Features |
+|---|---|---|---|
+| **Free** | 3 | 500 | Core steps, webhook + cron triggers, community support |
+| **Pro** | 25 | 10,000 | All step types, all triggers, plugins, priority support |
+| **Business** | Unlimited | 100,000 | SSO, audit logs, custom integrations, SLA |
+| **Enterprise** | Custom | Custom | Dedicated infrastructure, BYOK executor, premium support |
+
+Visit [vortex.omni.dev/pricing](https://vortex.omni.dev/pricing) for current pricing and plan details.
+
 <Cards>
   <Card title="Getting Started" href="/grid/vortex/getting-started">
     Create and run your first workflow in minutes
   </Card>
   <Card title="Triggers" href="/grid/vortex/triggers">
-    All 17 trigger types — webhook, cron, event, email, Kafka, SQS, MQTT, NATS, AMQP, gRPC, and more
+    19 trigger types, including webhook, cron, event, email, SSE, Kafka, SQS, MQTT, NATS, AMQP, gRPC, and more
   </Card>
   <Card title="Events" href="/grid/vortex/events">
     OmniEvent schema, Iggy streaming, routing rules, and replay

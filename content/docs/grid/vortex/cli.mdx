@@ -67,20 +67,13 @@ vortex dev
 
 ### `vortex deploy`
 
-Deploy workflows to the Vortex API or to an edge runtime.
+Deploy workflows to the Vortex API.
 
 ```bash
-# Standard deploy (same as push)
 vortex deploy
-
-# Edge deploy to Cloudflare Workers
-vortex deploy --edge --platform cf
-
-# Edge deploy to Deno Deploy
-vortex deploy --edge --platform deno
 ```
 
-Edge deployment validates workflows, fetches a WASM export from the API, and uploads via the platform CLI (`wrangler` or `deployctl`).
+Validates all workflows, then pushes each to the Vortex API (equivalent to `vortex push`).
 
 ## Code generation
 

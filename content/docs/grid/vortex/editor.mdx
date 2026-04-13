@@ -93,19 +93,3 @@ UI canvas ──reactFlowToDsl()──► JSON DSL ──dslToTypeScript()──
 | `dslToReactFlow()` | `vortex-app` | DSL &#8594; Canvas nodes/edges |
 | `dslToTypeScript()` | `vortex-app` | DSL &#8594; SDK code string |
 
-## Edge Export
-
-Workflows can be exported as [Fermyon Spin](https://www.fermyon.com/spin) bundles for edge execution. The export produces a ZIP containing:
-
-- `spin.toml` — Spin manifest (v2) with the workflow definition embedded
-- `workflow.json` — the raw DSL definition
-- `README.md` — deployment instructions
-
-Export via the API:
-
-```bash
-POST /api/v1/workflows/:workflowId/export/spin
-Authorization: Bearer <api-key>
-```
-
-Returns a `application/zip` download.
