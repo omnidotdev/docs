@@ -13,7 +13,7 @@ Synapse runs five containers:
 
 | Container | Image | Port |
 |-----------|-------|------|
-| `db` | `postgres:16-alpine` | 5432 |
+| `db` | `postgres:18-alpine` | 5432 |
 | `valkey` | `valkey/valkey:8-alpine` | 6379 |
 | `gateway` | `manifold.omni.dev/omnidotdev/synapse:latest` | 6000 |
 | `api` | `manifold.omni.dev/omnidotdev/synapse-api:latest` | 4000 |
@@ -25,7 +25,7 @@ Health checks are configured for all services. The gateway waits for the API and
 git clone https://github.com/omnidotdev/synapse-stack.git
 cd synapse-stack
 
-cp .env.example .env.local
+cp .env.local.template .env.local
 # Set required values (see below)
 
 docker compose --env-file .env.local up -d
@@ -43,7 +43,7 @@ docker compose --env-file .env.local up -d
 
 At least one LLM provider API key is required: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `NVIDIA_API_KEY`.
 
-Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, and billing credentials (`BILLING_*`). See the [full .env.example](https://github.com/omnidotdev/synapse-stack/blob/master/.env.example).
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, and billing credentials (`BILLING_*`). See the [full .env.local.template](https://github.com/omnidotdev/synapse-stack/blob/master/.env.local.template).
 
 ### Without authentication
 
