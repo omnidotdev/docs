@@ -3,7 +3,7 @@ title: Workflow DSL
 description: JSON definition format and step type reference
 ---
 
-The Vortex DSL is a JSON-based workflow definition format. Every workflow — whether built in the UI, SDK, or hand-written — is stored and executed as this format.
+The Vortex DSL is a JSON-based workflow definition format. Every workflow, whether built in the UI, SDK, or hand-written, is stored and executed as this format.
 
 ## Schema
 
@@ -61,11 +61,11 @@ Every step has a common shape:
 
 **Data transformation**
 
-`map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group`
+`map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group`, `set`, `template`, `parse`, `format`, `validate`
 
 **AI / ML**
 
-`llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`
+`llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`, `rivet`
 
 **Human-in-the-loop**
 
@@ -73,7 +73,19 @@ Every step has a common shape:
 
 **Infrastructure**
 
-`cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`
+`cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`, `file`, `log`
+
+**Security**
+
+`encrypt`, `decrypt`, `sign`, `jwt`, `hash`
+
+**Flow control**
+
+`try_catch`, `race`, `retry`, `timeout`, `sleep`, `wait`, `debounce`, `stop`, `noop`
+
+**Events and orchestration**
+
+`event`, `aggregate`, `window`, `collect`, `diff`, `change_detector`, `time_window`, `saga`, `mcp`, `comment`, `error`, `webhookResponse`
 
 ## Edges
 

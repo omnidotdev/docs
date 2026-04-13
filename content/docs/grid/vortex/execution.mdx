@@ -53,7 +53,7 @@ For workflows that need durability, signals, or multi-day execution. The API sta
 }
 ```
 
-Requires `TEMPORAL_ADDRESS` to be configured. The platform Temporal cluster runs `temporalio/auto-setup` alongside vortex-api.
+Requires `TEMPORAL_ADDRESS` to be configured. In production, use `temporalio/server` with schema migrations run separately.
 
 ### Local
 
@@ -92,29 +92,28 @@ Each workflow run creates an `ExecutionContext`:
 
 The executor processes each step by type. For an `action` step, it:
 
-1. Resolves the integration connector (e.g., `slack` &#8594; `@activepieces/piece-slack`)
+1. Resolves the integration connector (e.g., `slack`)
 2. Decrypts stored credentials for the organization
-3. Builds the Activepieces-compatible context
+3. Builds the connector execution context
 4. Executes the action with retry support
 5. Maps outputs to workflow variables
 
-## Connectors
+## Integrations
 
-Vortex integrates **600+ connectors** from the Activepieces ecosystem. Each connector is an npm package that provides actions and triggers.
+Vortex ships with 15+ built-in integrations. Each integration provides actions and triggers that can be used in workflow steps.
 
-### Connector mapping
+### Integration mapping
 
-Integration IDs map to Activepieces piece packages:
+Integration IDs map to connector packages:
 
-| Integration | Package |
+| Integration | Example operations |
 |---|---|
-| `slack` | `@activepieces/piece-slack` |
-| `github` | `@activepieces/piece-github` |
-| `stripe` | `@activepieces/piece-stripe` |
-| `google-sheets` | `@activepieces/piece-google-sheets` |
-| ... | 600+ total |
+| `slack` | `sendMessage`, `createChannel` |
+| `github` | `createIssue`, `addComment` |
+| `stripe` | `charge`, `createCustomer` |
+| `google-sheets` | `appendRow`, `readRange` |
 
-Connectors are dynamically loaded at runtime based on the integration ID in the step definition.
+Integrations are dynamically loaded at runtime based on the integration ID in the step definition. Browse all available integrations on the [Integrations page](https://vortex.omni.dev/integrations) in the dashboard.
 
 ## Built-in Plugins
 
@@ -168,7 +167,7 @@ Host functions that perform I/O (`vortex_state_get`, `vortex_state_set`, `vortex
 
 ### Native plugins
 
-68 built-in native plugins ship alongside WASM support, covering the same capabilities as external WASM plugins but implemented in TypeScript for zero cold-start overhead.
+Built-in native plugins ship alongside WASM support, covering the same capabilities as external WASM plugins but implemented in TypeScript for zero cold-start overhead. Plugin access is gated to Pro and above plans.
 
 ## MCP Integration
 

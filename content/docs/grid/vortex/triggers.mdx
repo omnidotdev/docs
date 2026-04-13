@@ -3,7 +3,7 @@ title: Triggers
 description: All trigger types for starting workflow execution
 ---
 
-A **trigger** is the entry point for a workflow run. Vortex supports many trigger types, all producing a consistent `triggerData` payload available to every subsequent step.
+A **trigger** is the entry point for a workflow run. Vortex supports 19 trigger types, all producing a consistent `triggerData` payload available to every subsequent step.
 
 ## Webhook
 
@@ -289,6 +289,23 @@ Connects to an SSE endpoint and fires a workflow run on each incoming event. Sup
 
 `triggerData` contains the event data, event type, and last event ID.
 
+## Omni Platform Event
+
+A higher-level trigger that subscribes to structured events from any Omni product via the Universal Workflow Hub. Unlike the generic `event` trigger, `omni` triggers are pre-configured with the OmniEvent schema and support org-scoped routing.
+
+```json
+{
+  "type": "trigger",
+  "trigger": {
+    "type": "omni",
+    "eventType": "aether.subscription.created",
+    "source": "omni.aether"
+  }
+}
+```
+
+`triggerData` contains the full OmniEvent envelope including `type`, `source`, `data`, `organizationId`, and `correlationId`.
+
 ## Email
 
 Fires when an inbound email is received via Resend webhook. Supports glob-pattern filters on sender address and subject line.
@@ -317,18 +334,19 @@ Fires when an inbound email is received via Resend webhook. Supports glob-patter
 | Webhook | Push | No (fire-and-forget) | Via `correlationId` |
 | Cron | Pull (internal) | No | Distributed lock |
 | Event | Push (Iggy) | No | `correlationId` SET NX |
-| Manual | Push (API) | No | — |
+| Manual | Push (API) | No | - |
+| Omni | Push (Iggy) | No | `correlationId` SET NX |
 | Polling | Pull | Configurable | Content hash or field |
-| S3 | Push | No | — |
-| CDC | Push | No | — |
+| S3 | Push | No | - |
+| CDC | Push | No | - |
 | Kafka | Pull | Via visibility | Kafka offsets |
 | SQS | Pull | Via visibility timeout | SQS dedup ID |
 | MQTT | Push | QoS-based | Topic + timestamp |
-| WebSocket | Push | On reconnect | — |
-| Redis | Push | On reconnect | — |
+| WebSocket | Push | On reconnect | - |
+| Redis | Push | On reconnect | - |
 | NATS | Push | Queue group | Subject + timestamp |
 | AMQP | Pull | Via nack/requeue | Delivery tag |
-| gRPC Stream | Push | On reconnect | — |
+| gRPC Stream | Push | On reconnect | - |
 | SSE | Push | On reconnect | Last event ID |
 | Email | Push (webhook) | No | `messageId` |
-| GraphQL Subscription | Push (WebSocket) | On reconnect | — |
+| GraphQL Subscription | Push (WebSocket) | On reconnect | - |

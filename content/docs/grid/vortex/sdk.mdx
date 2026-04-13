@@ -79,6 +79,9 @@ import {
   amqpTrigger,
   grpcStreamTrigger,
   graphqlSubscriptionTrigger,
+  sseTrigger,
+  emailTrigger,
+  omniTrigger,
 } from "@omnidotdev/vortex-sdk";
 
 // Webhook trigger
@@ -114,6 +117,15 @@ workflow.trigger(redisTrigger({ url: "redis://localhost:6379", channels: ["event
 // Cloud triggers
 workflow.trigger(kafkaTrigger({ brokers: ["kafka:9092"], topic: "orders", groupId: "vortex" }))
 workflow.trigger(sqsTrigger({ queueUrl: "https://sqs.us-east-1.amazonaws.com/123/queue", region: "us-east-1" }))
+
+// SSE trigger
+workflow.trigger(sseTrigger({ url: "https://api.example.com/events", eventTypes: ["order.created"] }))
+
+// Email trigger
+workflow.trigger(emailTrigger({ address: "workflows@omni.dev", filters: { from: "*@stripe.com" } }))
+
+// Omni platform event trigger
+workflow.trigger(omniTrigger({ eventType: "aether.subscription.created" }))
 
 // String-based alternative
 workflow.trigger("webhook", { method: "POST" })
