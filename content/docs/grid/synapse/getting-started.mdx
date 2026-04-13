@@ -28,7 +28,7 @@ Create a `synapse.toml` with one LLM provider:
 
 ```toml
 [server]
-listen_address = "0.0.0.0:6000"
+listen_address = "0.0.0.0:3000"
 
 [llm.providers.anthropic]
 type = "anthropic"
@@ -49,12 +49,12 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 synapse --config synapse.toml
 ```
 
-Synapse listens on the configured address (default `0.0.0.0:3000`).
+Synapse listens on the configured address (default `0.0.0.0:3000`). In Docker Compose, host port 6000 maps to container port 3000.
 
 ## Verify Health
 
 ```bash
-curl http://localhost:6000/health
+curl http://localhost:3000/health
 ```
 
 Expected response:
@@ -68,7 +68,7 @@ ok
 ### OpenAI-compatible endpoint
 
 ```bash
-curl http://localhost:6000/v1/chat/completions \
+curl http://localhost:3000/v1/chat/completions \
   -H "Authorization: Bearer synapse_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -80,7 +80,7 @@ curl http://localhost:6000/v1/chat/completions \
 ### Anthropic-compatible endpoint
 
 ```bash
-curl http://localhost:6000/v1/messages \
+curl http://localhost:3000/v1/messages \
   -H "Authorization: Bearer synapse_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -H "anthropic-version: 2023-06-01" \
@@ -96,7 +96,7 @@ curl http://localhost:6000/v1/messages \
 Both endpoints support streaming. Add `"stream": true` to the request body:
 
 ```bash
-curl http://localhost:6000/v1/chat/completions \
+curl http://localhost:3000/v1/chat/completions \
   -H "Authorization: Bearer synapse_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -112,7 +112,7 @@ Expand your config to include multiple modalities:
 
 ```toml
 [server]
-listen_address = "0.0.0.0:6000"
+listen_address = "0.0.0.0:3000"
 
 # LLM providers
 [llm.providers.anthropic]
