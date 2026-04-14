@@ -1,0 +1,124 @@
+---
+title: Self-Hosting
+description: Deploy Vortex on your own infrastructure with Docker Compose or Kubernetes
+---
+
+Vortex is fully open source (Apache 2.0) and designed to run on your own infrastructure. Two deployment options are supported: Docker Compose for simpler setups and Kubernetes (via Helm) for production-grade orchestration.
+
+## Docker Compose
+
+The fastest way to self-host Vortex. Clone the repo and run three commands.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) with Compose v2
+- [Git](https://git-scm.com/)
+- A [Hatchet](https://hatchet.run) account or self-hosted instance (workflow executor)
+
+### Quick start
+
+```sh
+git clone https://github.com/omnidotdev/vortex.git && cd vortex
+
+cp .env.local.template .env.local
+# Edit .env.local and fill in required values (see below)
+
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+The app will be available at `http://localhost:3000`, the API at `http://localhost:4000`.
+
+### Required environment variables
+
+| Variable | Description | Generate with |
+|----------|-------------|---------------|
+| `DB_PASSWORD` | PostgreSQL password | `openssl rand -hex 16` |
+| `CACHE_PASSWORD` | Valkey (Redis) password | `openssl rand -hex 16` |
+| `AUTH_SECRET` | Session signing secret | `openssl rand -hex 16` |
+| `ENCRYPTION_KEY` | Data encryption key | `openssl rand -base64 32` |
+| `INTERNAL_API_SECRET` | Service-to-service auth | `openssl rand -hex 16` |
+| `IGGY_USERNAME` | Event streaming username | Any value |
+| `IGGY_PASSWORD` | Event streaming password | Any value |
+| `HATCHET_CLIENT_TOKEN` | Hatchet API token | From Hatchet dashboard |
+
+### Optional variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_NAME` | Database name | `vortex` |
+| `DB_USER` | Database user | `postgres` |
+| `DB_PORT` | Database port | `5432` |
+| `API_PORT` | API port | `4000` |
+| `APP_PORT` | App port | `3000` |
+| `CORS_ALLOWED_ORIGINS` | Allowed CORS origins | `http://localhost:3000` |
+| `GOOGLE_CLIENT_ID` | Google OAuth (optional) | |
+| `GITHUB_CLIENT_ID` | GitHub OAuth (optional) | |
+
+### Architecture
+
+The Docker Compose stack includes:
+
+- **PostgreSQL 18** for persistent storage
+- **Valkey 8** (Redis-compatible) for caching and distributed locks
+- **Apache Iggy** for event streaming
+- **vortex-api** (port 4000) for the GraphQL and REST API
+- **vortex-app** (port 3000) for the web UI
+- **vortex-worker** for workflow execution
+
+All services include health checks and proper dependency ordering.
+
+### Self-hosted features
+
+When billing is not configured (`hasBilling=false`), the pricing page shows "All Features" mode, and all entitlements are unlocked. Self-hosted deployments get the full feature set with no artificial limits.
+
+## Kubernetes (Helm)
+
+For production deployments, Vortex ships a Helm chart with configurable replicas, resource limits, ingress, TLS, and Pod Disruption Budgets.
+
+### Install
+
+```sh
+helm install vortex ./charts/vortex \
+  --namespace vortex --create-namespace \
+  -f charts/vortex/values.yaml \
+  --set secrets.dbPassword=<password> \
+  --set secrets.authSecret=<secret> \
+  --set secrets.encryptionKey=<key>
+```
+
+See `charts/vortex/values.yaml` for the full list of configurable values, and `charts/vortex/values.prod.yaml` for a production reference.
+
+### External database
+
+To use an external PostgreSQL instance instead of the bundled subchart:
+
+```yaml
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: your-db-host
+  port: 5432
+  database: vortex
+  username: postgres
+  password: <password>
+```
+
+## Upgrading
+
+Pull the latest changes and rebuild:
+
+```sh
+git pull
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+Database migrations run automatically on startup.
+
+## Troubleshooting
+
+**Services won't start**: Check that all required env vars in `.env.local` are set. The compose file will print which variable is missing.
+
+**Database connection errors**: Verify `DB_PASSWORD` matches between the `db` service and `api`/`worker` services (they derive the URL from the same env var).
+
+**Hatchet connection failures**: Ensure `HATCHET_CLIENT_TOKEN` is valid and the Hatchet server is reachable. Set `HATCHET_CLIENT_TLS_STRATEGY=none` for local Hatchet instances without TLS.
