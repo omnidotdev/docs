@@ -1,0 +1,91 @@
+---
+title: Integrations
+description: Connect external services to power your Vortex workflows
+---
+
+Vortex ships with 500+ built-in integrations powered by the [ActivePieces](https://activepieces.com) connector ecosystem. Connect your favorite tools and use them as workflow steps without writing code.
+
+## Featured integrations
+
+| Category | Services |
+|----------|----------|
+| **AI** | Anthropic (Claude), OpenAI, Google AI, Hugging Face |
+| **Communication** | Slack, Discord, Microsoft Teams, Twilio |
+| **CRM** | HubSpot, Salesforce, Pipedrive |
+| **Developer** | GitHub, GitLab, Linear, Jira |
+| **Email** | Gmail, Resend, SendGrid, Mailchimp |
+| **Productivity** | Notion, Airtable, Google Sheets, Asana |
+| **Cloud** | AWS S3, Azure Blob Storage, Google Cloud Storage |
+| **eCommerce** | Shopify, Stripe, WooCommerce |
+| **Database** | PostgreSQL, MySQL, MongoDB, Supabase |
+| **Social** | X (Twitter), LinkedIn, Instagram, Facebook |
+
+## Connecting an integration
+
+1. Navigate to **Integrations** in your workspace sidebar
+2. Find the service you want to connect
+3. Click **Connect** and follow the OAuth flow or enter your API credentials
+4. The integration is now available as a step in your workflows
+
+## Using integrations in workflows
+
+Once connected, integrations appear as **Plugin** step types in the workflow editor. Each integration exposes actions and triggers specific to that service.
+
+### Example: Slack notification on form submission
+
+```json
+{
+  "nodes": [
+    {
+      "id": "trigger_1",
+      "type": "triggerNode",
+      "data": { "triggerType": "webhook" }
+    },
+    {
+      "id": "slack_1",
+      "type": "pluginNode",
+      "data": {
+        "pluginId": "builtin:slack",
+        "operation": "send-message",
+        "config": {
+          "channel": "#notifications",
+          "message": "New submission from {{ trigger_1.body.name }}"
+        }
+      }
+    }
+  ]
+}
+```
+
+## Custom integrations
+
+On the **Pro** plan and above, you can extend Vortex with custom [WebAssembly plugins](/grid/vortex/cli#plugin-development). Plugins run in a sandboxed WASM environment and can define custom step types with their own configuration UI.
+
+## OAuth providers
+
+Vortex supports OAuth 2.0 for integrations that require it. Configure OAuth credentials in your environment:
+
+```sh
+# GitHub
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
+
+# Google
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+
+# Generic OIDC (enterprise SSO)
+OIDC_ISSUER=https://your-idp.example.com
+OIDC_CLIENT_ID=your_client_id
+OIDC_CLIENT_SECRET=your_client_secret
+```
+
+## Integration limits
+
+| Plan | Connected accounts |
+|------|--------------------|
+| Free | 10 |
+| Starter | 50 |
+| Pro | Unlimited |
+| Team | Unlimited |
+| Enterprise | Unlimited |
