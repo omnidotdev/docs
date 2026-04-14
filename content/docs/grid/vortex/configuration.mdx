@@ -36,7 +36,7 @@ The API handles GraphQL/REST requests, cron scheduling, event routing, and workf
 | `AUTHZ_API_URL` | No | - | Warden AuthZ API URL (enables AuthZ when set) |
 | `STRIPE_API_KEY` | No | - | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | No | - | Stripe webhook signing secret |
-| `GRAPHQL_MAX_COMPLEXITY_COST` | No | `5000` | Maximum GraphQL query cost |
+| `GRAPHQL_MAX_COMPLEXITY_COST` | No | `5000` | Maximum GraphQL query cost (the `.env.local.template` suggests `2000`, but the code default is `5000`) |
 | `PROTECT_ROUTES` | No | `true` | Enable auth middleware on API routes |
 | `AUTH_DEBUG` | No | - | Enable Better Auth debug logging |
 
@@ -62,9 +62,6 @@ The app is the React dashboard with visual workflow editor, user management, and
 | `VITE_CONSOLE_URL` | No | - | Omni console URL |
 | `AUTH_CLIENT_ID` | No | - | OIDC client ID |
 | `AUTH_CLIENT_SECRET` | No | - | OIDC client secret |
-| `RESEND_API_KEY` | No | - | Resend API key for transactional email |
-| `STRIPE_API_KEY` | No | - | Stripe secret key for billing UI |
-| `HATCHET_CLIENT_TOKEN` | No | - | Hatchet token (for workflow status) |
 | `HATCHET_CLIENT_TLS_STRATEGY` | No | - | TLS mode for Hatchet connection |
 | `VITE_FLAGS_CLIENT_KEY` | No | - | Unleash feature flag client key |
 | `VITE_FLAGS_API_HOST` | No | - | Unleash API host URL |

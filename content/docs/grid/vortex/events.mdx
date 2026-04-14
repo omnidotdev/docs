@@ -11,15 +11,22 @@ Every event in the Omni platform follows a standard envelope:
 
 | Field | Type | Description |
 |---|---|---|
+| `specversion` | `string?` | CloudEvents spec version (e.g., `1.0`) |
 | `id` | `string` | UUID generated at publish time |
 | `type` | `string` | Dot-namespaced event type (e.g., `beacon.conversation.ended`) |
-| `source` | `string` | Service that emitted the event |
 | `subject` | `string?` | Optional subject for partitioning (e.g., run ID) |
+| `source` | `string` | Service that emitted the event |
+| `datacontenttype` | `string?` | Content type of the `data` field (e.g., `application/json`) |
+| `dataschema` | `string?` | URI identifying the schema for the `data` field |
 | `data` | `object` | Event-specific payload |
-| `timestamp` | `string` | ISO 8601 timestamp |
+| `time` | `string?` | ISO 8601 timestamp (CloudEvents standard) |
+| `timestamp` | `string` | ISO 8601 timestamp. **Deprecated**: use `time` instead |
 | `organizationId` | `string` | Tenant scope |
 | `correlationId` | `string?` | Tracing ID for idempotency |
-| `schemaId` | `string?` | Schema registry reference |
+| `schemaId` | `string?` | Schema registry reference. **Deprecated**: use `dataschema` instead |
+| `omniorgid` | `string?` | CloudEvents extension: organization ID |
+| `omniworkspaceid` | `string?` | CloudEvents extension: workspace ID |
+| `omnischemaversion` | `number?` | CloudEvents extension: schema version |
 
 ## Streaming Infrastructure
 

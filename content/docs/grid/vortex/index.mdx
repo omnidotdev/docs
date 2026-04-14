@@ -109,17 +109,19 @@ The DSL is a JSON-based workflow definition format. Every workflow, whether buil
       "id": "trigger_1",
       "type": "trigger",
       "name": "Webhook",
-      "trigger": { "type": "webhook" }
+      "trigger": { "type": "webhook", "config": {} }
     },
     {
       "id": "notify",
       "type": "action",
       "name": "Send Slack message",
-      "integration": "slack",
-      "operation": "sendMessage",
-      "inputs": {
-        "channel": "#alerts",
-        "text": "New event: {{triggerData.body.event}}"
+      "action": {
+        "integrationId": "slack",
+        "operation": "sendMessage",
+        "inputs": {
+          "channel": "#alerts",
+          "text": "New event: {{triggerData.body.event}}"
+        }
       }
     }
   ],

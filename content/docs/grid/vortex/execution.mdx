@@ -3,7 +3,7 @@ title: Execution
 description: Worker architecture, plugins, WASM, and execution backends
 ---
 
-Vortex workflows are executed by the **vortex-worker** service. The API dispatches each run to one of four pluggable backends (Hatchet, Temporal, Local, or a custom BYOK cluster), then the worker processes the DSL step-by-step.
+Vortex workflows are executed by the **vortex-worker** service. The API dispatches each run to one of four pluggable backends (Hatchet, Temporal, Local, or SpinKube), then the worker processes the DSL step-by-step.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ The backend is selected per workflow via the `executor` field (default: `hatchet
 | **Hatchet** | `"hatchet"` | Event-driven workflows, cron, short-to-medium runs |
 | **Temporal** | `"temporal"` | Durable long-running workflows, signals, sagas |
 | **Local** | `"local"` | In-process execution for development and testing |
-| **BYOK Temporal** | custom slug | Bring-your-own Temporal cluster per org |
+| **SpinKube** | `"spinkube"` | WASM-based execution via SpinKube on Kubernetes |
 
 ### Hatchet
 
@@ -65,17 +65,17 @@ In-process execution with no external dependencies. Designed for development, te
 }
 ```
 
-### BYOK Temporal
+### SpinKube
 
-Organizations can register their own Temporal cluster via the `workflow_executor_config` table. The executor field accepts a custom slug (not one of the built-in values) and the API looks up the encrypted connection config for the matching organization and slug.
+WASM-based execution via [SpinKube](https://spinkube.dev) on Kubernetes. Workflows are compiled to WebAssembly components and executed as Spin applications, providing lightweight sandboxed execution with fast cold starts.
 
 ```json
 {
-  "executor": "my-org-temporal"
+  "executor": "spinkube"
 }
 ```
 
-The API resolves the slug to a stored connection config containing address, namespace, and TLS settings, then starts the workflow on the custom cluster. If no matching config is found, the API returns a `400` error.
+Requires a Kubernetes cluster with the SpinKube operator installed. The adapter handles packaging DSL workflows as Spin apps and managing their lifecycle on the cluster.
 
 ## Execution Context
 

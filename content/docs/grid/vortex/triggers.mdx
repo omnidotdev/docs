@@ -20,6 +20,7 @@ Webhooks support arbitrary payloads. The secret is generated per workflow and ro
   "type": "trigger",
   "trigger": {
     "type": "webhook",
+    "config": {},
     "method": "POST"
   }
 }
@@ -34,6 +35,7 @@ Schedule workflows using standard cron expressions. The scheduler runs on a 60-s
   "type": "trigger",
   "trigger": {
     "type": "cron",
+    "config": {},
     "expression": "0 9 * * 1-5"
   }
 }
@@ -50,6 +52,7 @@ Subscribe to the Iggy event stream. A routing rule matches incoming events by ty
   "type": "trigger",
   "trigger": {
     "type": "event",
+    "config": {},
     "eventType": "beacon.conversation.ended"
   }
 }
@@ -71,7 +74,7 @@ Authorization: Bearer <api-key>
 ```json
 {
   "type": "trigger",
-  "trigger": { "type": "manual" }
+  "trigger": { "type": "manual", "config": {} }
 }
 ```
 
@@ -84,6 +87,7 @@ Vortex polls an HTTP endpoint on a schedule and deduplicates by content hash or 
   "type": "trigger",
   "trigger": {
     "type": "polling",
+    "config": {},
     "url": "https://api.example.com/status",
     "interval": 300,
     "dedup": { "field": "$.version" }
@@ -122,6 +126,7 @@ Consumes messages from a Kafka topic. Vortex manages the consumer lifecycle per 
   "type": "trigger",
   "trigger": {
     "type": "kafka",
+    "config": {},
     "brokers": ["kafka.example.com:9092"],
     "topic": "orders",
     "groupId": "vortex-orders",
@@ -141,6 +146,7 @@ Polls an AWS SQS queue and automatically deletes messages after the workflow com
   "type": "trigger",
   "trigger": {
     "type": "sqs",
+    "config": {},
     "queueUrl": "https://sqs.us-east-1.amazonaws.com/123456789/my-queue",
     "region": "us-east-1"
   }
@@ -156,6 +162,7 @@ Subscribes to an MQTT broker topic. Supports wildcard subscriptions (`#`, `+`) a
   "type": "trigger",
   "trigger": {
     "type": "mqtt",
+    "config": {},
     "brokerUrl": "mqtt://broker.example.com:1883",
     "topic": "sensors/temperature/#",
     "qos": 1
@@ -174,6 +181,7 @@ Connects to a WebSocket server and fires a workflow run on each incoming message
   "type": "trigger",
   "trigger": {
     "type": "websocket",
+    "config": {},
     "url": "wss://stream.example.com/events",
     "protocols": ["json"]
   }
@@ -191,6 +199,7 @@ Subscribes to Redis Pub/Sub channels and fires on each published message. Suppor
   "type": "trigger",
   "trigger": {
     "type": "redis",
+    "config": {},
     "url": "redis://localhost:6379",
     "channels": ["events:*", "notifications"]
   }
@@ -206,6 +215,7 @@ Subscribes to a NATS subject with optional queue group for load-balanced consump
   "type": "trigger",
   "trigger": {
     "type": "nats",
+    "config": {},
     "servers": "nats://localhost:4222",
     "subject": "orders.>",
     "queue": "vortex-workers"
@@ -224,6 +234,7 @@ Consumes messages from an AMQP queue with automatic acknowledgment on successful
   "type": "trigger",
   "trigger": {
     "type": "amqp",
+    "config": {},
     "url": "amqp://guest:guest@localhost:5672",
     "queue": "orders",
     "exchange": "events",
@@ -244,6 +255,7 @@ Opens a server-streaming gRPC call and fires a workflow run on each streamed res
   "type": "trigger",
   "trigger": {
     "type": "grpc_stream",
+    "config": {},
     "address": "localhost:50051",
     "protoPath": "/protos/events.proto",
     "service": "events.EventService",
@@ -263,6 +275,7 @@ Subscribes to a GraphQL API and fires a workflow run on each subscription event.
   "type": "trigger",
   "trigger": {
     "type": "graphql_subscription",
+    "config": {},
     "url": "wss://api.example.com/graphql",
     "query": "subscription { orderUpdated { id status } }",
     "headers": { "Authorization": "Bearer {{secrets.token}}" }
@@ -279,6 +292,7 @@ Connects to an SSE endpoint and fires a workflow run on each incoming event. Sup
   "type": "trigger",
   "trigger": {
     "type": "sse",
+    "config": {},
     "url": "https://api.example.com/events",
     "headers": { "Authorization": "Bearer {{secrets.token}}" },
     "eventTypes": ["order.created", "order.updated"],
@@ -298,6 +312,7 @@ A higher-level trigger that subscribes to structured events from any Omni produc
   "type": "trigger",
   "trigger": {
     "type": "omni",
+    "config": {},
     "eventType": "aether.subscription.created",
     "source": "omni.aether"
   }
@@ -315,6 +330,7 @@ Fires when an inbound email is received via Resend webhook. Supports glob-patter
   "type": "trigger",
   "trigger": {
     "type": "email",
+    "config": {},
     "address": "workflows@omni.dev",
     "provider": "resend",
     "filters": {
