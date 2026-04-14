@@ -54,17 +54,19 @@ Paste or import a JSON definition into the editor's import dialog:
       "id": "trigger_1",
       "type": "trigger",
       "name": "Webhook",
-      "trigger": { "type": "webhook" }
+      "trigger": { "type": "webhook", "config": {} }
     },
     {
       "id": "notify",
       "type": "action",
       "name": "Send Slack message",
-      "integration": "slack",
-      "operation": "sendMessage",
-      "inputs": {
-        "channel": "#alerts",
-        "text": "New event: {{triggerData.body.event}}"
+      "action": {
+        "integrationId": "slack",
+        "operation": "sendMessage",
+        "inputs": {
+          "channel": "#alerts",
+          "text": "New event: {{triggerData.body.event}}"
+        }
       }
     }
   ],

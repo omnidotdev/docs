@@ -143,10 +143,10 @@ Each step can define an `onError` handler:
 {
   "onError": {
     "action": "retry",
-    "maxRetries": 3,
-    "retryDelay": "5s",
-    "backoff": "exponential",
-    "fallbackStepId": "handle_error"
+    "retryCount": 3,
+    "retryDelayMs": 5000,
+    "retryBackoff": "exponential",
+    "gotoStepId": "handle_error"
   }
 }
 ```
@@ -156,7 +156,7 @@ Each step can define an `onError` handler:
 | `continue` | Skip the error and proceed to the next step |
 | `stop` | Halt workflow execution |
 | `retry` | Retry the step with backoff |
-| `goto` | Jump to a specific step via `fallbackStepId` |
+| `goto` | Jump to a specific step via `gotoStepId` |
 
 ## Example
 
@@ -171,18 +171,20 @@ A complete workflow that listens for webhooks and sends a Slack message:
       "type": "trigger",
       "name": "Webhook",
       "position": { "x": 0, "y": 0 },
-      "trigger": { "type": "webhook" }
+      "trigger": { "type": "webhook", "config": {} }
     },
     {
       "id": "notify",
       "type": "action",
       "name": "Send Slack message",
       "position": { "x": 250, "y": 0 },
-      "integration": "slack",
-      "operation": "sendMessage",
-      "inputs": {
-        "channel": "#alerts",
-        "text": "New event: {{triggerData.body.event}}"
+      "action": {
+        "integrationId": "slack",
+        "operation": "sendMessage",
+        "inputs": {
+          "channel": "#alerts",
+          "text": "New event: {{triggerData.body.event}}"
+        }
       }
     }
   ],
