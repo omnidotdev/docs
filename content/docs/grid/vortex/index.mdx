@@ -71,15 +71,15 @@ import { VscWorkspaceTrusted } from "react-icons/vsc";
 
 ## Key Features
 
-- **Visual editor** — drag-and-drop node canvas powered by React Flow with 140+ node types across 15 categories
-- **JSON DSL** — portable `v1.0` definition format stored as JSONB
-- **TypeScript SDK** — fluent builder API (`@omnidotdev/vortex-sdk`)
-- **15+ integrations** — Slack, GitHub, Stripe, Google Sheets, and more
-- **Built-in plugins** — cache, rate limiting, queues, LLM, code execution, and more (Pro+ gated)
-- **Import / Export** — drag JSON into the editor, export as JSON or TypeScript
-- **Distributed execution** — Hatchet-backed workers with retry, parallelism, and cron scheduling
-- **Execution monitoring** — real-time run status, step traces, and aggregate stats
-- **Events catalog** — browse and inspect all event schemas across the platform
+- **Visual editor**, drag-and-drop node canvas powered by React Flow with 80+ node types across 9 categories
+- **JSON DSL**, portable `v1.0` definition format stored as JSONB
+- **TypeScript SDK**, fluent builder API (`@omnidotdev/vortex-sdk`)
+- **15+ integrations**, Slack, GitHub, Stripe, Google Sheets, and more
+- **Built-in plugins**, cache, rate limiting, queues, LLM, code execution, and more (Pro+ gated)
+- **Import / Export**, drag JSON into the editor, export as JSON or TypeScript
+- **Distributed execution**, Hatchet-backed workers with retry, parallelism, and cron scheduling
+- **Execution monitoring**, real-time run status, step traces, and aggregate stats
+- **Events catalog**, browse and inspect all event schemas across the platform
 
 ## Workflow Authoring
 
@@ -93,7 +93,7 @@ Vortex workflows can be authored three ways, and every format round-trips to the
 
 ### Visual Editor
 
-The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 80+ step types across 15 categories.
+The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 80+ step types across 9 categories.
 
 Workflows built in the editor are automatically converted to the JSON DSL for storage and execution.
 
@@ -180,7 +180,7 @@ The API triggers workflow execution by pushing events to Hatchet. The worker pic
 
 ## Step Types
 
-Vortex supports 80+ step types across 15 categories:
+Vortex supports 80+ step types across 9 categories:
 
 | Category | Types |
 |---|---|
@@ -218,10 +218,10 @@ Vortex ships with 15+ built-in integrations (Slack, GitHub, Stripe, Google Sheet
 
 Each step can define error behavior:
 
-- **Continue** — skip the error, proceed to the next step
-- **Stop** — halt the entire workflow
-- **Retry** — retry with configurable backoff (fixed, linear, exponential)
-- **Goto** — jump to a fallback step
+- **Continue**, skip the error, proceed to the next step
+- **Stop**, halt the entire workflow
+- **Retry**, retry with configurable backoff (fixed, linear, exponential)
+- **Goto**, jump to a fallback step
 
 Connector actions are automatically retried up to 3 times for transient failures.
 
@@ -229,12 +229,12 @@ Connector actions are automatically retried up to 3 times for transient failures
 
 The worker creates an `ExecutionContext` for each workflow run:
 
-- `workflowId` — the workflow being executed
-- `runId` — unique ID for this execution
-- `organizationId` — tenant scope for credential lookup
-- `triggerData` — payload from the trigger (webhook body, cron metadata, etc.)
-- `variables` — workflow variable state, updated as steps complete
-- `stepResults` — output from each completed step
+- `workflowId`, the workflow being executed
+- `runId`, unique ID for this execution
+- `organizationId`, tenant scope for credential lookup
+- `triggerData`, payload from the trigger (webhook body, cron metadata, etc.)
+- `variables`, workflow variable state, updated as steps complete
+- `stepResults`, output from each completed step
 
 ## Cron Scheduling
 
@@ -257,12 +257,13 @@ The worker includes an MCP (Model Context Protocol) client for connecting to ext
 
 Vortex offers four tiers, plus custom Enterprise plans. All tiers include the visual editor, JSON DSL, and TypeScript SDK.
 
-| Plan | Workflows | Runs/month | Features |
-|---|---|---|---|
-| **Free** | 3 | 500 | Core steps, webhook + cron triggers, community support |
-| **Pro** | 25 | 10,000 | All step types, all triggers, plugins, priority support |
-| **Business** | Unlimited | 100,000 | SSO, audit logs, custom integrations, SLA |
-| **Enterprise** | Custom | Custom | Dedicated infrastructure, BYOK executor, premium support |
+| Plan | Workflows | Runs/month | Users | Features |
+|---|---|---|---|---|
+| **Free** | 3 | 1,000 | 1 | Core steps, webhook + cron triggers, community support |
+| **Starter** | 10 | 10,000 | 3 | All step types, all triggers, email support |
+| **Pro** | 50 | 50,000 | 10 | SSO, custom plugins, priority support |
+| **Team** | Unlimited | 500,000 | 25 | Audit logs, SLA guarantee |
+| **Enterprise** | Custom | Custom | Custom | Dedicated infrastructure, SOC 2, premium support |
 
 Visit [vortex.omni.dev/pricing](https://vortex.omni.dev/pricing) for current pricing and plan details.
 

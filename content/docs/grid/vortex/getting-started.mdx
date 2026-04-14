@@ -8,20 +8,26 @@ Get up and running with Vortex in a few minutes. Choose between Docker Compose f
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2
-- A copy of the [vortex-stack](https://github.com/omnidotdev/vortex) repository
+- [Git](https://git-scm.com/)
+- A [Hatchet](https://docs.hatchet.run/self-hosting) instance (local or cloud) for workflow execution
 
 ## 1. Start the stack
 
 ```bash
-# Clone the repository
+# Clone the metarepo and service repos
 git clone https://github.com/omnidotdev/vortex vortex-stack
 cd vortex-stack
+git clone https://github.com/omnidotdev/vortex-api services/vortex-api
+git clone https://github.com/omnidotdev/vortex-app services/vortex-app
+git clone https://github.com/omnidotdev/vortex-worker services/vortex-worker
 
 # Copy the environment template and fill in secrets
 cp .env.local.template .env.local
+# Edit .env.local: generate secrets (see comments in template) and
+# set HATCHET_CLIENT_TOKEN from your Hatchet instance.
 
-# Start all services
-docker compose up
+# Build from source and start all services
+docker compose -f compose.yaml -f compose.dev.yaml up --build
 ```
 
 This starts PostgreSQL, Valkey (cache), Iggy (event streaming), and the three Vortex services (API, app, worker). Once healthy, the dashboard is available at `http://localhost:3000` and the API at `http://localhost:4000`.

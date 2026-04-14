@@ -28,7 +28,7 @@ Events flow through a single Iggy stream (`omni-events`) with per-organization t
 - **3 partitions** per topic for parallel consumption
 - **90-day retention** across all topics
 - **System topic** for platform-level events (accessible to all consumers)
-- TCP transport — Vortex workers connect directly to the Iggy server
+- TCP transport, Vortex workers connect directly to the Iggy server
 
 ## Event Routing
 
@@ -38,8 +38,8 @@ Routing rules match incoming events to workflows. Each rule is an `event_routing
 |---|---|
 | `typePattern` | Glob pattern matched against `event.type` (e.g., `beacon.*`, `synapse.usage.*`) |
 | `sourcePattern` | Optional glob on `event.source` |
-| `condition` | Optional JSONPath expression — rule only fires if the path returns a result |
-| `transform` | Optional JSONata expression — reshapes `event.data` before it reaches the workflow |
+| `condition` | Optional JSONPath expression (rule only fires if the path returns a result) |
+| `transform` | Optional JSONata expression (reshapes `event.data` before it reaches the workflow) |
 | `celCondition` | Optional CEL expression for complex boolean filtering (takes precedence over `condition`) |
 | `batch` | Optional batch configuration for event accumulation before triggering |
 | `priority` | Higher priority rules are evaluated first |
@@ -49,15 +49,15 @@ Routing rules match incoming events to workflows. Each rule is an `event_routing
 
 Conditions filter events before dispatch. Vortex supports two expression languages:
 
-**JSONPath** — evaluated against `event.data`. An empty result skips the rule.
+**JSONPath**, evaluated against `event.data`. An empty result skips the rule.
 
 ```json
 "$.user.role"
 ```
 
-This fires only when `event.data.user.role` exists. Non-empty results (including `false`) match — conditions are presence checks, not boolean expressions.
+This fires only when `event.data.user.role` exists. Non-empty results (including `false`) match, as conditions are presence checks, not boolean expressions.
 
-**CEL** — [Common Expression Language](https://cel.dev) for complex boolean filtering. When both `condition` and `celCondition` are set, CEL takes precedence.
+**CEL**, [Common Expression Language](https://cel.dev) for complex boolean filtering. When both `condition` and `celCondition` are set, CEL takes precedence.
 
 ```json
 "data.user.role == 'admin' && data.total > 100"
@@ -110,11 +110,11 @@ mutation {
 
 All Vortex webhook endpoints publish to Iggy on receipt, making every incoming webhook replayable:
 
-- `POST /webhooks/workflow/:id/:secret` — workflow trigger
-- `POST /webhooks/s3/:secret` — S3 file events
-- `POST /webhooks/cdc/:secret` — Debezium database change capture
-- `POST /webhooks/audit/:secret` — Chronicle audit logs
-- `POST /webhooks/authz/:secret` — AuthZ tuple sync
+- `POST /webhooks/workflow/:id/:secret`, workflow trigger
+- `POST /webhooks/s3/:secret`, S3 file events
+- `POST /webhooks/cdc/:secret`, Debezium database change capture
+- `POST /webhooks/audit/:secret`, Chronicle audit logs
+- `POST /webhooks/authz/:secret`, AuthZ tuple sync
 
 ## Event Replay
 
@@ -132,7 +132,7 @@ Authorization: Bearer <api-key>
 }
 ```
 
-Returns `{ replayed, failed, total }`. Replayed events are published back to Iggy and re-routed by the event router — existing idempotency deduplication applies.
+Returns `{ replayed, failed, total }`. Replayed events are published back to Iggy and re-routed by the event router, and existing idempotency deduplication applies.
 
 ## Lifecycle Events
 
@@ -144,7 +144,7 @@ Vortex publishes its own events to the `vortex.*` namespace:
 | `vortex.workflow.completed` | vortex-worker | After DSL execution succeeds |
 | `vortex.workflow.failed` | vortex-api or vortex-worker | On dispatch error or execution failure |
 
-These can trigger other workflows — Vortex workflows can react to themselves.
+These can trigger other workflows, so Vortex workflows can react to themselves.
 
 ## Universal Workflow Hub
 

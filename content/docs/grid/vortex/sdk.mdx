@@ -235,7 +235,7 @@ workflow
 workflow
   .step("llm", "Summarize Document")
     .config({
-      model: "gpt-4",
+      model: "claude-sonnet-4-6",
       prompt: "Summarize: {{document}}",
     })
   .end()
