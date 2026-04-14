@@ -1,0 +1,105 @@
+---
+title: Vortex
+description: Open source workflow automation platform
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiLightning, PiFlowArrow, PiCode } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Automation",
+      icon: <PiLightning />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Workflows",
+      icon: <PiFlowArrow />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Open Source",
+      icon: <PiCode />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://vortex.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/vortex`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Big Idea",
+      description:
+        "Visual workflow automation with 500+ integrations, durable execution, and full self-hosting support.",
+    },
+  ]}
+/>
+
+**Vortex** is an open source workflow automation platform. Build, deploy, and monitor workflows with a visual drag-and-drop editor or code. Connect 500+ services, schedule tasks, react to events, and orchestrate complex multi-step processes with built-in retries and error handling.
+
+## Key Features
+
+- **Visual Workflow Builder**: Design workflows with an intuitive drag-and-drop editor. No coding required to get started.
+- **500+ Integrations**: Connect services like Slack, GitHub, Stripe, Discord, Google Sheets, and hundreds more.
+- **Durable Execution**: Built-in retries, error handling, dead letter queues, and monitoring. Workflows run reliably.
+- **Multiple Trigger Types**: Manual, cron schedule, webhook, polling, CloudEvents, and SSE triggers.
+- **CloudEvents Native**: First-class support for the CloudEvents specification. Publish and subscribe to events across services.
+- **Custom Plugins**: Extend Vortex with WebAssembly plugins for custom workflow steps (Pro plan).
+- **Self-Hosting**: Run Vortex on your own infrastructure with Docker Compose or Kubernetes.
+
+## Architecture
+
+Vortex consists of three services:
+
+| Service | Purpose | Stack |
+|---------|---------|-------|
+| **vortex-api** | GraphQL + REST API, authentication, entitlements | Bun, Elysia, PostGraphile, Drizzle, PostgreSQL |
+| **vortex-app** | Visual workflow editor, dashboard, monitoring | React 19, TanStack Router, ReactFlow, Tailwind |
+| **vortex-worker** | DSL executor, integration connectors, trigger adapters | Bun, Hatchet, ActivePieces connectors |
+
+## Getting Started
+
+1. **Sign up** at [vortex.omni.dev](https://vortex.omni.dev) (free, no credit card required)
+2. **Create a workspace** from the dashboard
+3. **Build a workflow** using the visual editor or start from a template
+4. **Connect integrations** (Slack, GitHub, etc.) via OAuth
+5. **Execute and monitor** your workflow from the dashboard
+
+## Self-Hosting
+
+Clone the repository and run with Docker Compose:
+
+```bash
+git clone https://github.com/omnidotdev/vortex.git
+cd vortex
+cp .env.local.template .env.local
+# Edit .env.local with your configuration
+docker compose up -d
+```
+
+See the [repository README](https://github.com/omnidotdev/vortex) for full self-hosting documentation.
+
+## Pricing
+
+Vortex is free and open source. The hosted platform at [vortex.omni.dev](https://vortex.omni.dev) offers tiered plans:
+
+| Plan | Price | Workflows | Executions/month | Users |
+|------|-------|-----------|-----------------|-------|
+| Free | $0 | 5 | 1,000 | 1 |
+| Starter | $12/mo | 25 | 10,000 | 2 |
+| Pro | $39/mo | Unlimited | 50,000 | 5 |
+| Team | $99/mo | Unlimited | 500,000 | 25 |
+| Enterprise | Custom | Unlimited | Custom | Custom |
+
+See [vortex.omni.dev/pricing](https://vortex.omni.dev/pricing) for full details.

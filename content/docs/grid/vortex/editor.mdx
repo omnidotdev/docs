@@ -9,12 +9,12 @@ The Vortex visual editor is a node-based workflow canvas powered by React Flow. 
 
 The editor provides a drag-and-drop canvas where each workflow step is a node. Nodes are connected by edges that define execution order. The canvas supports:
 
-- **Node palette** — add steps by type from the sidebar
-- **Edge drawing** — connect nodes by dragging between handles
-- **Branching** — conditions and switches expose multiple output handles
-- **Pan and zoom** — navigate large workflows
-- **Selection and multi-select** — batch move or delete nodes
-- **Undo/redo** — track canvas changes
+- **Node palette**, add steps by type from the sidebar
+- **Edge drawing**, connect nodes by dragging between handles
+- **Branching**, conditions and switches expose multiple output handles
+- **Pan and zoom**, navigate large workflows
+- **Selection and multi-select**, batch move or delete nodes
+- **Undo/redo**, track canvas changes
 
 ## Import
 
@@ -22,8 +22,8 @@ Import existing workflow definitions into the editor via the Import dialog.
 
 ### Supported formats
 
-- **JSON DSL** — paste or upload a `v1.0` workflow definition
-- **Drag-and-drop** — drag a `.json` file directly onto the import dialog
+- **JSON DSL**, paste or upload a `v1.0` workflow definition
+- **Drag-and-drop**, drag a `.json` file directly onto the import dialog
 
 ### Validation
 
@@ -32,7 +32,7 @@ Before loading, the importer validates:
 1. Valid JSON syntax
 2. `version: "1.0"` is present
 3. `steps` and `edges` arrays exist
-4. Format detection (DSL vs ReactFlow — only DSL is accepted)
+4. Format detection (DSL vs ReactFlow, only DSL is accepted)
 
 A preview shows the step count and step names before confirming the import.
 
@@ -50,8 +50,8 @@ Export workflows from the editor in two formats:
 
 ### JSON
 
-- **Copy to clipboard** — the raw DSL definition, 2-space indented
-- **Download as `.json`** — save to disk for version control, sharing, or re-import
+- **Copy to clipboard**, the raw DSL definition, 2-space indented
+- **Download as `.json`**, save to disk for version control, sharing, or re-import
 
 ### TypeScript
 

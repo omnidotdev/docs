@@ -27,7 +27,7 @@ Webhooks support arbitrary payloads. The secret is generated per workflow and ro
 
 ## Cron
 
-Schedule workflows using standard cron expressions. The scheduler runs on a 60-second tick with distributed locking — only one API instance fires per interval in multi-instance deployments.
+Schedule workflows using standard cron expressions. The scheduler runs on a 60-second tick with distributed locking, so only one API instance fires per interval in multi-instance deployments.
 
 ```json
 {
@@ -43,7 +43,7 @@ Schedule workflows using standard cron expressions. The scheduler runs on a 60-s
 
 ## Event
 
-Subscribe to the Iggy event stream. A routing rule matches incoming events by type glob, source glob, optional JSONPath condition, and optional JSONata transform — then dispatches this workflow.
+Subscribe to the Iggy event stream. A routing rule matches incoming events by type glob, source glob, optional JSONPath condition, and optional JSONata transform, then dispatches this workflow.
 
 ```json
 {
@@ -115,7 +115,7 @@ POST /webhooks/cdc/:secret
 
 ## Kafka
 
-Consumes messages from a Kafka topic. Vortex manages the consumer lifecycle per workflow — starting and stopping consumers as workflows are enabled or disabled.
+Consumes messages from a Kafka topic. Vortex manages the consumer lifecycle per workflow, starting and stopping consumers as workflows are enabled or disabled.
 
 ```json
 {

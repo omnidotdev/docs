@@ -22,12 +22,12 @@ vortex init
 ```
 
 Prompts for:
-- **API URL** — Vortex API endpoint (e.g., `https://api.vortex.omni.dev`)
-- **API Key** — Authentication token
+- **API URL**, Vortex API endpoint (e.g., `https://api.vortex.omni.dev`)
+- **API Key**, Authentication token
 
 Creates:
-- `.vortex/config.json` — project configuration (auto-added to `.gitignore`)
-- `.vortex/workflows/` — directory for workflow definitions
+- `.vortex/config.json`, project configuration (auto-added to `.gitignore`)
+- `.vortex/workflows/`, directory for workflow definitions
 - An example workflow file
 
 ## Workflow commands
@@ -105,7 +105,7 @@ vortex plugin init
 
 Prompts for:
 - **Plugin name**
-- **Language** — Rust, JavaScript/TypeScript (Extism JS PDK), or AssemblyScript
+- **Language**, Rust, JavaScript/TypeScript (Extism JS PDK), or AssemblyScript
 
 Creates a plugin directory with `manifest.json` and language-specific template code.
 
@@ -118,8 +118,8 @@ vortex plugin build
 ```
 
 Detects the language from project structure:
-- **Rust** — `cargo build --target wasm32-unknown-unknown --release`
-- **JavaScript/TypeScript** — Extism JS PDK, falls back to AssemblyScript compiler
+- **Rust**, `cargo build --target wasm32-unknown-unknown --release`
+- **JavaScript/TypeScript**, Extism JS PDK, falls back to AssemblyScript compiler
 
 Outputs `build/plugin.wasm` with file size reported.
 

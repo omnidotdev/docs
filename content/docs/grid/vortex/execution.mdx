@@ -3,7 +3,7 @@ title: Execution
 description: Worker architecture, plugins, WASM, and execution backends
 ---
 
-Vortex workflows are executed by the **vortex-worker** service. The API dispatches each run to one of four pluggable backends — Hatchet, Temporal, Local, or a custom BYOK cluster — then the worker processes the DSL step-by-step.
+Vortex workflows are executed by the **vortex-worker** service. The API dispatches each run to one of four pluggable backends (Hatchet, Temporal, Local, or a custom BYOK cluster), then the worker processes the DSL step-by-step.
 
 ## Architecture
 
@@ -81,12 +81,12 @@ The API resolves the slug to a stored connection config containing address, name
 
 Each workflow run creates an `ExecutionContext`:
 
-- `workflowId` — the workflow being executed
-- `runId` — unique ID for this execution
-- `organizationId` — tenant scope for credential lookup
-- `triggerData` — payload from the trigger (webhook body, cron metadata, etc.)
-- `variables` — workflow variable state, updated as steps complete
-- `stepResults` — output from each completed step
+- `workflowId`, the workflow being executed
+- `runId`, unique ID for this execution
+- `organizationId`, tenant scope for credential lookup
+- `triggerData`, payload from the trigger (webhook body, cron metadata, etc.)
+- `variables`, workflow variable state, updated as steps complete
+- `stepResults`, output from each completed step
 
 ## Step Dispatch
 
@@ -197,10 +197,10 @@ In production, the distributed lock ensures only one API instance runs the sched
 
 Each step can define error behavior:
 
-- **Continue** — skip the error, proceed to the next step
-- **Stop** — halt the entire workflow
-- **Retry** — retry with configurable backoff (fixed, linear, exponential)
-- **Goto** — jump to a fallback step
+- **Continue**, skip the error, proceed to the next step
+- **Stop**, halt the entire workflow
+- **Retry**, retry with configurable backoff (fixed, linear, exponential)
+- **Goto**, jump to a fallback step
 
 Connector actions are automatically retried up to 3 times for transient failures.
 
@@ -208,22 +208,22 @@ Connector actions are automatically retried up to 3 times for transient failures
 
 In addition to poll-based triggers, the worker manages long-lived streaming connections for push-based trigger types. Each adapter implements a common `EventAdapter` interface:
 
-- `start()` — connect and begin consuming
-- `stop()` — gracefully disconnect
-- `onEvent(handler)` — register a callback for normalized events
+- `start()`, connect and begin consuming
+- `stop()`, gracefully disconnect
+- `onEvent(handler)`, register a callback for normalized events
 
 The trigger runner scans active workflows every 60 seconds, starting new adapters and stopping removed ones. All streaming events are normalized to a consistent `NormalizedEvent` format before dispatch.
 
 Supported streaming adapters: MQTT, WebSocket, Redis Pub/Sub, Kafka, NATS, AMQP, gRPC stream, SQS, S3, CDC, and HTTP polling.
 
-External trigger adapters can be loaded from `VORTEX_TRIGGER_PLUGINS_DIR` — each file exports a `createAdapter(config)` factory function.
+External trigger adapters can be loaded from `VORTEX_TRIGGER_PLUGINS_DIR`, where each file exports a `createAdapter(config)` factory function.
 
 ## State Store
 
 The worker provides an org-scoped key-value store for sharing data across workflows:
 
-- `get(orgId, key)` — retrieve a value
-- `set(orgId, key, value, ttl?)` — store a value with optional TTL
-- `increment(orgId, key, by)` — atomic counter
-- `append(orgId, key, value)` — push to a list
-- `publish(orgId, channel, message)` — pub/sub messaging
+- `get(orgId, key)`, retrieve a value
+- `set(orgId, key, value, ttl?)`, store a value with optional TTL
+- `increment(orgId, key, by)`, atomic counter
+- `append(orgId, key, value)`, push to a list
+- `publish(orgId, channel, message)`, pub/sub messaging
