@@ -188,8 +188,8 @@ workflow
   .step("condition", "Check Total")
     .config({
       expression: "$.total > 100",
-      trueStepId: "apply-discount",
-      falseStepId: "skip",
+      trueBranch: "apply-discount",
+      falseBranch: "skip",
     })
   .end()
 
@@ -198,8 +198,11 @@ workflow
   .step("switch", "Route by Status")
     .config({
       expression: "$.status",
-      cases: { active: "handle-active", pending: "handle-pending" },
-      defaultCase: "handle-unknown",
+      cases: [
+        { value: "active", label: "Active", next: "handle-active" },
+        { value: "pending", label: "Pending", next: "handle-pending" },
+      ],
+      default: "handle-unknown",
     })
   .end()
 ```
