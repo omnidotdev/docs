@@ -1,0 +1,90 @@
+---
+title: Mixing
+description: Mixer console, channel strips, built-in effects, and export options
+---
+
+The mixer provides a console view of all tracks and buses with faders, pan knobs, plugin slots, and metering.
+
+## Mixer Console
+
+Open the mixer by pressing **M** or clicking the mixer tab. The console displays one channel strip per track and bus, arranged left to right in track order. The master bus is always on the far right.
+
+Each channel strip shows:
+
+- Track name and color
+- Input/output routing indicators
+- Plugin slots (click to add/edit effects)
+- Pan knob
+- Volume fader with dB scale
+- Peak meter (stereo)
+- Mute, solo, and record arm buttons
+
+## Channel Strip Controls
+
+### Volume
+
+The fader controls the track's output level in dB. Range is -inf to +12 dB. Double-click the fader to type a precise value. The fader position is automatable.
+
+### Pan
+
+The pan knob controls stereo placement from hard left (-1.0) to hard right (+1.0). Center is 0.0. Pan law is equal-power (-3 dB at center). The pan position is automatable.
+
+### Mute and Solo
+
+- **Mute**: Silences the track. Muted tracks still process plugins (to avoid pops) but output silence
+- **Solo**: Solos the track, muting all non-soloed tracks. Multiple tracks can be soloed simultaneously. Solo is implemented as an implicit mute on all other tracks
+
+## Built-in Effects
+
+Resonance includes several built-in effects that are always available, including in the browser version:
+
+| Effect | Description |
+|---|---|
+| **Gain** | Simple gain stage for level adjustment |
+| **Parametric EQ** | 4-band parametric EQ with low/high shelf and bell filters |
+| **Compressor** | Dynamics compressor with threshold, ratio, attack, release, and makeup gain |
+| **Reverb** | Algorithmic reverb with room size, damping, pre-delay, and mix controls |
+| **Delay** | Stereo delay with tempo sync, feedback, and filtering |
+
+Built-in effects are implemented as Rust DSP processors, compiled to WASM for the browser version. They appear in the plugin browser alongside installed CLAP plugins.
+
+## Plugin Slots
+
+Each channel strip has an ordered list of plugin slots. Signal flows through plugins top to bottom:
+
+1. Click an empty slot to open the plugin browser
+2. Select a plugin (built-in or CLAP)
+3. The plugin loads and its GUI opens
+4. Drag plugins to reorder, right-click to bypass or remove
+
+Each slot can be individually bypassed without removing the plugin. Bypassed slots pass audio through unprocessed.
+
+## Metering
+
+Each channel strip displays a stereo peak meter. The meter shows:
+
+- Real-time peak level (fast attack, slow release)
+- Peak hold indicator (resets on click)
+- Clip indicator (lights red when signal exceeds 0 dBFS)
+
+The master bus additionally shows LUFS loudness metering (integrated, short-term, and momentary).
+
+## Export
+
+Export renders the arrangement to an audio file:
+
+| Format | Extension | Notes |
+|---|---|---|
+| **WAV** | `.wav` | Uncompressed, 16/24/32-bit |
+| **FLAC** | `.flac` | Lossless compression |
+| **MP3** | `.mp3` | Lossy, 128-320 kbps (planned) |
+| **OGG** | `.ogg` | Lossy, Vorbis codec (planned) |
+
+### Export Options
+
+- **Range**: Entire arrangement, loop region, or custom selection
+- **Sample rate**: Match project or resample (44.1, 48, 88.2, 96 kHz)
+- **Bit depth**: 16, 24, or 32-bit (WAV and FLAC)
+- **Normalization**: Off, peak, or LUFS target
+- **Dithering**: Off, triangular, or noise-shaped (when reducing bit depth)
+- **Stem export** (planned): Render each track as a separate file, useful for collaboration or further mixing in another DAW

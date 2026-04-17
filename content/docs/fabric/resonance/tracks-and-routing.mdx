@@ -1,0 +1,90 @@
+---
+title: Tracks and Routing
+description: Track types, flexible routing graph, sends and buses
+---
+
+Resonance provides a flexible track and routing system. Any output can be routed to any input, enabling complex signal chains without limitations.
+
+## Track Types
+
+| Type | Purpose | Audio I/O |
+|---|---|---|
+| **Audio** | Record and play back audio clips | Hardware input, audio output |
+| **MIDI** | Sequence notes via piano roll, drive instrument plugins | MIDI input, audio output (via instrument) |
+| **Bus** | Sum multiple inputs, apply shared processing | Audio input (from sends/routes), audio output |
+| **Master** | Final output, always present | Audio input (from buses/tracks), hardware output |
+
+### Audio Tracks
+
+Audio tracks host audio clips on a timeline. Each track has:
+
+- An input selector (hardware input device and channel)
+- A record arm button
+- A plugin chain (insert effects)
+- Volume, pan, mute, and solo controls
+- Output routing (default: master bus)
+
+### MIDI Tracks
+
+MIDI tracks contain MIDI clips (note sequences). A MIDI track must be routed to an instrument plugin to produce audio. The instrument can live on the same track (as the first plugin in the chain) or on a separate bus.
+
+### Bus Tracks
+
+Bus tracks receive audio from other tracks via sends or direct routing. Common uses:
+
+- **Submix bus**: Group drums, vocals, or guitars for shared processing
+- **Effect bus**: Shared reverb or delay (tracks send to the bus at adjustable levels)
+- **Parallel compression**: Blend dry and compressed signals
+
+### Master Bus
+
+Every project has one master bus. All unrouted track outputs default to the master. The master bus has its own plugin chain and volume control, and outputs to the hardware audio device (or to a file during export).
+
+## Routing
+
+### Direct Routing
+
+Any track or bus output can be routed to any bus input. Set the output destination in the track's routing section:
+
+```toml
+[routing]
+output = "drum-bus"
+```
+
+### Sends
+
+Sends tap the signal at a configurable point (pre-fader or post-fader) and route a copy to a bus at an adjustable level:
+
+```toml
+[routing]
+output = "master"
+sends = [
+  { bus = "reverb-send", level = -12.0, pre_fader = false },
+  { bus = "delay-send", level = -18.0, pre_fader = false },
+]
+```
+
+A track can have unlimited sends. Each send has independent level and pre/post-fader selection.
+
+### Sidechain Routing
+
+Some plugins (compressors, gates, vocoders) accept a sidechain input. Resonance supports sidechain routing by connecting a track's output to a plugin's sidechain port:
+
+1. Open the plugin that accepts sidechain input
+2. In the sidechain input selector, choose the source track or bus
+3. The source signal is routed to the plugin's sidechain port without affecting the main signal path
+
+### Routing Graph
+
+Under the hood, all routing is represented as edges in the audio graph DAG. The UI provides a simplified view (output selector, sends, sidechain), but the underlying model supports arbitrary connections between any audio ports.
+
+Feedback loops are detected and prevented. If a routing change would create a cycle, the connection is rejected with an error message.
+
+## Track Management
+
+- **Create**: Click **+** in the track header, or press **Ctrl+T**
+- **Duplicate**: Right-click a track header and select **Duplicate**
+- **Delete**: Right-click and select **Delete**, or press **Delete** with the track selected
+- **Reorder**: Drag track headers to rearrange
+- **Color**: Right-click and choose a color for visual grouping
+- **Folder**: Group tracks into collapsible folders for organization (folders do not affect routing)

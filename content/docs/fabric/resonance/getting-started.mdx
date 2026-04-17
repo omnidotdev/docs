@@ -1,0 +1,79 @@
+---
+title: Getting Started
+description: Install Resonance and create your first project
+---
+
+## Installation
+
+### Desktop App (Recommended)
+
+Download the Resonance desktop app for your platform:
+
+| Platform | Format | Notes |
+|---|---|---|
+| **macOS** | `.dmg` | macOS 12+ (Intel and Apple Silicon) |
+| **Windows** | `.msi` | Windows 10+ |
+| **Linux** | `.AppImage`, `.deb` | Ubuntu 22.04+, Fedora 38+, Arch |
+
+Download links are available at [resonance.omni.dev/download](https://resonance.omni.dev/download).
+
+The desktop app provides the full feature set: native audio I/O, CLAP/LV2 plugin hosting, low-latency recording, and filesystem-based project storage.
+
+### Browser Version
+
+The browser version is not yet available. When released, it will be accessible at [resonance.omni.dev](https://resonance.omni.dev) with no installation or account required.
+
+The browser version will include the audio graph, built-in effects, MIDI support, and automation. It will not support native plugins or low-latency audio. See [Browser Version](/fabric/resonance/browser-version) for details on the intended design.
+
+## Creating a Project
+
+1. Open Resonance (desktop or browser)
+2. Click **New Project** from the start screen
+3. Enter a project name and choose a save location (desktop) or accept the default (browser)
+4. The editor opens with an empty arrangement and a default master bus
+
+On desktop, the project is saved as a `.resonance` directory. In the browser, the project is stored in IndexedDB.
+
+## Basic Workflow
+
+### 1. Create Tracks
+
+Click the **+** button in the track header area to add tracks:
+
+- **Audio Track**: Record or import audio files
+- **MIDI Track**: Sequence notes via the piano roll
+- **Bus Track**: Group and process multiple tracks together
+
+### 2. Record Audio
+
+1. Select an audio track
+2. Choose your input device from the track's input selector
+3. Arm the track for recording (click the red circle)
+4. Press the record button in the transport bar
+5. Press stop when finished
+
+The recorded audio is saved as a WAV file in the project directory and displayed as a waveform clip on the track.
+
+### 3. Add Effects
+
+1. Open the mixer (press **M** or click the mixer tab)
+2. Click an empty plugin slot on any channel strip
+3. Browse built-in effects or installed plugins
+4. Adjust parameters in the plugin window
+
+Built-in effects include EQ, compressor, reverb, and delay. On desktop, CLAP plugins are also available (LV2 planned).
+
+### 4. Export
+
+1. Select **File > Export** (or press **Ctrl+Shift+E**)
+2. Choose a format: WAV or FLAC
+3. Set sample rate and bit depth
+4. Optionally enable stem export (planned) to render each track as a separate file
+5. Click **Export**
+
+## Next Steps
+
+- [Audio Engine](/fabric/resonance/audio-engine): Understand how audio flows through the system
+- [Tracks and Routing](/fabric/resonance/tracks-and-routing): Learn about track types and signal routing
+- [Mixing](/fabric/resonance/mixing): Explore the mixer console and effects
+- [MIDI](/fabric/resonance/midi): Connect MIDI devices and use the piano roll

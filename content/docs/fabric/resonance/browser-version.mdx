@@ -1,0 +1,103 @@
+---
+title: Browser Version
+description: WASM-compiled audio engine with AudioWorklet bridge and offline support
+---
+
+> **Planned**: The browser version is not yet implemented. This page describes the intended design.
+
+The browser version of Resonance will run at [resonance.omni.dev](https://resonance.omni.dev). It will provide a subset of the desktop functionality, compiled to WebAssembly and running in an AudioWorklet.
+
+## What's Included
+
+- Audio graph engine (WASM-compiled `resonance-core`)
+- All built-in effects (EQ, compressor, reverb, delay)
+- MIDI input via WebMIDI
+- Automation lanes with full editing
+- Piano roll and arrangement views
+- WASM-compiled CLAP plugins (planned)
+- Project export (WAV, FLAC currently; MP3, OGG planned)
+- Offline support via service worker
+
+## What's Excluded
+
+- **Native CLAP/LV2 plugins**: No access to local plugin binaries from the browser
+- **Low-latency audio**: Browser audio typically has 10-50ms latency (vs 3-10ms on desktop)
+- **Filesystem access**: Projects are stored in IndexedDB, not on disk
+- **Hardware multi-channel I/O**: Browser audio is typically stereo only
+- **ASIO/JACK support**: No direct audio driver access
+
+## WASM Compilation
+
+The `resonance-web` crate compiles a subset of `resonance-core` to `wasm32-unknown-unknown`. The compilation excludes:
+
+- Plugin host code (replaced by WASM plugin host)
+- Native audio I/O (replaced by AudioWorklet bridge)
+- File I/O (replaced by IndexedDB adapter)
+- Thread spawning (single-threaded in WASM)
+
+The resulting `.wasm` binary is approximately 2 MB (gzipped) and loads in under 2 seconds on a modern connection.
+
+## AudioWorklet Bridge
+
+The audio engine runs inside an `AudioWorkletProcessor`:
+
+```
+┌─────────────────────────────────────────────┐
+│  Main Thread                                 │
+│  UI (React), project state, MIDI handling    │
+│                                              │
+│  ┌─────────────────────────────────────┐     │
+│  │  SharedArrayBuffer / MessagePort    │     │
+│  └──────────────────┬──────────────────┘     │
+└─────────────────────┼───────────────────────┘
+                      │
+┌─────────────────────┼───────────────────────┐
+│  AudioWorklet Thread                         │
+│  ┌──────────────────┴──────────────────┐     │
+│  │  resonance-core (WASM)              │     │
+│  │  Audio graph evaluation             │     │
+│  │  Built-in DSP                       │     │
+│  │  WASM plugin instances              │     │
+│  └─────────────────────────────────────┘     │
+└─────────────────────────────────────────────┘
+```
+
+Communication between the main thread and the AudioWorklet uses:
+
+- **SharedArrayBuffer**: For audio data transfer (when available, with COOP/COEP headers)
+- **MessagePort**: For commands and parameter changes (fallback if SAB unavailable)
+
+The AudioWorklet processes 128 samples per callback (the Web Audio API default). The WASM engine is called once per callback to fill the output buffer.
+
+## CLAP-in-WASM
+
+CLAP plugins that are compiled to WASM can run in the browser. The workflow:
+
+1. Plugin developer compiles their CLAP plugin to `wasm32-wasi`
+2. The `.wasm` bundle is uploaded to the Resonance plugin registry
+3. Users browse and install WASM plugins from within the browser version
+4. The plugin runs inside the AudioWorklet alongside the engine
+
+WASM plugins share the same AudioWorklet thread. CPU-heavy plugins may cause audio dropouts since there is no real-time thread priority in the browser.
+
+## Offline Support
+
+The browser version works offline after the initial load:
+
+- **Service Worker**: Caches the app shell, WASM binary, and static assets
+- **IndexedDB**: Stores projects, audio files, and plugin presets locally
+- **Background Sync**: Queues cloud sync operations for when connectivity returns
+
+The app registers a service worker on first visit. Subsequent visits load from cache, with updates applied in the background.
+
+## Use Cases
+
+The browser version is best suited for:
+
+- **Sketching**: Quickly capture an idea without launching the desktop app
+- **Review**: Open a shared project to listen and leave feedback
+- **Collaboration**: Join a live session from any device
+- **Education**: Learn music production without installing software
+- **Mobile**: Basic editing on tablets (limited by screen size and touch input)
+
+For production work (recording, mixing, mastering), the desktop app is recommended.

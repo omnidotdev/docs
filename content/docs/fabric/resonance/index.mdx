@@ -1,0 +1,142 @@
+---
+title: Resonance
+description: Professional digital audio workstation, desktop-native with a browser fallback
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaMusic, FaPlug, FaWaveSquare } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "DAW",
+      icon: <FaMusic />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Plugins",
+      icon: <FaPlug />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Audio",
+      icon: <FaWaveSquare />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://resonance.omni.dev",
+      label: "Visit App",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/resonance`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Under Construction",
+      description:
+        "Resonance is in early development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "Big Idea",
+      description:
+        "Professional music production on the desktop and in the browser, free and open to all",
+    },
+    {
+      title: "Problem Solved",
+      description:
+        "Resonance removes the barriers to music production. No expensive software, no platform lock-in. A full-featured Tauri desktop app with a browser fallback for lightweight workflows.",
+    },
+  ]}
+/>
+
+**Omni Resonance** is a professional digital audio workstation (DAW). The primary experience is a Tauri-based desktop application for macOS, Windows, and Linux. A browser version at [resonance.omni.dev](https://resonance.omni.dev) provides a lightweight fallback for sketching, review, and collaboration.
+
+## Key Features
+
+- **Desktop-Native Performance**: Tauri app with Rust audio engine for low-latency recording and playback
+- **Browser Fallback**: Subset of functionality available in any modern browser via WASM
+- **Multi-Track Recording**: Record audio and MIDI with unlimited tracks
+- **Audio Editing**: Cut, splice, stretch, and manipulate audio clips
+- **MIDI Sequencing**: Piano roll editor with quantization and automation
+- **Mixer**: Full mixing console with faders, panning, and flexible routing
+- **Effects Processing**: Built-in effects (EQ, compression, reverb, delay)
+- **Plugin Support**: CLAP plugin hosting (LV2 planned)
+- **Collaboration**: Real-time session sharing via WebRTC (planned)
+- **Export Options**: Render to WAV and FLAC (MP3, OGG, stems planned)
+
+## Plugin Formats
+
+Resonance supports open and free plugin standards only:
+
+| Format | Role | Rationale |
+|---|---|---|
+| **CLAP** | Primary | Open-source, modern API, clean Rust FFI via `clack` |
+| **LV2** | Planned | Linux audio standard, large open-source ecosystem |
+| **No VST3** | Excluded | Steinberg license conflicts with Apache 2.0 |
+
+CLAP plugins can also run in the browser via WASM compilation. See [Plugin System](/fabric/resonance/plugin-system) for details.
+
+## Architecture
+
+Resonance is split into several crates and packages:
+
+```
+resonance-core (Rust)       Audio engine, graph, transport, automation
+resonance-plugins (Rust)    CLAP/LV2 host, plugin scanning, parameter bridge (planned)
+resonance-app (Tauri)       Desktop shell, native GUI, file I/O
+resonance-web (WASM)        Browser build of resonance-core subset (planned)
+resonance-ui (TypeScript)   Shared UI (tracks, mixer, piano roll, automation)
+```
+
+The audio engine runs a real-time audio thread that pulls samples through a directed acyclic graph of processor nodes. A separate control thread handles UI state, transport commands, and plugin parameter changes. The control thread and audio callback share state via `Arc<Mutex<_>>`. Lock-free communication is planned for a future release.
+
+## Use Cases
+
+- **Music Production**: Create complete songs from idea to master
+- **Podcasting**: Record and edit podcast episodes
+- **Sound Design**: Design sound effects and ambient textures
+- **Education**: Learn music production without expensive software
+- **Collaboration**: Work on projects with musicians anywhere in the world
+
+<Cards>
+  <Card title="Getting Started" href="/fabric/resonance/getting-started">
+    Install the desktop app or open the browser version
+  </Card>
+  <Card title="Audio Engine" href="/fabric/resonance/audio-engine">
+    Three-layer architecture, pull-based audio graph, lock-free threading
+  </Card>
+  <Card title="Plugin System" href="/fabric/resonance/plugin-system">
+    CLAP and LV2 hosting, plugin scanning, WASM plugins for browser
+  </Card>
+  <Card title="Project Format" href="/fabric/resonance/project-format">
+    Directory structure, TOML manifests, non-destructive editing
+  </Card>
+  <Card title="Tracks and Routing" href="/fabric/resonance/tracks-and-routing">
+    Track types, flexible routing graph, sends and buses
+  </Card>
+  <Card title="Mixing" href="/fabric/resonance/mixing">
+    Mixer console, channel strips, built-in effects, export
+  </Card>
+  <Card title="MIDI" href="/fabric/resonance/midi">
+    Device connection, piano roll, recording, quantization
+  </Card>
+  <Card title="Automation" href="/fabric/resonance/automation">
+    Breakpoint envelopes, bezier curves, sample-accurate parameter control
+  </Card>
+  <Card title="Browser Version" href="/fabric/resonance/browser-version">
+    WASM build, AudioWorklet bridge, offline support
+  </Card>
+  <Card title="Collaboration" href="/fabric/resonance/collaboration">
+    Live session sharing, host authority, real-time monitoring
+  </Card>
+  <Card title="Platform Integration" href="/fabric/resonance/platform-integration">
+    HIDRA auth, cloud sync, Rushes, Vortex events, Aether billing
+  </Card>
+</Cards>

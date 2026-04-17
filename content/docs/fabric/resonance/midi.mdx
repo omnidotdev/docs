@@ -1,0 +1,96 @@
+---
+title: MIDI
+description: MIDI device connection, piano roll, recording, and routing
+---
+
+Resonance supports MIDI input and output for sequencing instrument plugins, controlling parameters, and recording performances.
+
+## Device Connection
+
+### Desktop
+
+On the desktop app, MIDI devices are connected via the `midir` Rust crate. Resonance detects all connected MIDI devices on startup and monitors for hot-plug events.
+
+To select a MIDI input for a track:
+
+1. Create or select a MIDI track
+2. Open the track's input selector
+3. Choose a MIDI device and channel (or "All Channels")
+
+### Browser
+
+In the browser version, MIDI devices are accessed via the [WebMIDI API](https://developer.mozilla.org/en-US/docs/Web/API/Web_MIDI_API). The browser will prompt for permission on first use.
+
+WebMIDI support varies by browser. Chromium-based browsers have the best support. Firefox requires a flag. Safari does not support WebMIDI.
+
+## Piano Roll Editor
+
+The piano roll is the primary MIDI editing view. Open it by double-clicking a MIDI clip or selecting a MIDI track and pressing **P**.
+
+Features:
+
+- **Note entry**: Click to place notes, drag to set length
+- **Selection**: Click and drag to select groups of notes
+- **Velocity**: Adjust note velocity via the velocity lane at the bottom
+- **Snap**: Quantize note positions to a grid (1/4, 1/8, 1/16, triplets, dotted)
+- **Keyboard input**: Type A-G to enter notes, Shift for sharps (#), 1-7 to set octave
+- **Cursor navigation**: Arrow left/right to move cursor by grid step
+- **Delete**: Right-click a note or select and press Delete/Backspace
+- **Tools**: Pointer, pencil, eraser, slice
+- **Zoom**: Scroll wheel to zoom, Ctrl+scroll for horizontal zoom
+
+## Recording
+
+MIDI recording captures incoming MIDI events to a clip on the armed track:
+
+1. Arm the MIDI track for recording
+2. Press record in the transport
+3. Play your MIDI controller
+4. Press stop when finished
+
+Recorded notes appear in the piano roll. Multiple takes can be recorded as separate clips on the same track.
+
+### Quantization
+
+After recording, apply quantization to snap notes to the grid:
+
+- **Quantize strength**: 0% (no change) to 100% (fully on grid)
+- **Grid size**: 1/4, 1/8, 1/16, 1/32, triplets
+- **Swing**: Add swing feel by delaying off-beat notes (0-100%)
+
+Select notes and press **Q** to quantize with the current settings. Use **Ctrl+Q** to open the quantize dialog for fine-tuning.
+
+## Channel Mapping
+
+MIDI tracks can filter and remap channels:
+
+```toml
+[midi]
+input_channel = 1          # listen to channel 1 only (0 = all)
+output_channel = 1         # send to instrument on channel 1
+transpose = 0              # semitones
+velocity_curve = "linear"  # linear, soft, hard, fixed
+fixed_velocity = 100       # used when velocity_curve = "fixed"
+```
+
+## MIDI to Instrument Plugins
+
+MIDI tracks produce audio by routing MIDI events to an instrument plugin:
+
+1. Insert an instrument plugin (synth, sampler) as the first plugin on the MIDI track
+2. MIDI events from the piano roll or live input are sent to the plugin
+3. The plugin generates audio, which flows through any subsequent effect plugins
+4. The audio output is routed like any other track (to a bus or master)
+
+CLAP instrument plugins are supported on desktop (LV2 planned). In the browser (planned), only WASM-compiled CLAP instruments and the built-in simple synth will be available.
+
+## MIDI CC Mapping
+
+MIDI continuous controller (CC) messages can be mapped to any automatable parameter:
+
+1. Right-click a parameter (plugin knob, fader, pan)
+2. Select **MIDI Learn**
+3. Move a knob or fader on your MIDI controller
+4. The CC message is bound to that parameter
+
+Multiple parameters can be mapped to the same CC. Mappings are saved per project in `project.toml`.

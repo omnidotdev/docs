@@ -1,0 +1,86 @@
+---
+title: Automation
+description: Breakpoint envelopes with sample-accurate parameter control
+---
+
+Automation allows any parameter in the signal chain to change over time. Volume fades, filter sweeps, effect wet/dry, tempo changes, and plugin parameters can all be automated.
+
+## Automation Lanes
+
+Each track can have multiple automation lanes, one per parameter. Lanes appear below the track in the arrangement view.
+
+To add an automation lane:
+
+1. Click the automation disclosure triangle on a track header
+2. Click **Add Lane**
+3. Select the parameter to automate (volume, pan, or any plugin parameter)
+
+## Breakpoint Envelopes
+
+Automation data is stored as a series of breakpoints (time-value pairs) with an interpolation mode between each pair.
+
+```toml
+[[automation]]
+target = "volume"
+points = [
+  { time = 0, value = -6.0, curve = "linear" },
+  { time = 96000, value = 0.0, curve = "linear" },
+  { time = 480000, value = 0.0, curve = "bezier" },
+  { time = 528000, value = -96.0, curve = "bezier" },
+]
+```
+
+### Interpolation Modes
+
+| Mode | Behavior |
+|---|---|
+| **Linear** | Straight line between points |
+| **Bezier** | Smooth curve with adjustable curvature (drag the curve handle) |
+| **Step** | Instant jump at the second point (hold previous value until the transition) |
+
+## Drawing and Editing
+
+### Drawing
+
+1. Select the **Pencil** tool (or hold **B**)
+2. Click and drag in an automation lane to draw a freehand envelope
+3. Breakpoints are placed at the grid resolution (adjustable via snap settings)
+
+### Editing
+
+1. Select the **Pointer** tool
+2. Click a breakpoint to select it, drag to move
+3. Drag the curve between two points to adjust bezier curvature
+4. Double-click to add a new breakpoint
+5. Select and press **Delete** to remove breakpoints
+6. Box-select multiple points and drag to move them together
+
+### Range Operations
+
+- **Copy/Paste**: Select a range of automation, copy, and paste at another position
+- **Scale**: Select points and drag the top or bottom edge to scale values proportionally
+- **Thin**: Reduce point density while preserving the shape (useful after freehand drawing)
+
+## Automatable Parameters
+
+Any parameter on any node in the audio graph can be automated:
+
+- **Track controls**: Volume, pan, mute
+- **Plugin parameters**: Every exposed parameter from CLAP plugins
+- **Built-in effects**: All parameters on gain, EQ, compressor, reverb, delay
+- **Sends**: Send level per bus
+- **Transport**: Tempo (for tempo automation)
+
+The parameter browser shows all available targets in a tree structure grouped by track and plugin.
+
+## Sample-Accurate Automation
+
+Automation values are evaluated per sample, not per buffer. The control thread pre-computes automation values for each buffer and sends them to the audio thread as a list of (sample_offset, value) pairs. The audio thread applies parameter changes at the exact sample position.
+
+This means:
+
+- A volume fade is perfectly smooth, with no stepping artifacts
+- A filter cutoff sweep is continuous, not quantized to buffer boundaries
+- Multiple parameters can change simultaneously at different rates
+
+For parameters that plugins process per-buffer (not per-sample), the audio thread sends the parameter value at the start of each processing block. CLAP plugins that support per-sample parameter events receive the full event list.
