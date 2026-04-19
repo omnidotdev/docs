@@ -33,7 +33,7 @@ import { VscWorkspaceTrusted } from "react-icons/vsc";
       className: "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
     },
     {
-      label: "15+ Integrations",
+      label: "600+ Integrations",
       icon: <VscWorkspaceTrusted />,
       className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
     },
@@ -71,7 +71,7 @@ import { VscWorkspaceTrusted } from "react-icons/vsc";
 
 ## Key Features
 
-- **Visual editor**, drag-and-drop node canvas powered by React Flow with 80+ node types across 9 categories
+- **Visual editor**, drag-and-drop node canvas powered by React Flow with 80+ step types across 10 categories
 - **JSON DSL**, portable `v1.0` definition format stored as JSONB
 - **TypeScript SDK**, fluent builder API (`@omnidotdev/vortex-sdk`)
 - **600+ integrations**, Slack, GitHub, Stripe, Google Sheets, and more
@@ -87,13 +87,13 @@ Vortex workflows can be authored three ways, and every format round-trips to the
 
 | Authoring mode | Format | Round-trip |
 |---|---|---|
-| **UI** | React Flow nodes/edges | UI &#8594; JSON &#8594; UI |
-| **JSON** | DSL v1.0 | JSON &#8594; UI &#8594; JSON |
-| **SDK** | TypeScript builder | SDK `.build()` &#8594; JSON &#8594; TypeScript export |
+| **UI** | React Flow nodes/edges | UI -> JSON -> UI |
+| **JSON** | DSL v1.0 | JSON -> UI -> JSON |
+| **SDK** | TypeScript builder | SDK `.build()` -> JSON -> TypeScript export |
 
 ### Visual Editor
 
-The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 80+ step types across 9 categories.
+The visual editor is a node-based workflow canvas powered by React Flow. Drag steps from the sidebar, connect them with edges, and configure each step inline. The editor supports branching, parallel paths, loops, and all 80+ step types across 10 categories.
 
 Workflows built in the editor are automatically converted to the JSON DSL for storage and execution.
 
@@ -182,23 +182,24 @@ The API triggers workflow execution by pushing events to Hatchet. The worker pic
 
 ## Step Types
 
-Vortex supports 80+ step types across 9 categories:
+Vortex supports 80+ step types across 10 categories:
 
 | Category | Types |
 |---|---|
 | **Core** | `trigger`, `action`, `condition`, `switch`, `delay`, `loop`, `parallel`, `gate`, `plugin`, `code`, `subworkflow`, `noop`, `stop` |
 | **Data** | `map`, `reduce`, `sort`, `unique`, `filter`, `merge`, `split`, `flatten`, `chunk`, `zip`, `group`, `set`, `template`, `parse`, `format`, `validate` |
-| **AI/ML** | `llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`, `rivet` |
+| **AI/ML** | `llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`, `rivet`, `modelRegistry` |
 | **Human** | `approval`, `input`, `notification` |
-| **Infra** | `cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`, `file`, `log` |
+| **Infra** | `cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`, `file`, `log`, `pdf` |
 | **Security** | `encrypt`, `decrypt`, `sign`, `jwt`, `hash` |
-| **Flow Control** | `try_catch`, `race`, `retry`, `timeout`, `sleep`, `wait`, `debounce` |
+| **Flow Control** | `try_catch`, `race`, `retry`, `timeout`, `sleep`, `wait`, `debounce`, `assert` |
 | **Events** | `event`, `aggregate`, `window`, `collect`, `diff`, `change_detector`, `time_window` |
 | **Orchestration** | `saga`, `mcp`, `comment`, `error`, `webhookResponse` |
+| **Integrations** | `spreadsheet`, `googleSheets` |
 
 ## Integrations
 
-Vortex ships with 600+ built-in integrations (Slack, GitHub, Stripe, Google Sheets, and more) powered by the ActivePieces connector ecosystem, with additional connectors available through the integrations page. Integrations are loaded at runtime based on the integration ID in the step definition.
+Vortex ships with 600+ built-in integrations (Slack, GitHub, Stripe, Google Sheets, and more) powered by the [ActivePieces](https://activepieces.com) connector ecosystem. Integrations are loaded at runtime based on the integration ID in the step definition. Browse the full catalog on the [Integrations page](https://vortex.omni.dev/integrations).
 
 ## Built-in Plugins
 
@@ -206,7 +207,7 @@ Vortex ships with 600+ built-in integrations (Slack, GitHub, Stripe, Google Shee
 |---|---|
 | **Cache** | Get, set, delete with optional TTL |
 | **Rate Limit** | Token bucket, sliding window, fixed window algorithms |
-| **Queue** | Push/pull with memory, Redis, SQS, or RabbitMQ backends |
+| **Queue** | Push/pull with memory, Valkey, SQS, or RabbitMQ backends |
 | **Database** | Query, insert, update, delete with parameterized SQL |
 | **Email** | Send emails via Resend |
 | **File** | Read, write, list, delete files |
@@ -259,13 +260,15 @@ The worker includes an MCP (Model Context Protocol) client for connecting to ext
 
 Vortex offers four tiers, plus custom Enterprise plans. All tiers include the visual editor, JSON DSL, and TypeScript SDK.
 
-| Plan | Workflows | Runs/month | Users | Features |
-|---|---|---|---|---|
-| **Free** | 3 | 1,000 | 1 | Core steps, webhook + cron triggers, community support |
-| **Starter** | 10 | 10,000 | 3 | All step types, all triggers, email support |
-| **Pro** | 50 | 50,000 | 10 | SSO, custom plugins, priority support |
-| **Team** | Unlimited | 500,000 | 25 | Audit logs, SLA guarantee |
-| **Enterprise** | Custom | Custom | Custom | Dedicated infrastructure, SOC 2, premium support |
+| Plan | Workflows | Executions/month | Key features |
+|---|---|---|---|
+| **Free** | 5 | 1,000 | All integrations, 10 connected accounts, 1 user, community support |
+| **Starter** | 25 | 10,000 | All integrations, email support |
+| **Pro** | Unlimited | 50,000 | Custom plugins, SSO, priority support |
+| **Team** | Unlimited | 500,000 | Custom plugins, audit logs, SLA guarantee |
+| **Enterprise** | Custom | Custom | Dedicated infrastructure, SOC 2, premium support |
+
+When billing is not configured (self-hosted), all features are unlocked with no limits.
 
 Visit [vortex.omni.dev/pricing](https://vortex.omni.dev/pricing) for current pricing and plan details.
 
@@ -291,13 +294,16 @@ Visit [vortex.omni.dev/pricing](https://vortex.omni.dev/pricing) for current pri
   <Card title="Execution" href="/grid/vortex/execution">
     Worker architecture, plugins, WASM, and execution backends
   </Card>
+  <Card title="API Reference" href="/grid/vortex/api">
+    REST and GraphQL endpoints for workflow management
+  </Card>
   <Card title="CLI" href="/grid/vortex/cli">
     Workflow management and plugin development from the terminal
   </Card>
   <Card title="Configuration" href="/grid/vortex/configuration">
     Environment variables and service configuration
   </Card>
-  <Card title="Self-Hosting" href="/help/self-hosting/docker-compose">
+  <Card title="Self-Hosting" href="/grid/vortex/self-hosting">
     Docker Compose and Kubernetes deployment
   </Card>
 </Cards>

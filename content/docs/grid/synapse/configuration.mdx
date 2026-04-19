@@ -38,7 +38,8 @@ path = "/health"
 [server.cors]
 origins = ["https://app.omni.dev"]
 methods = ["GET", "POST", "OPTIONS"]
-headers = ["Content-Type", "Authorization"]
+headers = ["Content-Type", "Authorization", "X-Api-Key"]
+credentials = true
 max_age = 3600
 ```
 
@@ -151,6 +152,10 @@ Group providers that can substitute for each other. If the primary provider fail
 [[llm.failover.equivalence_groups]]
 name = "frontier"
 models = ["openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"]
+
+[[llm.failover.equivalence_groups]]
+name = "fast"
+models = ["openai/gpt-4o-mini", "anthropic/claude-haiku-4-5-20251001"]
 ```
 
 ### Circuit Breaker
@@ -170,6 +175,69 @@ recovery_seconds = 30
 | `window_seconds` | Sliding window duration in seconds | 60 |
 | `recovery_seconds` | Seconds to wait before probing a tripped provider | 30 |
 
+## Response Cache
+
+Synapse can cache LLM responses in Valkey to reduce latency and cost for repeated queries:
+
+```toml
+[cache]
+enabled = true
+url = "{{ env.VALKEY_URL }}"
+ttl_seconds = 3600
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `enabled` | Enable response caching | false |
+| `url` | Valkey/Redis connection URL | -- (required) |
+| `ttl_seconds` | Time-to-live for cached responses in seconds | 3600 |
+
+<Callout type="info">
+  Response caching uses the same Valkey instance as rate limiting. Identical requests (same model, messages, and parameters) return cached responses within the TTL window.
+</Callout>
+
+## Billing
+
+Synapse integrates with Aether for usage metering and subscription enforcement. The `[billing]` section configures this integration:
+
+```toml
+[billing]
+enabled = true
+billing_url = "{{ env.BILLING_URL }}"
+service_api_key = "{{ env.BILLING_SERVICE_API_KEY }}"
+app_id = "synapse"
+mode = "hybrid"
+fail_mode = "open"
+
+[billing.tier_margins]
+free = 1.15
+pro = 1.15
+team = 1.15
+
+[billing.managed_providers.openai]
+api_key = "{{ env.OPENAI_API_KEY }}"
+margin = 1.0
+
+[billing.managed_providers.anthropic]
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+margin = 1.0
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `enabled` | Enable billing enforcement | false |
+| `billing_url` | URL of the Aether billing service | -- (required) |
+| `service_api_key` | Service API key for Aether | -- (required) |
+| `app_id` | Application identifier in Aether | `"synapse"` |
+| `mode` | Billing mode: `"hybrid"` (BYOK + managed), `"managed"`, or `"byok"` | `"hybrid"` |
+| `fail_mode` | Behavior when billing is unreachable: `"open"` (allow) or `"closed"` (deny) | `"open"` |
+| `tier_margins` | Per-tier markup multiplier for managed provider usage | -- |
+| `managed_providers` | Provider keys and margins for managed (non-BYOK) usage | -- |
+
+<Callout type="info">
+  Billing is optional for self-hosted deployments. When disabled, all requests are treated as BYOK with no usage metering.
+</Callout>
+
 ## Logging
 
 Log level is controlled by the `RUST_LOG` environment variable:
@@ -188,15 +256,16 @@ A full production config combining multiple sections:
 [server]
 listen_address = "0.0.0.0:3000"
 
-[server.tls]
-cert_path = "/etc/synapse/cert.pem"
-key_path = "/etc/synapse/key.pem"
+[server.health]
+enabled = true
+path = "/health"
 
 [server.cors]
-allowed_origins = ["https://app.omni.dev"]
-
-[server.csrf]
-enabled = true
+origins = ["https://synapse.omni.dev"]
+methods = ["GET", "POST", "OPTIONS"]
+headers = ["Content-Type", "Authorization", "X-Api-Key"]
+credentials = true
+max_age = 3600
 
 [server.rate_limit]
 [server.rate_limit.storage]
@@ -204,12 +273,25 @@ type = "cache"
 url = "{{ env.VALKEY_URL }}"
 
 [server.rate_limit.global]
-requests = 120
+requests = 1000
 window = "1m"
 
 [server.rate_limit.per_ip]
-requests = 30
+requests = 120
 window = "1m"
+
+[llm.providers.anthropic]
+type = "anthropic"
+api_key = "{{ env.ANTHROPIC_API_KEY }}"
+
+[llm.providers.openai]
+type = "openai"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+[llm.providers.nvidia]
+type = "openai"
+base_url = "https://integrate.api.nvidia.com/v1"
+api_key = "{{ env.NVIDIA_API_KEY }}"
 
 [llm.failover]
 enabled = true
@@ -222,20 +304,24 @@ recovery_seconds = 30
 
 [[llm.failover.equivalence_groups]]
 name = "frontier"
-models = ["openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"]
+models = ["anthropic/claude-opus-4-6", "anthropic/claude-sonnet-4-5-20250929", "openai/gpt-4o"]
 
-[llm.providers.anthropic]
-type = "anthropic"
-api_key = "{{ env.ANTHROPIC_API_KEY }}"
-
-[llm.providers.openai]
-type = "openai"
-api_key = "{{ env.OPENAI_API_KEY }}"
+[[llm.failover.equivalence_groups]]
+name = "fast"
+models = ["openai/gpt-4o-mini", "anthropic/claude-haiku-4-5-20251001"]
 
 [auth]
 enabled = true
 api_url = "http://synapse-api:4000"
 gateway_secret = "{{ env.GATEWAY_SECRET }}"
+cache_ttl_seconds = 60
+cache_capacity = 10000
+public_paths = ["/health"]
+
+[cache]
+enabled = true
+url = "{{ env.VALKEY_URL }}"
+ttl_seconds = 3600
 
 [stt.providers.whisper]
 type = "whisper"
@@ -243,6 +329,14 @@ api_key = "{{ env.OPENAI_API_KEY }}"
 
 [tts.providers.openai]
 type = "openai_tts"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+[embeddings.providers.openai]
+type = "openai"
+api_key = "{{ env.OPENAI_API_KEY }}"
+
+[imagegen.providers.openai]
+type = "openai"
 api_key = "{{ env.OPENAI_API_KEY }}"
 ```
 

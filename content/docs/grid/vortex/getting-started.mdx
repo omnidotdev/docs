@@ -14,25 +14,28 @@ Get up and running with Vortex in a few minutes. Choose between Docker Compose f
 ## 1. Start the stack
 
 ```bash
-# Clone the metarepo and service repos
+# Clone the stack repo (includes compose files)
 git clone https://github.com/omnidotdev/vortex vortex-stack
 cd vortex-stack
+
+# Clone each service into the services/ directory
 git clone https://github.com/omnidotdev/vortex-api services/vortex-api
 git clone https://github.com/omnidotdev/vortex-app services/vortex-app
 git clone https://github.com/omnidotdev/vortex-worker services/vortex-worker
 
-# Copy the environment template and fill in secrets
+# Copy the environment template and fill in required secrets
 cp .env.local.template .env.local
-# Edit .env.local: generate secrets (see comments in template) and
-# set HATCHET_CLIENT_TOKEN from your Hatchet instance.
+# Edit .env.local: generate secrets with the commands shown in the
+# template comments, and set HATCHET_CLIENT_TOKEN from your Hatchet
+# instance.
 
 # Build from source and start all services
 docker compose -f compose.yaml -f compose.dev.yaml up --build
 ```
 
-This starts PostgreSQL, Valkey (cache), Iggy (event streaming), and the three Vortex services (API, app, worker). Once healthy, the dashboard is available at `http://localhost:3000` and the API at `http://localhost:4000`.
+This starts PostgreSQL 18, Valkey 8 (Redis-compatible cache), Apache Iggy (event streaming), and the three Vortex services (API, app, worker). Once healthy, the dashboard is available at `http://localhost:3000` and the API at `http://localhost:4000`.
 
-See the [Self-Hosting guide](/help/self-hosting/docker-compose) for Kubernetes and production deployment options.
+See the [Self-Hosting guide](/grid/vortex/self-hosting) for Kubernetes and production deployment options.
 
 ## 2. Create a workflow
 
@@ -145,7 +148,7 @@ The dashboard shows real-time workflow run status, step-by-step execution traces
   <Card title="Configuration" href="/grid/vortex/configuration">
     Environment variables and service configuration
   </Card>
-  <Card title="Self-Hosting" href="/help/self-hosting/docker-compose">
+  <Card title="Self-Hosting" href="/grid/vortex/self-hosting">
     Docker Compose and Kubernetes deployment
   </Card>
   <Card title="CLI" href="/grid/vortex/cli">
