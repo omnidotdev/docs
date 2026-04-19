@@ -38,7 +38,7 @@ public_paths = ["/health"]
 | `enabled` | Enable API key auth | false |
 | `api_url` | URL of the synapse-api service | -- (required) |
 | `gateway_secret` | Shared secret for gateway-to-API authentication | -- (required) |
-| `cache_ttl_seconds` | How long to cache resolved API keys | 60 |
+| `cache_ttl_seconds` | How long to cache resolved API keys (seconds) | 30 |
 | `cache_capacity` | Maximum number of cached key resolutions | 10000 |
 | `public_paths` | Paths that skip authentication | `["/health"]` |
 | `tls_skip_verify` | Skip TLS verification for API calls (dev only) | false |
@@ -61,7 +61,7 @@ When configured, Synapse resolves BYOK (Bring Your Own Key) provider keys from a
 [auth.vault]
 url = "https://gatekeeper.omni.dev"
 service_key = "{{ env.AUTH_SERVICE_KEY }}"
-cache_ttl_seconds = 600
+cache_ttl_seconds = 300
 cache_capacity = 10000
 ```
 

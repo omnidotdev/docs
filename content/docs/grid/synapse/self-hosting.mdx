@@ -36,10 +36,9 @@ docker compose --env-file .env.local up -d --build
 | Variable | Description |
 |----------|-------------|
 | `DB_PASSWORD` | PostgreSQL password |
-| `AUTH_SECRET` | Session signing secret (`openssl rand -hex 32`) |
-| `GATEWAY_SECRET` | Internal gateway auth secret (`openssl rand -hex 32`) |
+| `AUTH_SECRET` | Session signing secret (`openssl rand -base64 32`) |
+| `GATEWAY_SECRET` | Internal gateway auth secret (`openssl rand -base64 32`) |
 | `ENCRYPTION_KEY` | Provider key encryption at rest (`openssl rand -base64 32`) |
-| `AUTH_BASE_URL` | URL of HIDRA Gatekeeper instance |
 
 At least one LLM provider API key is required: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `NVIDIA_API_KEY`.
 
@@ -96,11 +95,23 @@ A Helm chart is included at `charts/synapse/`.
 
 ```bash
 helm install synapse ./charts/synapse \
-  --set secrets.authSecret=$(openssl rand -hex 32) \
-  --set secrets.gatewaySecret=$(openssl rand -hex 32) \
+  --set secrets.authSecret=$(openssl rand -base64 32) \
+  --set secrets.gatewaySecret=$(openssl rand -base64 32) \
   --set secrets.encryptionKey=$(openssl rand -base64 32) \
   --set gateway.providers.anthropic=sk-ant-... \
-  --set postgresql.auth.postgresPassword=your-db-password
+  --set postgresql.auth.password=your-db-password
+```
+
+To deploy without authentication (no Gatekeeper):
+
+```bash
+helm install synapse ./charts/synapse \
+  --set api.protectRoutes=false \
+  --set secrets.authSecret=$(openssl rand -base64 32) \
+  --set secrets.gatewaySecret=$(openssl rand -base64 32) \
+  --set secrets.encryptionKey=$(openssl rand -base64 32) \
+  --set gateway.providers.anthropic=sk-ant-... \
+  --set postgresql.auth.password=your-db-password
 ```
 
 See `charts/synapse/values.prod.yaml` for production-tuned ingress, TLS, and auth configuration.
@@ -130,6 +141,7 @@ See [Configuration](/grid/synapse/configuration) for the full TOML reference.
 |---------|---------|---------|-----------|
 | Gatekeeper (HIDRA) | `AUTH_BASE_URL` | JWT auth, user management | No (set `PROTECT_ROUTES=false`) |
 | Aether | `BILLING_SERVICE_API_KEY` | Billing, subscriptions | No (returns 503) |
+| Warden | `AUTHZ_API_URL` | Fine-grained authorization | No (set `AUTHZ_ENABLED=false` or omit) |
 | Valkey | `VALKEY_URL` | Rate limiting, response cache | Included in compose |
 
 ## Binary Install
