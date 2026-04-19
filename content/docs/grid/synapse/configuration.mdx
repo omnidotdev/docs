@@ -18,9 +18,13 @@ The binary listens on port 3000 by default. In Docker Compose, port 6000 on the 
 
 ```toml
 [server.tls]
-cert_path = "/etc/synapse/cert.pem"
-key_path = "/etc/synapse/key.pem"
+certificate = "/etc/synapse/cert.pem"
+private_key = "/etc/synapse/key.pem"
 ```
+
+<Callout type="warning">
+  Application-level TLS is parsed by the config but not currently applied. Synapse logs a warning at startup. Use a reverse proxy or ingress controller for TLS termination instead.
+</Callout>
 
 ### Health Endpoint
 
@@ -221,6 +225,10 @@ margin = 1.0
 [billing.managed_providers.anthropic]
 api_key = "{{ env.ANTHROPIC_API_KEY }}"
 margin = 1.0
+
+[billing.managed_providers.nvidia]
+api_key = "{{ env.NVIDIA_API_KEY }}"
+margin = 1.0
 ```
 
 | Field | Description | Default |
@@ -304,7 +312,7 @@ recovery_seconds = 30
 
 [[llm.failover.equivalence_groups]]
 name = "frontier"
-models = ["anthropic/claude-opus-4-6", "anthropic/claude-sonnet-4-5-20250929", "openai/gpt-4o"]
+models = ["anthropic/claude-opus-4-6", "anthropic/claude-sonnet-4-5-20250929", "openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"]
 
 [[llm.failover.equivalence_groups]]
 name = "fast"
