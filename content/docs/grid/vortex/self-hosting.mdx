@@ -104,6 +104,14 @@ When billing is not configured, the pricing page shows "All Features" mode, and 
 
 For production deployments, Vortex ships a Helm chart with configurable replicas, resource limits, ingress, TLS, and Pod Disruption Budgets.
 
+### Prerequisites
+
+The Helm chart deploys the three Vortex services (API, app, worker) and optionally a PostgreSQL subchart. The following external dependencies must be provisioned separately:
+
+- **Valkey / Redis** for caching and distributed locks. Configure via `externalCache` values, or deploy your own Valkey instance alongside the chart.
+- **[Apache Iggy](https://iggy.rs)** for event streaming. The worker and API both require a reachable Iggy server.
+- **[Hatchet](https://docs.hatchet.run/self-hosting)** for workflow execution. See the Hatchet self-hosting docs for setup instructions.
+
 ### Install
 
 ```sh
@@ -112,8 +120,24 @@ helm install vortex ./charts/vortex \
   -f charts/vortex/values.yaml \
   --set secrets.dbPassword=<password> \
   --set secrets.authSecret=<secret> \
-  --set secrets.encryptionKey=<key>
+  --set secrets.encryptionKey=<key> \
+  --set secrets.internalApiSecret=<secret> \
+  --set secrets.hatchetClientToken=<token> \
+  --set secrets.iggyUsername=<username> \
+  --set secrets.iggyPassword=<password> \
+  --set secrets.cachePassword=<password>
 ```
+
+| Secret | Description | Generate with |
+|--------|-------------|---------------|
+| `secrets.dbPassword` | PostgreSQL password | `openssl rand -hex 16` |
+| `secrets.authSecret` | Session signing secret | `openssl rand -hex 16` |
+| `secrets.encryptionKey` | Data encryption key | `openssl rand -base64 32` |
+| `secrets.internalApiSecret` | Service-to-service auth | `openssl rand -hex 16` |
+| `secrets.hatchetClientToken` | Hatchet API token | From Hatchet dashboard |
+| `secrets.iggyUsername` | Iggy streaming username | Any value |
+| `secrets.iggyPassword` | Iggy streaming password | Any value |
+| `secrets.cachePassword` | Valkey/Redis password | `openssl rand -hex 16` |
 
 See `charts/vortex/values.yaml` for the full list of configurable values, and `charts/vortex/values.prod.yaml` for a production reference.
 
