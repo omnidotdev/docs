@@ -7,7 +7,12 @@ Vortex is fully open source (Apache 2.0) and designed to run on your own infrast
 
 ## Docker Compose
 
-The fastest way to self-host Vortex. Clone the repo and run three commands.
+The fastest way to self-host Vortex. The stack repo includes two compose files:
+
+- **`compose.yaml`** pulls pre-built images from `manifold.omni.dev` (Omni's private registry)
+- **`compose.dev.yaml`** overrides the image references to build from source instead
+
+For self-hosted deployments, use the dev override to build from the cloned service repos.
 
 ### Prerequisites
 
@@ -18,7 +23,11 @@ The fastest way to self-host Vortex. Clone the repo and run three commands.
 ### Quick start
 
 ```sh
-git clone https://github.com/omnidotdev/vortex.git && cd vortex
+# Clone the stack repo and service repos
+git clone https://github.com/omnidotdev/vortex vortex-stack && cd vortex-stack
+git clone https://github.com/omnidotdev/vortex-api services/vortex-api
+git clone https://github.com/omnidotdev/vortex-app services/vortex-app
+git clone https://github.com/omnidotdev/vortex-worker services/vortex-worker
 
 cp .env.local.template .env.local
 # Edit .env.local and fill in required values (see below)
@@ -33,7 +42,7 @@ The app will be available at `http://localhost:3000`, the API at `http://localho
 | Variable | Description | Generate with |
 |----------|-------------|---------------|
 | `DB_PASSWORD` | PostgreSQL password | `openssl rand -hex 16` |
-| `CACHE_PASSWORD` | Valkey (Redis) password | `openssl rand -hex 16` |
+| `CACHE_PASSWORD` | Valkey (Redis-compatible) password | `openssl rand -hex 16` |
 | `AUTH_SECRET` | Session signing secret | `openssl rand -hex 16` |
 | `ENCRYPTION_KEY` | Data encryption key | `openssl rand -base64 32` |
 | `INTERNAL_API_SECRET` | Service-to-service auth | `openssl rand -hex 16` |
@@ -50,9 +59,29 @@ The app will be available at `http://localhost:3000`, the API at `http://localho
 | `DB_PORT` | Database port | `5432` |
 | `API_PORT` | API port | `4000` |
 | `APP_PORT` | App port | `3000` |
+| `CACHE_PORT` | Valkey port | `6379` |
+| `EVENTS_TCP_PORT` | Iggy TCP port | `8090` |
+| `HATCHET_CLIENT_TLS_STRATEGY` | TLS mode for Hatchet (`none`, `tls`, `mtls`) | `none` |
 | `CORS_ALLOWED_ORIGINS` | Allowed CORS origins | `http://localhost:3000` |
-| `GOOGLE_CLIENT_ID` | Google OAuth (optional) | |
-| `GITHUB_CLIENT_ID` | GitHub OAuth (optional) | |
+| `VORTEX_PUBLIC_URL` | Public URL for webhook callbacks | `http://localhost:4000` |
+| `VORTEX_CALLBACK_BASE_URL` | Base URL for OAuth callback redirects | `http://localhost:3000` |
+| `PLATFORM_ORG_ID` | Platform org ID for multi-tenant deployments | (empty, single-tenant) |
+
+OAuth login providers (all optional, email/password is always available):
+
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | GitHub OAuth |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Generic OIDC (e.g., Keycloak, Auth0) |
+
+Omni platform integrations (optional, omit to run Vortex standalone):
+
+| Variable | Description |
+|----------|-------------|
+| `MANTLE_API_URL`, `MANTLE_SERVICE_KEY` | Mantle notification service |
+| `AUTH_API_URL` | HIDRA identity provider |
+| `RESEND_API_KEY`, `EMAIL_RENDER_SECRET` | Email trigger adapter |
 
 ### Architecture
 
@@ -65,11 +94,11 @@ The Docker Compose stack includes:
 - **vortex-app** (port 3000) for the web UI
 - **vortex-worker** for workflow execution
 
-All services include health checks and proper dependency ordering.
+All services include health checks and proper dependency ordering. The worker depends on the API being healthy before starting.
 
 ### Self-hosted features
 
-When billing is not configured (`hasBilling=false`), the pricing page shows "All Features" mode, and all entitlements are unlocked. Self-hosted deployments get the full feature set with no artificial limits.
+When billing is not configured, the pricing page shows "All Features" mode, and all entitlements are unlocked. Self-hosted deployments get the full feature set with no artificial limits: unlimited workflows, unlimited executions, all integrations, custom plugins, and SSO.
 
 ## Kubernetes (Helm)
 
@@ -117,8 +146,10 @@ Database migrations run automatically on startup.
 
 ## Troubleshooting
 
-**Services won't start**: Check that all required env vars in `.env.local` are set. The compose file will print which variable is missing.
+**Services won't start**: Check that all required env vars in `.env.local` are set. The compose file will print which variable is missing (e.g., `DB_PASSWORD is required`).
 
 **Database connection errors**: Verify `DB_PASSWORD` matches between the `db` service and `api`/`worker` services (they derive the URL from the same env var).
 
 **Hatchet connection failures**: Ensure `HATCHET_CLIENT_TOKEN` is valid and the Hatchet server is reachable. Set `HATCHET_CLIENT_TLS_STRATEGY=none` for local Hatchet instances without TLS.
+
+**Worker not starting**: The worker depends on the API being healthy first. Check the API logs for errors before investigating the worker.

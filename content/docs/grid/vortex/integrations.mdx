@@ -3,7 +3,7 @@ title: Integrations
 description: Connect external services to power your Vortex workflows
 ---
 
-Vortex ships with 500+ built-in integrations powered by the [ActivePieces](https://activepieces.com) connector ecosystem. Connect your favorite tools and use them as workflow steps without writing code.
+Vortex ships with 600+ built-in integrations powered by the [ActivePieces](https://activepieces.com) connector ecosystem. Connect your favorite tools and use them as workflow steps without writing code.
 
 ## Featured integrations
 
@@ -29,30 +29,38 @@ Vortex ships with 500+ built-in integrations powered by the [ActivePieces](https
 
 ## Using integrations in workflows
 
-Once connected, integrations appear as **Plugin** step types in the workflow editor. Each integration exposes actions and triggers specific to that service.
+Once connected, integrations appear as **action** step types in the workflow editor. Each integration exposes actions and triggers specific to that service.
 
 ### Example: Slack notification on form submission
 
 ```json
 {
-  "nodes": [
+  "version": "1.0",
+  "steps": [
     {
       "id": "trigger_1",
-      "type": "triggerNode",
-      "data": { "triggerType": "webhook" }
+      "type": "trigger",
+      "name": "Webhook",
+      "position": { "x": 0, "y": 0 },
+      "trigger": { "type": "webhook", "config": {} }
     },
     {
       "id": "slack_1",
-      "type": "pluginNode",
-      "data": {
-        "pluginId": "builtin:slack",
-        "operation": "send-message",
-        "config": {
+      "type": "action",
+      "name": "Send Slack notification",
+      "position": { "x": 250, "y": 0 },
+      "action": {
+        "integrationId": "slack",
+        "operation": "sendMessage",
+        "inputs": {
           "channel": "#notifications",
-          "message": "New submission from {{ trigger_1.body.name }}"
+          "text": "New submission from {{triggerData.body.name}}"
         }
       }
     }
+  ],
+  "edges": [
+    { "id": "e-trigger-slack", "source": "trigger_1", "target": "slack_1" }
   ]
 }
 ```
@@ -82,6 +90,8 @@ OIDC_CLIENT_SECRET=your_client_secret
 
 ## Integration limits
 
+All plans include access to all 600+ integrations. Connected account limits depend on your plan:
+
 | Plan | Connected accounts |
 |------|--------------------|
 | Free | 10 |
@@ -89,3 +99,5 @@ OIDC_CLIENT_SECRET=your_client_secret
 | Pro | Unlimited |
 | Team | Unlimited |
 | Enterprise | Unlimited |
+
+When billing is not configured (self-hosted), all integrations and connected accounts are unlimited.

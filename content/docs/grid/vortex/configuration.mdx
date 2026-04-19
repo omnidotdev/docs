@@ -9,92 +9,185 @@ Vortex is composed of three application services (API, app, worker) and three in
 
 | Service | Default port | Purpose |
 |---|---|---|
-| **PostgreSQL** | 5432 | Primary data store (workflows, runs, credentials, routing rules) |
-| **Valkey** | 6379 | Distributed cron locking and caching (Redis-compatible) |
-| **Iggy** | 8090 (TCP) | Event streaming (OmniEvent bus) |
+| **PostgreSQL 18** | 5432 | Primary data store (workflows, runs, credentials, routing rules) |
+| **Valkey 8** | 6379 | Distributed cron locking and caching (Redis-compatible) |
+| **Apache Iggy** | 8090 (TCP) | Event streaming (OmniEvent bus) |
 
 ## API (`vortex-api`)
 
 The API handles GraphQL/REST requests, cron scheduling, event routing, and workflow dispatch.
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | Yes | - | PostgreSQL connection string |
-| `AUTH_SECRET` | Yes | - | Better Auth session signing secret |
-| `AUTH_BASE_URL` | Yes | - | OIDC identity provider URL |
-| `CORS_ALLOWED_ORIGINS` | Yes | - | Comma-separated allowed origins |
-| `ENCRYPTION_KEY` | Yes | - | Base64-encoded 32-byte key for encrypting stored integration credentials (required when storing integration credentials) |
-| `HATCHET_CLIENT_TOKEN` | Yes* | - | Token for the Hatchet workflow engine (required when using Hatchet executor backend) |
-| `INTERNAL_API_SECRET` | Yes | - | Shared secret for internal service-to-service calls (generate with `openssl rand -hex 16`) |
-| `CACHE_URL` | No | - | Valkey/Redis URL for distributed locking (required for multi-instance) |
-| `EVENTS_URL` | No | - | Iggy TCP connection string |
-| `WORKER_URL` | No | - | Worker service URL for health forwarding |
-| `VORTEX_PUBLIC_URL` | No | - | Public-facing Vortex URL (used for OAuth callbacks, function invoke URLs) |
-| `BILLING_BASE_URL` | No | - | Aether billing service URL |
-| `BILLING_WEBHOOK_SECRET` | No | - | Aether billing webhook HMAC secret |
-| `IDP_WEBHOOK_SECRET` | No | - | Gatekeeper IDP webhook HMAC secret |
-| `AUTHZ_API_URL` | No | - | Warden AuthZ API URL (enables AuthZ when set) |
-| `STRIPE_API_KEY` | No | - | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | No | - | Stripe webhook signing secret |
-| `GRAPHQL_MAX_COMPLEXITY_COST` | No | `5000` | Maximum GraphQL query cost (the `.env.local.template` suggests `2000`, but the code default is `5000`) |
-| `PROTECT_ROUTES` | No | `true` | Enable auth middleware on API routes |
-| `AUTH_DEBUG` | No | - | Enable Better Auth debug logging |
+### Required
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AUTH_BASE_URL` | OIDC identity provider URL |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed origins |
+| `ENCRYPTION_KEY` | Base64-encoded 32-byte key for encrypting stored integration credentials |
+| `HATCHET_CLIENT_TOKEN` | Token for the Hatchet workflow engine (required when using the default Hatchet executor) |
+| `INTERNAL_API_SECRET` | Shared secret for internal service-to-service calls |
+| `IGGY_USERNAME` | Iggy authentication username |
+| `IGGY_PASSWORD` | Iggy authentication password |
+
+### Optional
+
+| Variable | Default | Description |
+|---|---|---|
+| `CACHE_URL` | - | Valkey/Redis URL for distributed locking (required for multi-instance) |
+| `EVENTS_URL` | - | Iggy TCP connection string |
+| `WORKER_URL` | - | Worker service URL for health forwarding |
+| `VORTEX_PUBLIC_URL` | - | Public-facing Vortex URL (used for OAuth callbacks) |
+| `PLATFORM_ORG_ID` | - | Platform organization ID (multi-tenant deployments) |
+| `BILLING_BASE_URL` | - | Aether billing service URL |
+| `BILLING_WEBHOOK_SECRET` | - | Aether billing webhook HMAC secret |
+| `BILLING_SERVICE_API_KEY` | - | Aether billing service API key |
+| `IDP_WEBHOOK_SECRET` | - | Gatekeeper IDP webhook HMAC secret |
+| `AUTHZ_API_URL` | - | Warden AuthZ API URL (enables AuthZ when set) |
+| `AUTHZ_WEBHOOK_SECRET` | - | Warden AuthZ webhook HMAC secret |
+| `AUTH_WEBHOOK_SECRET` | - | Auth service webhook HMAC secret |
+| `EMAIL_WEBHOOK_SECRET` | - | Email service webhook HMAC secret |
+| `STRIPE_API_KEY` | - | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | - | Stripe webhook signing secret |
+| `TEMPORAL_ADDRESS` | - | Temporal server address (when using Temporal backend) |
+| `TEMPORAL_NAMESPACE` | - | Temporal namespace |
+| `TEMPORAL_TASK_QUEUE` | - | Temporal task queue |
+| `GRAPHQL_MAX_COMPLEXITY_COST` | `5000` | Maximum GraphQL query cost |
+| `PROTECT_ROUTES` | `true` | Enable auth middleware on API routes |
+| `AUTH_DEBUG` | - | Enable Better Auth debug logging |
+| `LOG_LEVEL` | - | Log level override |
+
+### OAuth integration credentials
+
+These enable integration OAuth flows (e.g., connecting a user's Slack or GitHub account):
+
+| Variable | Description |
+|---|---|
+| `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` | GitHub integration OAuth |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Google integration OAuth |
+| `DISCORD_OAUTH_CLIENT_ID`, `DISCORD_OAUTH_CLIENT_SECRET` | Discord integration OAuth |
+| `SLACK_OAUTH_CLIENT_ID`, `SLACK_OAUTH_CLIENT_SECRET` | Slack integration OAuth |
+
+### Plugin storage
+
+| Variable | Description |
+|---|---|
+| `PLUGIN_STORAGE_BUCKET` | S3-compatible bucket for WASM plugin storage |
+| `PLUGIN_STORAGE_BASE_URL` | S3-compatible base URL |
 
 ### Observability
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | No | - | OpenTelemetry collector endpoint |
-| `OTEL_EXPORTER_OTLP_HEADERS` | No | - | OTLP headers (e.g., authorization) |
-| `OTEL_SERVICE_NAME` | No | `vortex-api` | Service name in traces |
+| Variable | Default | Description |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | - | OpenTelemetry collector endpoint |
+| `OTEL_EXPORTER_OTLP_HEADERS` | - | OTLP headers (e.g., authorization) |
+| `OTEL_SERVICE_NAME` | `vortex-api` | Service name in traces |
 
 ## App (`vortex-app`)
 
 The app is the React dashboard with visual workflow editor, user management, and real-time subscriptions.
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `AUTH_SECRET` | Yes | - | Better Auth session secret (must match API) |
-| `VITE_BASE_URL` | Yes | - | Public app URL (e.g., `https://vortex.omni.dev`) |
-| `VITE_API_BASE_URL` | Yes | - | Vortex API base URL |
-| `VITE_AUTH_BASE_URL` | Yes | - | OIDC identity provider URL |
-| `VITE_BILLING_BASE_URL` | No | - | Aether billing API URL |
-| `VITE_CONSOLE_URL` | No | - | Omni console URL |
-| `AUTH_CLIENT_ID` | No | - | OIDC client ID |
-| `AUTH_CLIENT_SECRET` | No | - | OIDC client secret |
-| `HATCHET_CLIENT_TLS_STRATEGY` | No | - | TLS mode for Hatchet connection |
-| `VITE_FLAGS_CLIENT_KEY` | No | - | Unleash feature flag client key |
-| `VITE_FLAGS_API_HOST` | No | - | Unleash API host URL |
+### Required
 
-### OAuth providers
+| Variable | Description |
+|---|---|
+| `AUTH_SECRET` | Session signing secret (generate with `openssl rand -base64 32`) |
+| `VITE_BASE_URL` | Public app URL (e.g., `https://vortex.omni.dev`) |
+| `VITE_API_BASE_URL` | Vortex API base URL |
+| `VITE_AUTH_BASE_URL` | OIDC identity provider URL |
 
-All OAuth providers are optional. Configure any combination:
+### Optional
+
+| Variable | Default | Description |
+|---|---|---|
+| `AUTH_CLIENT_ID` | - | OIDC client ID |
+| `AUTH_CLIENT_SECRET` | - | OIDC client secret |
+| `CACHE_URL` | - | Valkey/Redis URL (persists sessions across pod restarts) |
+| `API_INTERNAL_URL` | `VITE_API_BASE_URL` | Internal API URL for server-to-server communication (e.g., Docker service name) |
+| `VITE_BILLING_BASE_URL` | - | Aether billing API URL |
+| `VITE_AUTHZ_API_URL` | - | Warden AuthZ API URL |
+| `VITE_FLAGS_CLIENT_KEY` | - | Unleash feature flag client key |
+| `VITE_FLAGS_API_HOST` | - | Unleash API host URL |
+
+### OAuth providers (user login)
+
+All OAuth providers are optional. Configure any combination for login:
 
 | Variable | Description |
 |---|---|
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | GitHub OAuth |
-| `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_ISSUER` | Generic OIDC |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Generic OIDC (e.g., Keycloak, Auth0, HIDRA) |
 
 ## Worker (`vortex-worker`)
 
 The worker executes workflow DSL definitions, manages trigger adapters, and runs integration connectors.
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | Yes | - | PostgreSQL connection string |
-| `HATCHET_CLIENT_TOKEN` | Yes* | - | Hatchet workflow engine token (required when using Hatchet executor backend) |
-| `CACHE_URL` | No | - | Valkey/Redis URL |
-| `EVENTS_URL` | No | - | Iggy TCP connection string |
-| `IGGY_USERNAME` | No | - | Iggy authentication username |
-| `IGGY_PASSWORD` | No | - | Iggy authentication password |
-| `HATCHET_CLIENT_TLS_STRATEGY` | No | `none` | TLS mode for Hatchet connection |
-| `ENCRYPTION_KEY` | No | - | Base64-encoded 32-byte key for credential decryption |
-| `INTERNAL_API_SECRET` | Yes | - | Shared secret for internal service-to-service calls (generate with `openssl rand -hex 16`) |
-| `TEMPORAL_ADDRESS` | No | - | Temporal server address (when using Temporal backend) |
-| `VORTEX_TRIGGER_PLUGINS_DIR` | No | - | Directory for external trigger adapter plugins |
-| `HEALTH_PORT` | No | `8080` | Port for the health check HTTP server |
-| `LOG_LEVEL` | No | - | Log level override |
+### Required
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `HATCHET_CLIENT_TOKEN` | Hatchet workflow engine token (required when using the default Hatchet executor) |
+| `INTERNAL_API_SECRET` | Shared secret for internal service-to-service calls |
+
+### Optional
+
+| Variable | Default | Description |
+|---|---|---|
+| `VORTEX_EXECUTOR` | `hatchet` | Workflow executor backend (`hatchet` or `temporal`) |
+| `CACHE_URL` | - | Valkey/Redis URL |
+| `EVENTS_URL` | - | Iggy TCP connection string |
+| `IGGY_USERNAME` | - | Iggy authentication username |
+| `IGGY_PASSWORD` | - | Iggy authentication password |
+| `HATCHET_CLIENT_TLS_STRATEGY` | `none` | TLS mode for Hatchet connection |
+| `ENCRYPTION_KEY` | - | Base64-encoded 32-byte key for credential decryption |
+| `TEMPORAL_ADDRESS` | - | Temporal server address (when using Temporal backend) |
+| `TEMPORAL_NAMESPACE` | - | Temporal namespace |
+| `TEMPORAL_TASK_QUEUE` | - | Temporal task queue |
+| `VORTEX_API_URL` | - | API service URL (for internal callbacks) |
+| `VORTEX_PUBLIC_URL` | - | Public-facing Vortex URL |
+| `VORTEX_CALLBACK_BASE_URL` | - | Base URL for OAuth callback redirects |
+| `VORTEX_TRIGGER_PLUGINS_DIR` | - | Directory for external trigger adapter plugins |
+| `HEALTH_PORT` | `8080` | Port for the health check HTTP server |
+| `LOG_LEVEL` | - | Log level override |
+
+### Omni platform integrations
+
+| Variable | Description |
+|---|---|
+| `AUTHZ_API_URL` | Warden AuthZ PDP URL |
+| `AUTHZ_SERVICE_KEY` | Warden service key |
+| `BILLING_API_URL` | Aether billing API URL |
+| `BILLING_SERVICE_API_KEY` | Aether billing service API key |
+| `CHRONICLE_API_URL` | Chronicle audit logging URL |
+| `MANTLE_API_URL` | Mantle notification service URL |
+| `MANTLE_SERVICE_KEY` | Mantle service key |
+| `RESEND_API_KEY` | Resend API key (for email trigger adapter) |
+| `AUTH_API_URL` | Auth API URL (for email rendering) |
+| `EMAIL_RENDER_SECRET` | Email rendering secret |
+| `MEILISEARCH_URL` | Meilisearch URL |
+| `MEILISEARCH_MASTER_KEY` | Meilisearch master key |
+
+### OAuth integration credentials
+
+Same as the API (for worker-side OAuth flows):
+
+| Variable | Description |
+|---|---|
+| `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` | GitHub integration OAuth |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Google integration OAuth |
+| `DISCORD_OAUTH_CLIENT_ID`, `DISCORD_OAUTH_CLIENT_SECRET` | Discord integration OAuth |
+| `SLACK_OAUTH_CLIENT_ID`, `SLACK_OAUTH_CLIENT_SECRET` | Slack integration OAuth |
+
+### Observability
+
+| Variable | Default | Description |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | - | OpenTelemetry collector endpoint |
+| `OTEL_EXPORTER_OTLP_HEADERS` | - | OTLP headers |
+| `OTEL_SERVICE_NAME` | `vortex-worker` | Service name in traces |
+| `SENTRY_DSN` | - | Sentry error tracking DSN |
 
 ## Iggy (event streaming)
 
@@ -106,13 +199,16 @@ The worker executes workflow DSL definitions, manages trigger adapters, and runs
 ## Generating secrets
 
 ```bash
-# AUTH_SECRET - random 32-character string
+# AUTH_SECRET (app session signing)
 openssl rand -hex 16
 
-# ENCRYPTION_KEY - base64-encoded 32 bytes
+# ENCRYPTION_KEY (base64-encoded 32 bytes)
 openssl rand -base64 32
 
-# INTERNAL_API_SECRET - random string
+# INTERNAL_API_SECRET (service-to-service auth)
+openssl rand -hex 16
+
+# DB_PASSWORD / CACHE_PASSWORD (for Docker Compose)
 openssl rand -hex 16
 ```
 

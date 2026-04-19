@@ -1,0 +1,218 @@
+---
+title: API Reference
+description: REST and GraphQL API endpoints for workflow management and execution
+---
+
+Vortex exposes both a REST API and a GraphQL API. The REST API is documented below with curl examples. The GraphQL API is available at `/graphql` with an interactive playground.
+
+## Authentication
+
+All API requests require authentication via Bearer token:
+
+```bash
+Authorization: Bearer <api-key>
+```
+
+## Base URL
+
+| Environment | URL |
+|---|---|
+| Production | `https://api.vortex.omni.dev` |
+| Local | `http://localhost:4000` |
+
+## Workflows
+
+### List workflows
+
+```bash
+GET /api/v1/workflows?limit=20&offset=0&status=active
+```
+
+Returns a paginated list of workflows. Filter by `status` (`active`, `draft`, `archived`).
+
+### Get workflow
+
+```bash
+GET /api/v1/workflows/:workflowId
+```
+
+Returns the full workflow definition including steps, edges, variables, and settings.
+
+### Run a saved workflow
+
+```bash
+POST /api/v1/workflows/:workflowId/run
+Content-Type: application/json
+
+{
+  "triggerData": { "userId": "u_123" }
+}
+```
+
+Triggers execution of a saved workflow. Returns immediately with a run ID for tracking. The `triggerData` object is available to all steps in the workflow.
+
+### Run from DSL definition
+
+```bash
+POST /api/v1/workflows/run-dsl
+Content-Type: application/json
+
+{
+  "definition": {
+    "version": "1.0",
+    "steps": [...],
+    "edges": [...]
+  },
+  "triggerData": {}
+}
+```
+
+Executes a workflow directly from a DSL definition without saving. Useful for testing, one-off executions, and SDK usage.
+
+## Runs
+
+### List runs
+
+```bash
+GET /api/v1/runs?workflowId=<uuid>&status=running&limit=20
+```
+
+Returns a paginated list of workflow runs. Filter by `workflowId` and `status` (`pending`, `running`, `completed`, `failed`, `cancelled`).
+
+### Get run status
+
+```bash
+GET /api/v1/runs/:runId
+```
+
+Returns the current status of a workflow run including step-by-step progress, outputs, and errors.
+
+### Cancel a run
+
+```bash
+POST /api/v1/runs/:runId/cancel
+```
+
+Attempts to cancel a running workflow. Steps currently executing may complete before cancellation takes effect.
+
+### Stream run events (SSE)
+
+```bash
+GET /api/v1/runs/:runId/stream
+Accept: text/event-stream
+```
+
+Server-Sent Events stream for real-time execution updates. Events include step starts, completions, failures, and run completion.
+
+## Events
+
+### Publish an event
+
+```bash
+POST /api/v1/events
+Content-Type: application/json
+
+{
+  "type": "order.created",
+  "source": "my-service",
+  "data": { "orderId": "ord_123", "total": 99.00 }
+}
+```
+
+Publishes an event to the Iggy stream. The event is routed to matching workflows based on routing rules.
+
+### Replay events
+
+```bash
+POST /api/v1/events/replay
+Content-Type: application/json
+
+{
+  "type": "beacon.conversation.ended",
+  "since": "2026-01-01T00:00:00Z",
+  "until": "2026-01-02T00:00:00Z",
+  "limit": 100
+}
+```
+
+Re-publishes matching historical events to trigger workflow re-execution. Existing idempotency deduplication applies.
+
+## Plugins
+
+### List plugins
+
+```bash
+GET /api/v1/plugins?limit=20&search=cache&tags=infra
+```
+
+Returns a paginated list of available plugins.
+
+### Get plugin details
+
+```bash
+GET /api/v1/plugins/:pluginId
+```
+
+Returns plugin metadata, manifest, functions, and input/output schemas.
+
+### Upload a plugin
+
+```bash
+POST /api/v1/plugins/upload
+Content-Type: multipart/form-data
+```
+
+Uploads a WASM plugin binary with its manifest. Requires Pro plan or above.
+
+## Event schemas
+
+### List event schemas
+
+```bash
+GET /api/v1/schemas
+```
+
+Returns all registered event schemas. Used by the SDK `codegen` command to generate TypeScript types.
+
+## Webhooks
+
+Webhook endpoints do not require authentication. Instead, each endpoint uses a secret token in the URL path:
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /webhooks/workflow/:workflowId/:secret` | Trigger a workflow run |
+| `POST /webhooks/s3/:secret` | S3 file events |
+| `POST /webhooks/cdc/:secret` | Debezium database change capture |
+
+## GraphQL
+
+The GraphQL API is available at `/graphql`. It supports queries, mutations, and subscriptions for all workflow operations.
+
+```bash
+POST /graphql
+Content-Type: application/json
+
+{
+  "query": "{ workflows(first: 10) { edges { node { id name status } } } }"
+}
+```
+
+An interactive GraphQL playground is available at `/graphql` in the browser when running locally.
+
+### Query cost limiting
+
+GraphQL queries are subject to cost analysis. The maximum cost per query defaults to 5000 and is configurable via `GRAPHQL_MAX_COMPLEXITY_COST`.
+
+## Rate limits
+
+| Scope | Limit |
+|---|---|
+| General API | 100 requests/minute per IP |
+| Workflow executions | Rate-limited per plan tier |
+
+## Health checks
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /health` | Liveness check |
+| `GET /ready` | Readiness check (verifies DB and cache connectivity) |

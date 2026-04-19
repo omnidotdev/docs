@@ -38,7 +38,7 @@ public_paths = ["/health"]
 | `enabled` | Enable API key auth | false |
 | `api_url` | URL of the synapse-api service | -- (required) |
 | `gateway_secret` | Shared secret for gateway-to-API authentication | -- (required) |
-| `cache_ttl_seconds` | How long to cache resolved API keys | 30 |
+| `cache_ttl_seconds` | How long to cache resolved API keys | 60 |
 | `cache_capacity` | Maximum number of cached key resolutions | 10000 |
 | `public_paths` | Paths that skip authentication | `["/health"]` |
 | `tls_skip_verify` | Skip TLS verification for API calls (dev only) | false |

@@ -28,7 +28,7 @@ cd synapse-stack
 cp .env.local.template .env.local
 # Set required values (see below)
 
-docker compose --env-file .env.local up -d
+docker compose --env-file .env.local up -d --build
 ```
 
 ### Required environment variables
@@ -43,11 +43,11 @@ docker compose --env-file .env.local up -d
 
 At least one LLM provider API key is required: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `NVIDIA_API_KEY`.
 
-Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, and billing credentials (`BILLING_*`). See the [full .env.local.template](https://github.com/omnidotdev/synapse-stack/blob/master/.env.local.template).
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, `GOOGLE_API_KEY`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY`, `BRAVE_API_KEY`, and billing credentials (`BILLING_*`). See the [full .env.local.template](https://github.com/omnidotdev/synapse-stack/blob/master/.env.local.template).
 
 ### Without authentication
 
-Set `PROTECT_ROUTES=false` and omit `AUTH_BASE_URL` to bypass JWT verification. The API accepts unauthenticated requests. Billing features return 503 gracefully.
+Override `PROTECT_ROUTES=false` in `.env.local` and omit `AUTH_BASE_URL` to bypass JWT verification. The API accepts unauthenticated requests. Billing features return 503 gracefully.
 
 Suitable for: local development, internal networks behind a VPN, testing.
 
@@ -120,7 +120,7 @@ kubectl exec -it deploy/synapse-api -- bun db:migrate
 
 ## Gateway Configuration
 
-The gateway reads its config from `/etc/synapse.toml` (mounted from `config/synapse.toml` in docker-compose). Copy `config/synapse.example.toml` to `config/synapse.toml` to customize providers, routing, MCP servers, and failover.
+The gateway reads its config from `/etc/synapse.toml` (mounted from `config/synapse.toml` in the compose file). Copy `config/synapse.example.toml` to `config/synapse.toml` to customize providers, routing, MCP servers, and failover.
 
 See [Configuration](/grid/synapse/configuration) for the full TOML reference.
 
@@ -130,7 +130,7 @@ See [Configuration](/grid/synapse/configuration) for the full TOML reference.
 |---------|---------|---------|-----------|
 | Gatekeeper (HIDRA) | `AUTH_BASE_URL` | JWT auth, user management | No (set `PROTECT_ROUTES=false`) |
 | Aether | `BILLING_SERVICE_API_KEY` | Billing, subscriptions | No (returns 503) |
-| Valkey/Redis | `VALKEY_URL` | Rate limiting, caching | Included in docker-compose |
+| Valkey | `VALKEY_URL` | Rate limiting, response cache | Included in compose |
 
 ## Binary Install
 

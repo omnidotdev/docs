@@ -47,7 +47,7 @@ Every step has a common shape:
 
 | Type | Description |
 |---|---|
-| `trigger` | Entry point (webhook, cron, event, manual, polling, email, Kafka, SQS, S3, CDC, MQTT, WebSocket, Redis, NATS, AMQP, gRPC stream) |
+| `trigger` | Entry point (webhook, cron, event, manual, polling, email, SSE, Kafka, SQS, S3, CDC, MQTT, WebSocket, Redis, NATS, AMQP, gRPC stream, GraphQL subscription, Omni platform event) |
 | `action` | Execute a connector integration (Slack, GitHub, Stripe, etc.) |
 | `condition` | If/else branch based on an expression |
 | `switch` | Multi-way branch with named cases |
@@ -55,7 +55,7 @@ Every step has a common shape:
 | `loop` | Iterate with `forEach`, `while`, or `times` |
 | `parallel` | Run branches concurrently, wait for all/any/N |
 | `gate` | Approval or signal-based human-in-the-loop |
-| `plugin` | Execute a built-in plugin |
+| `plugin` | Execute a built-in or WASM plugin |
 | `code` | Run sandboxed JavaScript/TypeScript |
 | `subworkflow` | Invoke another workflow |
 
@@ -65,7 +65,7 @@ Every step has a common shape:
 
 **AI / ML**
 
-`llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`, `rivet`
+`llm`, `prompt`, `chat`, `summarize`, `classify`, `agent`, `rag`, `vision`, `audio`, `embedding`, `vectorSearch`, `ai_transform`, `ai_guardrails`, `rivet`, `modelRegistry`
 
 **Human-in-the-loop**
 
@@ -73,7 +73,7 @@ Every step has a common shape:
 
 **Infrastructure**
 
-`cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`, `file`, `log`
+`cache`, `queue`, `rateLimit`, `database`, `state_get`, `state_set`, `state_wait`, `email`, `webhookVerify`, `file`, `log`, `pdf`
 
 **Security**
 
@@ -81,11 +81,19 @@ Every step has a common shape:
 
 **Flow control**
 
-`try_catch`, `race`, `retry`, `timeout`, `sleep`, `wait`, `debounce`, `stop`, `noop`
+`try_catch`, `race`, `retry`, `timeout`, `sleep`, `wait`, `debounce`, `stop`, `noop`, `assert`
 
 **Events and orchestration**
 
-`event`, `aggregate`, `window`, `collect`, `diff`, `change_detector`, `time_window`, `saga`, `mcp`, `comment`, `error`, `webhookResponse`
+`event`, `aggregate`, `window`, `collect`, `diff`, `change_detector`, `time_window`
+
+**Orchestration**
+
+`saga`, `mcp`, `comment`, `error`, `webhookResponse`
+
+**Integrations**
+
+`spreadsheet`, `googleSheets`
 
 ## Edges
 

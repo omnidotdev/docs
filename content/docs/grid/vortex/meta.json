@@ -9,6 +9,7 @@
     "editor",
     "execution",
     "integrations",
+    "api",
     "cli",
     "configuration",
     "self-hosting"
