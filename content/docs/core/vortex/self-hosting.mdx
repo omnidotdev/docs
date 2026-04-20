@@ -1,0 +1,108 @@
+---
+title: Self-Hosting
+description: Run Vortex on your own infrastructure
+---
+
+Run the full Vortex stack on your own infrastructure with Docker Compose or Kubernetes.
+
+## Docker Compose
+
+The fastest way to self-host Vortex:
+
+```bash
+git clone https://github.com/omnidotdev/vortex.git
+cd vortex
+cp .env.local.template .env.local
+```
+
+Edit `.env.local` with your configuration (see [Environment Variables](#environment-variables) below), then start the stack:
+
+```bash
+docker compose up -d
+```
+
+This starts six services: PostgreSQL, Valkey (cache), Iggy (event streaming), the API, the app, and the worker.
+
+### Verify
+
+```bash
+# Check all services are healthy
+docker compose ps
+
+# Open the app
+open http://localhost:3000
+```
+
+## Kubernetes (Helm)
+
+For production deployments, use the included Helm chart:
+
+```bash
+helm dependency update charts/vortex
+helm install vortex charts/vortex \
+  --namespace vortex --create-namespace \
+  --set secrets.authSecret=$(openssl rand -hex 16) \
+  --set secrets.encryptionKey=$(openssl rand -base64 32) \
+  --set secrets.internalApiSecret=$(openssl rand -hex 16) \
+  --set secrets.hatchetClientToken=YOUR_TOKEN \
+  --set secrets.iggyUsername=YOUR_USERNAME \
+  --set secrets.iggyPassword=YOUR_PASSWORD \
+  --set postgresql.auth.password=YOUR_DB_PASSWORD
+```
+
+The chart deploys the API, app, and worker as separate deployments with configurable replicas, resource limits, and ingress.
+
+See `charts/vortex/values.yaml` for the full list of configuration options.
+
+## Environment Variables
+
+### Required
+
+| Variable | Description |
+|----------|-------------|
+| `DB_PASSWORD` | PostgreSQL password |
+| `CACHE_PASSWORD` | Valkey/Redis password |
+| `AUTH_SECRET` | Session encryption key (`openssl rand -hex 16`) |
+| `ENCRYPTION_KEY` | Data encryption key (`openssl rand -base64 32`) |
+| `INTERNAL_API_SECRET` | Service-to-service auth (`openssl rand -hex 16`) |
+| `IGGY_USERNAME` | Iggy event streaming username |
+| `IGGY_PASSWORD` | Iggy event streaming password |
+| `HATCHET_CLIENT_TOKEN` | Hatchet workflow engine token |
+| `AUTH_BASE_URL` | Identity provider URL for JWKS validation |
+
+### Optional
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_NAME` | `vortex` | Database name |
+| `DB_USER` | `postgres` | Database user |
+| `API_PORT` | `4000` | API service port |
+| `APP_PORT` | `3000` | App service port |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:3000` | Allowed CORS origins |
+| `VORTEX_PUBLIC_URL` | `http://localhost:4000` | Public API URL for webhooks |
+| `PLATFORM_ORG_ID` | (empty) | Multi-tenant org ID |
+
+### OAuth Providers (optional)
+
+Configure any combination of OAuth providers for social login. Email/password authentication is always available.
+
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
+- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`
+- `OIDC_ISSUER` / `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` (generic OIDC)
+
+## Workflow Engine
+
+Vortex uses [Hatchet](https://docs.hatchet.run) as its default workflow execution backend. You need a running Hatchet instance and a client token.
+
+To run Hatchet locally alongside Vortex, see the [Hatchet self-hosting guide](https://docs.hatchet.run/self-hosting).
+
+## Upgrading
+
+Pull the latest images and restart:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Database migrations run automatically on API startup.

@@ -1,0 +1,86 @@
+---
+title: Architecture
+description: How Vortex is built
+---
+
+Vortex is a three-service architecture designed for reliability, scalability, and self-hosting flexibility.
+
+## Services
+
+```
+                    ┌─────────────────┐
+                    │   vortex-app    │
+                    │  (React 19 +   │
+                    │  TanStack Start)│
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   vortex-api    │
+                    │  (Elysia +     │
+                    │  PostGraphile)  │
+                    └──┬──────────┬──┘
+                       │          │
+              ┌────────▼──┐  ┌───▼──────────┐
+              │ PostgreSQL │  │ vortex-worker │
+              │            │  │ (DSL executor)│
+              └────────────┘  └──────────────┘
+```
+
+### vortex-api
+
+The API layer exposes two interfaces:
+
+- **GraphQL** (PostGraphile + Grafast): auto-generated from the PostgreSQL schema, used by the app for workflow CRUD, workspace management, and real-time subscriptions
+- **REST**: custom endpoints for triggers, execution, OAuth callbacks, webhooks, and API key authentication
+
+Key responsibilities: authentication (JWKS validation), authorization (Warden integration), entitlement enforcement (Aether billing), and event publishing (CloudEvents via Iggy).
+
+### vortex-app
+
+The web frontend provides:
+
+- **Visual Workflow Builder**: drag-and-drop editor powered by ReactFlow
+- **Execution Monitoring**: real-time run tracking, success/failure charts, error logs
+- **Event Catalog**: browse and test CloudEvents schemas
+- **Integration Management**: connect external services via OAuth
+- **Workspace Settings**: plan management, API keys, member access
+
+Built with React 19, TanStack Start (SSR), TanStack Router, and Tailwind CSS.
+
+### vortex-worker
+
+The execution engine that runs workflows:
+
+- **DSL Executor**: interprets the workflow DSL (JSON) into executable steps
+- **Pluggable Backends**: Hatchet (default) or Temporal for durable execution
+- **500+ Integrations**: via ActivePieces connectors (Slack, GitHub, Discord, Stripe, etc.)
+- **Trigger Adapters**: webhook, cron, polling, SSE, CloudEvents, email, Kafka, MQTT, gRPC, and more
+- **Saga Coordination**: distributed transactions with compensation steps
+- **WASM Sandbox**: secure execution of custom plugin code
+
+## Infrastructure Dependencies
+
+| Service | Purpose |
+|---------|---------|
+| **PostgreSQL** | Primary datastore for workflows, runs, integrations, events |
+| **Valkey** | Cache and session storage (Redis-compatible) |
+| **Iggy** | Event streaming for CloudEvents publish/subscribe |
+| **Hatchet** | Durable workflow execution engine |
+
+## Data Flow
+
+1. User creates or edits a workflow in the visual editor (app)
+2. The workflow DSL is saved via GraphQL (API -> PostgreSQL)
+3. When triggered, the API dispatches the workflow to the worker
+4. The worker executes steps sequentially or in parallel via Hatchet
+5. Step results, logs, and status updates are written back to PostgreSQL
+6. The app polls or streams execution status for real-time monitoring
+7. CloudEvents are published to Iggy for cross-service subscribers
+
+## Security
+
+- **Authentication**: JWKS-based JWT validation against an external identity provider
+- **Authorization**: OpenFGA (Warden) for fine-grained RBAC per workspace
+- **Encryption**: AES-256-GCM for stored OAuth tokens and secrets
+- **Webhook Signing**: HMAC-SHA256 for all outbound webhook deliveries
+- **SSRF Protection**: URL validation on HTTP steps to prevent internal network access
