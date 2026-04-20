@@ -15,9 +15,9 @@ Synapse runs five containers:
 |-----------|-------|------|
 | `db` | `postgres:18-alpine` | 5432 |
 | `valkey` | `valkey/valkey:8-alpine` | 6379 |
-| `gateway` | `manifold.omni.dev/omnidotdev/synapse:latest` | 6000 |
-| `api` | `manifold.omni.dev/omnidotdev/synapse-api:latest` | 4000 |
-| `app` | `manifold.omni.dev/omnidotdev/synapse-app:latest` | 3000 |
+| `gateway` | `manifold.omni.dev/omni/synapse:latest` | 6000 |
+| `api` | `manifold.omni.dev/omni/synapse-api:latest` | 4000 |
+| `app` | `manifold.omni.dev/omni/synapse-app:latest` | 3000 |
 
 Health checks are configured for all services. The gateway waits for the API and Valkey to be healthy before starting. The API waits for PostgreSQL.
 
