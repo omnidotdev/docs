@@ -1,0 +1,59 @@
+---
+title: Integrations
+description: Connect external services to your workflows
+---
+
+Vortex supports 500+ integrations via the ActivePieces connector ecosystem, plus native support for HTTP, webhooks, and custom plugins.
+
+## Featured Integrations
+
+| Integration | Category | Capabilities |
+|------------|----------|-------------|
+| **Slack** | Communication | Send messages, manage channels, react to events |
+| **Discord** | Communication | Send messages, manage roles, webhook forwarding |
+| **GitHub** | Developer | Repository management, issues, pull requests, webhooks |
+| **Google Sheets** | Productivity | Read/write spreadsheets, data automation |
+| **Airtable** | Productivity | Database operations, automations |
+| **Notion** | Productivity | Workspace automation, database queries |
+| **Linear** | Productivity | Issue tracking, project management |
+| **HubSpot** | CRM | Contact management, marketing automation |
+| **Stripe** | Payments | Payment processing, subscription management |
+| **SendGrid** | Email | Transactional and marketing email delivery |
+| **Resend** | Email | Transactional email delivery |
+| **Twilio** | SMS | Send and receive SMS messages |
+| **Anthropic** | AI | Claude models for text generation and analysis |
+| **OpenAI** | AI | GPT models, DALL-E, embeddings |
+| **Telegram** | Communication | Bot messaging and automation |
+
+## Connecting an Integration
+
+1. Navigate to **Integrations** in your workspace sidebar
+2. Find the service you want to connect
+3. Click **Connect** and follow the OAuth flow (or enter API credentials)
+4. The integration is now available in your workflow steps
+
+Connected integrations are workspace-scoped and encrypted at rest (AES-256-GCM).
+
+## Using Integrations in Workflows
+
+Once connected, integrations appear as available actions when adding a step to your workflow. Each integration exposes specific actions (e.g., "Send Slack Message", "Create GitHub Issue").
+
+Step configuration includes:
+- **Action**: the specific operation (e.g., "Send Message", "Create Record")
+- **Connection**: which connected account to use
+- **Parameters**: action-specific inputs, supporting dynamic values from previous steps via `{{ expressions }}`
+
+## Custom HTTP Requests
+
+For services without a dedicated integration, use the built-in **HTTP Request** step:
+
+- Any HTTP method (GET, POST, PUT, PATCH, DELETE)
+- Custom headers and authentication
+- JSON, form-data, or raw body
+- Response parsing with JSONPath or JQ expressions
+
+## Custom Plugins (Pro)
+
+Build custom integration steps with WebAssembly plugins. Plugins run in a sandboxed WASM environment for security and portability.
+
+See the [Vortex repository](https://github.com/omnidotdev/vortex) for plugin development documentation.
