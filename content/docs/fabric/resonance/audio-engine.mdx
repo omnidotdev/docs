@@ -1,0 +1,105 @@
+---
+title: Audio Engine
+description: Rust-native audio processing with shared-state threading
+---
+
+The Resonance audio engine is written in Rust and built around a pull-based audio graph. It prioritizes deterministic, glitch-free playback with sample-accurate timing.
+
+## Three-Layer Architecture
+
+The engine is organized into two threads:
+
+```
+┌──────────────────────────────────────────────────┐
+│  Audio Callback (real-time, highest priority)     │
+│  Pulls samples through the audio graph            │
+│  Shares AudioGraph/Transport/Metronome via        │
+│  Arc<Mutex<_>> with the control thread            │
+└───────────────────────┬──────────────────────────┘
+                        │ Arc<Mutex<_>>
+┌───────────────────────┴──────────────────────────┐
+│  Control Thread (near-real-time)                  │
+│  Transport state, parameter changes, MIDI routing │
+│  Bridges UI events to audio-safe commands         │
+└──────────────────────────────────────────────────┘
+```
+
+### Audio Callback
+
+The audio callback runs at the OS audio callback priority. It processes one buffer at a time (typically 128 or 256 samples) by walking the audio graph from outputs back to inputs. The callback acquires a shared `Arc<Mutex<_>>` to access the `AudioGraph`, `Transport`, and `Metronome`. If the lock is contended (e.g., the control thread is updating state), the callback outputs silence for that buffer to avoid blocking. Lock-free communication via ring buffers is planned for a future release to reduce latency.
+
+### Control Thread
+
+The control thread receives commands from the UI (play, stop, seek, parameter change, track arm) and translates them into audio-safe messages. It also handles MIDI routing, automation playback, and transport state management. Commands are batched per audio buffer to minimize cross-thread traffic.
+
+### I/O Thread (Planned)
+
+A separate I/O thread for disk streaming, audio file decode/encode, and project save/load is planned but not yet implemented. Currently, file I/O is handled on the control thread.
+
+## Audio Graph
+
+The audio graph is a directed acyclic graph (DAG) of processor nodes. Each node has typed input and output ports. The graph is evaluated by pulling from the master output, which recursively pulls from upstream nodes.
+
+```
+[Audio File Reader] ──► [Gain] ──► [EQ] ──► [Bus Input]
+                                                  │
+[MIDI Source] ──► [Synth Plugin] ──► [Reverb] ──► [Bus Input]
+                                                  │
+                                           [Bus Sum] ──► [Master]
+```
+
+Node types include:
+
+| Node | Purpose |
+|---|---|
+| `AudioFileReader` | Streams samples from disk |
+| `AudioInput` | Captures from hardware input |
+| `PluginProcessor` | Wraps a CLAP plugin instance |
+| `BuiltinEffect` | Gain, EQ, compressor, reverb, delay |
+| `MidiSynth` | Routes MIDI events to instrument plugins |
+| `BusSum` | Mixes multiple inputs together |
+| `MasterOutput` | Final output to hardware or bounce |
+
+Graph modifications (adding/removing nodes, changing connections) are performed on the control thread and swapped into the audio thread atomically using a triple-buffer scheme.
+
+## Key Data Structures
+
+### TransportState
+
+Tracks playback position, tempo, time signature, loop region, and record state. Shared between the control and audio threads via an atomic snapshot.
+
+```rust
+struct TransportState {
+    playing: bool,
+    recording: bool,
+    position_samples: u64,
+    tempo_bpm: f64,
+    time_signature: (u32, u32),
+    loop_enabled: bool,
+    loop_start: u64,
+    loop_end: u64,
+    sample_rate: u32,
+}
+```
+
+### MixerState
+
+Per-channel state: volume, pan, mute, solo, and the ordered list of plugin slots.
+
+### AutomationLane
+
+A sorted list of breakpoints with interpolation mode (linear or bezier). The control thread evaluates lanes each buffer and sends parameter updates to the audio thread.
+
+### MidiRouter
+
+Maps MIDI input ports and channels to instrument plugin nodes. Supports channel filtering, transposition, and velocity curves.
+
+## Sample-Accurate Timing
+
+All events (note on/off, parameter changes, transport jumps) are tagged with a sample offset within the current buffer. The audio thread applies events at the exact sample position, not at buffer boundaries. This ensures timing precision of 1/sample_rate seconds (approximately 23 microseconds at 44.1 kHz).
+
+## Thread Communication
+
+Currently, the audio callback and control thread share state (`AudioGraph`, `Transport`, `Metronome`) via `Arc<Mutex<_>>`. If the mutex is contended when the audio callback tries to acquire it, the callback outputs silence for that buffer rather than blocking.
+
+Lock-free threading via ring buffers is planned for a future release to reduce latency. The intended design uses SPSC ring buffers for parameter changes and transport commands, and triple-buffering for graph topology swaps.

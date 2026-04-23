@@ -1,0 +1,83 @@
+---
+title: Collaboration
+description: Live session sharing via WebRTC with host authority
+---
+
+> **Planned**: Real-time collaboration is not yet implemented. This page describes the intended design.
+
+Resonance supports real-time collaboration, allowing multiple users to work on the same project simultaneously.
+
+## Live Sessions
+
+A live session connects multiple Resonance instances (desktop or browser) over WebRTC:
+
+1. The host opens a project and clicks **Share > Start Live Session**
+2. Resonance generates a session link
+3. Collaborators open the link (desktop app or browser)
+4. All participants see the same arrangement, mixer, and transport state
+
+Live sessions require an Omni account for all participants. Sign in via HIDRA (Omni's identity service).
+
+## Host Authority Model
+
+The session host has full authority over the project:
+
+| Action | Host | Collaborator |
+|---|---|---|
+| Play/stop/seek | Yes | Yes (forwarded to host) |
+| Add/delete tracks | Yes | No |
+| Edit clips | Yes | Delegated tracks only |
+| Change routing | Yes | No |
+| Adjust mixer | Yes | Delegated tracks only |
+| Add/remove plugins | Yes | No |
+| Export | Yes | No |
+| Save | Yes | No |
+
+Collaborators can always listen to the full mix and view the arrangement. Editing permissions are granted per track by the host.
+
+## Track Delegation
+
+The host can delegate control of individual tracks to collaborators:
+
+1. Right-click a track header
+2. Select **Delegate to...** and choose a participant
+3. The delegated user can now edit clips, adjust volume/pan, and modify plugins on that track
+
+Delegation can be revoked at any time. A track can only be delegated to one collaborator at a time. The host always retains the ability to override.
+
+## Real-Time State Sync
+
+Session state is synchronized using a combination of:
+
+- **State diffs**: Track, mixer, and arrangement changes are transmitted as compact diffs over a WebRTC data channel
+- **Transport sync**: Play/stop/seek commands are broadcast with timestamp correction for latency
+- **Parameter updates**: Plugin and mixer parameter changes stream in real-time
+
+The host is the source of truth. If the host and a collaborator make conflicting edits, the host's state wins.
+
+## Audio Monitoring
+
+Collaborators hear the mix as rendered by the host:
+
+1. The host's audio engine renders the full mix
+2. A compressed audio stream (Opus codec) is sent via WebRTC to each collaborator
+3. Collaborators hear the mix with a small delay (typically 50-200ms depending on network)
+
+This approach means collaborators do not need to load plugins or audio files locally. The host bears the full processing load.
+
+### Low-Latency Mode
+
+For recording together, the host can enable low-latency mode:
+
+- Each participant sends their raw audio input via WebRTC
+- The host's engine mixes all inputs in real-time
+- Latency depends on network quality (typically 20-80ms on good connections)
+
+Low-latency mode requires a stable connection and works best on local networks.
+
+## Requirements
+
+- All participants need an Omni account (free tier is sufficient)
+- Modern browser or Resonance desktop app
+- WebRTC-capable network (most networks work, some corporate firewalls may block peer-to-peer)
+- The Omni signaling server brokers the initial connection, after which traffic is peer-to-peer

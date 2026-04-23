@@ -1,0 +1,19 @@
+{
+  "title": "Resonance",
+  "pages": [
+    "getting-started",
+    "---Architecture---",
+    "audio-engine",
+    "plugin-system",
+    "project-format",
+    "---User Guide---",
+    "tracks-and-routing",
+    "mixing",
+    "midi",
+    "automation",
+    "---Advanced---",
+    "browser-version",
+    "collaboration",
+    "platform-integration"
+  ]
+}

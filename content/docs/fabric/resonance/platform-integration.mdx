@@ -1,0 +1,68 @@
+---
+title: Platform Integration
+description: Optional Omni platform integrations for auth, sync, and cross-product workflows
+---
+
+Resonance works fully offline as a standalone DAW. All Omni platform integrations are optional and degrade gracefully when unavailable.
+
+## HIDRA Authentication
+
+Sign in with your Omni account via HIDRA (Omni's identity provider):
+
+- Enables cloud sync, collaboration, and cross-product features
+- No feature gates: all DAW functionality works without an account
+- Desktop app uses OAuth PKCE flow via system browser
+- Browser version uses standard redirect flow
+
+If `HIDRA_URL` is not configured or the user is not signed in, Resonance logs a warning at startup and disables cloud features.
+
+## Cloud Project Sync
+
+Signed-in users can sync projects to Omni cloud storage:
+
+- **TOML files**: Synced as-is, enabling server-side diff and merge
+- **Audio blobs**: Content-addressed and deduplicated (SHA-256 hash)
+- **Incremental sync**: Only changed files are uploaded
+- **Conflict resolution**: Last-write-wins for TOML, with local backup of the overwritten version
+
+Sync is manual (click **Sync** or press **Ctrl+Shift+S**). There is no automatic background sync to avoid unexpected bandwidth usage.
+
+### Storage
+
+Projects are stored in the user's Omni storage quota. Audio files are deduplicated across projects, so shared samples only count once toward the quota.
+
+## Rushes Integration
+
+[Rushes](/fabric/rushes) is Omni's video production tool. Resonance integrates with Rushes for audio-in-video workflows:
+
+- **Export stems to Rushes**: Send individual track stems or the final mixdown directly to a Rushes project
+- **Import video from Rushes**: Load a video file as a reference track in Resonance for scoring or sound design
+- **Timecode sync**: When working with video, Resonance displays SMPTE timecode alongside bars/beats
+
+Integration is available when both products are linked to the same Omni account. If Rushes is not available, these menu items are hidden.
+
+## Vortex CloudEvents
+
+Resonance publishes events to the Omni event stream via [Vortex](/grid/vortex):
+
+| Event | When |
+|---|---|
+| `resonance.project.created` | User creates a new project |
+| `resonance.project.exported` | User exports a mixdown or stems |
+| `resonance.session.started` | Host starts a live collaboration session |
+| `resonance.session.ended` | Host ends a live session |
+
+Events use CloudEvents format with source `omni.resonance`. They are published only when the user is signed in. Other Omni products and Vortex workflows can subscribe to these events for automation (e.g., triggering a Rushes render when a mixdown is exported).
+
+## Aether Billing
+
+The DAW itself is free. Cloud features are billed through [Aether](/grid/aether):
+
+| Feature | Free Tier | Pro Tier |
+|---|---|---|
+| **DAW (all features)** | Included | Included |
+| **Cloud storage** | 1 GB | 100 GB |
+| **Collaboration sessions** | 2 participants | 10 participants |
+| **Cloud sync** | Manual only | Manual only |
+
+Billing state is fetched from Aether at sign-in. If Aether is unreachable, the free tier limits apply as a fallback.

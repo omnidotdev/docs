@@ -1,0 +1,155 @@
+---
+title: Project Format
+description: Directory-based project structure with TOML manifests and non-destructive editing
+---
+
+Resonance projects are stored as directories with a `.resonance` extension. The format is designed to be human-readable, version-control friendly, and non-destructive.
+
+## Directory Structure
+
+```
+my-song.resonance/
+├── project.toml            # Project manifest
+├── tracks/
+│   ├── lead-vocal/
+│   │   ├── track.toml      # Track configuration
+│   │   └── clips/
+│   │       ├── take-01.flac
+│   │       └── take-02.flac
+│   ├── drums/
+│   │   ├── track.toml
+│   │   └── clips/
+│   │       └── beat-loop.flac
+│   └── synth-pad/
+│       ├── track.toml
+│       └── midi/
+│           └── chords.mid
+├── buses/
+│   ├── reverb-send.toml
+│   └── master.toml
+├── plugins/
+│   └── presets/
+│       ├── lead-eq.json
+│       └── pad-reverb.json
+├── automation/
+│   ├── lead-vocal-volume.toml
+│   └── synth-pad-filter.toml
+└── session.db              # Ephemeral state (SQLite)
+```
+
+## project.toml
+
+The project manifest contains global settings and metadata:
+
+```toml
+[project]
+name = "My Song"
+created = "2026-03-15T10:30:00Z"
+modified = "2026-03-29T14:20:00Z"
+sample_rate = 48000
+bit_depth = 32
+tempo = 120.0
+time_signature = [4, 4]
+
+[transport]
+loop_enabled = false
+loop_start = 0
+loop_end = 0
+
+[master]
+volume = 0.0     # dB
+pan = 0.0        # -1.0 to 1.0
+```
+
+## track.toml
+
+Each track directory contains a `track.toml` with the track's configuration:
+
+```toml
+[track]
+id = "lead-vocal"
+name = "Lead Vocal"
+type = "audio"         # audio, midi, bus
+color = "#e74c3c"
+armed = false
+muted = false
+solo = false
+
+[mixer]
+volume = -3.0          # dB
+pan = 0.1
+
+[input]
+device = "default"
+channels = [1]         # mono, channel 1
+
+[routing]
+output = "master"
+sends = [
+  { bus = "reverb-send", level = -12.0 }
+]
+
+[[plugins]]
+id = "com.example.eq"
+format = "clap"
+preset = "plugins/presets/lead-eq.json"
+enabled = true
+
+[[plugins]]
+id = "com.example.compressor"
+format = "clap"
+enabled = true
+
+[[clips]]
+file = "clips/take-02.flac"
+position = 48000       # sample offset in arrangement
+length = 480000
+offset = 0             # start offset within the source file
+gain = 0.0             # dB
+fade_in = 1024         # samples
+fade_out = 2048
+```
+
+## session.db
+
+`session.db` is a SQLite database for ephemeral state that does not belong in version control:
+
+- Current playback position
+- Scroll and zoom state per view
+- Undo/redo history
+- Plugin scan cache
+- Window positions and sizes
+
+This file is listed in `.gitignore` by default. Deleting it resets the session state without affecting the project content.
+
+## Audio Storage
+
+| Context | Format | Rationale |
+|---|---|---|
+| **Stored clips** | FLAC | Lossless compression, typically 50-60% of WAV size |
+| **Recording buffer** | WAV | No encoding overhead during real-time capture |
+| **On save** | WAV converted to FLAC | Automatic background conversion after recording stops |
+
+Audio files are referenced by relative path from the track directory. Moving a `.resonance` folder preserves all references.
+
+## Non-Destructive Editing
+
+All edits are non-destructive. The original audio files are never modified:
+
+- **Clip trimming**: Adjusts `offset` and `length` in `track.toml`, source file is unchanged
+- **Gain changes**: Stored as metadata, applied at playback
+- **Fades**: Defined as sample counts, computed in real-time
+- **Time stretching**: Stores the stretch ratio, original file preserved
+- **Effects**: Applied in the audio graph, never baked into files
+
+To produce a final file, use the export function which renders the entire arrangement (or individual stems) to a new file.
+
+## Version Control
+
+The project format is designed to work well with Git:
+
+- TOML files produce clean, line-based diffs
+- Track directories isolate changes per track
+- `session.db` is excluded via `.gitignore`
+- Audio files can be stored with Git LFS
+- Merging is straightforward since tracks are independent directories

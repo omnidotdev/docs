@@ -1,0 +1,147 @@
+---
+title: Trellis
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiGraph, PiBooks, PiGitBranch } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Knowledge Graph",
+      icon: <PiGraph />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Local-First",
+      icon: <PiBooks />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Git-Backed",
+      icon: <PiGitBranch />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://trellis.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/trellis`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Local-First",
+      description:
+        "Trellis works fully offline as a desktop app. Notes are plain .md files on disk. Cloud sync and collaboration are opt-in.",
+    },
+    {
+      title: "Obsidian Compatible",
+      description:
+        "Open existing Obsidian vaults directly. Same wikilink syntax, same frontmatter, same file structure.",
+    },
+  ]}
+/>
+
+**Omni Trellis** is a local-first knowledge garden and Obsidian alternative. Notes are plain markdown files on disk. The desktop app (Tauri) works offline with no account required. Cloud sync, real-time collaboration, and publishing are opt-in via trellis.omni.dev.
+
+## Key Features
+
+### Editor
+- **Rich markdown editing** with Lexical, including slash commands, markdown shortcuts, and live preview
+- **Wikilinks** (`[[note]]`) with autocomplete, resolution, and aliased display text
+- **Backlinks panel** showing all notes that link to the current note
+- **Transclusion** (`![[note]]`) to embed note content inline, with section targeting
+- **Images** via paste, drag-and-drop, or `/image` slash command, stored in `assets/` directory
+- **Templates** with create, browse, and instantiate flow
+- **Daily notes** with automatic date-based creation
+- **Full-text search** powered by a Rust backend
+
+### Knowledge Graph
+- **Interactive force-directed graph** visualizing connections between notes
+- **Ghost nodes** for wikilinks to nonexistent notes
+- **Cross-vault links** for multi-vault setups
+- **Unlinked mentions** detection with one-click conversion to wikilinks
+
+### Canvas
+- **Spatial note organization** with draggable elements (text, images, shapes, note cards)
+- **Freehand drawing** with pressure-sensitive strokes
+- **Edge connections** between elements with labels
+- **Note cards** that reference vault notes and navigate on click
+- **Canvas persistence** as `.canvas` JSON files alongside notes
+
+### Query Blocks
+- **Dataview-lite** query syntax in fenced code blocks
+- Filter notes by `tag`, `link`, `backlink`, or `path`
+- Results render as clickable note lists in preview mode
+- `/query` slash command for quick insertion
+
+### Themes & Customization
+- **4 built-in editor themes**: Default, Sakura, Minimal, Paper
+- **Dark/light mode** with system preference detection
+- **Custom CSS snippets** loaded from `.trellis/snippets/`
+- **Plugin themes** via the plugin system
+- **5 preview themes** for markdown rendering
+
+### Plugin System
+- **Script loading** via ES module dynamic import
+- **Slash command plugins** that appear in the editor menu
+- **Theme plugins** with CSS injection
+- Plugin discovery from `.trellis/plugins/` with manifest-based registration
+- Enable/disable per plugin in vault settings
+
+### Collaboration & Publishing
+- **Real-time multiplayer editing** via Hocuspocus (WebSocket-based CRDT sync)
+- **Vault publishing** with one toggle -- generates a shareable public URL
+- **Public viewer** with full markdown rendering, wikilink navigation, and SEO metadata
+- **Cloud-to-local export** to download a cloud vault as local files
+
+### Local-First Architecture
+- **No server required** for the desktop app
+- **Plain `.md` files** on disk, editable in any editor
+- **Obsidian vault import** -- open an `.obsidian/` directory directly
+- **File watcher** detects external edits (vim, VS Code, `git pull`)
+- **Graph cache** for fast backlink/tag resolution without scanning files on every operation
+
+## Two Modes, Same Codebase
+
+| | Desktop (Tauri) | Web (trellis.omni.dev) |
+|---|---|---|
+| Storage | Local filesystem | Cloud (GraphQL API) |
+| Auth | Not required | Required |
+| Collaboration | Not available | Real-time multiplayer |
+| Publishing | Not available | Vault-level public URLs |
+| Offline | Full offline support | Cached via IndexedDB |
+
+## Comparison with Obsidian
+
+| Feature | Trellis | Obsidian |
+|---|---|---|
+| Local-first files | Yes | Yes |
+| Wikilinks & backlinks | Yes | Yes |
+| Knowledge graph | Yes | Yes |
+| Canvas | Yes | Yes |
+| Templates | Yes | Yes (via plugin) |
+| Real-time collaboration | Yes (built-in) | Paid add-on |
+| Publishing | Yes (built-in) | Paid add-on ($8/mo) |
+| Cloud sync | Yes (opt-in) | Paid add-on ($4/mo) |
+| Query blocks | Yes (built-in) | Via Dataview plugin |
+| Plugin system | Yes (early) | Yes (1000+ plugins) |
+| Mobile app | PWA | Native iOS/Android |
+| Open source | Yes (Apache 2.0) | No |
+
+## Use Cases
+
+- **Personal knowledge management** with local files and no vendor lock-in
+- **Team knowledge bases** with real-time collaboration and shared vaults
+- **Development documentation** alongside code, editable in any editor
+- **Digital gardens** published to the web with a shareable URL
+- **Research** with connected thinking, backlinks, and query blocks
+- **Obsidian migration** with direct vault import and compatible file format

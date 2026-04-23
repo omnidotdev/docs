@@ -1,0 +1,99 @@
+---
+title: Plugin System
+description: CLAP and LV2 plugin hosting with WASM support for the browser
+---
+
+Resonance hosts audio plugins using open, royalty-free formats. The plugin system handles scanning, loading, GUI hosting, and parameter bridging.
+
+## Supported Formats
+
+### CLAP (Primary)
+
+[CLAP](https://cleveraudio.org/) (CLever Audio Plug-in) is the primary plugin format. Resonance uses the `clack` Rust crate for host-side FFI.
+
+Why CLAP is the primary format:
+
+- **Open-source** specification and SDK, Apache 2.0 compatible
+- **Modern API** designed for stability, thread safety, and parameter negotiation
+- **Clean Rust FFI** via `clack-host`, no C++ interop required
+- **Growing ecosystem** of free and commercial plugins
+- **WASM-compilable** subset for browser use
+
+### LV2 (Planned)
+
+LV2 support is planned but not yet implemented.
+
+[LV2](https://lv2plug.in/) will be supported as a secondary format, primarily for Linux users.
+
+Why LV2 is included:
+
+- **Linux audio standard** with a large library of open-source plugins
+- **Open specification** with no licensing restrictions
+- **Extensible** via LV2 extensions (atom ports, worker threads, state)
+
+### No VST3
+
+Resonance does not support VST3. The Steinberg VST3 SDK license includes clauses that conflict with Apache 2.0 distribution. Since both CLAP and LV2 provide comparable functionality with fully open licenses, VST3 is excluded.
+
+## Plugin Scanning
+
+On startup (and on demand via the plugin manager), Resonance scans standard plugin directories:
+
+| Format | macOS | Windows | Linux |
+|---|---|---|---|
+| **CLAP** | `~/Library/Audio/Plug-Ins/CLAP`, `/Library/Audio/Plug-Ins/CLAP` | `%COMMONPROGRAMFILES%\CLAP`, `%LOCALAPPDATA%\Programs\Common\CLAP` | `~/.clap`, `/usr/lib/clap` |
+| **LV2** (planned) | `~/Library/Audio/Plug-Ins/LV2`, `/Library/Audio/Plug-Ins/LV2` | `%COMMONPROGRAMFILES%\LV2` | `~/.lv2`, `/usr/lib/lv2` |
+
+Scan results are cached in `session.db` (SQLite). The cache stores plugin ID, name, vendor, category, port configuration, and file modification time. Rescanning only reloads plugins whose files have changed.
+
+## Plugin Loading
+
+When a plugin is inserted into a track's effect chain:
+
+1. The control thread loads the plugin binary and creates an instance
+2. Port configuration is negotiated (audio I/O channel count, parameter list)
+3. The instance is wrapped in a `PluginProcessor` graph node
+4. The node is inserted into the audio graph via triple-buffer swap
+5. The audio thread begins pulling samples through the plugin
+
+Plugin instances are always created and destroyed on the control thread, never on the audio thread.
+
+## Native GUI Hosting
+
+Native plugin GUI hosting is not yet implemented. A generic parameter editor with auto-generated knobs is available.
+
+CLAP and LV2 plugins can provide their own GUI. The intended design embeds plugin GUIs as child windows:
+
+| Platform | Embedding |
+|---|---|
+| **macOS** | `NSView` child of Tauri `WebviewWindow` |
+| **Windows** | `HWND` child window |
+| **Linux** | X11 embed via `XReparentWindow` |
+
+If a plugin does not provide a GUI (or the user prefers), Resonance displays a generic parameter UI with sliders for each exposed parameter.
+
+## Parameter Bridge
+
+Plugin parameters are exposed to the rest of the system through a unified `ParamBridge`:
+
+- **Automation**: Any plugin parameter can be an automation target
+- **MIDI CC**: Parameters can be mapped to MIDI CC messages
+- **UI**: The generic parameter view reflects real-time values
+- **Preset**: Parameter values are saved/restored with presets and projects
+
+Parameter changes from the UI or automation are sent to the audio thread as sample-accurate events. Parameter changes from the plugin (e.g., internal modulation) are reported back to the control thread for UI updates.
+
+## WASM Plugins (Browser) (Planned)
+
+WASM plugin support is planned but not yet implemented.
+
+In the browser version, a subset of CLAP plugins will be able to run as WASM modules. This will require plugins to be compiled to `wasm32-wasi` and bundled as `.wasm` files.
+
+The browser plugin host:
+
+1. Loads the `.wasm` file into a `WebAssembly.Instance`
+2. Provides a CLAP host shim (memory allocation, parameter negotiation)
+3. Bridges audio buffers between the `AudioWorklet` and the WASM instance
+4. Renders a generic parameter UI (no native GUI in browser)
+
+Only plugins that avoid platform-specific code (filesystem, threads, GPU) can compile to WASM. The Resonance plugin registry tags WASM-compatible plugins.
