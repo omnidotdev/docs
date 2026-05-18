@@ -1,0 +1,57 @@
+---
+title: Getting Started
+description: Sign up for Blink, create your first profile, add links, and share your branded landing page.
+---
+
+This guide walks you from a brand-new account to a published profile in under five minutes. If you intend to run Blink on your own hardware, jump to [Self-Hosting](/kindred/blink/self-hosting).
+
+## Create an account
+
+1. Visit [blink.omni.dev](https://blink.omni.dev) and click **Sign In**.
+2. You will be redirected to `identity.omni.dev` to authenticate with Google, GitHub, or any OIDC provider configured by your organization.
+3. After signing in, you land on the Blink dashboard. A default organization is created for you on first sign-in.
+
+## Create your first profile
+
+A profile is the public page people see when they visit `blink.omni.dev/u/<username>`.
+
+1. From the dashboard, click **New Profile**.
+2. Pick a **username** (this becomes the URL slug), a **display name**, and optionally a short bio.
+3. Upload an avatar if you have one handy.
+4. Click **Save**. Your profile is now live at `https://blink.omni.dev/u/<username>`.
+
+Free accounts can have unlimited profiles, but each profile is capped at five links. Profiles above the free tier inherit your organization's plan.
+
+## Add links
+
+1. Open your profile and click **Add link**.
+2. Choose the link **type** (regular link, short link, or section header).
+3. Paste the destination URL, set a label, and optionally an icon.
+4. Drag to reorder. Toggle visibility per link.
+
+Short links count against your plan's monthly quota (`max_short_links_per_month`); regular links count against `max_links`. See [Pricing](/kindred/blink/pricing) for current limits.
+
+## Customize the look
+
+Pro and Team plans unlock custom themes:
+
+- Open profile settings, click **Theme**, and pick a preset or define your own colors, fonts, and background.
+- Team plans can also configure a **custom domain** (e.g., `links.yourbrand.com`) and remove the "Powered by Blink" footer.
+
+Free profiles always show the Blink footer and use the default theme.
+
+## Generate a QR code
+
+1. From the dashboard or any link's detail page, click **Generate QR**.
+2. Pick the size, error-correction level, and optional logo overlay.
+3. Download the SVG or PNG. The QR resolves through Blink so you can swap the destination later without reprinting.
+
+## Sharing and analytics
+
+Every profile has a canonical URL (`blink.omni.dev/u/<username>`) and an OG image for previews in social apps. Analytics (per-link click counts, geo, referrers) ship on Pro and Team plans. The Free tier shows a "Coming soon" placeholder on the analytics page.
+
+## Next steps
+
+- [Pricing](/kindred/blink/pricing): plan comparison and what each entitlement unlocks
+- [API Reference](/kindred/blink/api): GraphQL endpoint, REST helpers, webhooks
+- [Self-Hosting](/kindred/blink/self-hosting): run Blink inside your own infrastructure

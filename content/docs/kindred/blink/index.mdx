@@ -1,0 +1,81 @@
+---
+title: 🖇️ Blink
+description: One link to bind them all. Centralize your online identity, share branded links, and manage QR codes from a single dashboard.
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaIdCard, FaLink, FaQrcode } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Digital Identity",
+      icon: <FaIdCard />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "URL Shortener",
+      icon: <FaLink />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "QR Codes",
+      icon: <FaQrcode />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://blink.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/blink`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "What is Blink?",
+      description:
+        "A unified link-in-bio platform with branded short links, custom themes, and per-organization workspaces. Apache 2.0 licensed and self-hostable.",
+    },
+  ]}
+/>
+
+**Omni Blink** is a link-in-bio and short-link platform. Create a single shareable profile that points at every place you live online, generate branded QR codes, and shorten links with custom domains.
+
+## Why Blink?
+
+- **One profile, many facets**: a single public page that organizes every link you want to share
+- **Branded short links**: per-organization short links with optional custom domains
+- **Custom themes**: pick a preset or design your own to match your brand
+- **Workspaces**: organizations and team seats backed by Omni's identity platform
+- **Self-hostable**: ship it inside your own infrastructure with the official Compose stack
+
+<Cards>
+  <Card title="Getting Started" href="/kindred/blink/getting-started">
+    Sign up, create your first profile, add links, and publish in under five minutes
+  </Card>
+  <Card title="Self-Hosting" href="/kindred/blink/self-hosting">
+    Run Blink inside your own infrastructure with Docker Compose
+  </Card>
+  <Card title="Pricing" href="/kindred/blink/pricing">
+    Free, Pro, and Team plans with entitlements enforced by Aether
+  </Card>
+  <Card title="API Reference" href="/kindred/blink/api">
+    GraphQL endpoint, REST helpers, authentication, and rate limits
+  </Card>
+</Cards>
+
+## Architecture
+
+Blink runs as two services backed by PostgreSQL:
+
+- `blink-api`: Elysia + PostGraphile GraphQL backend with Drizzle migrations
+- `blink-app`: TanStack Start frontend (React 19) served as the public-facing application
+
+The hosted version uses Omni's Identity (`identity.omni.dev`) for OAuth, Aether for billing entitlements, Warden for authorization, and the Fractal cluster for deployment. Self-hosters can wire any subset of these or run Blink standalone.
