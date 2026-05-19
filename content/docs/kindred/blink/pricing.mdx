@@ -1,0 +1,40 @@
+---
+title: Pricing
+description: Tier breakdown and entitlement enforcement for Blink.
+---
+
+Blink offers a free tier for individuals, paid tiers for power users and teams, and self-hosting for anyone who would rather run the stack themselves. Entitlements are enforced at the API by Aether and surfaced through the app.
+
+## Plans
+
+Pricing and tier definitions are owned by the [omni-api product catalog](https://github.com/omnidotdev/omni-api/blob/master/services/api/src/lib/db/catalog/planConfigs.ts) under the `blink` key. The values below mirror that source of truth.
+
+| Plan | Monthly | Yearly | Links | Short links per month | Custom themes | Custom domain | Remove "Powered by Blink" | Analytics |
+|------|---------|--------|-------|-----------------------|----------------|----------------|---------------------------|-----------|
+| Free | $0 | $0 | 10 | 10 | No | No | No | No |
+| Pro | $3 / mo | $27 / yr | 20 | 100 | Yes | No | No | Basic |
+| Team | $8 / mo | $72 / yr | Unlimited | Unlimited | Yes | Yes | Yes | Advanced |
+
+Yearly billing applies a 25% discount over the monthly rate. For enterprise terms, dedicated support, or on-prem deployments, [contact us](mailto:support@omni.dev).
+
+## Entitlement Enforcement
+
+Each entitlement is enforced server-side. The relevant feature keys map to checks in `services/blink-api/src/lib/entitlements`:
+
+| Feature key | Where it's enforced |
+|-------------|---------------------|
+| `max_links` | Link create mutation |
+| `max_short_links_per_month` | Short link create mutation |
+| `custom_themes` | Profile update mutation when `customTheme` is set; also drives the analytics gate |
+| `remove_branding` | Public profile renderer (hides the badge) |
+| `custom_domain` | Custom domain settings tab |
+
+When Aether is unreachable, the API falls back to free-tier defaults rather than failing requests. This keeps the app responsive during partial outages.
+
+## Self-Hosting
+
+Self-hosters do not pay anything to use Blink. The Apache 2.0 license covers commercial use, modification, and redistribution. Aether integration is optional. See [self-hosting](/kindred/blink/self-hosting) for setup.
+
+## Billing
+
+Hosted plans are billed monthly via Aether. Invoices, seat changes, and cancellations are handled in the Omni Console.

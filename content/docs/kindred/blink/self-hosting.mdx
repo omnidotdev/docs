@@ -1,0 +1,92 @@
+---
+title: Self-Hosting
+description: Run Blink inside your own infrastructure with Docker Compose.
+---
+
+Blink ships an Apache 2.0 licensed reference deployment via Docker Compose. The metarepo at [`omnidotdev/blink-stack`](https://github.com/omnidotdev/blink-stack) provides everything needed to bring up the full stack.
+
+## Prerequisites
+
+- Docker (or any OCI runtime that speaks `compose` v2)
+- A registered OAuth application if you want federated sign-in
+- A reachable public hostname for the app and API if not running on localhost
+
+## Services
+
+The bundled `compose.yaml` defines three services. `api` and `app` are built from source on first `docker compose up`; subsequent runs use the cached images.
+
+| Service | Image | Default Port |
+|---------|-------|--------------|
+| `db` | `postgres:18-alpine` | `5432` |
+| `api` | `blink-api:latest` (built from `./services/blink-api`) | `4000` |
+| `app` | `blink-app:latest` (built from `./services/blink-app`) | `3000` |
+
+The API runs migrations on boot, then serves GraphQL at `/graphql` and REST helpers under `/api/`. The app is a TanStack Start server that proxies API calls to the API service.
+
+## Required Environment Variables
+
+Configure these in a `.env` next to `compose.yaml`. A starter file is included as `.env.local.template`.
+
+| Variable | Purpose |
+|----------|---------|
+| `DB_PASSWORD` | PostgreSQL password used by the API to connect to `db` |
+| `AUTH_SECRET` | Session signing secret. Generate with `openssl rand -hex 32` |
+
+## Optional Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `APP_BASE_URL` | Public URL of the app, used for CORS and OAuth callbacks. Defaults to `http://localhost:3000` |
+| `API_BASE_URL` | URL the app uses to reach the API. Defaults to `http://api:4000` |
+| `DB_NAME`, `DB_USER`, `DB_PORT` | Postgres overrides |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Enable Google OAuth |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Enable GitHub OAuth |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Generic OIDC provider |
+
+If no OAuth provider is configured, sign-in features are disabled. The app boots successfully with only `DB_PASSWORD` and `AUTH_SECRET` set.
+
+## Running
+
+```sh
+git clone https://github.com/omnidotdev/blink-stack.git
+cd blink-stack
+cp services.yaml.template services.yaml
+cp .env.local.template .env
+# edit .env to set DB_PASSWORD and AUTH_SECRET
+docker compose up -d --build
+```
+
+The `--build` flag is only needed the first time; subsequent `docker compose up` runs reuse the cached images.
+
+The API is reachable at `http://localhost:4000`, the app at `http://localhost:3000`.
+
+## Diagnostics
+
+Verify each service is healthy:
+
+```sh
+curl http://localhost:4000/health
+curl http://localhost:4000/ready
+curl http://localhost:3000
+```
+
+`GET /ready` returns `503` if the database is not reachable. Logs are available via `docker compose logs -f api app`.
+
+## Volumes
+
+`db_data` is the only declared volume and persists Postgres state. Back it up before any image upgrade.
+
+## Optional Integrations
+
+Blink can integrate with other Omni services if those URLs are configured:
+
+- `BILLING_BASE_URL` and `BILLING_SERVICE_API_KEY`: enable Aether-backed entitlements (otherwise free-tier defaults apply)
+- `AUTHZ_API_URL`: enable Warden authorization checks (otherwise allow-by-default within the app)
+- `VORTEX_API_URL`: enable cross-product event delivery
+- `MEILISEARCH_URL` and `MEILISEARCH_MASTER_KEY`: enable search indexing
+
+If these are unset, the API logs a warning at boot and continues with the corresponding feature disabled.
+
+## License
+
+Blink is licensed under Apache 2.0. See `LICENSE.md` in the metarepo for details.

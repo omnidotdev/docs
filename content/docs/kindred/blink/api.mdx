@@ -1,0 +1,69 @@
+---
+title: API Reference
+description: GraphQL endpoint, REST helpers, authentication, and rate limits for the Blink API.
+---
+
+The Blink API is served by a single Elysia process. It exposes a GraphQL endpoint, a small set of REST helpers, and standard health probes.
+
+## Base URL
+
+Hosted: `https://api.blink.omni.dev`
+
+Self-hosted: whatever `API_BASE_URL` is set to in your Compose environment (default `http://localhost:4000`).
+
+## Authentication
+
+Authenticated requests carry a JWT bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer <access_token>
+```
+
+Tokens are issued by Omni Identity (`identity.omni.dev`) via the OAuth 2.0 authorization code flow with PKCE. The frontend handles token acquisition and refresh; programmatic clients can mint tokens via the standard Identity API.
+
+Public read paths (such as `/api/profile/by-username/:username/branding`) do not require authentication.
+
+## GraphQL
+
+Endpoint: `POST /graphql`
+
+Schema introspection is **disabled in production**. To explore the schema, run `bun graphql:generate` in the API service to write the SDL to disk, or query a development instance where introspection is enabled.
+
+Common operations:
+
+- `query profileByUsername(username: String!)` to fetch a public profile and its tree
+- `mutation createProfile`, `updateProfile`, `deleteProfile`
+- `mutation createLink`, `updateLink`, `deleteLink`
+- `mutation createTreeNode`, `updateTreeNode`, `deleteTreeNode`
+
+All write mutations enforce Aether entitlements and Warden authorization checks.
+
+## REST Helpers
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/health` | none | Liveness probe |
+| `GET` | `/ready` | none | Readiness probe (checks DB) |
+| `GET` | `/api/profile/by-username/:username/branding` | none | Returns `{ removeBranding: boolean }` for a public profile's organization |
+| `GET` | `/api/entitlements/check?feature=&organizationId=` | bearer | Returns `{ allowed: boolean }` for the given feature key |
+| `GET` | `/api/billing/prices` | none | Returns the live Stripe price catalog for Blink, including marketing features per tier |
+| `POST` | `/api/billing/checkout` | bearer | Creates a Stripe Checkout session for the requested tier and returns the redirect URL |
+| `POST` | `/api/billing/portal` | bearer | Creates a Stripe Customer Portal session for self-serve subscription management |
+
+## Webhooks
+
+The API receives webhooks from related services. Each path verifies its own HMAC signature.
+
+| Path | Source | Purpose |
+|------|--------|---------|
+| `/webhooks/entitlements` | Aether | Invalidate cached entitlements on plan changes |
+| `/webhooks/authz` | Vortex | Invalidate authorization tuples on org membership changes |
+| `/webhooks/idp` | Gatekeeper | Sync user records on identity events |
+
+## Rate Limiting
+
+The API rate limits at **100 requests per minute per IP** (Elysia rate-limit plugin). Authenticated endpoints inherit the same limit. For higher throughput, contact us about Enterprise plans.
+
+## CORS
+
+The API only accepts cross-origin requests from origins listed in `CORS_ALLOWED_ORIGINS`. The hosted app (`https://blink.omni.dev`) is allowed by default in production.
