@@ -1,0 +1,203 @@
+---
+title: Configuration
+description: fractal.toml reference
+---
+
+Fractal projects are configured with a `fractal.toml` file. Run `fractal init <name>` to generate a starter template.
+
+## Project
+
+```toml
+[project]
+name = "my-app"            # Project name (used for CRD naming)
+owner = "team@example.com" # Project owner
+description = "Optional"   # Project description
+```
+
+## Services
+
+Each service is declared as a `[[services]]` entry:
+
+```toml
+[[services]]
+name = "api"
+service_type = "web"  # web, worker, cronJob, staticSite
+```
+
+### Source
+
+Every service needs a source -- either a Git repository or a container image:
+
+```toml
+# Git repository
+[services.source.git]
+url = "https://github.com/org/api"
+branch = "main"
+
+# Container image (alternative to git)
+[services.source.image]
+repository = "nginx"
+tag = "latest"
+```
+
+### Deploy
+
+```toml
+[services.deploy]
+replicas = 2
+env = { NODE_ENV = "production", PORT = "3000" }
+```
+
+### Expose
+
+Network exposure is optional. When set, the operator creates a Gateway API HTTPRoute and cert-manager Certificate:
+
+```toml
+[services.expose]
+port = 3000
+domain = "api.example.com"
+tls = true
+```
+
+### Autoscaling
+
+Autoscaling is optional. The default mode is a CPU-based Horizontal Pod
+Autoscaler between `minReplicas` and `maxReplicas`:
+
+```toml
+[services.deploy.autoscale]
+minReplicas = 1
+maxReplicas = 5
+targetCpuPercent = 80
+```
+
+#### Scale to zero
+
+Set `scaleToZero = true` for request-driven scale-to-zero: idle apps scale to
+**0** replicas and wake automatically on the first HTTP request (served through
+the KEDA HTTP interceptor). This trades a small cold-start latency on the first
+request for zero idle cost.
+
+```toml
+[services.deploy.autoscale]
+maxReplicas = 3
+scaleToZero = true
+idleTimeoutSeconds = 300   # idle window before sleeping (default: 300)
+```
+
+Requirements and behaviour:
+
+- Requires an `[services.expose]` domain (HTTP traffic is what wakes the app).
+- The operator emits a KEDA `HTTPScaledObject` and routes the Gateway HTTPRoute
+  through the interceptor instead of a CPU HPA.
+- The first request after the app has slept incurs a cold start (pod schedule +
+  container boot); subsequent requests are served normally.
+- Backward compatible: when `scaleToZero` is unset, the service keeps the
+  classic CPU HPA.
+
+## Databases
+
+Declare managed Postgres databases with `[[databases]]`:
+
+```toml
+[[databases]]
+name = "app-db"
+engine = "postgres"
+version = "16"
+instances = 2          # Primary + 1 replica
+storage = "10Gi"
+
+[databases.backup]
+schedule = "0 2 * * *" # Daily at 2 AM
+retention_days = 30
+```
+
+The operator creates a CloudNativePG Cluster and a K8s Secret with connection credentials. Reference the secret in your service env:
+
+```toml
+[[services]]
+name = "api"
+service_type = "web"
+
+[services.source.image]
+repository = "org/api"
+tag = "latest"
+
+[services.deploy]
+replicas = 2
+
+# Reference the database secret
+[services.deploy.env_from_secret]
+DATABASE_URL = { secret = "app-db-credentials", key = "uri" }
+
+[services.expose]
+port = 3000
+domain = "api.example.com"
+tls = true
+```
+
+## Service Types
+
+| Type | Description |
+|------|-------------|
+| `web` | HTTP-serving web application (default) |
+| `worker` | Background worker process |
+| `cronJob` | Scheduled cron job |
+| `staticSite` | Static site (HTML/CSS/JS) |
+
+## Full Example
+
+```toml
+[project]
+name = "my-saas"
+owner = "team@example.com"
+description = "A multi-service SaaS application"
+
+# Managed Postgres database
+[[databases]]
+name = "main-db"
+engine = "postgres"
+version = "16"
+instances = 2
+storage = "20Gi"
+
+[databases.backup]
+schedule = "0 2 * * *"
+retention_days = 30
+
+# API service
+[[services]]
+name = "api"
+service_type = "web"
+
+[services.source.git]
+url = "https://github.com/org/api"
+branch = "main"
+
+[services.deploy]
+replicas = 3
+env = { NODE_ENV = "production" }
+
+[services.deploy.env_from_secret]
+DATABASE_URL = { secret = "main-db-credentials", key = "uri" }
+
+[services.expose]
+port = 3000
+domain = "api.my-saas.com"
+tls = true
+
+# Background worker
+[[services]]
+name = "worker"
+service_type = "worker"
+
+[services.source.image]
+repository = "org/worker"
+tag = "v1.2.0"
+
+[services.deploy]
+replicas = 2
+
+[services.deploy.env_from_secret]
+DATABASE_URL = { secret = "main-db-credentials", key = "uri" }
+```
