@@ -61,47 +61,72 @@ import {
 
 **Omni Backfeed** is a user feedback reporting platform. Backfeed aggregates user data for your products, services, and experiences, providing a centralized location to iterate on your projects with user-driven insights and planning.
 
-Backfeed is evolving from a feedback board into an **AI-native feedback brain**: it keeps the public board, voting, and roadmap at its core while learning to ingest feedback from many sources and triage it automatically. The board stays the source of truth, and human votes still set priority. AI handles the manual labor of sorting, not the judgment. See [AI &amp; Multi-Source Feedback (Planned)](#ai--multi-source-feedback-planned).
+Backfeed is evolving from a feedback board into an **AI-native feedback brain**: it keeps the public board, voting, and roadmap at its core while learning to ingest feedback from many sources and triage it automatically. The board stays the source of truth, and human votes still set priority. AI handles the manual labor of sorting, not the judgment. See [AI &amp; Multi-Source Feedback](#ai--multi-source-feedback).
 
 ## Terminology
 
 | Term | Description |
 |------|-------------|
-| **Organization** | The highest level, representing a company or group (managed via Gatekeeper) |
+| **Organization** | The highest level, representing a company or group (managed via Gatekeeper). Surfaced in the app as your **workspace** |
 | **Project** | A product or service within an organization that collects feedback |
 | **Board** | The feedback collection area for a project where posts are displayed |
-| **Post** | A single feedback submission (feature request, bug report, idea, etc.) |
+| **Post** | A single feedback submission (feature request, bug report, idea, etc.), addressed by a per-project number (`#42`, or `PREFIX-42` when a prefix is set) |
 | **Vote** | An upvote or downvote on a post to indicate support or priority |
-| **Comment** | Discussion on a post for collaboration and clarification |
+| **Comment** | Threaded discussion on a post for collaboration and clarification |
+| **Reaction** | An emoji response on a post or comment |
+| **Status** | Where a post sits in your workflow (e.g. Under Review, Planned, In Progress, Completed); fully customizable per project |
+| **Roadmap** | A read-only board that groups posts by status to show what you are building |
+| **Label** | A project-scoped tag for categorizing and filtering posts |
+| **Signal** | Any inbound piece of user input, regardless of source; a feature request or bug Signal becomes (or merges into) a Post |
 
 ## Features
 
-- **Feedback Aggregation**: Collect and categorize posts from multiple sources, ensuring a streamlined workflow for product teams.
-- **Prioritization Tools**: Rank posts based on user demand, impact, and urgency, making it easier to decide what to build next.
-- **Roadmap Planning**: Communicate product direction by turning posts into actionable roadmap items.
-- **User Voting & Discussion**: Each post includes upvotes/downvotes and a community discussion section for comments.
-- **Public & Private Boards**: Control project visibility with a per-project toggle.
-- **Multi-Source Ingestion**: Capture feedback from in-app widgets, email, social mentions, app-store reviews, and chat channels, all funneled into the same boards (planned).
-- **AI Triage**: Automatically tag, cluster, dedupe, and run sentiment analysis on incoming feedback so teams skip the manual sorting (planned).
-- **Product Reviews**: Collect star-rated reviews alongside feature requests as a distinct feedback type (planned).
-- **Analytics & Insights**: Gain deep insights into user needs and engagement trends (planned).
-- **API Access**: Integrate Backfeed seamlessly into your existing infrastructure with a powerful API (planned).
+### Available today
 
-## AI &amp; Multi-Source Feedback (Planned)
+- **Public feedback board**: A shareable board per project where users submit posts and the team triages them. Public by default, no account required to view or post.
+- **Voting**: Up/down votes on every post to surface demand; sort the board by top-voted or most recent.
+- **Comments & threaded replies**: Discuss any post, with nested replies.
+- **Rich-text editor**: Posts and comments support bold, italic, lists, and links, plus `@`-mentions of people and `#`-references to other posts (GitHub `#123` style, with an inline search-as-you-type picker).
+- **Reactions**: Emoji reactions on both posts and comments.
+- **Statuses & roadmap**: Fully customizable per-project statuses, a status-change **timeline** on each post (who moved it where, and when), and a read-only **roadmap** board that groups posts by status to communicate what you are building.
+- **Labels, filtering & saved views**: Tag posts with project-scoped labels, filter and search the board, sort it, and save view configurations for quick recall.
+- **Attachments**: Attach images and video to posts.
+- **Duplicate detection**: When semantic search is configured, drafting a post surfaces possible duplicates so feedback consolidates instead of fragmenting.
+- **Project links & branding**: Add website/social links and a project logo; workspaces carry their organization branding.
+- **Public & private boards**: Control project visibility with a per-project toggle.
+- **Email-to-feedback**: Each project has a dedicated inbound email address; messages sent to it become Signals and flow onto the board.
+- **AI triage (optional)**: With an embedding/AI provider configured, incoming feedback is automatically deduplicated, clustered into themes, sentiment-scored, and tagged. It degrades gracefully: with nothing configured, manual tagging and the in-app flow still work.
+- **Content moderation (optional)**: Submissions can be screened before they reach a board.
+- **Ecosystem events**: Every change emits a CloudEvent (`backfeed.post.*`, `backfeed.comment.*`, `backfeed.vote.*`, and more) so the rest of the Omni ecosystem can react, including closing the loop with [Runa](#closing-the-loop-with-runa).
 
-Backfeed is being extended around a single new concept, the **Signal**: any inbound piece of user input, regardless of source. A Signal that is a feature request or bug becomes (or merges into) a Post, exactly as today, so the board, votes, and roadmap are unchanged. Reviews, emails, and social mentions are simply Signals with a different source and type.
+### Planned
 
-Planned capabilities:
+- **More ingestion sources**: Beyond email, capture feedback from in-app widgets, social mentions, app-store reviews, and chat channels, all funneled into the same boards (the Signal model already supports them; connectors are rolling out).
+- **Product reviews**: Star-rated reviews alongside feature requests as a distinct feedback type.
+- **Analytics & insights**: Deeper dashboards on user needs and engagement trends.
+- **Public API & webhooks**: A documented API and webhooks to integrate Backfeed with your existing stack.
 
-- **Multi-source ingestion**: pull feedback from in-app widgets, email, social mentions, app-store reviews, and chat channels into the same boards
-- **AI triage**: automatically tag, cluster, dedupe, and score sentiment on incoming feedback
-- **Moderation**: filter public and ingested submissions before they reach a board
+## AI &amp; Multi-Source Feedback
 
-Every integration is opt-in and degrades gracefully: with no AI configured, manual tagging still works; with no ingestion connectors, the in-app widget still works. Human voting always remains the prioritization layer.
+Backfeed is built around a single concept, the **Signal**: any inbound piece of user input, regardless of source. A Signal that is a feature request or bug becomes (or merges into) a Post, exactly as a manual submission does, so the board, votes, and roadmap are unchanged. Reviews, emails, and social mentions are simply Signals with a different source and type.
 
-## Closing the Loop with Runa (Planned)
+Available today:
 
-When a feature request is accepted, Backfeed can hand it to **[Runa](/core/runa)** as a task. When that task ships, Backfeed notifies the original reporters that their feedback was delivered, the single most effective way to keep feedback flowing. The Backfeed to Runa flow runs over CloudEvents, no manual status-syncing required.
+- **Email ingestion**: every project has a dedicated inbound email address; messages become Signals on the board
+- **AI triage**: with an embedding/AI provider configured, incoming feedback is automatically deduplicated, clustered into themes, sentiment-scored, and tagged
+- **Moderation**: submissions can be screened before they reach a board
+
+Rolling out:
+
+- **More connectors**: in-app widgets, social mentions, app-store reviews, and chat channels (the Signal model already supports these source types)
+
+Every integration is opt-in and degrades gracefully: with no AI configured, manual tagging still works; with no ingestion connectors, the in-app submission flow still works. Human voting always remains the prioritization layer.
+
+## Closing the Loop with Runa
+
+When a feature request is accepted, Backfeed can hand it to **[Runa](/core/runa)** as a task. When the work ships, the original reporters are notified that their feedback was delivered, the single most effective way to keep feedback flowing.
+
+Backfeed already does its half of this over CloudEvents: the first time a post reaches a shipped status it emits a `backfeed.post.shipped` event carrying the reporters behind that feedback, with no manual status-syncing required. The Runa-side consumer that turns shipped tasks back into Backfeed updates is rolling out.
 
 ## Board Visibility
 
@@ -131,15 +156,15 @@ When a project is public:
 5. **Review & Prioritize**
    Use Backfeed's prioritization tools to filter, sort, and rank posts based on importance and feasibility.
 6. **Plan & Execute**
-   Convert prioritized posts into roadmap items, assign tasks to your team, and start building based on user demand.
+   Move posts through your statuses to build the roadmap, hand accepted work to [Runa](/core/runa), and close the loop with reporters when it ships.
 
-## Integrations (Planned)
+## Integrations
 
-Backfeed plans to support integrations across the Omni ecosystem and beyond:
+Backfeed integrates across the Omni ecosystem and beyond:
 
-- **Runa** for turning accepted feedback into tracked work (see [Closing the Loop](#closing-the-loop-with-runa-planned))
-- Additional feedback sources and AI triage (see [AI &amp; Multi-Source Feedback](#ai--multi-source-feedback-planned))
-- GitHub
+- **Runa** for turning accepted feedback into tracked work (see [Closing the Loop](#closing-the-loop-with-runa))
+- Additional feedback sources and AI triage (see [AI &amp; Multi-Source Feedback](#ai--multi-source-feedback))
+- **GitHub** (planned)
 
 ## API & Webhooks (Planned)
 
