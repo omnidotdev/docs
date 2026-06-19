@@ -1,0 +1,225 @@
+---
+title: Troubleshooting
+description: Diagnose common errors in workflow execution, webhooks, and integrations
+---
+
+This page lists the failures we see most often and how to resolve each one. Most errors surface in the dashboard's run inspector and in the `workflow_run` and `workflow_run_step` tables.
+
+## Execution limit reached
+
+**Symptom:** New workflow runs return `403` with a message like `Plan limit reached: executions (2500/2500). Upgrade your plan to continue.`
+
+**Cause:** Each plan has a `max_executions_per_month` quota enforced by the API. Free tier is 2500. The check runs every time a workflow is about to dispatch.
+
+**Resolution:**
+
+- Check `/api/v1/billing/usage` to see current consumption and reset window.
+- Disable workflows that are firing more often than needed. Cron expressions like `* * * * *` and unbounded webhook handlers are common culprits.
+- Add a [`debounce`](./step-types) step to coalesce rapid triggers.
+- Add a [`change_detector`](./step-types) step early in the workflow so noop runs do not consume the budget.
+- Upgrade the plan if real usage outgrows the quota.
+
+Other plan limits to watch: `max_workflows`, `max_subscriptions`, `max_integrations`, `max_routing_rules`, `max_event_schemas`, `max_mcp_servers`, `max_functions`, `max_plugins`. Each returns a similar `403` from the matching route.
+
+## Webhook signature verification fails
+
+**Symptom:** Outbound subscription deliveries always return `401` from your receiver, even though the URL is correct.
+
+**Cause:** Almost always one of:
+
+1. Comparing against a `sha256=` prefix that Vortex does not emit.
+2. Parsing the JSON body before verifying, so the bytes used to compute the signature differ from the bytes Vortex signed.
+3. Using a string compare (`==`) instead of a constant-time compare.
+4. Wrong header name. Vortex uses the configured `signatureHeader` (default `x-vortex-signature`), not `X-Hub-Signature` or `Stripe-Signature`.
+
+**Resolution:**
+
+- Use the **raw request body bytes**, not the parsed object.
+- Expect a plain lowercase hex digest with no prefix.
+- Use `crypto.timingSafeEqual`, `hmac.Equal`, or `hmac.compare_digest`.
+- Verify the secret matches what was returned at subscription creation. Rotate through `PATCH /api/v1/subscriptions/:id` if unsure.
+- Send a test delivery with `POST /api/v1/subscriptions/:id/test` and compare what arrives against what you compute. See [Webhooks](./webhooks#signature-verification).
+
+## Inbound webhook returns 404
+
+**Symptom:** `POST /webhooks/workflow/:id/:secret` returns `404 Not Found`.
+
+**Cause:** Either the workflow does not exist, the secret was rotated, or the workflow is disabled.
+
+**Resolution:**
+
+- Confirm the workflow ID in the dashboard URL bar matches the path.
+- Re-fetch the webhook URL from the workflow detail page. Rotation generates a new secret.
+- Make sure the workflow's `enabled` flag is true. Disabled workflows reject inbound webhooks.
+
+## Hatchet worker offline
+
+**Symptom:** Runs sit in `pending` indefinitely and never progress, or fail to dispatch with `Failed to push event to Hatchet`.
+
+**Cause:** The worker process is not connected to the Hatchet server, or `HATCHET_CLIENT_TOKEN` is missing or invalid.
+
+**Resolution:**
+
+- Check the worker container logs for `Hatchet client connected` on startup. The worker logs a warning on boot if Hatchet credentials are absent.
+- Verify `HATCHET_CLIENT_TOKEN` is set in the worker environment.
+- Confirm network reachability from the worker to the Hatchet host.
+- For self-hosted Hatchet, ensure its database is healthy and migrations have run.
+- For local development, the worker auto-bootstraps Hatchet through Docker Compose. In production, the [feedback note about auto-setup](./self-hosting) still applies: do not run dev mode against a production Hatchet instance.
+
+## Schema validation error on workflow save
+
+**Symptom:** `POST /api/v1/workflows` returns `400` with a Zod validation error pointing at `steps[N]` or `trigger`.
+
+**Cause:** The DSL JSON does not match the discriminated union defined in `vortex-worker/src/dsl/types.ts`. Common mistakes:
+
+- `type: "trigger"` step missing the inner `trigger` config object.
+- Switch step with no `cases` array.
+- Loop step omitting `body`.
+- Action step with neither `integrationId` nor `pluginId` set.
+
+**Resolution:**
+
+- Read the Zod error path carefully. It tells you exactly which step and field is wrong.
+- Cross-check against [Step types](./step-types) which mirrors the schema.
+- Open the workflow in the visual editor. The editor refuses to save invalid graphs, so any persistable graph is structurally valid.
+
+## OAuth integration broken
+
+**Symptom:** An `action` step fails with `Integration credentials expired` or `Token refresh failed`.
+
+**Cause:** The stored OAuth token has expired and the refresh attempt failed. This usually happens because the third-party provider revoked the token (password change, app permissions revoked, scope change) or the refresh token was never issued.
+
+**Resolution:**
+
+- Open the **Integrations** page in the dashboard.
+- Find the affected integration and click **Reconnect**.
+- Re-authorize through the provider, accepting any new scopes.
+- Re-run the failed workflow. New runs use the refreshed credentials immediately.
+
+For a workflow that runs frequently, wrap the action in a [`try_catch`](./step-types) so a single bad refresh does not stop scheduled fan-outs.
+
+## Slow workflow runs
+
+**Symptom:** Runs take many seconds or minutes longer than the underlying step durations suggest.
+
+**Diagnosis:**
+
+- Open the run detail in the dashboard. Each step shows `startedAt` and `completedAt`. Identify gaps between consecutive steps (queue delay) versus long step durations (work itself is slow).
+- Check the worker logs for `connector executor` timings.
+- For LLM steps, large `maxTokens` and `messages` history dominate latency.
+
+**Common causes and fixes:**
+
+- **Sequential HTTP calls in a loop.** Convert to a `parallel` step or use `map` with a sub-action if the connector supports batch operations.
+- **Cold MCP server.** First call to an MCP server pays connection cost. Keep it warm with a periodic health check workflow.
+- **Cache misses.** Wrap expensive lookups in a `cache` step with `getOrSet` and a sensible TTL.
+- **Subworkflow with `waitForCompletion: true`.** Set it to `false` for fire-and-forget when the parent does not need the child's result.
+- **Hatchet queue saturation.** Scale worker replicas or increase concurrency on the Hatchet side.
+
+## Trigger never fires
+
+**Symptom:** A workflow is enabled but never receives data from its configured trigger.
+
+**By trigger type:**
+
+| Trigger | Check |
+|---|---|
+| Webhook | Curl the URL with a small body and look at the response status |
+| Cron | Confirm the expression is in UTC and the workflow is enabled |
+| Event | Check the routing rule matches the expected `typePattern` and `sourcePattern` |
+| Polling | Worker logs show the polling adapter starting; confirm the URL is reachable |
+| Kafka/SQS/AMQP/MQTT/NATS/Redis/SSE/WebSocket | Worker logs show the adapter connecting; confirm broker credentials |
+| Email | Confirm the Herald webhook is configured to point at Vortex's email endpoint |
+| Omni / Event | Confirm the publishing service is emitting; query the event log |
+
+Streaming triggers (MQTT, NATS, Kafka, AMQP, WebSocket, Redis, SSE, gRPC) require the worker process to be running. If the worker is restarted, adapters reconnect automatically on startup.
+
+## Routing rule does not match
+
+**Symptom:** Events flow through the Iggy stream but no workflow runs.
+
+**Resolution:**
+
+- Open the **Events** page and click an arrived event to inspect its `type` and `source`.
+- Compare against your routing rule's `typePattern` (glob) and `sourcePattern`.
+- If the rule has a `condition` (JSONPath), confirm it returns a non-empty value for the event in question. Conditions are presence checks, not boolean checks.
+- If `celCondition` is set, it overrides `condition`. Verify the CEL expression evaluates to `true`.
+- Higher-priority rules can shadow lower-priority ones if they consume an event first. Check the rule list ordering.
+
+See [Events](./events) for routing semantics.
+
+## State not persisting across runs
+
+**Symptom:** A `state_set` step succeeds, but a later run's `state_get` returns `null`.
+
+**Cause:**
+
+- TTL expired between runs.
+- The key includes a per-run variable like `{{runId}}`, so each run writes under a different key.
+- The keys differ in organizationId scope (state is per-organization).
+
+**Resolution:**
+
+- Use a stable key derived from a business identifier (`order:{{orderId}}`), not a run identifier.
+- Set a long enough TTL or omit it for indefinite retention.
+
+## Duplicate runs from the same event
+
+**Symptom:** A single event triggers the workflow twice.
+
+**Cause:** The event has no `correlationId`, so the deduplication SETNX in Redis cannot recognize the duplicate.
+
+**Resolution:**
+
+- Publish events with a `correlationId` (a stable hash of the operation works well).
+- Vortex deduplicates within a 24-hour window per organization. See [Events](./events#idempotency).
+
+## Subscription delivery in DLQ
+
+**Symptom:** Deliveries pile up with `status: "dlq"` in `GET /api/v1/subscriptions/:id/deliveries?status=dlq`.
+
+**Common causes:**
+
+- Target endpoint consistently returns non-2xx.
+- Target endpoint is unreachable (DNS, TLS, firewall).
+- Target endpoint is on a blocked private network (SSRF guard rejects it).
+- `maxRetries` reached.
+
+**Resolution:**
+
+- Inspect the `error` and `httpStatus` columns on the DLQ rows.
+- Fix the receiver, then replay the DLQ entries through the events replay API or by sending fresh test deliveries.
+- Increase `maxRetries`, `initialBackoffMs`, or `backoffMultiplier` on the subscription if transient errors are common.
+
+## Connector or plugin not found
+
+**Symptom:** `IntegrationError: Connector "foo" not found` or `PluginError: Plugin "bar" not installed`.
+
+**Cause:** The integration or plugin is referenced in the DSL but is not registered on the worker.
+
+**Resolution:**
+
+- Confirm the `integrationId` or `pluginId` matches a record in `integration_definition` or the plugin registry.
+- For OAuth integrations, the user must connect their account first.
+- For custom plugins, the WASM or built-in plugin must be loaded on worker startup.
+
+## When all else fails
+
+- Tail the worker logs (`docker compose logs -f vortex-worker`). Every step logs structured records at `info` and `error`.
+- Drop a [`log`](./step-types) step early in the workflow with `data: { ctx: "{{triggerData}}" }` to see exactly what the executor received.
+- Reproduce the failure with a minimal workflow before changing the production one.
+- File an issue at [github.com/omnidotdev/vortex](https://github.com/omnidotdev/vortex) with the workflow ID and a redacted run trace.
+
+## Next steps
+
+<Cards>
+  <Card title="Best practices" href="./best-practices">
+    Design patterns that avoid these errors
+  </Card>
+  <Card title="Configuration" href="./configuration">
+    Environment variables and service tuning
+  </Card>
+  <Card title="Self-hosting" href="./self-hosting">
+    Deployment topology
+  </Card>
+</Cards>
