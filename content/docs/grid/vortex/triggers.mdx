@@ -323,7 +323,7 @@ A higher-level trigger that subscribes to structured events from any Omni produc
 
 ## Email
 
-Fires when an inbound email is received via Resend webhook. Supports glob-pattern filters on sender address and subject line.
+Fires when an inbound email is received via Herald webhook. Supports glob-pattern filters on sender address and subject line.
 
 ```json
 {
@@ -332,7 +332,7 @@ Fires when an inbound email is received via Resend webhook. Supports glob-patter
     "type": "email",
     "config": {},
     "address": "workflows@omni.dev",
-    "provider": "resend",
+    "provider": "herald",
     "filters": {
       "from": "*@stripe.com",
       "subject": "Invoice*"
