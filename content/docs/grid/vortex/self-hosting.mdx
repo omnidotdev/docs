@@ -1,9 +1,9 @@
 ---
 title: Self-Hosting
-description: Deploy Vortex on your own infrastructure with Docker Compose or Kubernetes
+description: Deploy Vortex on your own infrastructure with Docker Compose
 ---
 
-Vortex is fully open source (Apache 2.0) and designed to run on your own infrastructure. Two deployment options are supported: Docker Compose for simpler setups and Kubernetes (via Helm) for production-grade orchestration.
+Vortex is fully open source (Apache 2.0) and designed to run on your own infrastructure. Docker Compose is the supported path for self-hosting. A Helm chart is not currently published; Kubernetes operators who want to wire their own manifests can use the compose file as the source of truth for service topology, env vars, and health checks.
 
 ## Docker Compose
 
@@ -81,7 +81,7 @@ Omni platform integrations (optional, omit to run Vortex standalone):
 |----------|-------------|
 | `MANTLE_API_URL`, `MANTLE_SERVICE_KEY` | Mantle notification service |
 | `AUTH_API_URL` | HIDRA identity provider |
-| `RESEND_API_KEY`, `EMAIL_RENDER_SECRET` | Email trigger adapter |
+| `HERALD_API_KEY`, `EMAIL_RENDER_SECRET` | Email trigger adapter |
 
 ### Architecture
 
@@ -99,63 +99,6 @@ All services include health checks and proper dependency ordering. The worker de
 ### Self-hosted features
 
 When billing is not configured, the pricing page shows "All Features" mode, and all entitlements are unlocked. Self-hosted deployments get the full feature set with no artificial limits: unlimited workflows, unlimited executions, all integrations, custom plugins, and SSO.
-
-## Kubernetes (Helm)
-
-For production deployments, Vortex ships a Helm chart with configurable replicas, resource limits, ingress, TLS, and Pod Disruption Budgets.
-
-### Prerequisites
-
-The Helm chart deploys the three Vortex services (API, app, worker) and optionally a PostgreSQL subchart. The following external dependencies must be provisioned separately:
-
-- **Valkey / Redis** for caching and distributed locks. Configure via `externalCache` values, or deploy your own Valkey instance alongside the chart.
-- **[Apache Iggy](https://iggy.rs)** for event streaming. The worker and API both require a reachable Iggy server.
-- **[Hatchet](https://docs.hatchet.run/self-hosting)** for workflow execution. See the Hatchet self-hosting docs for setup instructions.
-
-### Install
-
-```sh
-helm install vortex ./charts/vortex \
-  --namespace vortex --create-namespace \
-  -f charts/vortex/values.yaml \
-  --set secrets.dbPassword=<password> \
-  --set secrets.authSecret=<secret> \
-  --set secrets.encryptionKey=<key> \
-  --set secrets.internalApiSecret=<secret> \
-  --set secrets.hatchetClientToken=<token> \
-  --set secrets.iggyUsername=<username> \
-  --set secrets.iggyPassword=<password> \
-  --set secrets.cachePassword=<password>
-```
-
-| Secret | Description | Generate with |
-|--------|-------------|---------------|
-| `secrets.dbPassword` | PostgreSQL password | `openssl rand -hex 16` |
-| `secrets.authSecret` | Session signing secret | `openssl rand -hex 16` |
-| `secrets.encryptionKey` | Data encryption key | `openssl rand -base64 32` |
-| `secrets.internalApiSecret` | Service-to-service auth | `openssl rand -hex 16` |
-| `secrets.hatchetClientToken` | Hatchet API token | From Hatchet dashboard |
-| `secrets.iggyUsername` | Iggy streaming username | Any value |
-| `secrets.iggyPassword` | Iggy streaming password | Any value |
-| `secrets.cachePassword` | Valkey/Redis password | `openssl rand -hex 16` |
-
-See `charts/vortex/values.yaml` for the full list of configurable values, and `charts/vortex/values.prod.yaml` for a production reference.
-
-### External database
-
-To use an external PostgreSQL instance instead of the bundled subchart:
-
-```yaml
-postgresql:
-  enabled: false
-
-externalDatabase:
-  host: your-db-host
-  port: 5432
-  database: vortex
-  username: postgres
-  password: <password>
-```
 
 ## Upgrading
 

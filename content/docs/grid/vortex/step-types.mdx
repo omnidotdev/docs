@@ -1,0 +1,417 @@
+---
+title: Step Types
+description: Reference for every step type in the Vortex DSL
+---
+
+This page documents every step type the worker recognizes. Each entry includes purpose, key fields, and a minimal example. For shared fields (`id`, `name`, `position`, `onError`), see [Concepts](./concepts) and [DSL](./dsl).
+
+## Control flow
+
+### `trigger`
+
+The entry point of every workflow. Wraps a [trigger configuration](./triggers).
+
+```json
+{
+  "id": "trigger_1",
+  "type": "trigger",
+  "name": "Webhook",
+  "position": { "x": 0, "y": 0 },
+  "trigger": { "type": "webhook", "config": {} }
+}
+```
+
+### `condition`
+
+Two-way branch on a boolean expression. Edges from this step use `sourceHandle: "true"` or `"false"`.
+
+```json
+{
+  "type": "condition",
+  "condition": {
+    "expression": "$.total > 100",
+    "trueBranch": "discount",
+    "falseBranch": "skip"
+  }
+}
+```
+
+### `switch`
+
+Multi-way branch on a value, with named cases and an optional default.
+
+```json
+{
+  "type": "switch",
+  "switch": {
+    "expression": "$.status",
+    "cases": [
+      { "value": "paid", "label": "Paid", "next": "fulfill" },
+      { "value": "refunded", "label": "Refunded", "next": "credit" }
+    ],
+    "default": "review"
+  }
+}
+```
+
+### `loop`
+
+Iterate with `forEach`, `while`, or `times`. `body` is an array of step IDs that run per iteration.
+
+```json
+{
+  "type": "loop",
+  "loop": {
+    "type": "forEach",
+    "collection": "$.items",
+    "itemVariable": "item",
+    "indexVariable": "i",
+    "body": ["process_item"]
+  }
+}
+```
+
+### `parallel`
+
+Run multiple branches concurrently. `waitFor` accepts `"all"`, `"any"`, or a number.
+
+```json
+{
+  "type": "parallel",
+  "parallel": {
+    "branches": [["send_email"], ["send_slack"], ["log_event"]],
+    "waitFor": "all"
+  }
+}
+```
+
+### `race`
+
+Run branches in parallel, the first to complete wins.
+
+```json
+{
+  "type": "race",
+  "race": {
+    "branches": [["primary_api"], ["fallback_api"]],
+    "timeout": "10s",
+    "output": "result",
+    "winnerIndex": "winner"
+  }
+}
+```
+
+### `try_catch`
+
+Run a `tryBranch`. On failure, optionally retry, then run `catchBranch` with the error available as `errorOutput`.
+
+```json
+{
+  "type": "try_catch",
+  "tryCatch": {
+    "tryBranch": ["charge_card"],
+    "catchBranch": ["notify_failure"],
+    "errorOutput": "chargeError",
+    "retries": 2,
+    "retryDelay": "1s"
+  }
+}
+```
+
+### `delay`, `sleep`, `wait`
+
+`delay` pauses for `duration` and `unit` (`seconds`, `minutes`, `hours`, `days`). `sleep` pauses in `ms`, `seconds`, or `minutes`. `wait` blocks until a webhook arrives, a named event fires, or a timeout elapses.
+
+```json
+{
+  "type": "wait",
+  "wait": {
+    "resumeOn": "webhook",
+    "webhookSuffix": "approval",
+    "timeout": 86400,
+    "timeoutUnit": "seconds",
+    "timeoutAction": "continue"
+  }
+}
+```
+
+### `subworkflow`
+
+Invoke another workflow by ID. Pass inputs in, map outputs back out.
+
+```json
+{
+  "type": "subworkflow",
+  "subworkflow": {
+    "workflowId": "wf_audit_log",
+    "inputs": { "event": "{{event}}" },
+    "waitForCompletion": true
+  }
+}
+```
+
+### `stop`, `noop`, `comment`
+
+`stop` terminates the run with `success`, `failure`, or `cancelled`. `noop` is a passthrough. `comment` is a visual-only annotation skipped by the executor.
+
+### `retry`, `timeout`
+
+`retry` re-executes a referenced `stepId` with backoff. `timeout` enforces a deadline on a referenced step and can `error`, `continue`, or run a `fallback`.
+
+## Data
+
+### `set`
+
+Assign workflow variables.
+
+```json
+{
+  "type": "set",
+  "set": { "variables": { "approved": true, "reviewer": "{{user.id}}" } }
+}
+```
+
+### `map`, `reduce`, `filter`, `sort`, `unique`, `group`, `flatten`, `chunk`, `zip`
+
+Standard collection operations. Each takes a `source` JSONPath and an `outputVariable`.
+
+```json
+{
+  "type": "filter",
+  "filter": {
+    "source": "$.orders",
+    "expression": "$.total > 50",
+    "outputVariable": "largeOrders"
+  }
+}
+```
+
+### `merge`, `split`
+
+`merge` combines objects or arrays from multiple sources with a `conflictStrategy` (`first`, `last`, or `error`). `split` divides an array into batches.
+
+### `template`, `parse`, `format`, `validate`
+
+`template` renders a string with variable interpolation. `parse` reads `json`, `xml`, `csv`, `yaml`, or `querystring` input. `format` formats `date`, `number`, `currency`, `percentage`, or `bytes`. `validate` checks input against a schema.
+
+```json
+{
+  "type": "parse",
+  "parse": {
+    "input": "{{triggerData.body}}",
+    "format": "json",
+    "outputVariable": "payload"
+  }
+}
+```
+
+### `aggregate`, `diff`, `change_detector`, `debounce`, `time_window`
+
+Stateful data steps. `aggregate` rolls up arrays (`collect`, `merge`, `sum`, `first`, `last`). `diff` reports `added`, `removed`, and `changed`. `change_detector` skips the run if the value matches the previous run (`hash` or `deep_equal`). `debounce` coalesces rapid triggers using a cache key and `windowMs`. `time_window` proceeds only when the current time falls inside a window.
+
+### `cache`, `state_get`, `state_set`, `state_wait`
+
+`cache` is per-organization with TTL and supports `get`, `set`, `delete`, `getOrSet`. The `state_*` steps operate on a cross-workflow KV store, useful for coordinating runs.
+
+## Integration
+
+### `action`
+
+Run a connector operation. The connector executor in `vortex-worker` dispatches on `integrationId` and `operation`.
+
+```json
+{
+  "type": "action",
+  "action": {
+    "integrationId": "slack",
+    "operation": "sendMessage",
+    "inputs": { "channel": "#alerts", "text": "{{message}}" }
+  }
+}
+```
+
+### `database`
+
+Execute SQL through an MCP database server. `operation` is `query`, `insert`, `update`, or `delete`.
+
+### `email`
+
+Send an email through Herald (or another configured provider). Supports `to`/`cc`/`bcc` (single or array), HTML or text body, and attachments.
+
+### `file`, `queue`
+
+`file` supports `local`, `s3`, `gcs`, and `azure` providers with `read`, `write`, `delete`, `list`, `exists`. `queue` operates on `memory`, `valkey`, `sqs`, or `rabbitmq` queues with `push`, `pull`, `peek`, `ack`, `nack`.
+
+### `spreadsheet`, `googleSheets`, `pdf`
+
+Office-style operations. `spreadsheet` handles `xlsx`, `xls`, `csv`. `googleSheets` uses a stored connection ID. `pdf` supports `create`, `parse`, `merge`, `split`, `watermark`, `extractPages`, `info`.
+
+### `webhookResponse`, `webhookVerify`
+
+`webhookResponse` returns a status code and body to a synchronous webhook caller. `webhookVerify` validates incoming signatures for `stripe`, `github`, `slack`, `twilio`, `shopify`, `sendgrid`, `paddle`, `linear`, or a `custom` HMAC scheme.
+
+### `notification`
+
+Send a notification through `email`, `slack`, `webhook`, or `push` channel with a `priority` (`low`, `normal`, `high`, `urgent`).
+
+## AI
+
+### `llm`
+
+Call an LLM via an MCP server with optional memory and tool use. Supports `images` for vision models.
+
+```json
+{
+  "type": "llm",
+  "llm": {
+    "serverId": "openai-mcp",
+    "model": "gpt-4",
+    "systemPrompt": "You are a helpful assistant",
+    "userPrompt": "Summarize: {{document}}",
+    "temperature": 0.7,
+    "outputs": { "summary": "summary" }
+  }
+}
+```
+
+### `prompt`, `chat`, `summarize`, `classify`
+
+Higher-level wrappers. `prompt` runs a template through a model. `chat` keeps a message history. `summarize` produces `brief`, `detailed`, or `bullets` output. `classify` returns one or many labels.
+
+### `agent`, `rag`, `vision`, `audio`
+
+`agent` executes an autonomous loop with `maxIterations`. `rag` queries a vector collection then prompts the model. `vision` performs `describe`, `ocr`, `detect`, or `classify` on an image. `audio` does `transcribe` or `synthesize`.
+
+### `embedding`, `vectorSearch`
+
+`embedding` generates vectors through an MCP server. `vectorSearch` queries `pinecone`, `pgvector`, `qdrant`, `weaviate`, or `chroma` with a `topK` and optional `minScore`.
+
+### `modelRegistry`
+
+BYOK access to `openai`, `anthropic`, `huggingface`, `ollama`, `replicate`, `together`, `groq`, `mistral`, `cohere`. Use a stored `connectionId` or an inline `apiKey`.
+
+### `ai_transform`, `ai_guardrails`, `rivet`
+
+`ai_transform` sends a value through a prompt template for structured output. `ai_guardrails` validates output against `regex`, `contains`, `not_contains`, `max_length`, or `json_schema` rules. `rivet` executes a Rivet AI agent graph by `graphId` or inline JSON.
+
+## Security
+
+### `encrypt`, `decrypt`, `sign`, `hash`, `jwt`
+
+`encrypt` and `decrypt` use AES-GCM or AES-CBC. `sign` produces HMAC signatures (SHA-256/384/512). `hash` accepts `md5`, `sha1`, `sha256`, `sha512`, `xxhash`. `jwt` creates, verifies, or decodes tokens with HS256/HS384/HS512.
+
+## Human in the loop
+
+### `approval`, `input`, `gate`
+
+`approval` blocks until approvers respond, with a `timeoutAction` of `approve`, `reject`, or `error`. `input` collects form data from `assignees` (`text`, `number`, `email`, `textarea`, `select`, `checkbox` fields). `gate` is a lower-level pause that resumes on approval, named signal, or manual continue.
+
+```json
+{
+  "type": "approval",
+  "approval": {
+    "title": "Refund over $1000",
+    "message": "Approve refund for order {{orderId}}",
+    "approvers": ["user_admin_1"],
+    "timeout": 86400,
+    "timeoutAction": "reject"
+  }
+}
+```
+
+## Plugins and code
+
+### `plugin`
+
+Execute a registered plugin (built-in or WASM) with `pluginId`, `function`, and `inputs`. Supports `timeout` and `memoryLimit` for sandboxing.
+
+### `code`
+
+Run JavaScript or TypeScript. `sandbox` picks the execution environment: `mcp` (default), `worker` (isolated Bun Worker), or `wasm` (QuickJS through Extism). MCP sandbox can install npm `dependencies` before execution.
+
+### `mcp`
+
+Call any tool exposed by a registered MCP server.
+
+## Events and orchestration
+
+### `event`
+
+Emit an event to the Iggy stream. `operation` is `emit`.
+
+```json
+{
+  "type": "event",
+  "event": {
+    "operation": "emit",
+    "eventName": "order.processed",
+    "payload": { "orderId": "{{orderId}}" }
+  }
+}
+```
+
+### `collect`
+
+Pause the workflow until matching cross-service events arrive. Useful for sagas that fan out across products. See [Events](./events).
+
+```json
+{
+  "type": "collect",
+  "collect": {
+    "events": [
+      { "name": "billing", "sourcePattern": "omni.aether", "typePattern": "subscription.created" },
+      { "name": "identity", "sourcePattern": "omni.gatekeeper", "typePattern": "user.created" }
+    ],
+    "correlationKey": "data.userId",
+    "timeout": "5m",
+    "mode": "all"
+  }
+}
+```
+
+### `window`
+
+Collect events into `tumbling`, `sliding`, or `session` windows. Emit `onClose` or `onEach`.
+
+### `saga`
+
+Distributed transaction with execute and compensate pairs per step. Set `parallel: true` to run steps concurrently.
+
+```json
+{
+  "type": "saga",
+  "saga": {
+    "steps": [
+      {
+        "name": "reserveInventory",
+        "execute": { "type": "http", "url": "https://inv.example.com/reserve", "method": "POST" },
+        "compensate": { "type": "http", "url": "https://inv.example.com/release", "method": "POST" }
+      }
+    ]
+  }
+}
+```
+
+## Observability
+
+### `log`, `assert`, `error`
+
+`log` writes structured records at `debug`, `info`, `warn`, `error`. `assert` evaluates an expression and fails (or soft-fails) if false. `error` raises a typed error with optional `fatal` to terminate the workflow.
+
+### `rateLimit`
+
+Apply `token_bucket`, `sliding_window`, or `fixed_window` rate limits keyed by a string. Operations: `acquire`, `check`, `reset`, `throttle`, `configure`.
+
+## Next steps
+
+<Cards>
+  <Card title="Examples" href="./examples">
+    Workflow templates that combine these steps
+  </Card>
+  <Card title="Triggers" href="./triggers">
+    Configure how workflows start
+  </Card>
+  <Card title="Best practices" href="./best-practices">
+    When to reach for which step
+  </Card>
+</Cards>
