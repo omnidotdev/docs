@@ -1,0 +1,80 @@
+---
+title: Architecture
+description: How Herald is built
+---
+
+Herald is two pieces: a stateless send API and a self-hosted MTA. The API owns
+tenancy, validation, suppression, and delivery state; the MTA owns signing and
+the SMTP path.
+
+## Components
+
+```
+   caller (service or Vortex workflow)
+                 │  POST /messages  (Bearer <tenant API key>)
+                 ▼
+        ┌──────────────────┐        inject (HTTP, Basic auth)
+        │    herald-api    │ ───────────────────────────────┐
+        │ (Bun + Elysia)   │                                 ▼
+        └────────┬─────────┘                       ┌──────────────────┐
+                 │                                  │     KumoMTA      │
+        ┌────────▼─────────┐   webhook (log_hooks)  │  (mail.omni.dev) │
+        │   PostgreSQL     │ ◀──────────────────────┤  DKIM + SMTP :25 │
+        │ tenants, keys,   │                        └────────┬─────────┘
+        │ messages, events,│                                 │ deliver
+        │ suppression      │                                 ▼
+        └──────────────────┘                        recipient mail servers
+```
+
+### herald-api
+
+A Bun + Elysia service. Responsibilities:
+
+- **Auth & tenancy**: an `Authorization: Bearer <key>` is hashed and matched to a tenant; routes decide whether a tenant is required. There is no public GraphQL surface in this phase.
+- **Send (`POST /messages`)**: validate the body at the boundary, reject suppressed recipients, short-circuit duplicate idempotency keys, persist a `queued` message, then inject into the MTA. On an engine failure the message is marked `failed` and the caller gets a `502` so it can fail over.
+- **Webhook (`POST /webhooks/kumomta`)**: ingest delivery lifecycle records, advance `message.status`, and auto-suppress hard bounces and complaints. Always acks `200` so the MTA does not retry forever.
+- **Events**: emit `herald.message.*` CloudEvents to Vortex (source `omni.herald`).
+
+The mail engine is injected behind a `MailEngine` interface, so KumoMTA can be
+swapped without touching the routes.
+
+### KumoMTA host
+
+A dedicated, isolated Hetzner box (`mail.omni.dev`) with a dedicated mail IP and
+PTR, never sharing application egress. It runs:
+
+- an **HTTP injection** endpoint behind Basic auth (Caddy terminates TLS, proxies to KumoMTA),
+- **DKIM signing** for the sending domain (selector `herald`),
+- an **SMTP listener** on `:25` to receive bounces and DSNs,
+- a **`log_hooks`** module that POSTs delivery/bounce/complaint records to `herald-api`.
+
+## Correlation
+
+KumoMTA's injection API does not return a per-message id, so Herald threads its
+own message id through an `X-Herald-Message-Id` header on the injected content.
+The MTA's `log_hooks` is configured to echo that header on every delivery record,
+and the webhook correlates events back to the originating message by it (falling
+back to the stored external id). This is what lets an asynchronous bounce or
+complaint, arriving seconds or minutes later, find its message and auto-suppress
+the recipient.
+
+## Data model (essentials)
+
+| Table | Holds |
+|-------|-------|
+| `tenant` | one row per sending tenant (org binding, name) |
+| `api_key` | hashed API keys, `lastUsedAt`, tenant FK |
+| `sending_domain` | per-tenant verified domains + DKIM selector |
+| `message` | every send: addresses, subject, status, external id, idempotency key |
+| `message_event` | immutable raw delivery/bounce/complaint records |
+| `suppression` | per-tenant suppressed addresses with a reason |
+
+## Send path, end to end
+
+1. Caller `POST /messages` with a tenant API key.
+2. Resolve tenant → validate body → suppression check → insert `queued` message.
+3. Inject into KumoMTA with `X-Herald-Message-Id`; store the returned id; mark sent.
+4. KumoMTA DKIM-signs and delivers over SMTP `:25`.
+5. KumoMTA `log_hooks` POSTs the outcome to `/webhooks/kumomta`.
+6. Herald correlates by the echoed header, advances status, auto-suppresses hard
+   bounces/complaints, and emits a `herald.message.*` CloudEvent.

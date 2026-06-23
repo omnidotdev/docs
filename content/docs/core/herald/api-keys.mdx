@@ -1,0 +1,51 @@
+---
+title: API keys
+description: Authenticate to Herald and scope access
+---
+
+Herald authenticates every request with a bearer API key that resolves to a
+single tenant. Pass it as `authorization: Bearer <key>` on REST and GraphQL
+requests alike.
+
+## Permission levels
+
+| Level     | Can send | Can manage tenant (keys, domains, templates, suppressions, settings) |
+| --------- | -------- | -------------------------------------------------------------------- |
+| `full`    | yes      | yes                                                                  |
+| `sending` | yes      | no                                                                   |
+
+Use a `sending` key for the application code path that only emits mail, and keep
+`full` keys for administrative tooling.
+
+## Creating a key
+
+From the dashboard (**API Keys → New key**) or the `createApiKey` mutation:
+
+```graphql
+mutation {
+  createApiKey(
+    input: { name: "production-sender", permission: "sending", expiresAt: "2027-01-01T00:00:00Z" }
+  ) {
+    apiKeyId
+    secret
+  }
+}
+```
+
+The `secret` is returned **once** and stored only as a peppered hash; Herald
+cannot show it again. The leading prefix is retained so you can recognise a key
+in the dashboard without revealing it.
+
+`expiresAt` is optional; after it passes the key stops authenticating.
+
+## Rotating and revoking
+
+Create the replacement key, deploy it, then revoke the old one with
+`revokeApiKey(apiKeyId: ...)`. Revocation is immediate. A revoked or expired key
+returns `401`.
+
+## Keep keys secret
+
+Treat keys like passwords: never commit them, never log them, and prefer the
+shortest-lived key that works. Herald never logs the key, the recipient, or the
+message body.

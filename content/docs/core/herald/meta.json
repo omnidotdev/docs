@@ -1,0 +1,14 @@
+{
+  "title": "Herald",
+  "pages": [
+    "index",
+    "quickstart",
+    "api-keys",
+    "domains",
+    "templates",
+    "tracking",
+    "webhooks",
+    "sdk",
+    "architecture"
+  ]
+}

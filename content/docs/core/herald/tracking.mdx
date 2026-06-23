@@ -1,0 +1,54 @@
+---
+title: Open and click tracking
+description: Measure engagement on the messages you send
+---
+
+Herald can record when a recipient opens a message or clicks a link, surfacing
+engagement in the message log and emitting `opened`/`clicked` events to your
+webhooks.
+
+## Enable per send
+
+Set `trackOpens` and/or `trackClicks` on a send:
+
+```json
+{
+  "to": "recipient@example.com",
+  "from": "hello@send.example.com",
+  "subject": "Product update",
+  "html": "<p>See <a href=\"https://example.com/changelog\">what's new</a>.</p>",
+  "trackOpens": true,
+  "trackClicks": true
+}
+```
+
+- **Opens** inject a 1x1 tracking pixel before `</body>`. The pixel URL carries
+  an HMAC-signed token, so tokens cannot be forged or enumerated.
+- **Clicks** rewrite each `<a href>` to a redirect endpoint that records the
+  click and then `302`s to the original URL. The original URL is stored, which
+  avoids an open redirect and yields per-link stats.
+
+Tracking only ever rewrites the delivered copy; the stored message body stays
+clean, so a resend re-applies tracking fresh.
+
+## Tenant defaults
+
+Rather than setting flags on every send, set tenant-wide defaults in the
+dashboard **Settings** page (`trackOpensDefault`, `trackClicksDefault`). A send
+that omits `trackOpens`/`trackClicks` inherits the tenant default; an explicit
+value on the send always wins.
+
+Transactional and verification mail is best left untracked for deliverability
+and privacy; marketing broadcasts default to tracking on.
+
+## Tracking host
+
+Tracking links are served by Herald on a dedicated host so they sit on your
+sending brand rather than the API host. A sending domain may also override the
+host per domain with its own tracking subdomain.
+
+## Consuming engagement
+
+Opens and clicks appear on the message in the dashboard log and are delivered to
+[webhook endpoints](/docs/core/herald/webhooks) subscribed to those event types,
+alongside the standard delivery events.
