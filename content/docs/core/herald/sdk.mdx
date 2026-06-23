@@ -1,0 +1,52 @@
+---
+title: SDK and MCP server
+description: Typed client and an agent-ready tool surface
+---
+
+Herald ships a typed TypeScript client and a Model Context Protocol (MCP) server,
+both generated from the same GraphQL schema so they stay in lockstep with the
+API.
+
+## TypeScript SDK
+
+`@omnidotdev/herald` wraps the generated GraphQL client with an ergonomic facade:
+API-key auth, automatic idempotency keys, and named methods.
+
+```ts
+import { createHerald } from "@omnidotdev/herald";
+
+const herald = createHerald({ apiKey: process.env.HERALD_API_KEY });
+
+await herald.emails.send({
+  to: "recipient@example.com",
+  from: "hello@send.example.com",
+  subject: "Welcome aboard",
+  html: "<p>Thanks for signing up.</p>",
+});
+```
+
+The client also exposes the messages, domains, and API-key operations. Because it
+is generated from the schema, new fields and operations appear in the client as
+the API grows.
+
+## MCP server
+
+`herald-mcp` is a standalone [Model Context Protocol](https://modelcontextprotocol.io)
+server that exposes a curated, agent-friendly subset of Herald as tools, so an
+assistant can send and inspect mail on a tenant's behalf:
+
+- `send_email`
+- `list_messages`
+- `get_message`
+- `list_domains`
+- `verify_domain`
+
+It speaks MCP over stdio and calls the Herald API with the tenant token supplied
+in its environment, so the same permission model applies: the agent can only do
+what its key allows.
+
+## Regenerating
+
+Both targets are generated with [ODK](/docs/armory/odk) from the committed Herald
+schema and operation documents. Regenerate after the schema changes so the SDK,
+its hooks, and the MCP tools reflect the current API.

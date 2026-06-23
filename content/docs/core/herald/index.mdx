@@ -1,0 +1,80 @@
+---
+title: Herald
+description: Transactional email platform for the Omni stack
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiEnvelopeSimple, PiPaperPlaneTilt, PiShieldCheck } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Email",
+      icon: <PiEnvelopeSimple />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Transactional",
+      icon: <PiPaperPlaneTilt />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Deliverability",
+      icon: <PiShieldCheck />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: `${app.socials.github}/herald-api`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Big Idea",
+      description:
+        "Own the transactional email path end to end: a multi-tenant send API in front of a self-hosted MTA with a dedicated sending reputation, suppression, and delivery feedback.",
+    },
+  ]}
+/>
+
+**Herald** is Omni's transactional email platform. It pairs a small multi-tenant
+send API with a self-hosted [KumoMTA](https://kumomta.com) mail host on a
+dedicated IP, so product emails (order receipts, notifications, verification)
+flow over infrastructure Omni controls rather than a third-party ESP, while
+keeping a third-party provider available as a fallback.
+
+## Key Features
+
+- **Multi-tenant send API**: API-key auth resolves a tenant; each tenant has its own suppression list and verified sending domains.
+- **Self-hosted MTA**: KumoMTA on a dedicated Hetzner host with a dedicated mail IP, PTR, and DKIM signing, isolated from application egress to protect sending reputation.
+- **Suppression built in**: hard bounces and spam complaints auto-suppress the recipient; suppressed addresses are rejected before any send.
+- **Delivery feedback**: KumoMTA posts delivery/bounce/complaint events back to Herald, which advances message status and emits CloudEvents.
+- **Idempotent sends**: an optional idempotency key dedupes retries so a redelivered request never sends twice.
+- **Swappable engine**: the mail engine sits behind an interface, so the underlying MTA can change without touching callers.
+
+## How it fits
+
+Herald is consumed two ways:
+
+1. **Directly** by services that send their own mail (`POST /messages` with a tenant API key).
+2. **Through [Vortex](/docs/core/vortex)** workflows, which render an email and hand it to Herald, falling back to a third-party provider on failure.
+
+Inter-service delivery events are published as [CloudEvents](https://cloudevents.io)
+(`herald.message.delivered`, `herald.message.bounced`, `herald.message.complained`)
+under the source `omni.herald`.
+
+## Sending domain
+
+Herald signs and sends from a dedicated sending subdomain (`send.omni.dev`) with
+SPF, a `herald` DKIM selector, and DMARC configured, while the MTA host itself
+(`mail.omni.dev`) carries the PTR and receives bounce/feedback mail. Keeping the
+sending domain separate from the primary domain isolates reputation.
+
+## Status
+
+Herald is an internal platform service. See [Architecture](/docs/core/herald/architecture)
+for how the API and MTA fit together.

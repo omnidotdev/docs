@@ -1,0 +1,84 @@
+---
+title: Quickstart
+description: Send your first email with Herald
+---
+
+This guide takes you from nothing to a delivered email: create an API key,
+verify a sending domain, and send a message over REST or GraphQL.
+
+## 1. Create an API key
+
+Every request authenticates as a tenant with a bearer API key. Create one from
+the dashboard (**API Keys → New key**) or with the `createApiKey` mutation. The
+secret is shown **once**, so store it immediately.
+
+Keys carry a permission level:
+
+- `full` manages the tenant (keys, domains, templates, suppressions) and sends.
+- `sending` may only send messages.
+
+See [API keys](/docs/core/herald/api-keys) for expiry and rotation.
+
+## 2. Verify a sending domain
+
+Herald only sends from a domain you have verified, which proves you control it
+and lets Herald publish a DKIM key for signing. Add a domain (**Domains → Add
+domain**), then publish the DKIM `TXT` record Herald shows you and click
+**Verify**. See [Sending domains](/docs/core/herald/domains).
+
+## 3. Send a message
+
+### REST
+
+```bash
+curl https://api.herald.omni.dev/messages \
+  -H "authorization: Bearer $HERALD_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "to": "recipient@example.com",
+    "from": "hello@send.example.com",
+    "subject": "Welcome aboard",
+    "html": "<p>Thanks for signing up.</p>",
+    "idempotencyKey": "signup-12345"
+  }'
+```
+
+`from` must belong to a verified sending domain or the send is rejected. An
+optional `idempotencyKey` dedupes retries so a redelivered request never sends
+twice. Other fields: `text`, `cc`, `bcc`, `replyTo`, `attachments`, `sendAt`
+(future ISO-8601 to schedule), `variables`, `trackOpens`, `trackClicks`.
+
+### GraphQL
+
+```graphql
+mutation Send {
+  sendMessage(
+    input: {
+      to: "recipient@example.com"
+      from: "hello@send.example.com"
+      subject: "Welcome aboard"
+      html: "<p>Thanks for signing up.</p>"
+    }
+  ) {
+    messageId
+    status
+  }
+}
+```
+
+The GraphQL endpoint is `https://api.herald.omni.dev/graphql`, authenticated with
+the same bearer key.
+
+## 4. Track delivery
+
+Herald records every message and its delivery events (`delivered`, `bounced`,
+`complained`, and, when enabled, `opened`/`clicked`). View them in the dashboard
+**Messages** log, query the `messages` connection, or subscribe to
+[webhooks](/docs/core/herald/webhooks). Hard bounces and complaints add the
+recipient to your suppression list automatically.
+
+## Next steps
+
+- [Templates and variables](/docs/core/herald/templates) for reusable, personalized content
+- [Open and click tracking](/docs/core/herald/tracking)
+- [The TypeScript SDK and MCP server](/docs/core/herald/sdk)

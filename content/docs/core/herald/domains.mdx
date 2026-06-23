@@ -1,0 +1,53 @@
+---
+title: Sending domains
+description: Add and verify a domain to send from
+---
+
+Herald sends only from domains you have verified. Verification proves control of
+the domain and publishes a DKIM key so the MTA can sign your mail, which is what
+makes it deliverable.
+
+## Add a domain
+
+From the dashboard (**Domains → Add domain**) or `createSendingDomain`:
+
+```graphql
+mutation {
+  createSendingDomain(input: { domain: "send.example.com" }) {
+    domainId
+    dkimSelector
+    dkimPublicKey
+    verified
+  }
+}
+```
+
+Herald generates a DKIM key pair and returns the public half. Use a dedicated
+sending subdomain (for example `send.example.com`) rather than your root domain,
+so sending reputation stays isolated from the rest of your mail.
+
+## Publish DNS and verify
+
+Add the DKIM public key as a `TXT` record at
+`<selector>._domainkey.<domain>` (the dashboard shows the exact record), then
+verify:
+
+```graphql
+mutation {
+  verifySendingDomain(id: "<domainId>") {
+    verified
+  }
+}
+```
+
+Verification resolves the record and checks it matches the key Herald generated.
+A missing record reads as "not yet verified" rather than an error, so you can
+re-run it after DNS propagates.
+
+For the best inbox placement, also publish `SPF` and `DMARC` records for the
+sending domain. Herald surfaces deliverability recommendations in the dashboard.
+
+## The send gate
+
+Until a domain is verified, any send whose `from` address uses it is rejected.
+Once verified, messages from that domain are signed and sent.

@@ -1,0 +1,63 @@
+---
+title: Templates and variables
+description: Reusable content with Handlebars merge fields
+---
+
+Templates store reusable subject, HTML, and text content. Combined with
+variables, they let you send personalized mail without rebuilding the body on
+every call.
+
+## Create a template
+
+From the dashboard (**Templates**) or `createTemplate`:
+
+```graphql
+mutation {
+  createTemplate(
+    input: {
+      name: "welcome"
+      subject: "Welcome, {{name}}"
+      html: "<p>Hi {{name}}, thanks for joining {{company}}.</p>"
+    }
+  ) {
+    templateId
+  }
+}
+```
+
+## Variables
+
+Herald renders [Handlebars](https://handlebarsjs.com) tags server-side before
+the message is stored and injected, so the stored body and the delivered body
+are identical.
+
+- `{{value}}` inserts an HTML-escaped value (the safe default).
+- `{{{value}}}` inserts a raw, unescaped value. Use it only for content you
+  trust, since values are tenant-provided.
+
+Pass `variables` on a send to fill the tags:
+
+```json
+{
+  "to": "ada@example.com",
+  "from": "hello@send.example.com",
+  "subject": "Welcome, {{name}}",
+  "html": "<p>Hi {{name}}.</p>",
+  "variables": { "name": "Ada", "company": "Omni" }
+}
+```
+
+When no `variables` are supplied the content is sent verbatim, so a body that
+contains literal braces is never reinterpreted.
+
+## Preview
+
+Use the template preview (the editor's live preview, backed by the
+`renderTemplate` query) to render a template against sample variables and see the
+final subject and body before sending.
+
+## Broadcasts
+
+For audience sends, store per-contact attributes on each contact; a broadcast
+renders the template with each recipient's own attributes, so one template
+personalizes the whole send.
