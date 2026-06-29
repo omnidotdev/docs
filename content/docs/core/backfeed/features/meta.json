@@ -1,0 +1,10 @@
+{
+  "title": "Features",
+  "pages": [
+    "index",
+    "boards-posts",
+    "statuses-roadmap",
+    "tags-filtering",
+    "ai-ingestion"
+  ]
+}
