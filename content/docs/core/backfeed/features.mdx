@@ -1,0 +1,31 @@
+---
+title: Features
+description: What Backfeed does today and what is planned
+---
+
+## Available today
+
+- **Public feedback board**: A shareable board per project where users submit posts and the team triages them. Public by default, no account required to view; posting and voting require signing in.
+- **Voting**: Up/down votes on every post to surface demand; sort the board by top-voted or most recent.
+- **Comments & threaded replies**: Discuss any post, with nested replies.
+- **Rich-text editor**: Posts and comments support bold, italic, lists, and links, plus `@`-mentions of people and `#`-references to other posts (GitHub `#123` style, with an inline search-as-you-type picker).
+- **Reactions**: Emoji reactions on both posts and comments.
+- **Statuses, roadmap & changelog**: Fully customizable per-project statuses, a status-change **timeline** on each post (who moved it where, and when), a read-only **roadmap** board that groups posts by status to communicate what you are building, and an opt-in public **changelog** that lists shipped posts.
+- **Status notifications**: When a post changes status, the people who reported or upvoted it are emailed so the loop closes, and each person can opt out in their notification preferences.
+- **At-a-glance metrics**: Each project surfaces post counts, total engagement, contributor activity, and a status breakdown.
+- **Tags, filtering & saved views**: Tag posts with project-scoped tags, filter and search the board, sort it, and save view configurations for quick recall.
+- **Attachments**: Attach images and video to posts.
+- **Duplicate detection**: When semantic search is configured, drafting a post surfaces possible duplicates so feedback consolidates instead of fragmenting.
+- **Project links & branding**: Add website/social links and a project logo; workspaces carry their organization branding.
+- **Public & private boards**: Control project visibility with a per-project toggle.
+- **Email-to-feedback**: Each project has a dedicated inbound email address; messages sent to it become Signals and flow onto the board.
+- **AI triage (optional)**: With an embedding/AI provider configured, incoming feedback is automatically deduplicated, clustered into themes, and sentiment-scored. It degrades gracefully: with nothing configured, manual tagging and the in-app flow still work.
+- **Content moderation (optional)**: Submissions can be screened before they reach a board.
+- **Ecosystem events**: Every change emits a CloudEvent (`backfeed.post.*`, `backfeed.comment.*`, `backfeed.vote.*`, and more) so the rest of the Omni ecosystem can react, including closing the loop with [Runa](/core/backfeed/runa-loop).
+
+## Planned
+
+- **More ingestion sources**: Beyond email, capture feedback from in-app widgets, social mentions, app-store reviews, and chat channels, all funneled into the same boards (the Signal model already supports them; connectors are rolling out).
+- **Product reviews**: Star-rated reviews alongside feature requests as a distinct feedback type.
+- **Analytics & insights**: Deeper dashboards on user needs and engagement trends.
+- **Public API & webhooks**: A documented API and webhooks to integrate Backfeed with your existing stack.

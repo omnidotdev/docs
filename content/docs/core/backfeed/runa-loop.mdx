@@ -1,0 +1,8 @@
+---
+title: Closing the Loop with Runa
+description: Hand accepted feedback to Runa and notify reporters when it ships
+---
+
+When a feature request is accepted, Backfeed can hand it to **[Runa](/core/runa)** as a task. When the work ships, the original reporters are notified that their feedback was delivered, the single most effective way to keep feedback flowing.
+
+Backfeed already does its half of this over CloudEvents: the first time a post reaches a shipped status it emits a `backfeed.post.shipped` event carrying the reporters behind that feedback, with no manual status-syncing required. The Runa-side consumer that turns shipped tasks back into Backfeed updates is rolling out.
