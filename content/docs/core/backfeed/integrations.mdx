@@ -1,14 +1,17 @@
 ---
 title: Integrations
-description: How Backfeed connects across the Omni ecosystem, plus the planned API
+description: How Backfeed connects across the Omni ecosystem and beyond
 ---
 
 Backfeed integrates across the Omni ecosystem and beyond:
 
 - **Runa** for turning accepted feedback into tracked work (see [Closing the Loop](/core/backfeed/runa-loop))
-- Additional feedback sources and AI triage (see [AI &amp; Multi-Source Feedback](/core/backfeed/ai-feedback))
+- **Additional feedback sources and AI triage** (see [AI &amp; Ingestion](/core/backfeed/features/ai-ingestion))
 - **GitHub** (planned)
 
-## API & Webhooks (Planned)
+## Ecosystem events
 
-Backfeed will offer a fully-featured API for developers looking to extend its functionality. Webhooks will allow real-time notifications and automation with your existing stack.
+Every change emits a [CloudEvent](https://cloudevents.io) (`backfeed.post.*`,
+`backfeed.comment.*`, `backfeed.vote.*`, and more) so the rest of the Omni
+ecosystem can react, including [closing the loop with Runa](/core/backfeed/runa-loop).
+A documented public API and webhooks are [planned](/core/backfeed/api).

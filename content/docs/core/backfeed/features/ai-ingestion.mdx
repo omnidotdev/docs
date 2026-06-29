@@ -1,0 +1,38 @@
+---
+title: AI & Ingestion
+description: The Signal model, email-to-feedback, optional AI triage, and moderation
+---
+
+Backfeed is evolving from a feedback board into an **AI-native feedback brain**:
+it keeps the public board, voting, and roadmap at its core while learning to
+ingest feedback from many sources and triage it automatically. AI handles the
+manual labor of sorting, not the judgment; human voting always remains the
+prioritization layer.
+
+## The Signal model
+
+Everything is built around a single concept, the **Signal**: any inbound piece
+of user input, regardless of source. A Signal that is a feature request or bug
+becomes (or merges into) a Post, exactly as a manual submission does, so the
+board, votes, and roadmap are unchanged. Reviews, emails, and social mentions
+are simply Signals with a different source and type.
+
+## Available today
+
+- **Email ingestion**: every project has a dedicated inbound email address;
+  messages sent to it become Signals and flow onto the board.
+- **AI triage**: with an embedding/AI provider configured, incoming feedback is
+  automatically deduplicated, clustered into themes, and sentiment-scored.
+- **Moderation**: submissions can be screened before they reach a board.
+
+## Graceful degradation
+
+Every integration is opt-in and degrades gracefully: with no AI configured,
+manual tagging still works; with no ingestion connectors, the in-app submission
+flow still works.
+
+## Rolling out
+
+More connectors are on the way: in-app widgets, social mentions, app-store
+reviews, and chat channels (the Signal model already supports these source
+types). Track them on the [roadmap](/core/backfeed/roadmap).

@@ -1,0 +1,20 @@
+---
+title: API & Webhooks
+description: Programmatic access and event-driven integration (planned)
+---
+
+<Callout type="warn">
+  **Planned.** A documented public API and webhooks are on the
+  [roadmap](/core/backfeed/roadmap). This page describes the direction, not yet
+  a stable contract.
+</Callout>
+
+Backfeed will offer a fully-featured API for developers looking to extend its
+functionality, and webhooks for real-time notifications and automation with your
+existing stack.
+
+In the meantime, Backfeed is already event-driven internally: every change emits
+a [CloudEvent](https://cloudevents.io) (`backfeed.post.*`, `backfeed.comment.*`,
+`backfeed.vote.*`, and more) so the rest of the Omni ecosystem can react,
+including [closing the loop with Runa](/core/backfeed/runa-loop). See
+[integrations](/core/backfeed/integrations) for what connects today.
