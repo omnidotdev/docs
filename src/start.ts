@@ -14,6 +14,8 @@ const permanentRedirects: Record<string, string> = {
   "/grid/vortex/self-hosting": "/help/self-hosting/docker-compose",
   "/grid/fractal/self-hosting": "/help/self-hosting/kubernetes",
   "/armory/manifold/self-hosting": "/help/self-hosting/docker-compose",
+  // Vortex moved from the core realm to grid; keep old links working.
+  "/core/vortex": "/grid/vortex",
 };
 
 /**
