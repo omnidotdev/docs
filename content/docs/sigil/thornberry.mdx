@@ -33,14 +33,58 @@ import { SiReact, SiTailwindcss } from "react-icons/si";
   ]}
   alerts={[
     {
-      title: "Unreleased",
-      description: "Thornberry is not yet released.",
+      title: "🚧 Under Construction",
+      description:
+        "Thornberry is live and evolving. Expect this documentation to grow.",
     },
     {
       title: "💡 Big Idea",
       description: "Extend Sigil with the power of Tailwind and shadcn",
     },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Thornberry brings the Sigil design system to Tailwind and shadcn projects, distributing accessible, ready-to-customize components through a shadcn registry you install by URL.",
+    },
   ]}
 />
 
-**Omni Sigil Thornberry** docs coming soon. Smashing! 🍓
+**Omni Sigil Thornberry** is the [🎨 Sigil](/sigil) design system expressed with [Tailwind CSS](https://tailwindcss.com) and [shadcn](https://ui.shadcn.com), built on [Ark UI](https://ark-ui.com) primitives. It ships as a shadcn registry, so you add components straight into your project as editable source instead of pulling in an opaque dependency.
+
+## Key Features
+
+- **Registry Distribution**: Add components by URL with the shadcn CLI; each is copied into your project as editable source
+- **Tailwind + shadcn**: Familiar styling and conventions for any shadcn project
+- **Ark UI Primitives**: Accessible, unstyled behavior under the hood
+- **Rich Component Set**: The full primitive lineup plus advanced building blocks like a flow canvas and a Lexical rich-text editor
+- **Sigil Design Tokens**: Consistent theming via CSS variables shared across Omni apps
+- **Accessible by Default**: Components built with WCAG accessibility standards in mind
+
+## Use Cases
+
+- **Application Development**: Build consistent UIs with pre-styled, editable components
+- **Design System Adoption**: Bring Sigil to Tailwind and shadcn codebases
+- **Rapid Prototyping**: Drop in ready-to-use components and iterate quickly
+- **Custom Theming**: Own the source and restyle with Tailwind and CSS variables
+
+## How It Works
+
+Thornberry publishes its components as a [shadcn](https://ui.shadcn.com) registry. Initialize shadcn in a React + Tailwind project, then add any component by URL:
+
+```bash
+bunx --bun shadcn@latest add https://thornberry.omni.dev/r/button.json
+```
+
+The component lands in your project under your configured `ui` alias, ready to use and customize:
+
+```tsx
+import { Button } from "@/components/ui/button";
+
+function Example() {
+  return <Button>Get Started</Button>;
+}
+```
+
+## Getting Started
+
+Browse the full component registry, live previews, and per-component install commands at [thornberry.omni.dev](https://thornberry.omni.dev).
