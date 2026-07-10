@@ -5,7 +5,6 @@ description: Unified spatial computing development under a single React-first AP
 
 import { ProductOverview } from "@/components/docs";
 import app from "@/lib/config/app.config";
-import { SiGraphql, SiTypescript, SiOpenapiinitiative } from "react-icons/si";
 
 <ProductOverview
   tags={[
@@ -57,8 +56,78 @@ import { SiGraphql, SiTypescript, SiOpenapiinitiative } from "react-icons/si";
   ]}
 />
 
-**Omni Reality Development Kit (RDK)** is a React-first framework for building web-based XR experiences, from AR to VR, orchestrated through one unified API powered by Three.js and react-three-fiber.
+**Omni Reality Development Kit (RDK)** is a React-first framework for building web-based XR experiences, from AR to VR, orchestrated through one unified API powered by [Three.js](https://threejs.org) and [`react-three-fiber`](https://github.com/pmndrs/react-three-fiber).
 
-RDK aims to be a one-stop platform for all web-based spatial and immersive computing use cases.
+RDK unifies multiple spatial and XR technologies (marker-based AR, geolocation-based AR, camera passthrough, and WebXR) under a single React-first abstraction, so you can target browsers, Android, iOS, and headsets alike with minimal friction.
 
-More docs coming soon, hang tight anon ᯅ
+## Why RDK
+
+Web-based XR today is fragmented: split between native SDKs and the web, and further divided by platform politics. Notably, iOS does not natively support WebXR, leaving developers to maintain separate code paths for identical use cases.
+
+RDK's goal is to unify these worlds under a single, web-native React API. Build once with the R3F and Three.js ecosystems you already know, and reach every surface.
+
+## Capabilities
+
+Support is evolving quickly. Status reflects the current state of the framework:
+
+- ⚗️ **Experimental** — working today, but expect rough edges and API changes
+- 🧭 **Planned** — on the roadmap, not yet implemented
+
+| Capability | Status | Backend (current or proposed) | Notes |
+| --- | --- | --- | --- |
+| Fiducial (pattern/barcode) | ⚗️ Experimental | [AR.js (ARToolKit)](https://github.com/ar-js-org/ar.js) | Printed `.patt` or barcode markers. Reliable, no WebXR dependency. |
+| Geolocation / world anchors | ⚗️ Experimental | [LocAR.js](https://github.com/ar-js-org/locar.js) | GPS + compass anchoring. May later integrate mapping data sources. |
+| Magic window (camera passthrough) | ⚗️ Experimental | DeviceOrientation + `getUserMedia` | Camera passthrough with device orientation. Works everywhere, no WebXR dependency. |
+| WebXR native AR/VR session | ⚗️ Experimental | [`@react-three/xr`](https://github.com/pmndrs/xr) | Entry point for immersive AR/VR. Not available on iOS (WebXR unsupported). |
+| ML vision (hand / face / pose) | 🧭 Planned | Browser ML (MediaPipe Tasks, ONNX Runtime Web) | Webcam-based landmark tracking with a pluggable provider backend. |
+| Image tracking (natural feature) | 🧭 Planned | AR.js / WebXR image tracking | Ideal for logos or posters. Requires an image database. |
+| Plane / surface detection | 🧭 Planned | [WebXR Hit Test API](https://immersive-web.github.io/hit-test) | Place AR objects on flat surfaces. |
+| Depth sensing / environment mesh | 🧭 Planned | [WebXR Depth Sensing API](https://immersive-web.github.io/depth-sensing) | Per-pixel depth. Early spec. |
+| SLAM / visual positioning (VPS) | 🧭 Planned | Custom (Rust + WebAssembly) | On-device localization. Long-term goal. |
+| Voice / gesture interaction | 🧭 Planned | [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) + gesture models | Multimodal input: voice, hand, gaze. |
+
+## Getting Started
+
+Install RDK and its core peer dependencies:
+
+```bash
+bun add @omnidotdev/rdk @react-three/fiber react react-dom three
+```
+
+Then add the extra dependencies for the modules you need:
+
+```bash
+# fiducial marker AR
+bun add @ar-js-org/ar.js
+
+# location-based AR
+bun add locar
+
+# WebXR immersive AR/VR
+bun add @react-three/xr
+```
+
+Each capability ships a runnable demo in the repository's `apps/` directory:
+
+- **`fiducial-demo`** — fiducial marker tracking powered by AR.js
+- **`geolocation-demo`** — GPS-based AR powered by LocAR.js
+- **`immersive-demo`** — WebXR powered by `@react-three/xr`
+- **`magic-demo`** — magic window camera passthrough with device orientation
+
+## Ecosystem
+
+Because RDK builds on `@react-three/fiber` and Three.js, the entire R3F and Three.js ecosystem is available to you: physics, post-processing, loaders, and controls all compose naturally with RDK modules.
+
+<Callout>
+  RDK is web-first. For React Native, see [react-native-webgpu](https://github.com/wcandillon/react-native-webgpu); for Babylon.js, see [Reactylon](https://www.reactylon.com) or [react-babylonjs](https://github.com/brianzinn/react-babylonjs). RDK is currently focused on the Three.js ecosystem.
+</Callout>
+
+## Roadmap
+
+Long-term focus areas:
+
+- **Rust + WebAssembly** for on-device SLAM and visual positioning with near-native performance
+- **WebGPU + Web Workers** for parallelized rendering, physics, and computer-vision inference
+- **Interoperable modules** designed to plug into any renderer or sensor source over time
+
+More guides and API references are coming soon.
