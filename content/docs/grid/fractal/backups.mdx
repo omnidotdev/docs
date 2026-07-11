@@ -1,0 +1,34 @@
+---
+title: Backups
+description: Automatic backups and restores for your databases
+---
+
+Managed Postgres databases are **backed up automatically**, with no setup. You
+can also take a backup on demand and restore from any backup in the dashboard.
+
+## What gets backed up
+
+Backups apply to database services (a service with type `database`, or one
+running Postgres). Backups are **enabled by default**; you can turn them off for
+a service from its settings if you don't need them.
+
+## Schedule and retention
+
+The backup **schedule and retention are set by your plan** and managed for you,
+so every database has a sensible policy without configuration. The **Backups**
+tab shows the current schedule, retention, the last backup, and the full history.
+
+## Back up and restore on demand
+
+From a database service's **Backups** tab you can:
+
+- **Back Up Now** &mdash; take an immediate backup.
+- **Restore** &mdash; restore the database from any backup in the history (with a
+  confirmation step, since restoring overwrites current data).
+
+Backups are stored in S3-compatible object storage, off the database's own disk.
+
+<Callout title="Before a restore">
+Restoring replaces the current contents of the database with the backup. Take a
+fresh "Back Up Now" first if you might want to return to the current state.
+</Callout>
