@@ -58,8 +58,8 @@ visual workflow or the `fractal` CLI for scripting and CI.
 - **Push-to-deploy**: connect a GitHub repository and every push to the tracked
   branch triggers an in-cluster build and zero-downtime rollout
 - **Deploy from anywhere**: build from a Git repo or run a prebuilt container image
-- **Managed Postgres**: HA Postgres via CloudNativePG, with automated backups and
-  point-in-time recovery
+- **Managed Postgres**: HA Postgres via CloudNativePG, with automatic scheduled
+  backups and one-click restore
 - **Automatic TLS**: certificates are provisioned and renewed for every exposed
   service, including custom domains
 - **Custom domains**: bring your own domain with copy-paste DNS records and
@@ -78,7 +78,7 @@ Fractal is built on a curated, production-grade platform:
 | Concern | Technology |
 | --------- | ---------- |
 | Networking | Cilium (eBPF CNI + Gateway API + Hubble) |
-| Databases | CloudNativePG (Postgres with HA and PITR) |
+| Databases | CloudNativePG (Postgres with HA and automatic backups) |
 | Autoscaling | KEDA (CPU HPA and HTTP scale-to-zero) |
 | TLS | cert-manager + Let's Encrypt, and Cloudflare for SaaS for custom domains |
 | OS | Talos Linux |

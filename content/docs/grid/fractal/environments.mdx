@@ -1,0 +1,47 @@
+---
+title: Environments
+description: Run staging and production from one project
+---
+
+A project can have multiple **environments** (for example `production` and
+`staging`). Each environment is fully isolated: it gets its own Kubernetes
+namespace, its own running copy of every service, and its own configuration.
+
+## Define environments
+
+Add environments to your project (one is marked as the default). Each service in
+the project is then deployed into every environment, so `staging` and
+`production` never share pods, data, or secrets. Namespaces are
+`fractal-<project>-<environment>` under the hood.
+
+If a project has no environments defined, it runs a single default environment.
+
+## Per-environment configuration
+
+Each service can override its base configuration per environment, so the same
+service runs differently in `staging` and `production`. You can override:
+
+- **Environment variables** (for example a different `DATABASE_URL`)
+- **Replicas** (for example 1 in staging, 3 in production)
+- **CPU / memory** resources
+- **Custom domain** (for example `staging.example.com` vs `app.example.com`)
+
+Anything you do not override falls back to the service's base configuration.
+
+## Deploying to an environment
+
+There are two ways to ship to a specific environment:
+
+- **Branch mapping (push-to-deploy):** map git branches to environments on the
+  service's webhook, e.g. `main → production` and `develop → staging`. A push to
+  that branch deploys the matching environment automatically.
+- **CLI:** target an environment explicitly:
+
+  ```bash
+  fractal deploy --namespace <ns> --project <project> --service <service> --env staging
+  ```
+
+<Callout>
+Because environments are separate namespaces, promote changes by deploying the
+same commit to the next environment, rather than moving pods between them.
+</Callout>

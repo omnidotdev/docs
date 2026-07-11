@@ -1,0 +1,39 @@
+---
+title: PR Previews
+description: A live, isolated environment for every pull request
+---
+
+Fractal can spin up a **full, isolated deployment for every pull request** so you
+can review changes on a real URL before they merge, then tear it down
+automatically when the PR closes.
+
+## Enable previews
+
+PR previews are **opt-in per service** (so bot and dependency-bump PRs don't spin
+up costly environments). Turn them on from the service's **Settings** tab.
+
+Requirements:
+
+- The service deploys from a **Git repository** (previews build the PR's branch).
+- The GitHub App is connected to the repository (this is what delivers the pull
+  request events).
+- To get a browsable preview URL, the service has a **custom domain** set.
+
+## What happens on a PR
+
+When you open or push to a pull request, Fractal:
+
+1. Builds the PR branch and deploys an ephemeral service named
+   `<service>-pr-<number>`.
+2. If the service has a custom domain, serves the preview at
+   `pr-<number>.<your-domain>` (for example `pr-42.app.example.com`).
+3. Updates the preview on every new commit to the PR.
+
+You can see active previews on the service's **PR Previews** tab (PR number,
+branch, status, and a link to open it).
+
+## Cleanup
+
+When the pull request is **closed or merged**, Fractal deletes the preview
+deployment automatically, so nothing is left running (this happens even if
+previews were later turned off, to avoid stranded environments).

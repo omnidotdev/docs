@@ -3,7 +3,11 @@
   "pages": [
     "index",
     "getting-started",
+    "---Guides---",
+    "environments",
+    "pr-previews",
     "custom-domains",
+    "backups",
     "cli-reference",
     "architecture",
     "---Reference---",
