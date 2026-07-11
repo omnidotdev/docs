@@ -1,0 +1,119 @@
+---
+title: Service Configuration
+description: Every setting a Fractal service supports
+---
+
+A service is configured through the dashboard (**Settings** tab), the Fractal API,
+or the `FractalService` custom resource directly. The fields below are the same
+across all three; the resource uses `camelCase` keys.
+
+## Source
+
+Every service builds from a Git repository or runs a prebuilt image.
+
+- **Git**: repository `url` and `branch`. Fractal builds the image in-cluster on
+  every push (automatic language detection, or a `Dockerfile` in the repo).
+- **Image**: `repository` and `tag` of a container image to run directly.
+
+## Build
+
+`build.mode` controls how a Git source is built:
+
+| Mode | Behavior |
+|------|----------|
+| `auto` | Detect the language and generate an optimized build (default) |
+| `dockerfile` | Build from a `Dockerfile` in the repo |
+| `none` | No build step (image sources) |
+
+## Deploy
+
+| Field | Description |
+|-------|-------------|
+| `replicas` | Desired replica count |
+| `env` | Environment variables (literal values or Secret references) |
+| `resources` | CPU and memory requests/limits |
+| `volumes` | Persistent volumes (see below) |
+| `healthCheck` | HTTP path used for liveness/readiness |
+| `sleep` | Pause the service (scale to 0) |
+| `autoscale` | Autoscaling policy (see below) |
+
+### Environment variables
+
+Each variable is either a literal value or a reference to a key in a Kubernetes
+Secret. In the dashboard use the **Variables** tab; from the CLI:
+
+```bash
+fractal env set my-api NODE_ENV=production
+fractal env set-secret my-api DATABASE_URL --secret main-db-app --key uri
+```
+
+### Volumes
+
+Attach persistent storage with a mount path, size, and optional storage class:
+
+| Field | Example |
+|-------|---------|
+| `mountPath` | `/var/lib/data` |
+| `size` | `10Gi` |
+| `storageClass` | cluster default if omitted |
+
+Volume size can be increased but not shrunk.
+
+### Autoscaling
+
+The default policy is a CPU-based Horizontal Pod Autoscaler:
+
+| Field | Description |
+|-------|-------------|
+| `minReplicas` | Lower bound |
+| `maxReplicas` | Upper bound |
+| `targetCpuPercent` | Target average CPU (default 80) |
+
+#### Scale to zero
+
+Set `scaleToZero: true` for request-driven scale-to-zero: idle services scale to
+**0** and wake automatically on the first HTTP request (served through the KEDA
+HTTP interceptor). This trades a small cold start on the first request for zero
+idle cost.
+
+| Field | Description |
+|-------|-------------|
+| `scaleToZero` | Enable request-driven scale-to-zero |
+| `idleTimeoutSeconds` | Idle window before sleeping (default 300) |
+
+Scale-to-zero requires an exposed HTTP port (traffic is what wakes the service).
+
+## Expose
+
+Network exposure is optional. When set, the operator creates a Gateway API
+HTTPRoute and provisions TLS.
+
+| Field | Description |
+|-------|-------------|
+| `port` | Port the service listens on |
+| `domain` | Custom domain (see [Custom Domains](/grid/fractal/custom-domains)) |
+| `tls` | Enable TLS |
+| `www` | `redirect` to send `www.` to the apex, or `off` |
+
+## Service types
+
+| Type | Description |
+|------|-------------|
+| `web` | HTTP-serving web application (default) |
+| `worker` | Background worker process |
+| `cronJob` | Scheduled job (with a cron schedule) |
+| `staticSite` | Static site (HTML/CSS/JS) |
+| `database` | Managed Postgres, reconciled to a CloudNativePG cluster |
+
+## Databases
+
+A database is a service with `serviceType: database`. Fractal provisions a
+CloudNativePG Postgres cluster with a connection pooler and writes the connection
+credentials to a Kubernetes Secret. Reference that Secret from another service:
+
+```bash
+fractal env set-secret api DATABASE_URL --secret main-db-app --key uri
+```
+
+Backups are enabled by default and managed from the **Backups** tab; point-in-time
+recovery and scheduled base backups are handled by the operator.
