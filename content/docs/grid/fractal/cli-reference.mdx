@@ -1,0 +1,130 @@
+---
+title: CLI Reference
+description: fractal command reference
+---
+
+The `fractal` CLI authenticates against Fractal, connects to a cluster, and manages
+your projects and services. Global commands read the bearer token from
+`~/.config/fractal/config.toml` (written by `fractal auth login`).
+
+## Authentication
+
+```bash
+fractal auth login     # authenticate against fractal.omni.dev
+fractal auth logout     # clear stored credentials
+fractal auth whoami     # show the current identity
+```
+
+## Cluster
+
+Connect the CLI to a Kubernetes cluster and manage its access tokens.
+
+```bash
+fractal cluster connect [--kubeconfig <path>] [--context <ctx>] [--name <label>]
+fractal cluster status        # show the connected cluster
+fractal cluster disconnect
+fractal cluster list-tokens
+fractal cluster revoke-token <id>
+```
+
+## Projects and services
+
+```bash
+fractal projects list         # list projects
+fractal projects get <name>   # show a project
+
+fractal services [-n, --namespace <ns>]   # list services
+```
+
+### `fractal deploy`
+
+Trigger a deploy of an existing service (used in CI and automation).
+
+```bash
+fractal deploy --namespace <ns> --project <project> --service <service> [--env <environment>]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--namespace <ns>` | Target namespace |
+| `--project <project>` | Project name |
+| `--service <service>` | Service name |
+| `--env <environment>` | Environment to deploy (optional) |
+
+## Logs and shell access
+
+```bash
+fractal logs <service> [--follow] [--since <dur>] [--tail <n>] [--grep <text>]
+fractal exec <service> [-t, --tty] [-- <command>...]
+fractal port-forward <service> <local:remote>
+fractal db-connect <service> [--print-only]
+```
+
+| Command | Notes |
+|---------|-------|
+| `logs` | `--follow` streams; `--since`, `--tail`, `--grep` filter output |
+| `exec` | Run a command in a service pod; `--tty` for an interactive shell |
+| `port-forward` | Forward a local port to the service (`8080:80` or just `8080`) |
+| `db-connect` | Open a psql session to a database service; `--print-only` prints the URL |
+
+## Scaling and lifecycle
+
+```bash
+fractal scale <service> --replicas <n>
+fractal restart <service>       # rolling restart
+fractal rollback <service>      # roll back to the previous revision
+fractal destroy <service>       # remove a service
+fractal restore <service>       # restore a database service from backup
+```
+
+## Environment variables
+
+```bash
+fractal env list <service>
+fractal env set <service> KEY=VALUE
+fractal env set-secret <service> KEY --secret <secret-name> --key <secret-key>
+fractal env unset <service> KEY
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `list` | List env vars with their source |
+| `set` | Set a literal value |
+| `set-secret` | Set a value from a Kubernetes Secret |
+| `unset` | Remove a variable |
+
+## Canary deployments
+
+Roll out a candidate image to a slice of traffic before promoting it.
+
+```bash
+fractal canary start <service> --image <image> [--weight <0-100>]   # default weight: 10
+fractal canary status <service>
+fractal canary promote <service>   # send 100% of traffic to the candidate
+fractal canary abort <service>     # revert to the primary
+```
+
+## Members
+
+```bash
+fractal members list <project>
+fractal members add <project> <user> [-r, --role <role>]   # default role: developer
+fractal members remove <project> <user>
+```
+
+## API tokens
+
+Scoped tokens for automation and CI.
+
+```bash
+fractal tokens list
+fractal tokens create --name <label> [--subject <user-id>] [--scope <project>]... [--expires-in-days <n>]
+fractal tokens revoke <name>
+fractal tokens delete <name>
+```
+
+## Shell completions
+
+```bash
+fractal completions <shell>   # bash, zsh, fish, ...
+```

@@ -1,0 +1,56 @@
+---
+title: Custom Domains
+description: Serve a service on your own domain with automatic TLS
+---
+
+Every exposed service gets a generated `*.fractal.omni.dev` domain automatically.
+To serve it on your own domain instead, add a custom domain from the service's
+**Settings** tab.
+
+## Add a domain
+
+1. Open the service and go to **Settings → Networking**.
+2. Enter your domain (for example `app.example.com`) and save (or press Enter).
+3. Fractal shows the **DNS records** to add at your domain host. Copy each record
+   into your DNS provider.
+4. The certificate is issued automatically once the records resolve. The
+   **Certificate** badge moves from _Provisioning_ to _Active_, with no downtime.
+
+<Callout title="Zero-downtime issuance">
+Fractal uses DNS-based certificate validation, so the certificate is issued and
+ready before any traffic moves to your domain. Your existing
+`*.fractal.omni.dev` URL keeps working the whole time.
+</Callout>
+
+## DNS records
+
+You typically add two records:
+
+| Record | Purpose |
+|--------|---------|
+| Traffic `CNAME` | Points your domain at Fractal's edge |
+| Verification `CNAME` | Proves domain ownership so the certificate can issue |
+
+The exact names and values are shown in the dashboard for your specific domain,
+each with a copy button.
+
+## apex and www
+
+Set **www** to `redirect` in the same Networking section to send
+`www.example.com` to the apex `example.com` automatically. This is the common
+"apex plus www" setup and needs no second custom-domain slot.
+
+## Certificate status
+
+The **Certificate** badge reflects issuance:
+
+- **Provisioning** &mdash; waiting for the DNS records to resolve
+- **Issuing** &mdash; validation in progress
+- **Active** &mdash; the certificate is live and auto-renewing
+
+## Plan limits
+
+The number of custom domains available depends on your plan. If a domain is gated
+by your plan, the panel shows an upgrade prompt instead of DNS records, and the
+service keeps serving on its generated subdomain. See
+[fractal.omni.dev](https://fractal.omni.dev) for current plan limits.

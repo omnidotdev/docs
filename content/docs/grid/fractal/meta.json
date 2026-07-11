@@ -1,0 +1,12 @@
+{
+  "title": "Fractal",
+  "pages": [
+    "index",
+    "getting-started",
+    "custom-domains",
+    "cli-reference",
+    "architecture",
+    "---Reference---",
+    "configuration"
+  ]
+}

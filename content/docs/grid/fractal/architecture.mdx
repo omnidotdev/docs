@@ -1,0 +1,115 @@
+---
+title: Architecture
+description: How Fractal works under the hood
+---
+
+## Overview
+
+Fractal uses the Kubernetes operator pattern. Services are represented as Custom
+Resources, and a Rust operator watches those resources and reconciles them into
+native Kubernetes objects (Deployments, Services, HTTPRoutes, Certificates,
+CloudNativePG clusters, and more). You author the resources through the dashboard,
+the GraphQL API, or the CLI; the operator does the rest.
+
+```
+dashboard / CLI / API  ──→  Kubernetes API  ←──  fractal-operator
+       (author)               (Custom Resources)     (reconciler)
+```
+
+## Components
+
+### fractal-operator
+
+A Rust operator built with kube-rs. It runs several controllers concurrently:
+
+- **Project controller** &mdash; watches `FractalProject`, creating a per-project
+  namespace with resource limits and a default-deny network policy
+- **Service controller** &mdash; watches `FractalService` and reconciles the source
+  (Git build or image), Deployment, Service, Gateway API HTTPRoute, TLS, revisions,
+  autoscaling, and (for database services) a CloudNativePG cluster
+- **Backup / Restore controllers** &mdash; watch `FractalBackup` / `FractalRestore`
+  to run database backups and restores against object storage
+- **CronJob**, **DeployGroup**, and **ObjectStorage** controllers for scheduled
+  jobs, coordinated multi-service rollouts, and managed buckets
+
+Alongside the controllers the operator runs a usage-metering loop and a Git
+reconcile loop that drives push-to-deploy. All reconciliation uses server-side
+apply for idempotency, and each resource tracks its own status (phase, ready
+replicas, URL). The operator exposes Prometheus metrics for reconciles and builds.
+
+### fractal-cli
+
+A Rust CLI (`fractal`) built with clap. It authenticates against Fractal, connects
+to a cluster, and drives day-to-day operations: deploy, service and project
+listing, logs, exec, port-forward, scaling, environment variables, canaries,
+members, and API tokens. See the [CLI Reference](/grid/fractal/cli-reference).
+
+### fractal-app
+
+The dashboard at [fractal.omni.dev](https://fractal.omni.dev). A React application
+that talks to the Fractal API and the Kubernetes API to show real-time service
+status, logs, metrics, deploy history, and configuration.
+
+## Custom Resources
+
+Fractal defines these CRDs in the `fractal.omni.dev` API group:
+
+| Kind | Purpose |
+|------|---------|
+| `FractalProject` | Isolated environment: namespace, limits, network policy |
+| `FractalService` | A deployable unit (web, worker, cron job, static site, or database) |
+| `FractalRevision` | Immutable record of a deployed version, for rollback |
+| `FractalCronJob` | Scheduled job derived from a cron-type service |
+| `FractalDeployGroup` | Coordinates atomic rollout across multiple services |
+| `FractalBackupPolicy` / `FractalBackup` | Database backup schedule and runs |
+| `FractalRestore` | Database restore from a backup |
+| `FractalObjectStorage` | Managed object-storage bucket |
+| `FractalApiToken` | Scoped API token for CLI and automation access |
+
+<Callout title="Databases are services">
+There is no separate database CRD. A database is a `FractalService` with
+`serviceType: database`; the service controller reconciles it into a CloudNativePG
+Postgres cluster (with a connection pooler and backups). Caches such as Valkey or
+Redis run as ordinary image-based services.
+</Callout>
+
+### FractalProject
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `spec.displayName` | string | Human-readable project name |
+| `spec.description` | string? | Project description |
+| `spec.owner` | string | Project owner |
+| `spec.environments` | array | Named environments (e.g. production, staging) |
+| `status.phase` | string | Current phase |
+| `status.namespace` | string? | Created namespace name |
+
+### FractalService
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `spec.project` | string | Parent project name |
+| `spec.source` | Git or Image | Where the code or image comes from |
+| `spec.build.mode` | enum | `auto`, `dockerfile`, or `none` |
+| `spec.deploy.replicas` | integer? | Desired replica count |
+| `spec.deploy.env` | array | Environment variables (literal or secret ref) |
+| `spec.deploy.volumes` | array? | Persistent volumes |
+| `spec.deploy.autoscale` | object? | CPU HPA or HTTP scale-to-zero |
+| `spec.expose.port` | integer | Service port |
+| `spec.expose.domain` | string? | Custom domain |
+| `spec.expose.tls` | boolean | Enable TLS |
+| `spec.serviceType` | enum | `web`, `worker`, `cronJob`, `staticSite`, `database` |
+| `status.phase` | string | Pending, Building, Deploying, Running, Failed |
+| `status.readyReplicas` | integer | Ready replica count |
+| `status.url` | string? | Public URL |
+
+## Tech stack
+
+- **Operator**: Rust (kube-rs, k8s-openapi, tokio, tracing)
+- **CLI**: Rust (clap)
+- **Dashboard**: React
+- **Networking**: Cilium (eBPF CNI, Gateway API, Hubble)
+- **Databases**: CloudNativePG (Postgres HA + PITR backups)
+- **Autoscaling**: KEDA (CPU HPA and HTTP scale-to-zero)
+- **TLS**: cert-manager + Let's Encrypt, and Cloudflare for SaaS for custom domains
+- **OS**: Talos Linux

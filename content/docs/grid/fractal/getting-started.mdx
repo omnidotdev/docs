@@ -1,0 +1,71 @@
+---
+title: Getting Started
+description: Create a project and deploy your first service
+---
+
+Get up and running with Fractal in a few minutes. The fastest path is the hosted
+dashboard at [fractal.omni.dev](https://fractal.omni.dev); the `fractal` CLI covers
+the same operations for scripting and CI.
+
+## 1. Create a project
+
+Sign in at [fractal.omni.dev](https://fractal.omni.dev) and create a **project**.
+A project is an isolated environment (its own namespace, network policy, and
+resource limits) that holds one or more services.
+
+## 2. Deploy a service
+
+From the project, choose **New Service** and pick a source:
+
+- **GitHub repository** &mdash; connect the Fractal GitHub App and select a repo.
+  Fractal builds the image in-cluster (automatic language detection, or your own
+  `Dockerfile`) and deploys it. Every push to the tracked branch redeploys
+  automatically (push-to-deploy).
+- **Container image** &mdash; point at any image reference (for example
+  `nginx:latest` or a private registry image) to run it directly.
+- **Template** &mdash; start from a prebuilt app or database template.
+
+Set the port your app listens on under **Networking**, and Fractal exposes it over
+HTTPS on a generated `*.fractal.omni.dev` domain (add your own later; see
+[Custom Domains](/grid/fractal/custom-domains)).
+
+## 3. Watch it build and run
+
+Open the service to follow the rollout. The service tabs give you:
+
+- **Overview** &mdash; status, current image, and live CPU/memory
+- **Activity** &mdash; deploy and pod events as they happen
+- **Logs** &mdash; runtime, HTTP, and network logs
+- **Deployments** &mdash; build and deploy history, with one-click rollback
+- **Variables**, **Volumes**, **Backups** (databases), and **Settings**
+
+## 4. Manage from the CLI (optional)
+
+Install the CLI, authenticate, and connect it to your cluster:
+
+```bash
+# Authenticate against fractal.omni.dev
+fractal auth login
+
+# Point the CLI at a cluster (uses your current kubeconfig context)
+fractal cluster connect --name my-cluster
+```
+
+Then operate your services:
+
+```bash
+# List services and projects
+fractal services
+fractal projects list
+
+# Stream logs
+fractal logs my-api --follow
+
+# Scale and restart
+fractal scale my-api --replicas 3
+fractal restart my-api
+```
+
+See the [CLI Reference](/grid/fractal/cli-reference) for the full command set and
+the [Service Configuration](/grid/fractal/configuration) reference for every
+setting a service supports.

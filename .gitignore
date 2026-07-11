@@ -8,6 +8,5 @@ node_modules
 # Unreleased product docs: kept locally, never committed
 content/docs/kindred/blink/
 content/docs/fabric/resonance/
-content/docs/grid/fractal/
 content/docs/core/herald/
-fractal/
+/fractal/
