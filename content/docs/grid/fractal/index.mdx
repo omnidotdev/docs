@@ -1,27 +1,25 @@
 ---
 title: Fractal
-description: Application deployment platform built on Kubernetes
+description: Deploy apps, databases, and services straight from Git or a container image
 ---
 
 import { ProductOverview } from "@/components/docs";
-import app from "@/lib/config/app.config";
-import { SiKubernetes, SiDocker } from "react-icons/si";
-import { FaCloud } from "react-icons/fa";
+import { FaBolt, FaDatabase, FaCloud } from "react-icons/fa";
 
 <ProductOverview
   tags={[
     {
-      label: "Kubernetes",
-      icon: <SiKubernetes />,
+      label: "Push-to-deploy",
+      icon: <FaBolt />,
       className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
     },
     {
-      label: "Docker",
-      icon: <SiDocker />,
+      label: "Managed databases",
+      icon: <FaDatabase />,
       className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
     },
     {
-      label: "Cloud",
+      label: "Fully managed",
       icon: <FaCloud />,
       className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
     },
@@ -32,60 +30,42 @@ import { FaCloud } from "react-icons/fa";
       label: "Visit Website",
       type: "website",
     },
-    {
-      href: `${app.socials.github}/fractal`,
-      label: "Visit Repository",
-      type: "repository",
-    },
   ]}
   alerts={[
     {
       title: "🚀 Deploy in minutes",
       description:
-        "Connect a GitHub repo or point at a container image and Fractal builds, deploys, and serves it over HTTPS, with managed Postgres, autoscaling, and push-to-deploy built in.",
+        "Connect a GitHub repo or point at a container image and Fractal builds, deploys, and serves it over HTTPS, with a managed database, autoscaling, and push-to-deploy built in.",
     },
   ]}
 />
 
-**Omni Fractal** is an application deployment platform built on Kubernetes. Deploy
-services straight from a Git repository or a container image, and a Rust-based
-Kubernetes operator manages the full lifecycle: builds, rollouts, managed
-databases, networking, and TLS. Use the [dashboard](https://fractal.omni.dev) for a
-visual workflow or the `fractal` CLI for scripting and CI.
+**Omni Fractal** is a fully managed platform for deploying and running your
+applications, databases, and services. Push from a Git repository or point Fractal
+at a container image, and it builds, ships, and serves your app over HTTPS, with a
+managed database, autoscaling, and push-to-deploy built in. Work visually in the
+[dashboard](https://fractal.omni.dev) or script everything with the `fractal` CLI.
 
 ## Key features
 
 - **Push-to-deploy**: connect a GitHub repository and every push to the tracked
-  branch triggers an in-cluster build and zero-downtime rollout
-- **Deploy from anywhere**: build from a Git repo or run a prebuilt container image
-- **Managed Postgres**: HA Postgres via CloudNativePG, with automatic scheduled
-  backups and one-click restore
-- **Automatic TLS**: certificates are provisioned and renewed for every exposed
-  service, including custom domains
+  branch builds and rolls out a new version with zero downtime
+- **Deploy from anywhere**: deploy from a Git repository or a prebuilt container
+  image
+- **Managed databases**: high-availability Postgres with automatic scheduled
+  backups and one-click restore, no database to run yourself
+- **Automatic HTTPS**: certificates are provisioned and renewed for every exposed
+  service, including your custom domains
 - **Custom domains**: bring your own domain with copy-paste DNS records and
   automatic, zero-downtime certificate issuance
-- **Autoscaling and scale-to-zero**: CPU-based horizontal autoscaling, or
-  request-driven scale-to-zero for idle services (via KEDA)
-- **PR previews and canaries**: ephemeral per-pull-request environments and
-  weighted canary rollouts
-- **Kubernetes-native**: everything is a Custom Resource (`FractalProject`,
-  `FractalService`, and more) reconciled by the operator
+- **Autoscaling and scale-to-zero**: scale on demand, or let idle services sleep
+  and wake instantly on the next request
+- **Preview environments and canaries**: an ephemeral environment for every pull
+  request, plus weighted canary rollouts for safe releases
 
-## Platform stack
+## Get started
 
-Fractal is built on a curated, production-grade platform:
-
-| Concern | Technology |
-| --------- | ---------- |
-| Networking | Cilium (eBPF CNI + Gateway API + Hubble) |
-| Databases | CloudNativePG (Postgres with HA and automatic backups) |
-| Autoscaling | KEDA (CPU HPA and HTTP scale-to-zero) |
-| TLS | cert-manager + Let's Encrypt, and Cloudflare for SaaS for custom domains |
-| OS | Talos Linux |
-
-## Deployment modes
-
-- **Managed**: deploy to Omni-hosted infrastructure at
-  [fractal.omni.dev](https://fractal.omni.dev), no cluster to run
-- **Bring Your Own Cluster (BYOC)**: install the Fractal operator on your own
-  Kubernetes cluster and deploy against it
+Deploy your first service in a few minutes with the
+[quickstart](/grid/fractal/getting-started), or explore
+[configuration](/grid/fractal/configuration), [environments](/grid/fractal/environments),
+[custom domains](/grid/fractal/custom-domains), and [backups](/grid/fractal/backups).

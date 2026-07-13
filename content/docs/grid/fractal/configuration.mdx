@@ -3,9 +3,8 @@ title: Service Configuration
 description: Every setting a Fractal service supports
 ---
 
-A service is configured through the dashboard (**Settings** tab), the Fractal API,
-or the `FractalService` custom resource directly. The fields below are the same
-across all three; the resource uses `camelCase` keys.
+A service is configured through the dashboard (**Settings** tab) or the Fractal
+API. The fields below are the same in both; keys use `camelCase`.
 
 ## Source
 
@@ -39,8 +38,8 @@ Every service builds from a Git repository or runs a prebuilt image.
 
 ### Environment variables
 
-Each variable is either a literal value or a reference to a key in a Kubernetes
-Secret. In the dashboard use the **Variables** tab; from the CLI:
+Each variable is either a literal value or a reference to a stored secret. In the
+dashboard use the **Variables** tab; from the CLI:
 
 ```bash
 fractal env set my-api NODE_ENV=production
@@ -73,9 +72,8 @@ The default policy is a CPU-based Horizontal Pod Autoscaler:
 #### Scale to zero
 
 Set `scaleToZero: true` for request-driven scale-to-zero: idle services scale to
-**0** and wake automatically on the first HTTP request (served through the KEDA
-HTTP interceptor). This trades a small cold start on the first request for zero
-idle cost.
+**0** and wake automatically on the first HTTP request. This trades a small cold
+start on the first request for zero idle cost.
 
 | Field | Description |
 |-------|-------------|
@@ -86,8 +84,8 @@ Scale-to-zero requires an exposed HTTP port (traffic is what wakes the service).
 
 ## Expose
 
-Network exposure is optional. When set, the operator creates a Gateway API
-HTTPRoute and provisions TLS.
+Network exposure is optional. When set, Fractal routes public traffic to your
+service and provisions TLS automatically.
 
 | Field | Description |
 |-------|-------------|
@@ -104,13 +102,13 @@ HTTPRoute and provisions TLS.
 | `worker` | Background worker process |
 | `cronJob` | Scheduled job (with a cron schedule) |
 | `staticSite` | Static site (HTML/CSS/JS) |
-| `database` | Managed Postgres, reconciled to a CloudNativePG cluster |
+| `database` | Managed high-availability Postgres database |
 
 ## Databases
 
-A database is a service with `serviceType: database`. Fractal provisions a
-CloudNativePG Postgres cluster with a connection pooler and writes the connection
-credentials to a Kubernetes Secret. Reference that Secret from another service:
+A database is a service with `serviceType: database`. Fractal provisions a managed
+high-availability Postgres database with a connection pooler and stores the
+connection credentials as a secret. Reference that secret from another service:
 
 ```bash
 fractal env set-secret api DATABASE_URL --secret main-db-app --key uri

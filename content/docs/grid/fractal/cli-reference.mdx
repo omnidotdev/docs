@@ -17,7 +17,7 @@ fractal auth whoami     # show the current identity
 
 ## Cluster
 
-Connect the CLI to a Kubernetes cluster and manage its access tokens.
+Connect the CLI to a Fractal cluster and manage its access tokens.
 
 ```bash
 fractal cluster connect [--kubeconfig <path>] [--context <ctx>] [--name <label>]
@@ -90,7 +90,7 @@ fractal env unset <service> KEY
 |------------|-------------|
 | `list` | List env vars with their source |
 | `set` | Set a literal value |
-| `set-secret` | Set a value from a Kubernetes Secret |
+| `set-secret` | Set a value from a stored secret |
 | `unset` | Remove a variable |
 
 ## Canary deployments

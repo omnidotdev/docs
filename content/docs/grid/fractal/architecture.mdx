@@ -1,115 +1,69 @@
 ---
-title: Architecture
-description: How Fractal works under the hood
+title: How it works
+description: The core concepts behind Fractal, and how a deploy flows end to end
 ---
 
 ## Overview
 
-Fractal uses the Kubernetes operator pattern. Services are represented as Custom
-Resources, and a Rust operator watches those resources and reconciles them into
-native Kubernetes objects (Deployments, Services, HTTPRoutes, Certificates,
-CloudNativePG clusters, and more). You author the resources through the dashboard,
-the GraphQL API, or the CLI; the operator does the rest.
+You describe what you want to run, and Fractal builds it, deploys it, scales it,
+and keeps it healthy. You work through the [dashboard](https://fractal.omni.dev),
+the `fractal` CLI, or the API, and Fractal handles everything from the source code
+to a running service on a public HTTPS URL.
 
-```
-dashboard / CLI / API  ──→  Kubernetes API  ←──  fractal-operator
-       (author)               (Custom Resources)     (reconciler)
-```
+## Core concepts
 
-## Components
+### Project
 
-### fractal-operator
+A **project** is an isolated workspace that groups related services. Each project
+gets its own [environments](/grid/fractal/environments) (such as production and
+staging), its own resources, and its own team access. Services in one project are
+isolated from services in another.
 
-A Rust operator built with kube-rs. It runs several controllers concurrently:
+### Service
 
-- **Project controller** &mdash; watches `FractalProject`, creating a per-project
-  namespace with resource limits and a default-deny network policy
-- **Service controller** &mdash; watches `FractalService` and reconciles the source
-  (Git build or image), Deployment, Service, Gateway API HTTPRoute, TLS, revisions,
-  autoscaling, and (for database services) a CloudNativePG cluster
-- **Backup / Restore controllers** &mdash; watch `FractalBackup` / `FractalRestore`
-  to run database backups and restores against object storage
-- **CronJob**, **DeployGroup**, and **ObjectStorage** controllers for scheduled
-  jobs, coordinated multi-service rollouts, and managed buckets
+A **service** is a single deployable unit. Every service deploys from a Git
+repository or a prebuilt container image, and can be one of:
 
-Alongside the controllers the operator runs a usage-metering loop and a Git
-reconcile loop that drives push-to-deploy. All reconciliation uses server-side
-apply for idempotency, and each resource tracks its own status (phase, ready
-replicas, URL). The operator exposes Prometheus metrics for reconciles and builds.
+- **Web** &mdash; an HTTP service exposed on a URL, with optional custom domains
+- **Worker** &mdash; a background process with no public endpoint
+- **Scheduled job** &mdash; runs on a cron schedule
+- **Static site** &mdash; prebuilt static assets served over a CDN-style edge
+- **Database** &mdash; a managed, high-availability Postgres database
 
-### fractal-cli
+### Deploy and revision
 
-A Rust CLI (`fractal`) built with clap. It authenticates against Fractal, connects
-to a cluster, and drives day-to-day operations: deploy, service and project
-listing, logs, exec, port-forward, scaling, environment variables, canaries,
-members, and API tokens. See the [CLI Reference](/grid/fractal/cli-reference).
+Every deploy is a versioned **revision**. Rollouts are zero-downtime, and you can
+roll back to any previous revision at any time. Each service tracks its own status
+(building, deploying, running) and its public URL.
 
-### fractal-app
+## How a deploy works
 
-The dashboard at [fractal.omni.dev](https://fractal.omni.dev). A React application
-that talks to the Fractal API and the Kubernetes API to show real-time service
-status, logs, metrics, deploy history, and configuration.
+1. **Connect a source** &mdash; link a GitHub repository (and branch) or point at a
+   container image.
+2. **Build** &mdash; on each push to the tracked branch, Fractal builds your app
+   automatically (from your Dockerfile, or with zero configuration).
+3. **Roll out** &mdash; the new version is deployed with zero downtime and served
+   over HTTPS. Certificates are provisioned and renewed automatically, including
+   for [custom domains](/grid/fractal/custom-domains).
+4. **Scale** &mdash; services scale on demand, and idle services can sleep and wake
+   instantly on the next request.
 
-## Custom Resources
+For safer releases, Fractal creates an ephemeral
+[preview environment](/grid/fractal/pr-previews) for every pull request, and
+supports weighted canary rollouts.
 
-Fractal defines these CRDs in the `fractal.omni.dev` API group:
+## Databases
 
-| Kind | Purpose |
-|------|---------|
-| `FractalProject` | Isolated environment: namespace, limits, network policy |
-| `FractalService` | A deployable unit (web, worker, cron job, static site, or database) |
-| `FractalRevision` | Immutable record of a deployed version, for rollback |
-| `FractalCronJob` | Scheduled job derived from a cron-type service |
-| `FractalDeployGroup` | Coordinates atomic rollout across multiple services |
-| `FractalBackupPolicy` / `FractalBackup` | Database backup schedule and runs |
-| `FractalRestore` | Database restore from a backup |
-| `FractalObjectStorage` | Managed object-storage bucket |
-| `FractalApiToken` | Scoped API token for CLI and automation access |
+A database is just a service with the **database** type. Fractal provisions a
+managed, high-availability Postgres database with connection pooling, automatic
+[scheduled backups](/grid/fractal/backups), and one-click restore, so there is no
+database to run or maintain yourself. Caches such as Valkey or Redis run as
+ordinary image-based services.
 
-<Callout title="Databases are services">
-There is no separate database CRD. A database is a `FractalService` with
-`serviceType: database`; the service controller reconciles it into a CloudNativePG
-Postgres cluster (with a connection pooler and backups). Caches such as Valkey or
-Redis run as ordinary image-based services.
-</Callout>
+## Working with Fractal
 
-### FractalProject
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `spec.displayName` | string | Human-readable project name |
-| `spec.description` | string? | Project description |
-| `spec.owner` | string | Project owner |
-| `spec.environments` | array | Named environments (e.g. production, staging) |
-| `status.phase` | string | Current phase |
-| `status.namespace` | string? | Created namespace name |
-
-### FractalService
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `spec.project` | string | Parent project name |
-| `spec.source` | Git or Image | Where the code or image comes from |
-| `spec.build.mode` | enum | `auto`, `dockerfile`, or `none` |
-| `spec.deploy.replicas` | integer? | Desired replica count |
-| `spec.deploy.env` | array | Environment variables (literal or secret ref) |
-| `spec.deploy.volumes` | array? | Persistent volumes |
-| `spec.deploy.autoscale` | object? | CPU HPA or HTTP scale-to-zero |
-| `spec.expose.port` | integer | Service port |
-| `spec.expose.domain` | string? | Custom domain |
-| `spec.expose.tls` | boolean | Enable TLS |
-| `spec.serviceType` | enum | `web`, `worker`, `cronJob`, `staticSite`, `database` |
-| `status.phase` | string | Pending, Building, Deploying, Running, Failed |
-| `status.readyReplicas` | integer | Ready replica count |
-| `status.url` | string? | Public URL |
-
-## Tech stack
-
-- **Operator**: Rust (kube-rs, k8s-openapi, tokio, tracing)
-- **CLI**: Rust (clap)
-- **Dashboard**: React
-- **Networking**: Cilium (eBPF CNI, Gateway API, Hubble)
-- **Databases**: CloudNativePG (Postgres HA + automatic backups)
-- **Autoscaling**: KEDA (CPU HPA and HTTP scale-to-zero)
-- **TLS**: cert-manager + Let's Encrypt, and Cloudflare for SaaS for custom domains
-- **OS**: Talos Linux
+- **Dashboard** &mdash; a visual workflow for deploying, configuring, and monitoring
+  services, with real-time logs, metrics, and deploy history
+- **CLI** &mdash; the `fractal` command-line tool for scripting and CI; see the
+  [CLI Reference](/grid/fractal/cli-reference)
+- **API** &mdash; automate everything programmatically with scoped API tokens
