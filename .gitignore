@@ -10,3 +10,10 @@ content/docs/kindred/blink/
 content/docs/fabric/resonance/
 content/docs/core/herald/
 /fractal/
+
+# Environment files (never commit secrets). Templates are allowed.
+.env
+.env.*
+!.env.example
+!.env.*.template
+!.env.template
