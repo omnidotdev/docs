@@ -261,6 +261,7 @@ These action names can be used in custom keybindings:
 | `selectPrevTab` | Switch to previous tab |
 | `selectLastTab` | Switch to last tab |
 | `closeTab` | Close current tab |
+| `renameTab` | Prompt for a custom label for the current tab |
 | `newWindow` | Create a new window |
 | `splitRight` | Split pane horizontally |
 | `splitDown` | Split pane vertically |
@@ -287,3 +288,31 @@ Bindings can be restricted to specific terminal modes:
 | `SEARCH` | Search mode active |
 
 Prefix a mode with `~` to match when it is **not** active (e.g. `~VI` means "not in VI mode").
+
+## Tab Labels
+
+By default, tab titles are derived automatically from the `[title]` template (running program, terminal title, working directory, and so on). You can give a tab a fixed, human-readable name instead:
+
+- Press `Ctrl+Shift+L` (`Cmd+Shift+L` on macOS), or bind the [`renameTab`](#bindable-actions) action to a key of your choice.
+- Type a name in the prompt and press `Enter` to commit, or `Esc` to cancel.
+
+A custom label takes priority over the title template and is **not** overwritten by process, working-directory, or terminal-title (OSC) changes. To remove a label and return the tab to its automatic title, open the prompt again and commit an empty value.
+
+Labels last for the lifetime of the session; they are not currently persisted across restarts.
+
+### Splits and panes
+
+Labels are per-pane. `renameTab` labels the **focused** pane, so:
+
+- With a single (unsplit) pane, its label is the tab's title, shown in the tab bar and OS window title.
+- In a split, the focused pane's label drives the tab title, and every labeled pane reserves a one-line title strip at its top showing the name, so all pane names are visible at once without overlapping terminal content. Switching focus updates the tab title to the newly focused pane's label.
+
+### Single-tab visibility
+
+A label is always reflected in the OS window title, so it is visible even when you have a single tab and no tab bar showing.
+
+To also show the label **in-window** with a single tab:
+
+- In a tab navigation mode (`TopTab` or `BottomTab`), labeling a single tab automatically reveals the tab bar so its name is visible, even with `hide-if-single = true`. Clearing the label hides the bar again.
+- Set `hide-if-single = false` to always show the bar (named or not).
+- The `Bookmark` navigation mode draws collapsed indicators rather than text, so it does not display label text in-window; use `TopTab`/`BottomTab` if you want the name shown there.
