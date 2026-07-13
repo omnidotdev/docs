@@ -14,7 +14,7 @@ To serve it on your own domain instead, add a custom domain from the service's
 3. Fractal shows the **DNS records** to add at your domain host. Copy each record
    into your DNS provider.
 4. The certificate is issued automatically once the records resolve. The
-   **Certificate** badge moves from _Provisioning_ to _Active_, with no downtime.
+   **Certificate** badge advances to _Active_, with no downtime.
 
 <Callout title="Zero-downtime issuance">
 Fractal uses DNS-based certificate validation, so the certificate is issued and
@@ -43,15 +43,22 @@ Set **www** to `redirect` in the same Networking section to send
 
 ## Certificate status
 
-The **Certificate** badge reflects issuance:
+The **Certificate** badge reflects where your domain is in setup:
 
-- **Provisioning** &mdash; waiting for the DNS records to resolve
-- **Issuing** &mdash; validation in progress
+- **Pending** &mdash; waiting for the DNS records to resolve
+- **Verifying** &mdash; confirming you own the domain
+- **Issuing** &mdash; the certificate is being issued
 - **Active** &mdash; the certificate is live and auto-renewing
+- **Error** &mdash; something needs attention (usually a missing or incorrect DNS
+  record); double-check the records shown in the dashboard
+
+Your existing `*.fractal.omni.dev` URL keeps serving the whole time, so there is
+never a gap while a custom domain finishes setting up.
 
 ## Plan limits
 
-The number of custom domains available depends on your plan. If a domain is gated
-by your plan, the panel shows an upgrade prompt instead of DNS records, and the
-service keeps serving on its generated subdomain. See
+Custom domains add no per-domain setup on your side beyond the DNS records, so the
+only limit is how many your plan includes. If a domain is gated by your plan, the
+panel shows an upgrade prompt instead of DNS records, and the service keeps serving
+on its generated subdomain. See
 [fractal.omni.dev](https://fractal.omni.dev) for current plan limits.
