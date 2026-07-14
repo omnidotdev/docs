@@ -1,0 +1,34 @@
+---
+title: Supported Languages
+description: Languages and project types Kiln can build
+---
+
+Kiln ships with providers for a broad range of ecosystems. Point it at a project
+and it picks the right one automatically.
+
+| Language / type | Detected from |
+| --------------- | ------------- |
+| Node.js | `package.json` |
+| Deno | `deno.json` |
+| Python | `pyproject.toml`, `requirements.txt` |
+| Ruby | `Gemfile` |
+| PHP | `composer.json` |
+| Go | `go.mod` |
+| Rust | `Cargo.toml` |
+| Java | `pom.xml` |
+| .NET | `.csproj` |
+| Elixir | `mix.exs` |
+| Gleam | `gleam.toml` |
+| C++ | `CMakeLists.txt`, `Makefile` |
+| Static site | prebuilt HTML/CSS/JS assets |
+| Shell | shell entrypoint |
+
+Run `kiln detect --path .` to see what Kiln picks for your project, and
+`kiln plan --path .` to preview the exact build it would produce.
+
+## Adding a provider
+
+Each language is a self-contained provider in the `kiln-core` crate. Adding
+support for a new ecosystem means implementing detection plus build-plan
+generation for it, and contributions are welcome on
+[GitHub](https://github.com/omnidotdev/kiln).

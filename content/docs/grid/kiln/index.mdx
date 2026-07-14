@@ -1,0 +1,70 @@
+---
+title: Kiln
+description: Zero-config source-to-image container builder
+---
+
+import { ProductOverview } from "@/components/docs";
+import { FaBolt, FaFire, FaBox } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Zero config",
+      icon: <FaBolt />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Open source",
+      icon: <FaFire />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Portable",
+      icon: <FaBox />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://github.com/omnidotdev/kiln",
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🔥 Source code, fired into containers",
+      description:
+        "Point Kiln at a project and it detects the language, plans the build, and produces a container image, with no Dockerfile to write.",
+    },
+  ]}
+/>
+
+**Kiln** is a zero-config build tool that turns a source repository into a
+container image. Point it at a project and it detects the language, plans the
+build, and produces a ready-to-run image, with no Dockerfile to write and no
+configuration to maintain.
+
+Unlike builders that emit an opaque, proprietary build graph, Kiln generates a
+**plain, readable Dockerfile** that you own. Inspect it, commit it, tweak it, or
+hand it to any Docker- or BuildKit-compatible toolchain. There is no lock-in:
+the output is a standard artifact that works everywhere.
+
+## Why Kiln
+
+- **Zero config** &mdash; detects your language and framework and builds a sensible,
+  production-ready image out of the box
+- **Transparent output** &mdash; emits a real Dockerfile you can read, version, and
+  customize, not a black box
+- **Portable** &mdash; the generated Dockerfile and image work with any registry and
+  any Docker- or BuildKit-based platform
+- **Fast and self-contained** &mdash; a single binary with no runtime dependencies
+- **Slim images** &mdash; multi-stage builds ship only what runs, not your build
+  toolchain
+- **Open source** &mdash; Apache-2.0 licensed
+
+## Next steps
+
+- [Get started](/grid/kiln/getting-started) and build your first image
+- See the [supported languages](/grid/kiln/languages)
+- Learn [how it works](/grid/kiln/how-it-works)

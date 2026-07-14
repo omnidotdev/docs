@@ -1,0 +1,57 @@
+---
+title: Getting Started
+description: Install Kiln and build your first image
+---
+
+## Install
+
+Kiln is distributed as a single binary. Install it with Homebrew:
+
+```bash
+brew install omnidotdev/tap/kiln
+```
+
+On Arch Linux, install from the AUR (`omnidotdev-kiln` to build from source, or
+`omnidotdev-kiln-bin` for the prebuilt binary).
+
+Or build from source with a recent Rust toolchain:
+
+```bash
+git clone https://github.com/omnidotdev/kiln
+cd kiln
+cargo install --path crates/kiln-cli
+```
+
+This installs the `kiln` binary. Verify it:
+
+```bash
+kiln --version
+```
+
+## Build your first image
+
+From the root of a project (Kiln detects the language automatically):
+
+```bash
+# See what Kiln detects
+kiln detect --path .
+
+# Preview the build plan without building anything
+kiln plan --path .
+
+# Build the image (requires a reachable BuildKit daemon; set its address
+# with BUILDKIT_HOST or --buildkit-addr)
+kiln build --path . --dest registry.example/my-app:latest
+```
+
+`kiln build` can also build straight from a Git source:
+
+```bash
+kiln build --source https://github.com/you/my-app --ref main --dest registry.example/my-app:latest
+```
+
+## What next
+
+- The generated Dockerfile is yours to keep and edit, see
+  [how it works](/grid/kiln/how-it-works)
+- Check the [supported languages](/grid/kiln/languages)
