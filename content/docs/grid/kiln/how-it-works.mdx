@@ -1,0 +1,49 @@
+---
+title: How it works
+description: Detection, planning, and Dockerfile generation
+---
+
+Kiln turns source into an image in three steps: **detect**, **plan**, and
+**build**. Each step is inspectable, so you always know what Kiln is doing.
+
+## Detect
+
+Kiln inspects a project's files, such as manifests, lockfiles, and entrypoints,
+to identify the language and framework. Run it directly to see the result:
+
+```bash
+kiln detect --path .
+```
+
+Each supported language is a self-contained provider, so detection is
+predictable and easy to extend.
+
+## Plan
+
+From the detected language, Kiln produces a **build plan**: the base image,
+install and build steps, the start command, and the files that matter. Print it
+as JSON to see exactly what Kiln intends to do before it runs anything:
+
+```bash
+kiln plan --path .
+```
+
+## Build
+
+The plan is rendered into a **multi-stage Dockerfile** and built into a container
+image (via [BuildKit](https://github.com/moby/buildkit)):
+
+```bash
+kiln build --path . --dest registry.example/my-app:latest
+```
+
+The multi-stage layout keeps the final image slim: build-time tooling stays in an
+earlier stage and only the runtime artifacts ship. Because the output is a plain
+Dockerfile and a standard image, both work with any registry and any Docker- or
+BuildKit-based toolchain, with no lock-in.
+
+## Own the output
+
+The generated Dockerfile is not a black box. Keep it, commit it, or customize it
+by hand at any point. Kiln gets you a production-ready image with zero config,
+and hands you a standard artifact you fully control.
