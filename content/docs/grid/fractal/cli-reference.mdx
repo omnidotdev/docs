@@ -20,11 +20,32 @@ fractal auth whoami     # show the current identity
 Connect the CLI to a Fractal cluster and manage its access tokens.
 
 ```bash
-fractal cluster connect [--kubeconfig <path>] [--context <ctx>] [--name <label>]
+fractal cluster connect [--kubeconfig <path>] [--context <ctx>] [--name <label>] \
+  [--registry <host/namespace>] [--registry-insecure]
 fractal cluster status        # show the connected cluster
 fractal cluster disconnect
 fractal cluster list-tokens
 fractal cluster revoke-token <id>
+```
+
+| Flag | Description |
+|------|-------------|
+| `--kubeconfig <path>` | Kubeconfig to use (defaults to `$KUBECONFIG` or `~/.kube/config`) |
+| `--context <ctx>` | Kubeconfig context (defaults to the current context) |
+| `--name <label>` | Human-readable cluster label shown in the dashboard |
+| `--registry <host/namespace>` | Bring your own registry (e.g. `registry.example.com/myorg`) for builds and runtime images. Omit to deploy onto Omni's hosted cluster |
+| `--registry-insecure` | Treat the registry as plaintext HTTP (default is HTTPS) |
+
+### Bring your own registry (BYOC)
+
+When you pass `--registry`, the operator pushes builds to and pulls runtime
+images from your registry instead of Omni's. Your registry credential never
+transits Omni: create the pull Secret yourself before applying the bundle. The
+`connect` command prints the exact command, e.g.
+
+```bash
+kubectl -n fractal-system create secret docker-registry fractal-registry-credentials \
+  --docker-server=registry.example.com --docker-username=<user> --docker-password=<pass>
 ```
 
 ## Projects and services
