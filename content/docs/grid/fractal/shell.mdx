@@ -1,0 +1,37 @@
+---
+title: Shell
+description: Open an interactive terminal in a running container
+---
+
+Fractal can drop you into an **interactive shell inside a running container**,
+straight from the dashboard, so you can inspect a live service without wiring up
+your own access.
+
+## Open a shell
+
+From a service's detail page, select the **Shell** tab. Fractal connects a
+terminal to a running instance of the service and starts a shell
+(`/bin/bash` when the image has it, otherwise `/bin/sh`).
+
+The Shell tab is available for **web and worker** services (the long-running
+workloads that have a container to attach to). Managed databases, static sites,
+and cron jobs do not show it.
+
+If the service is **asleep** (scaled to zero) there is no container to connect
+to. Wake it first, by sending it a request or scaling it up, and reopen the tab.
+
+## Who can use it
+
+Opening a shell requires **deploy-level access** to the project (owner, admin,
+or developer). Project viewers cannot open a shell. Every session is recorded in
+the project's audit trail (who connected, to which service, and when).
+
+## Good to know
+
+- **Sessions are temporary.** The connection is not recorded, and anything you
+  change on the container's filesystem is lost on the next deploy. Make lasting
+  changes through your repository or configuration, not the shell.
+- **Idle sessions close automatically** after a period of inactivity, and each
+  connection is scoped to a single running instance.
+- The terminal needs a **WebGPU-capable browser**. On an unsupported browser the
+  tab shows a note instead of a terminal.
