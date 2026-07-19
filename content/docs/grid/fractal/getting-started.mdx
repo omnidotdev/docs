@@ -23,11 +23,22 @@ From the project, choose **New Service** and pick a source:
   automatically (push-to-deploy).
 - **Container image** &mdash; point at any image reference (for example
   `nginx:latest` or a private registry image) to run it directly.
-- **Template** &mdash; start from a prebuilt app or database template.
+- **Template** &mdash; one-click deploy a prebuilt app (WordPress, n8n, Metabase,
+  Ghost, and more). A template comes up as a working app at a public URL; apps
+  that need a database (like WordPress) get a companion database provisioned and
+  wired in automatically, and you can review or edit the template's environment
+  variables before deploying.
 
-Set the port your app listens on under **Networking**, and Fractal exposes it over
-HTTPS on a generated `*.fractal.omni.dev` domain (add your own later; see
-[Custom Domains](/grid/fractal/custom-domains)).
+By default a web service comes up reachable over HTTPS at a generated
+`*.up.fractal.omni.dev` URL (toggle this off to keep it internal, or add your own
+domain later; see [Custom Domains](/grid/fractal/custom-domains)).
+
+### Private networking
+
+Services in the same project reach each other privately at `<service>:<port>`
+&mdash; no public exposure needed. The service's **Networking** panel shows its
+private address (with click-to-copy) alongside its public URL. This is how, for
+example, an app connects to its database.
 
 ## 3. Watch it build and run
 
