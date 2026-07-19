@@ -1,0 +1,51 @@
+---
+title: Getting Started
+description: Create a Discord application, invite Charm to your server, and set up welcome messages in a few minutes.
+---
+
+Charm runs as a Discord application you control. Whether you self-host or use a
+hosted instance, setup follows the same path: create the app, invite it, and
+configure it with slash commands.
+
+## 1. Create the Discord application
+
+1. Open the [Discord Developer Portal](https://discord.com/developers/applications) and select **New Application**. Name it (for example, Charm).
+2. Go to **Bot** and copy the **token**. You will pass it to Charm as `CHARM_DISCORD_TOKEN`.
+3. Under **Privileged Gateway Intents**, enable the **Server Members Intent**. This is required for welcome, goodbye, and autorole events.
+
+## 2. Invite the bot
+
+Under **OAuth2 > URL Generator**, select the scopes `bot` and
+`applications.commands`, and the bot permissions **Send Messages**, **Embed
+Links**, and **Attach Files**. For moderation and roles, also grant **Kick
+Members**, **Ban Members**, **Moderate Members**, **Manage Messages**, and
+**Manage Roles**. Open the generated URL and add Charm to your server.
+
+Charm registers its slash commands in each server the moment it joins, so
+`/theme`, `/welcome`, and the rest are available immediately.
+
+## 3. Configure welcomes
+
+Slash commands require the **Manage Server** permission. Set a preset, choose a
+channel, and turn welcomes on:
+
+```
+/theme preset cobalt
+/welcome channel #general
+/welcome toggle enabled: True
+/welcome test
+```
+
+`/welcome test` posts a live preview of the welcome card for you, so you can see
+the result without waiting for someone to join.
+
+## 4. Tune the look
+
+- `/theme preset` picks a named palette (`charm`, `cobalt`, `ember`, `forest`, `mono`)
+- `/theme color accent #1E6FEB` overrides any single color role
+- `/theme branding "My Server"` sets the author brand shown on every embed
+- `/welcome message ...` customizes the greeting text with variables like `{user.mention}`, `{server}`, and `{member_count}`
+- `/welcome background gradient` chooses the card background (`solid`, `gradient`, or an image URL)
+
+See [Features](/kindred/charm/features) for the full command set, or
+[Self-Hosting](/kindred/charm/self-hosting) to run your own instance.

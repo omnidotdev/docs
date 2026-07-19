@@ -1,0 +1,65 @@
+---
+title: Self-Hosting
+description: Run your own Charm instance inside your infrastructure with Docker Compose.
+---
+
+Charm ships an Apache 2.0 licensed reference deployment via Docker Compose. The
+metarepo at [`omnidotdev/charm-stack`](https://github.com/omnidotdev/charm-stack)
+provides everything needed to run the bot and its database.
+
+## Prerequisites
+
+- Docker (or any OCI runtime that speaks `compose` v2)
+- A Discord application and bot token (see [Getting Started](/kindred/charm/getting-started))
+
+## Services
+
+The bundled `compose.yaml` defines two services. `charm` is built from source on
+the first `docker compose up`; subsequent runs use the cached image.
+
+| Service | Image | Notes |
+|---------|-------|-------|
+| `db` | `postgres:18-alpine` | per-guild configuration |
+| `charm` | `charm:latest` (built from `./services/charm`) | the bot gateway |
+
+The bot connects out to Discord's gateway and exposes no public port. It runs its
+database migrations on boot.
+
+## Run it
+
+```bash
+git clone https://github.com/omnidotdev/charm-stack
+cd charm-stack
+cp .env.local.template .env.local
+# set CHARM_DISCORD_TOKEN in .env.local
+docker compose up -d
+```
+
+The bot connects, registers its slash commands in each server it is in, and is
+ready to configure. See [Getting Started](/kindred/charm/getting-started) for the
+invite URL and first-run setup.
+
+## Configuration
+
+Charm boots with only the required variables set; optional integrations degrade
+gracefully.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CHARM_DISCORD_TOKEN` | yes | Bot token from the Discord dev portal |
+| `DATABASE_URL` | yes | Postgres connection string (provided by Compose) |
+| `CHARM_SHARD_COUNT` | no | Gateway shard count; omit for autosharding |
+| `CHARM_HEALTH_PORT` | no | Health-check port (default `8080`) |
+| `CHARM_MESSAGE_CONTENT` | no | Set `true` to enable message-content logging |
+| `RUST_LOG` | no | Log filter (default `charm=info`) |
+
+### Message content logging
+
+Logging the text of deleted and edited messages requires Discord's **Message
+Content Intent**, which is privileged. To enable it:
+
+1. In the Discord dev portal, open your application's **Bot** page and turn on the **Message Content Intent**.
+2. Set `CHARM_MESSAGE_CONTENT=true` in your environment and restart the bot.
+
+Left off, message logging still records that a message was deleted or edited, but
+not its text. The bot always connects regardless of this setting.

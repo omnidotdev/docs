@@ -1,0 +1,95 @@
+---
+title: 📿 Charm
+description: A free, open-source, self-hostable all-in-one Discord community bot. Themed welcome cards, moderation, roles, and logging, with per-server branding included and never paywalled.
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaDiscord, FaShieldAlt, FaUsers } from "react-icons/fa";
+
+<Callout type="info">
+  **Coming soon.** Charm is in active development and rolling out. You can
+  self-host it today; the hosted experience and configuration dashboard are on
+  the way.
+</Callout>
+
+<ProductOverview
+  tags={[
+    {
+      label: "Discord Bot",
+      icon: <FaDiscord />,
+      className: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-300",
+    },
+    {
+      label: "Moderation",
+      icon: <FaShieldAlt />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+    {
+      label: "Community",
+      icon: <FaUsers />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://charm.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/charm-stack`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "What is Charm?",
+      description:
+        "An all-in-one Discord community bot: themed welcome cards, moderation, roles, and logging. Apache 2.0 licensed and self-hostable, with per-server branding and theming included at no cost.",
+    },
+  ]}
+/>
+
+**Omni Charm** is a community-management bot for Discord. It brings the tools a
+server needs, welcome cards, moderation, reaction roles, and event logging,
+together behind a genuinely polished experience, and it is free and open-source
+end to end. The features other bots charge for, like per-server branding, are
+included.
+
+## Why Charm?
+
+- **Polished welcome cards**: a rendered, per-member card (avatar, greeting,
+  member count) on a themed background, with color emoji support
+- **Free theming and branding**: named presets plus full custom colors, and a
+  per-server footer and author brand on every embed, never behind a paywall
+- **Moderation with receipts**: warn, timeout, kick, ban, and purge, each with an
+  auto-numbered case and a themed mod-log
+- **Self-service roles**: auto-assign roles on join, and reaction roles members
+  claim themselves
+- **Event logging**: member joins and leaves, and message deletes and edits, to a
+  log channel of your choice
+- **Self-hostable**: run your own instance with the official Docker Compose stack
+
+<Cards>
+  <Card title="Getting Started" href="/kindred/charm/getting-started">
+    Create the bot, invite it, and configure welcomes in a few minutes
+  </Card>
+  <Card title="Features" href="/kindred/charm/features">
+    Welcomes, theming, moderation, roles, and logging, command by command
+  </Card>
+  <Card title="Self-Hosting" href="/kindred/charm/self-hosting">
+    Run Charm inside your own infrastructure with Docker Compose
+  </Card>
+</Cards>
+
+## Architecture
+
+- `charm`: the bot gateway, a Rust service built on Serenity and Poise
+- `charm-db`: a Postgres database holding per-guild configuration
+- `charm-app` and `charm-api`: the configuration dashboard, planned
+
+Charm connects out to Discord's gateway and needs no inbound network access. All
+configuration lives per guild, so one instance can serve many servers, each with
+its own theme, channels, and settings.

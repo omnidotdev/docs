@@ -1,0 +1,83 @@
+---
+title: Features
+description: Welcome cards and theming, moderation with cases, self-service roles, and event logging, command by command.
+---
+
+Every feature is configured with slash commands and gated by the appropriate
+Discord permission. All of Charm's output inherits your server's theme, so
+branding is consistent everywhere the bot speaks.
+
+## Welcome and goodbye
+
+Themed welcome and goodbye messages with an optional rendered card (avatar,
+greeting, member count) on a themed background. Both are off until you enable
+them.
+
+| Command | Description |
+|---------|-------------|
+| `/welcome channel <#channel>` | Where welcomes are posted |
+| `/welcome message <template>` | Greeting text; supports `{user.mention}`, `{server}`, `{member_count}` |
+| `/welcome toggle <on/off>` | Turn welcomes on or off |
+| `/welcome card <on/off>` | Show the rendered welcome card |
+| `/welcome background <value>` | `solid`, `gradient`, or an image URL |
+| `/welcome goodbye channel\|message\|toggle` | The goodbye equivalents |
+| `/welcome test` | Post a live preview for yourself |
+
+## Theming and branding
+
+Per-server colors and branding, all free.
+
+| Command | Description |
+|---------|-------------|
+| `/theme preset <name>` | `charm`, `cobalt`, `ember`, `forest`, or `mono` |
+| `/theme color <role> <hex>` | Override `accent`, `success`, `warning`, `error`, or `info` |
+| `/theme footer <text> [icon]` | Set the embed footer |
+| `/theme branding <name> [icon]` | Set the embed author brand |
+| `/theme show` / `/theme reset` | Show or reset the theme |
+
+## Moderation
+
+Warn, timeout, kick, ban, and purge. Every action records an auto-numbered case
+and posts to the mod-log, and optionally DMs the affected member.
+
+| Command | Description |
+|---------|-------------|
+| `/modlog <#channel>` | Set the mod-log channel |
+| `/warn <user> [reason]` | Record a warning |
+| `/timeout <user> <duration> [reason]` | Time out a member (`10m`, `1h30m`, `7d`) |
+| `/untimeout <user> [reason]` | Remove a timeout early |
+| `/kick <user> [reason]` | Remove a member |
+| `/ban <user> [reason] [delete_days]` | Ban a user |
+| `/unban <user_id> [reason]` | Lift a ban |
+| `/purge <count>` | Bulk-delete 1-100 recent messages |
+| `/case <number>` | View a case |
+| `/cases <user>` | List a user's cases |
+
+## Roles
+
+Assign roles automatically on join, and let members claim roles by reacting.
+
+| Command | Description |
+|---------|-------------|
+| `/autorole add\|remove\|list` | Roles assigned to every new member |
+| `/reactionrole add <message-id> <emoji> <role>` | Bind an emoji on a message to a role |
+| `/reactionrole remove <message-id> <emoji>` | Remove a binding |
+| `/reactionrole list` | List this server's bindings |
+
+For reaction roles, run `/reactionrole add` in the channel that contains the
+target message. Charm adds the reaction, and members click it to self-assign.
+
+## Logging
+
+Log member and message events to a channel of your choice.
+
+| Command | Description |
+|---------|-------------|
+| `/logs channel <#channel>` | Set the log channel (omit to disable) |
+| `/logs toggle <category> <on/off>` | Toggle `messages` or `members` logging |
+| `/logs status` | Show the current configuration |
+
+Member joins and leaves log with the standard intents. Logging the text of
+deleted and edited messages additionally requires the **Message Content Intent**,
+a privileged intent enabled in the Discord dev portal; see
+[Self-Hosting](/kindred/charm/self-hosting) for how to turn it on.
