@@ -1,0 +1,163 @@
+---
+title: 🧊 gel
+description: Declarative whole-system management for Arch Linux
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      color: "orange.100a",
+    },
+  ]}
+  links={[
+    {
+      href: "https://gel.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/gel`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🧊 Early Days",
+      description:
+        "gel is new and pre-release. It has been validated end to end in a disposable Arch container, but not yet run widely on real hardware.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Describe your whole Arch machine in typed Rust config, converge any box to it, and roll back any change, without leaving Arch or learning Nix.",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "You want most of the declarative, roll-back-able experience people go to NixOS for, on the Arch you already run. gel manages packages, config files, services, and system settings from one config, with journal and filesystem-snapshot rollback.",
+    },
+  ]}
+/>
+
+## Key Features
+
+- **Declarative whole system**: packages (native + AUR), config files, systemd service enablement, and system settings (hostname, timezone, locale) from one config
+- **Typed Rust config**: your machine is a Rust program that builds a `System`; invalid config fails to compile instead of at runtime
+- **Eval/apply split**: evaluating config into an artifact is pure and safe; touching the system is a separate step, so a bare box just applies a data artifact
+- **Roll back any change**: every apply is journaled; on a btrfs root with snapper you also get a pre-apply filesystem snapshot
+- **Stays on Arch**: no new OS, no Nix language; gel drives `pacman`, an AUR helper, `systemctl`, and `hostnamectl`/`timedatectl`/`localectl`
+
+## How It Works
+
+gel keeps a desired state (packages, files, services, settings) and converges the
+machine toward it. The workflow is an **eval/apply split**:
+
+1. **eval** (pure, any build): `gel eval` compiles and runs your Rust config crate
+   and writes a desired-state artifact. This never touches the system, so it can
+   run on a dev box or in CI.
+2. **apply** (Arch build): `gel apply` reads the artifact, diffs it against the
+   live machine, converges the difference, and journals what it changed.
+
+Rollback reverses the last apply at the package, file, service, and setting level;
+on a btrfs root it can also restore the pre-apply snapshot.
+
+## Bootstrap a fresh machine
+
+gel configures an already-installed, booted Arch system. It is **not** an OS
+installer, so do the base install first (archinstall, or a manual `pacstrap` +
+bootloader + network), then bring the machine up with gel.
+
+One command on the fresh box (installs gel, then applies a config you point at):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/omnidotdev/gel/master/scripts/bootstrap.sh | bash -s -- \
+  --config ./my-config --apply
+```
+
+Or the minimum manual steps:
+
+```bash
+# 1. install gel (build from source until the first release lands)
+sudo pacman -S --needed base-devel git rust
+git clone https://github.com/omnidotdev/gel && cd gel
+cargo build --release --features arch
+sudo install -Dm755 target/release/gel /usr/local/bin/gel
+
+# 2. author your machine as config (copy the starter; it depends on gel-core
+#    via git, so it works from anywhere, not just inside this checkout)
+cp -r examples/starter ~/my-config       # edit ~/my-config/src/main.rs
+
+# 3. evaluate, preview, converge
+gel eval ~/my-config --out ~/desired.json
+gel diff  --artifact ~/desired.json      # read-only plan
+gel apply --artifact ~/desired.json      # converge the machine
+gel rollback                             # undo the last apply
+```
+
+Two caveats for a truly bare box:
+
+- **AUR packages** use [paru](https://github.com/Morganamilo/paru), gel's
+  opinionated AUR helper; `bootstrap.sh` installs it by default (`--no-paru` to
+  skip). Native packages, files, services, and settings work without it.
+- **Snapshot rollback** needs a btrfs root with snapper; otherwise gel falls back
+  to its transaction journal (which still rolls back everything it changed).
+
+## Configuration
+
+A gel config is an ordinary Rust program that builds a `System` and prints the
+desired state as JSON:
+
+```rust
+use gel_core::config::System;
+
+fn main() {
+    let system = System::new()
+        .native(["git", "ripgrep", "neovim"])   // official-repo packages
+        .foreign(["paru"])                        // AUR packages
+        .file("/etc/gel-demo.conf", "managed by gel\n")
+        .enable("systemd-timesyncd.service")     // ensure enabled
+        .hostname("workstation")
+        .timezone("Etc/UTC");
+
+    print!("{}", serde_json::to_string(&system.build()).expect("serialize"));
+}
+```
+
+`gel eval` runs this and writes the artifact; `gel diff`/`gel apply` consume it.
+
+## Example Usage
+
+```bash
+# capture what an existing machine explicitly has installed
+$ gel import --out desired.json
+
+# preview the plan to converge toward a desired artifact (read-only)
+$ gel diff --artifact desired.json
++ 3 to install, - 0 to remove
+~ 1 files to write
++ 1 to enable, - 0 to disable
+~ 1 settings: Hostname = workstation
+
+# converge the machine, then roll the whole apply back
+$ gel apply --artifact desired.json
+$ gel rollback
+```
+
+## Roadmap
+
+gel is in active development. Planned work includes:
+
+- **File pruning**: remove managed files no longer declared
+- **Users and groups**: declarative account management
+- **sysctl and kernel modules**: first-class settings beyond hostname/timezone/locale
+- **Unit masking and drop-ins**: richer service management
+- **Reproducible pinning**: pin the package set to an Arch Linux Archive date
+
+See the [GitHub repository](https://github.com/omnidotdev/gel) for progress.
