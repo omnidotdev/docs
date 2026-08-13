@@ -11,14 +11,14 @@ bounced, and counted against your reputation.
 ## What gets suppressed automatically
 
 Herald adds addresses to the list on its own from
-[delivery feedback](/docs/core/herald/webhooks):
+[delivery feedback](/docs/grid/herald/webhooks):
 
 - **Hard bounces** (a nonexistent mailbox or domain) auto-suppress, since
   retrying can never succeed.
 - **Spam complaints** auto-suppress, since the recipient has signalled they do
   not want your mail.
 - **One-click unsubscribes** on marketing mail add the address as well (see
-  [Compliance](/docs/core/herald/compliance)).
+  [Compliance](/docs/grid/herald/compliance)).
 
 Transient, or "soft", failures (a full mailbox, a temporary reputation or rate
 block, greylisting) do **not** suppress: the address is still valid and a later
@@ -68,5 +68,5 @@ mutation {
 ```
 
 Both mutations require a `full` API key (see
-[API keys](/docs/core/herald/api-keys)). Browse and search the current list in
+[API keys](/docs/grid/herald/api-keys)). Browse and search the current list in
 the dashboard **Suppressions** page, or query the `suppressions` connection.

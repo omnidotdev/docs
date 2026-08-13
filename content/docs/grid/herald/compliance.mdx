@@ -5,7 +5,7 @@ description: One-click unsubscribe and CAN-SPAM requirements for marketing mail
 
 Bulk marketing mail is held to rules that transactional mail is not: it must
 offer an easy opt-out and identify the sender. Herald builds both into every
-[broadcast](/docs/core/herald/broadcasts) automatically, and blocks a broadcast
+[broadcast](/docs/grid/herald/broadcasts) automatically, and blocks a broadcast
 until the tenant has supplied what the footer needs.
 
 Transactional sends (`POST /messages`, `sendMessage`) are byte-for-byte
@@ -21,11 +21,11 @@ unsubscribe control, without loading a browser, so the POST itself is the
 opt-out.
 
 The unsubscribe URL is minted per recipient on the tracking host, which is why a
-broadcast requires [tracking](/docs/core/herald/tracking) to be configured. The
+broadcast requires [tracking](/docs/grid/herald/tracking) to be configured. The
 target lives at `POST /u/:token`:
 
 - `POST /u/:token` performs the opt-out: it marks the contact unsubscribed and
-  adds the address to the tenant's [suppression list](/docs/core/herald/suppressions),
+  adds the address to the tenant's [suppression list](/docs/grid/herald/suppressions),
   so no further mail reaches it.
 - `GET /u/:token` renders a confirmation page with an unsubscribe button and does
   **not** opt out. A human clicking the footer link lands here; requiring the
@@ -71,5 +71,5 @@ mutation {
 
 Until both `senderName` and `postalAddress` are set, `sendBroadcast` is refused
 and the broadcast stays in draft (see
-[Broadcasts](/docs/core/herald/broadcasts)). `updateTenantSettings` requires a
-`full` [API key](/docs/core/herald/api-keys).
+[Broadcasts](/docs/grid/herald/broadcasts)). `updateTenantSettings` requires a
+`full` [API key](/docs/grid/herald/api-keys).

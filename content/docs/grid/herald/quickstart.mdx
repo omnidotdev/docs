@@ -17,14 +17,14 @@ Keys carry a permission level:
 - `full` manages the tenant (keys, domains, templates, suppressions) and sends.
 - `sending` may only send messages.
 
-See [API keys](/docs/core/herald/api-keys) for expiry and rotation.
+See [API keys](/docs/grid/herald/api-keys) for expiry and rotation.
 
 ## 2. Verify a sending domain
 
 Herald only sends from a domain you have verified, which proves you control it
 and lets Herald publish a DKIM key for signing. Add a domain (**Domains → Add
 domain**), then publish the DKIM `TXT` record Herald shows you and click
-**Verify**. See [Sending domains](/docs/core/herald/domains).
+**Verify**. See [Sending domains](/docs/grid/herald/domains).
 
 ## 3. Send a message
 
@@ -74,11 +74,11 @@ the same bearer key.
 Herald records every message and its delivery events (`delivered`, `bounced`,
 `complained`, and, when enabled, `opened`/`clicked`). View them in the dashboard
 **Messages** log, query the `messages` connection, or subscribe to
-[webhooks](/docs/core/herald/webhooks). Hard bounces and complaints add the
+[webhooks](/docs/grid/herald/webhooks). Hard bounces and complaints add the
 recipient to your suppression list automatically.
 
 ## Next steps
 
-- [Templates and variables](/docs/core/herald/templates) for reusable, personalized content
-- [Open and click tracking](/docs/core/herald/tracking)
-- [The TypeScript SDK and MCP server](/docs/core/herald/sdk)
+- [Templates and variables](/docs/grid/herald/templates) for reusable, personalized content
+- [Open and click tracking](/docs/grid/herald/tracking)
+- [The TypeScript SDK and MCP server](/docs/grid/herald/sdk)

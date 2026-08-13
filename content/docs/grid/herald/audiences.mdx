@@ -6,7 +6,7 @@ description: The marketing contact model behind broadcasts
 Audiences are Herald's marketing contact model. An **audience** is a named list
 of **contacts**, each an address with optional per-contact **attributes** used
 as merge data. A **segment** is a saved attribute filter over an audience. A
-[broadcast](/docs/core/herald/broadcasts) sends to an audience, optionally
+[broadcast](/docs/grid/herald/broadcasts) sends to an audience, optionally
 narrowed to one of its segments.
 
 Transactional sends do not need any of this: they address a recipient directly.
@@ -112,5 +112,5 @@ query {
 ```
 
 Contact and audience mutations require a `full`
-[API key](/docs/core/herald/api-keys). Once an audience is populated, send to it
-with a [broadcast](/docs/core/herald/broadcasts).
+[API key](/docs/grid/herald/api-keys). Once an audience is populated, send to it
+with a [broadcast](/docs/grid/herald/broadcasts).

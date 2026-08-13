@@ -4,13 +4,13 @@ description: Send a marketing campaign to an audience
 ---
 
 A broadcast is a one-to-many marketing send: a subject and body sent to every
-contact in an [audience](/docs/core/herald/audiences), optionally narrowed to a
+contact in an [audience](/docs/grid/herald/audiences), optionally narrowed to a
 segment. Each recipient's copy is rendered with that contact's own attributes, so
 one broadcast personalizes the whole send.
 
 Unlike a transactional send, a broadcast is bulk marketing mail, so it must carry
 a one-click unsubscribe and a CAN-SPAM footer. Herald enforces that before it
-will send (see the block below and [Compliance](/docs/core/herald/compliance)).
+will send (see the block below and [Compliance](/docs/grid/herald/compliance)).
 
 ## Create a broadcast
 
@@ -38,8 +38,8 @@ mutation {
 }
 ```
 
-The `from` address must be a [verified sending domain](/docs/core/herald/domains),
-and the body may use [Handlebars](/docs/core/herald/templates) tags filled from
+The `from` address must be a [verified sending domain](/docs/grid/herald/domains),
+and the body may use [Handlebars](/docs/grid/herald/templates) tags filled from
 each contact's attributes.
 
 ## Send it
@@ -47,7 +47,7 @@ each contact's attributes.
 `sendBroadcast` fans the campaign out to every non-unsubscribed contact in its
 audience (matching the segment when set), queuing one message per recipient
 through the normal send pipeline. The pipeline's verified-domain and
-[suppression](/docs/core/herald/suppressions) gates still apply per recipient.
+[suppression](/docs/grid/herald/suppressions) gates still apply per recipient.
 The payload reports how many recipients were queued:
 
 ```graphql
@@ -71,7 +71,7 @@ mail. A broadcast will not send unless:
 - the tenant has a **sender name** and **physical postal address** configured in
   Settings (CAN-SPAM requires a clear sender identity and postal address in the
   footer), and
-- [tracking](/docs/core/herald/tracking) is configured, because the one-click
+- [tracking](/docs/grid/herald/tracking) is configured, because the one-click
   unsubscribe URL is minted on the tracking host.
 
 If the sender name or postal address is missing, the send is refused with a
@@ -80,6 +80,6 @@ message telling you to complete Settings first, and the broadcast stays in
 footer (sender identity, postal address, unsubscribe link) into every message.
 Broadcasts default to open and click tracking on.
 
-See [Compliance](/docs/core/herald/compliance) for the full set of marketing
+See [Compliance](/docs/grid/herald/compliance) for the full set of marketing
 requirements. Broadcast and audience mutations require a `full`
-[API key](/docs/core/herald/api-keys).
+[API key](/docs/grid/herald/api-keys).

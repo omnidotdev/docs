@@ -3,17 +3,17 @@ title: Sending email
 description: The full send reference for single, batch, scheduled, and idempotent sends
 ---
 
-The [quickstart](/docs/core/herald/quickstart) sends a minimal message. This
+The [quickstart](/docs/grid/herald/quickstart) sends a minimal message. This
 page is the complete reference: every field a send accepts, how to send many
 messages in one call, how idempotency and scheduling behave, and how to attach
 files.
 
 Every send authenticates as a tenant with a bearer API key
 (`authorization: Bearer <key>`) and sends only from a
-[verified sending domain](/docs/core/herald/domains). The REST host is
+[verified sending domain](/docs/grid/herald/domains). The REST host is
 `https://api.herald.omni.dev`; the GraphQL host is
 `https://api.herald.omni.dev/graphql`. Both run the same send pipeline, so the gates
-and failure modes described in [Limits and errors](/docs/core/herald/limits)
+and failure modes described in [Limits and errors](/docs/grid/herald/limits)
 apply identically.
 
 ## Single send
@@ -51,12 +51,12 @@ curl https://api.herald.omni.dev/messages \
 | `to` | Recipient address. A malformed address is refused up front so it never spends sending reputation on a guaranteed bounce. |
 | `from` | A verified sending domain address. Bare (`hello@send.example.com`) or a display-name form (`Omni <hello@send.example.com>`); the display name is rendered in the header and the bare address is used for the domain gate and envelope sender. |
 | `subject`, `html` | Required content. `text` is an optional plain-text alternative. |
-| `cc`, `bcc` | Additional recipients. A suppressed `cc`/`bcc` is silently dropped rather than failing the send (see [Suppressions](/docs/core/herald/suppressions)). |
+| `cc`, `bcc` | Additional recipients. A suppressed `cc`/`bcc` is silently dropped rather than failing the send (see [Suppressions](/docs/grid/herald/suppressions)). |
 | `replyTo` | `Reply-To` header address. |
 | `headers` | Extra message headers. A caller-supplied header wins over Herald's defaults, except the ones Herald must control. |
 | `metadata` | Arbitrary string key/values stored with the message, not sent to the recipient. |
-| `variables` | [Handlebars](/docs/core/herald/templates) merge values for `subject`, `html`, and `text`. |
-| `trackOpens`, `trackClicks` | Per-send [tracking](/docs/core/herald/tracking) overrides; omit to inherit the tenant default. |
+| `variables` | [Handlebars](/docs/grid/herald/templates) merge values for `subject`, `html`, and `text`. |
+| `trackOpens`, `trackClicks` | Per-send [tracking](/docs/grid/herald/tracking) overrides; omit to inherit the tenant default. |
 | `attachments` | Base64 file attachments (see below). |
 | `idempotencyKey` | Dedupe key, unique per tenant (see below). |
 | `sendAt` | ISO-8601 time to schedule the send (see below). |
@@ -143,7 +143,7 @@ Messages are processed in order (not concurrently) so the monthly quota and
 warm-up daily cap are counted accurately, and each message's `idempotencyKey` is
 honored just as on the single route. The failure `code` on a rejected item is
 the same lower_snake code the single route would have returned as an HTTP status
-(see [Limits and errors](/docs/core/herald/limits)).
+(see [Limits and errors](/docs/grid/herald/limits)).
 
 The cap is 100 messages: an empty array or one over the cap is rejected with a
 `4xx` validation error before any message is sent.
@@ -217,7 +217,7 @@ Attach files by base64-encoding their bytes. Each attachment carries a
 
 ## Related
 
-- [Templates and variables](/docs/core/herald/templates) for reusable, personalized content
-- [Open and click tracking](/docs/core/herald/tracking)
-- [Sending domains](/docs/core/herald/domains) that gate the `from` address
-- [Limits and errors](/docs/core/herald/limits) for quotas, warm-up, and failure codes
+- [Templates and variables](/docs/grid/herald/templates) for reusable, personalized content
+- [Open and click tracking](/docs/grid/herald/tracking)
+- [Sending domains](/docs/grid/herald/domains) that gate the `from` address
+- [Limits and errors](/docs/grid/herald/limits) for quotas, warm-up, and failure codes

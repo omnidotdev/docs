@@ -51,11 +51,11 @@ body is `{ "error": "<message>" }`. The codes:
 
 `429`, `502`, and `503` are worth retrying (with backoff); the `422` codes mean
 the request itself needs to change. `marketing_unavailable` only arises on
-[broadcasts](/docs/core/herald/broadcasts), never on transactional sends.
+[broadcasts](/docs/grid/herald/broadcasts), never on transactional sends.
 
 ### In a batch
 
-A [batch send](/docs/core/herald/sending#batch-send) always returns HTTP `200`
+A [batch send](/docs/grid/herald/sending#batch-send) always returns HTTP `200`
 and reports these same codes **per item** in each result's `code` field instead
 of as an HTTP status, so one rejected message never fails the whole call. Over
 GraphQL the codes are UPPER_SNAKE (for example `QUOTA_EXCEEDED`); over REST they
