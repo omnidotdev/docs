@@ -1,0 +1,52 @@
+---
+title: Webhooks
+description: Receive delivery and engagement events
+---
+
+Webhooks push message events to your own endpoint as they happen, so you can
+react to deliveries, bounces, complaints, opens, and clicks without polling.
+
+## Register an endpoint
+
+From the dashboard (**Webhooks**) or `createWebhook`:
+
+```graphql
+mutation {
+  createWebhook(
+    input: { url: "https://example.com/hooks/herald", eventTypes: ["bounced", "complained"] }
+  ) {
+    webhookId
+    secret
+  }
+}
+```
+
+The `secret` is returned once and used to sign deliveries. Omit `eventTypes`
+(or pass an empty list) to receive every event; otherwise you only receive the
+types you list.
+
+## Event types
+
+- `delivered`
+- `bounced`
+- `complained`
+- `opened` (requires [open tracking](/docs/core/herald/tracking))
+- `clicked` (requires click tracking)
+
+## Verifying signatures
+
+Each delivery is signed with an HMAC-SHA256 over the payload using your endpoint
+secret, alongside a timestamp and version field. Recompute the signature with
+your stored secret and compare before trusting a payload. Reject anything that
+does not match.
+
+## Delivery, retries, and replay
+
+Deliveries are durable: each is enqueued and sent by a poller with exponential
+backoff (escalating from about a minute up to several hours), and dead-lettered
+after the maximum attempts rather than dropped. Recent deliveries appear in the
+dashboard with their status, and a failed or dead delivery can be **replayed**
+for an immediate retry once your endpoint is healthy again.
+
+Respond `2xx` promptly to acknowledge a delivery; a non-`2xx` or timeout is
+treated as a failure and retried.

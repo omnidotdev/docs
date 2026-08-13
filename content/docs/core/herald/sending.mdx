@@ -1,0 +1,223 @@
+---
+title: Sending email
+description: The full send reference for single, batch, scheduled, and idempotent sends
+---
+
+The [quickstart](/docs/core/herald/quickstart) sends a minimal message. This
+page is the complete reference: every field a send accepts, how to send many
+messages in one call, how idempotency and scheduling behave, and how to attach
+files.
+
+Every send authenticates as a tenant with a bearer API key
+(`authorization: Bearer <key>`) and sends only from a
+[verified sending domain](/docs/core/herald/domains). The REST host is
+`https://api.herald.omni.dev`; the GraphQL host is
+`https://api.herald.omni.dev/graphql`. Both run the same send pipeline, so the gates
+and failure modes described in [Limits and errors](/docs/core/herald/limits)
+apply identically.
+
+## Single send
+
+### REST
+
+`POST /messages` takes a JSON body. Only `to`, `from`, `subject`, and `html`
+are required:
+
+```bash
+curl https://api.herald.omni.dev/messages \
+  -H "authorization: Bearer $HERALD_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "to": "recipient@example.com",
+    "from": "Omni <hello@send.example.com>",
+    "subject": "Welcome aboard",
+    "html": "<p>Thanks for signing up.</p>",
+    "text": "Thanks for signing up.",
+    "cc": ["team@example.com"],
+    "bcc": ["audit@example.com"],
+    "replyTo": "support@example.com",
+    "headers": { "X-Campaign": "onboarding" },
+    "metadata": { "userId": "12345" },
+    "variables": { "name": "Ada" },
+    "trackOpens": true,
+    "trackClicks": true,
+    "idempotencyKey": "signup-12345",
+    "sendAt": "2026-01-01T09:00:00Z"
+  }'
+```
+
+| Field | Meaning |
+| ----- | ------- |
+| `to` | Recipient address. A malformed address is refused up front so it never spends sending reputation on a guaranteed bounce. |
+| `from` | A verified sending domain address. Bare (`hello@send.example.com`) or a display-name form (`Omni <hello@send.example.com>`); the display name is rendered in the header and the bare address is used for the domain gate and envelope sender. |
+| `subject`, `html` | Required content. `text` is an optional plain-text alternative. |
+| `cc`, `bcc` | Additional recipients. A suppressed `cc`/`bcc` is silently dropped rather than failing the send (see [Suppressions](/docs/core/herald/suppressions)). |
+| `replyTo` | `Reply-To` header address. |
+| `headers` | Extra message headers. A caller-supplied header wins over Herald's defaults, except the ones Herald must control. |
+| `metadata` | Arbitrary string key/values stored with the message, not sent to the recipient. |
+| `variables` | [Handlebars](/docs/core/herald/templates) merge values for `subject`, `html`, and `text`. |
+| `trackOpens`, `trackClicks` | Per-send [tracking](/docs/core/herald/tracking) overrides; omit to inherit the tenant default. |
+| `attachments` | Base64 file attachments (see below). |
+| `idempotencyKey` | Dedupe key, unique per tenant (see below). |
+| `sendAt` | ISO-8601 time to schedule the send (see below). |
+
+A successful send returns the message id and its status:
+
+```json
+{ "id": "3f1c…", "status": "queued" }
+```
+
+### GraphQL
+
+The `sendMessage` mutation runs the same pipeline:
+
+```graphql
+mutation Send {
+  sendMessage(
+    input: {
+      to: "recipient@example.com"
+      from: "Omni <hello@send.example.com>"
+      subject: "Welcome, {{name}}"
+      html: "<p>Hi {{name}}.</p>"
+      variables: { name: "Ada" }
+      trackClicks: true
+    }
+  ) {
+    messageId
+    status
+    to
+    subject
+  }
+}
+```
+
+The GraphQL `SendMessageInput` accepts `to`, `from`, `subject`, `html`, `text`,
+`cc`, `bcc`, `replyTo`, `attachments`, `sendAt`, `variables`, `trackOpens`,
+`trackClicks`, and an optional `tenantId` (only needed when one key spans
+several tenants). `headers`, `metadata`, and `idempotencyKey` are currently
+REST-only fields.
+
+## Batch send
+
+To send many distinct messages in one round trip, use the batch endpoint rather
+than looping single sends. `POST /messages/batch` takes up to 100 messages,
+each the same shape as a single send:
+
+```bash
+curl https://api.herald.omni.dev/messages/batch \
+  -H "authorization: Bearer $HERALD_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "messages": [
+      {
+        "to": "ada@example.com",
+        "from": "hello@send.example.com",
+        "subject": "Welcome, Ada",
+        "html": "<p>Hi Ada.</p>",
+        "idempotencyKey": "welcome-ada"
+      },
+      {
+        "to": "not-an-email",
+        "from": "hello@send.example.com",
+        "subject": "Welcome",
+        "html": "<p>Hi.</p>"
+      }
+    ]
+  }'
+```
+
+The response is always HTTP `200` with a per-message `results` array. Each entry
+carries its `index` into the input and succeeds or fails independently, so one
+bad message never aborts the batch:
+
+```json
+{
+  "results": [
+    { "index": 0, "ok": true, "id": "3f1c…", "status": "queued" },
+    { "index": 1, "ok": false, "code": "invalid_recipient", "error": "Recipient address is not a valid email address" }
+  ]
+}
+```
+
+Messages are processed in order (not concurrently) so the monthly quota and
+warm-up daily cap are counted accurately, and each message's `idempotencyKey` is
+honored just as on the single route. The failure `code` on a rejected item is
+the same lower_snake code the single route would have returned as an HTTP status
+(see [Limits and errors](/docs/core/herald/limits)).
+
+The cap is 100 messages: an empty array or one over the cap is rejected with a
+`4xx` validation error before any message is sent.
+
+The GraphQL equivalent is `sendMessages`:
+
+```graphql
+mutation SendBatch {
+  sendMessages(
+    input: {
+      messages: [
+        { to: "ada@example.com", from: "hello@send.example.com", subject: "Hi", html: "<p>Hi.</p>" }
+        { to: "grace@example.com", from: "hello@send.example.com", subject: "Hi", html: "<p>Hi.</p>" }
+      ]
+    }
+  ) {
+    results {
+      index
+      ok
+      messageId
+      status
+      code
+      error
+    }
+  }
+}
+```
+
+Note that the GraphQL `code` is UPPER_SNAKE (for example `UNVERIFIED_DOMAIN`)
+where the REST `code` is lower_snake (`unverified_domain`); the two name the same
+failures.
+
+## Idempotency
+
+Set `idempotencyKey` (on the single route you may instead send an
+`Idempotency-Key` header) to make a send safe to retry. The key is unique per
+tenant: the first send stores it, and any later send with the same key returns
+the original message without injecting a second copy. This is how a
+network-level retry of a request that actually succeeded never doubles up a
+message. In a batch, each message carries its own key.
+
+## Scheduled send
+
+Set `sendAt` to a future ISO-8601 time to schedule a message. Herald enqueues it
+with status `scheduled` and the dispatcher runs it through the normal pipeline
+at send time. A scheduled message does not consume monthly quota until it
+actually sends, so scheduling ahead does not draw down this month's allowance
+early. A `sendAt` in the past (or omitted) sends immediately; a value that is not
+a valid ISO-8601 date-time is rejected with `invalid_send_at`.
+
+## Attachments
+
+Attach files by base64-encoding their bytes. Each attachment carries a
+`filename`, a `contentType`, and the base64 `content`:
+
+```json
+{
+  "to": "recipient@example.com",
+  "from": "hello@send.example.com",
+  "subject": "Your receipt",
+  "html": "<p>Receipt attached.</p>",
+  "attachments": [
+    {
+      "filename": "receipt.pdf",
+      "contentType": "application/pdf",
+      "content": "JVBERi0xLjcKJ..."
+    }
+  ]
+}
+```
+
+## Related
+
+- [Templates and variables](/docs/core/herald/templates) for reusable, personalized content
+- [Open and click tracking](/docs/core/herald/tracking)
+- [Sending domains](/docs/core/herald/domains) that gate the `from` address
+- [Limits and errors](/docs/core/herald/limits) for quotas, warm-up, and failure codes

@@ -1,0 +1,62 @@
+---
+title: Limits and errors
+description: Send quotas, warm-up caps, and the send failure codes
+---
+
+Herald enforces a few limits on the send path and returns a small, stable set of
+failure codes. This page covers the monthly quota, new-tenant warm-up, and what
+each failure means.
+
+## Monthly send quota
+
+Each tenant has a monthly send quota set by its plan tier. Usage counts every
+message created in the current UTC calendar month; once the quota is reached,
+further sends are refused with `quota_exceeded` until the month rolls over.
+Scheduled messages do not count until they actually send.
+
+Quotas (and the other per-plan operational limits, such as sending domains and
+API keys) come from the Omni product catalog, so the exact number for each tier
+lives on the Herald pricing page rather than being restated here. A tenant with
+no billing account falls back to the free-tier limit.
+
+## Sending warm-up
+
+A brand-new tenant is ramped gradually rather than allowed to send at full
+volume on day one, so it builds a sending reputation on the shared IP instead of
+tripping spam filters with a cold blast. While a tenant is warming, each UTC day
+caps at that day's step in the ramp; once the ramp is exhausted the tenant has
+graduated and only the monthly quota applies.
+
+The default ramp raises the daily cap step by step over the first several days
+(for example 100, then 200, 500, 1,000, 2,500, 5,000, 10,000) before graduating.
+A send that would exceed the current day's cap is refused with `warmup_exceeded`
+and can be sent the next day. Long-standing tenants are never warm-up throttled.
+
+## Send failure codes
+
+Every send runs the same gates. On REST, a failure maps to an HTTP status; the
+body is `{ "error": "<message>" }`. The codes:
+
+| Code | Meaning | HTTP status |
+| ---- | ------- | ----------- |
+| `unverified_domain` | The `from` address is not a verified sending domain | `422` |
+| `invalid_recipient` | The `to` address is not a valid email address | `422` |
+| `suppressed` | The primary recipient is on the suppression list | `422` |
+| `invalid_send_at` | `sendAt` is not an ISO-8601 date-time | `422` |
+| `marketing_unavailable` | A marketing send was attempted with no tracking host configured | `422` |
+| `quota_exceeded` | The monthly send quota is reached | `429` |
+| `warmup_exceeded` | The current warm-up day's cap is reached | `429` |
+| `engine_unavailable` | The mail engine could not be reached (retry) | `502` |
+| `persist_failed` | The message could not be persisted (retry) | `503` |
+
+`429`, `502`, and `503` are worth retrying (with backoff); the `422` codes mean
+the request itself needs to change. `marketing_unavailable` only arises on
+[broadcasts](/docs/core/herald/broadcasts), never on transactional sends.
+
+### In a batch
+
+A [batch send](/docs/core/herald/sending#batch-send) always returns HTTP `200`
+and reports these same codes **per item** in each result's `code` field instead
+of as an HTTP status, so one rejected message never fails the whole call. Over
+GraphQL the codes are UPPER_SNAKE (for example `QUOTA_EXCEEDED`); over REST they
+are lower_snake (`quota_exceeded`).
