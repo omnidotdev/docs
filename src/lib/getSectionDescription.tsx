@@ -1,3 +1,4 @@
+import { products } from "./catalog/generated/catalog";
 import { REALMS } from "./sections";
 
 // TODO extract to frontmatter
@@ -11,23 +12,32 @@ import { REALMS } from "./sections";
 // ````
 // then need to figure a way to grab the frontmatter here
 
-// TODO grab from Omni API
-export const NEW_PRODUCTS = [
-  "Beacon",
-  "Eden",
-  "life.json",
-  "Omni CLI",
-  "Omni Terminal",
-  "persona.json",
-  "RDK",
-  "Runa",
-];
-export const COMING_SOON_PRODUCTS = [
-  "Manifold",
-  "Synapse",
-  "Thornberry",
-  "Vortex",
-];
+/**
+ * A product is badged "New" for this many days after its release. Derived from
+ * the catalog `releaseDate` so a product ages out of the badge on its own,
+ * without a rebuild.
+ */
+const NEW_WINDOW_DAYS = 90;
+
+const isRecentlyReleased = (releaseDate?: string) => {
+  if (!releaseDate) return false;
+
+  const released = new Date(releaseDate).getTime();
+
+  if (Number.isNaN(released)) return false;
+
+  return Date.now() - released <= NEW_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+};
+
+// Sidebar status badges derive from the omni-api catalog (SSOT), vendored into
+// `catalog/generated/catalog.ts` at build time. Matched against sidebar item
+// names, so these hold product display names.
+export const NEW_PRODUCTS = products
+  .filter((product) => isRecentlyReleased(product.releaseDate))
+  .map((product) => product.name);
+export const COMING_SOON_PRODUCTS = products
+  .filter((product) => product.status === "coming_soon")
+  .map((product) => product.name);
 
 // TODO augment section metadata directly (unsure if this is possible with Fumadocs)
 
