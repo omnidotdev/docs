@@ -1,0 +1,121 @@
+---
+title: Self-Hosting
+description: Deploy Arbor on your own infrastructure with Docker Compose
+---
+
+Arbor is open source (Apache 2.0) and designed to run on your own infrastructure. The supported path for self-hosting is Docker Compose. A Helm chart is not currently published; Kubernetes operators who want to wire their own manifests can use the compose file as the source of truth for service topology, env vars, and health checks.
+
+## The Stack Repo
+
+Arbor is distributed as a metarepo (`arbor-stack`) that ties the three services together. It includes two compose files:
+
+- **`compose.yaml`** pulls pre-built images from `manifold.omni.dev` (Omni's container registry)
+- **`compose.dev.yaml`** overrides the image references to build from the cloned service repos instead
+
+The stack also ships a `Tiltfile` and a `weaver.yaml` for local development with [Tilt](https://tilt.dev) or [🕸️ Weaver](/armory/weaver). For a self-hosted deployment, Docker Compose is the simplest path.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) with Compose v2
+- [Git](https://git-scm.com/)
+
+## Quick Start
+
+```sh
+# Clone the metarepo
+git clone https://github.com/omnidotdev/arbor arbor-stack && cd arbor-stack
+
+# Copy the env template and fill in the required values (see below).
+# Name it `.env` so `docker compose up` auto-loads it (it does not read `.env.local`).
+cp .env.local.template .env
+
+# Start the stack with pre-built images
+docker compose up
+```
+
+To build the images from source instead of pulling them, clone the service repos and use the dev override:
+
+```sh
+git clone https://github.com/omnidotdev/arbor-git services/arbor-git
+git clone https://github.com/omnidotdev/arbor-api services/arbor-api
+git clone https://github.com/omnidotdev/arbor-app services/arbor-app
+
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+The web app will be available at `http://localhost:3000` and the API at `http://localhost:4000`.
+
+> If you develop on the stack locally, you can also run it with Tilt (`tilt up`) or Weaver, which orchestrate the same services with live rebuilds. Docker Compose is the recommended path for a standalone self-hosted deployment.
+
+## Required Environment Variables
+
+`DB_PASSWORD` and `AUTH_SECRET` are required for the API and database to boot. If either is missing, the compose stack fails fast and prints which variable is required.
+
+| Variable | Description | Generate with |
+|----------|-------------|---------------|
+| `DB_PASSWORD` | PostgreSQL password. Must be URL-safe because it is embedded in `DATABASE_URL`, so use hex. | `openssl rand -hex 32` |
+| `AUTH_SECRET` | Session signing secret (shared by `app` and `api`) | `openssl rand -hex 32` |
+
+<Callout type="warn">
+  Generate `DB_PASSWORD` with `openssl rand -hex 32`, not `base64`. A base64 value can contain `/` or `+`, which break the `postgres://user:PASSWORD@host/db` connection string. `AUTH_SECRET` is not used in a URL, so `base64` is also fine there.
+</Callout>
+
+### Login (identity provider)
+
+`DB_PASSWORD` and `AUTH_SECRET` get the API and database running, but they are not enough to log in. Authentication is delegated to an external OIDC identity provider, so the `app` additionally requires the following to be set for sign-in to work:
+
+| Variable | Description |
+|----------|-------------|
+| `AUTH_CLIENT_ID` | OIDC client ID registered with your identity provider |
+| `AUTH_BASE_URL` | Public base URL of the identity provider |
+| `AUTH_INTERNAL_URL` | In-cluster URL the `app` uses to reach the identity provider (falls back to `AUTH_BASE_URL` outside Docker) |
+
+Without these, the stack boots but users cannot sign in.
+
+### Optional integrations
+
+`STRIPE_API_KEY` and the other Omni platform integrations (billing, authorization, event streaming, search) are optional. When unset, the API logs a startup warning and disables that feature rather than crashing.
+
+## Optional Overrides
+
+All ports and database identifiers have sensible defaults, so override them only if they conflict with something already running.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_NAME` | Database name | `arbor` |
+| `DB_USER` | Database user | `postgres` |
+| `DB_PORT` | PostgreSQL port | `5432` |
+| `API_PORT` | API port | `4000` |
+| `APP_PORT` | App port | `3000` |
+| `GIT_GRPC_PORT` | `arbor-git` gRPC port | `50051` |
+| `GIT_HTTP_PORT` | `arbor-git` HTTP port | `8080` |
+
+## Architecture
+
+The Docker Compose stack includes:
+
+- **PostgreSQL 18** for persistent storage (`db`), with data persisted to a volume at `/var/lib/postgresql`
+- **arbor-api** (TypeScript, port 4000) for the GraphQL API. It connects to PostgreSQL and serves git itself, storing repositories on local disk under `/var/lib/arbor/repos` (persisted to a volume at `/var/lib/arbor`)
+- **arbor-app** (TypeScript, port 3000) for the web UI, including the graph view
+- **arbor-git** (Rust) is a standalone git backend exposing gRPC on `50051` and HTTP on `8080`, with git data persisted to a volume at `/var/lib/arbor-git`. It is reserved for future use and is not yet wired into `arbor-api`, so the API does not proxy git operations to it today
+
+Services include health checks and dependency ordering: the API waits for PostgreSQL to be healthy and for `arbor-git` to start before booting, and the app waits for the API.
+
+## Upgrading
+
+Pull the latest changes and restart:
+
+```sh
+git pull
+docker compose up
+# or, when building from source:
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+Database migrations run automatically on startup.
+
+## Licensing and Graph Capability
+
+Self-hosters do not pay anything to use Arbor. The Apache 2.0 license covers commercial use, modification, and redistribution.
+
+A self-hosted instance runs at **free-tier graph capability (per-repository)** by default. The paid graph tiers (org-wide polyrepo graph, Weaver dependency detection, blast-radius analysis, multi-repo orchestration) are a hosted-plan capability enforced through Aether. They are not part of the open-core package: you get them on [arbor.omni.dev](https://arbor.omni.dev), or on a self-hosted instance only if you deliberately wire it up to Aether entitlement enforcement. Omni platform integrations are optional, and when unset the API logs a startup warning and disables that feature rather than crashing. See [Pricing](/armory/arbor/pricing) for the full capability ladder.

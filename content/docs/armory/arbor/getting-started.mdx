@@ -1,0 +1,70 @@
+---
+title: Getting Started
+description: Create an organization, add a repository, and explore the graph
+---
+
+The fastest way to try Arbor is the hosted instance at [arbor.omni.dev](https://arbor.omni.dev). No installation required. If you would rather run the stack yourself, see [Self-Hosting](/armory/arbor/self-hosting).
+
+## Sign Up
+
+1. Go to [arbor.omni.dev](https://arbor.omni.dev) and sign in.
+2. Authentication is handled by the Omni identity platform (HIDRA / Gatekeeper), so your existing Omni account works across every product. Email/password and social login are both supported.
+
+## Create an Organization
+
+Repositories in Arbor live inside an organization, which is the shared identity and billing boundary across Omni products.
+
+1. From the dashboard, open the organization switcher and choose **Create organization**.
+2. Give it a name and slug. The slug becomes part of your repository paths (for example `your-org/your-repo`).
+3. Invite collaborators now or later. The Free plan allows up to 5 collaborators per repository; Pro and Team make collaborators unlimited (see [pricing](/armory/arbor/pricing)).
+
+## Create a Repository
+
+1. Inside your organization, select **New repository**.
+2. Choose a name and visibility (public or private). Public and private repositories are unlimited on every plan.
+3. Arbor provisions the repository and returns its clone URL.
+
+Clone and push as you would with any git remote:
+
+```sh
+git clone https://git.arbor.omni.dev/your-org/your-repo.git
+cd your-repo
+# make changes
+git add .
+git commit -m "feat: initial commit"
+git push origin master
+```
+
+## Access Tokens
+
+Cloning and pushing over HTTPS uses a personal access token as the password (your username stays the same). Create one under **Settings → Personal access tokens**.
+
+Each token is issued with two limits, both set when you create it and fixed for the life of the token:
+
+- **Access**: *Read and write* allows clone, fetch, and push. *Read only* allows clone and fetch, and refuses pushes.
+- **Repository access**: leave the selection empty and the token reaches every repository you can reach. Select repositories and the token is confined to exactly those, and is refused everywhere else even though your account has access.
+
+Tokens can also be given an expiration in days. Leave it blank for a token that never expires.
+
+<Callout type="info">
+  Confining a token matters most for tokens you hand to an agent or to CI. A confined, read-only token limits the blast radius of a leaked credential to the repositories it names, and makes it answerable after the fact whether a change could have come from that token at all.
+</Callout>
+
+A token is shown exactly once, when it is created. Store it somewhere safe; if you lose it, revoke it and create another.
+
+## View the Graph
+
+Once an organization has more than one repository, the graph view becomes the primary way to navigate it.
+
+1. Open the **Graph** tab for your organization.
+2. Each node is a repository; edges represent the relationships between them (see [Concepts](/armory/arbor/concepts)).
+3. Use tags to filter the graph down to a single subsystem, for example just your backend services.
+4. Click a node to drill into a repository's branches, commits, and metadata.
+
+If you describe your repositories and their dependencies with [🕸️ Weaver](/armory/weaver), Arbor can use that definition to lay out and seed the graph automatically rather than wiring every edge by hand.
+
+## Next Steps
+
+- Learn the [concepts](/armory/arbor/concepts) behind the polyrepo graph
+- [Self-host](/armory/arbor/self-hosting) Arbor on your own infrastructure
+- Review the [pricing](/armory/arbor/pricing) tiers and limits

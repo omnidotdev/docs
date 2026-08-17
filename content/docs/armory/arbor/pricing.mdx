@@ -1,0 +1,75 @@
+---
+title: Pricing
+description: Plans, entitlement limits, and the graph capability ladder for Arbor
+---
+
+Arbor is open core: the platform is free and open source (Apache 2.0) to self-host, and the hosted service at [arbor.omni.dev](https://arbor.omni.dev) adds paid plans that unlock deeper graph capabilities. Entitlements are enforced at the API by Aether and surfaced through the app.
+
+Pricing is **per organization**, billed as a flat rate for the whole organization rather than per seat. Yearly billing is 25% off the monthly rate (nine months for the year).
+
+## Plans
+
+Pricing and tier definitions are owned by the [omni-api product catalog](https://github.com/omnidotdev/omni-api/blob/master/services/api/src/lib/db/catalog/planConfigs.ts) under the `arbor` key. The values below mirror that source of truth.
+
+| Plan | Monthly | Yearly | Graph | Collaborators | Storage | Support |
+|------|---------|--------|-------|---------------|---------|---------|
+| Free | $0 | $0 | Per-repository | Up to 5 per repository | 1 GB | Community |
+| Pro | $10 / org / mo | $90 / org / yr | Org-wide polyrepo | Unlimited | 25 GB | Email |
+| Team | $25 / org / mo | $225 / org / yr | Blast-radius + orchestration | Unlimited | 100 GB | Priority |
+
+### Free
+
+- Unlimited public and private repositories
+- Per-repository dependency graph
+- Up to 5 collaborators per repository
+- 1 GB storage
+- Community support
+
+### Pro
+
+- Everything in Free
+- Org-wide polyrepo graph
+- [Weaver](/armory/weaver) dependency detection
+- Advanced graph visualization
+- Unlimited collaborators
+- 25 GB storage
+- Email support
+
+### Team
+
+- Everything in Pro
+- Dependency blast-radius analysis
+- Multi-repo [Weaver](/armory/weaver) orchestration
+- 100 GB storage
+- Priority support
+
+## The Graph Capability Ladder
+
+Every plan includes the graph, but what the graph can see and reason about scales with your plan. This is the core of what each paid tier unlocks:
+
+- **Free (per-repository graph)**: each repository gets its own dependency graph. You see the structure inside a single repository, but repositories remain separate islands.
+- **Pro (org-wide polyrepo graph)**: the graph spans your entire organization. [Weaver](/armory/weaver) dependency detection surfaces the edges between repositories automatically, so a polyrepo or microservice architecture renders as one connected topology with advanced visualization.
+- **Team (blast-radius and orchestration)**: on top of the org-wide graph, Team adds dependency blast-radius analysis (trace what a change to one repository can affect downstream) and multi-repo Weaver orchestration (drive coordinated operations across the graph).
+
+## Operational Limits
+
+The hosted API enforces these limits per organization. A value of "Unlimited" corresponds to `-1` in the product catalog.
+
+| Limit | Free | Pro | Team |
+|-------|------|-----|------|
+| `max_private_repos` | Unlimited | Unlimited | Unlimited |
+| `max_storage_bytes` | 1 GB | 25 GB | 100 GB |
+| `max_collaborators` | 5 | Unlimited | Unlimited |
+| `graph_level` | Per-repository | Org-wide polyrepo | Blast-radius + orchestration |
+
+## Open Source Projects
+
+Arbor is built on open source and we want maintainers on it. There is no automatic open-source discount applied by billing, so this is a manual program: if you maintain public repositories and want your organization on a paid plan at no cost, [contact us](mailto:support@omni.dev) and we will set it up by hand. Do not expect the upgrade to apply itself, reach out and we will arrange it.
+
+## Self-Hosting
+
+Self-hosters do not pay anything to use Arbor. The Apache 2.0 license covers commercial use, modification, and redistribution. A self-hosted instance runs at free-tier graph capability (per-repository) by default. The paid graph tiers are a hosted-plan capability enforced through Aether, so they apply on [arbor.omni.dev](https://arbor.omni.dev) or on a self-hosted instance that you deliberately wire up to Aether. See [Self-Hosting](/armory/arbor/self-hosting) for setup.
+
+## Billing
+
+Hosted plans are billed per organization via Aether. Invoices, plan changes, and cancellations are handled in the Omni Console. For enterprise terms or dedicated support, [contact us](mailto:support@omni.dev).
