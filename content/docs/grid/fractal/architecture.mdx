@@ -28,7 +28,7 @@ repository or a prebuilt container image, and can be one of:
 - **Worker** &mdash; a background process with no public endpoint
 - **Scheduled job** &mdash; runs on a cron schedule
 - **Static site** &mdash; prebuilt static assets served over a CDN-style edge
-- **Database** &mdash; a managed, high-availability Postgres database
+- **Database** &mdash; a managed Postgres database
 
 ### Deploy and revision
 
@@ -55,7 +55,7 @@ supports weighted canary rollouts.
 ## Databases
 
 A database is just a service with the **database** type. Fractal provisions a
-managed, high-availability Postgres database with connection pooling, automatic
+managed Postgres database with connection pooling, automatic
 [scheduled backups](/grid/fractal/backups), and one-click restore, so there is no
 database to run or maintain yourself. Caches such as Valkey or Redis run as
 ordinary image-based services.

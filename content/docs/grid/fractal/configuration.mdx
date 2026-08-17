@@ -102,12 +102,12 @@ service and provisions TLS automatically.
 | `worker` | Background worker process |
 | `cronJob` | Scheduled job (with a cron schedule) |
 | `staticSite` | Static site (HTML/CSS/JS) |
-| `database` | Managed high-availability Postgres database |
+| `database` | Managed Postgres database |
 
 ## Databases
 
 A database is a service with `serviceType: database`. Fractal provisions a managed
-high-availability Postgres database with a connection pooler and stores the
+Postgres database with a connection pooler and stores the
 connection credentials as a secret. Reference that secret from another service:
 
 ```bash

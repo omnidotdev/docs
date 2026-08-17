@@ -1,0 +1,56 @@
+---
+title: Pricing and billing
+description: How Fractal plans, usage credits, and metered overage work
+---
+
+Fractal plans pair a flat monthly price with a monthly usage credit that covers
+your compute. You only pay more if your usage goes past the credit, billed by the
+hour. See [fractal.omni.dev/pricing](https://fractal.omni.dev/pricing) for current
+plans and prices.
+
+## Start with a trial
+
+New teams start with a **14-day free trial** of the Pro plan, no card required.
+When the trial ends, add a payment method to continue. If you do not, your
+services are paused (scaled to zero) and your data is retained for a grace period
+so you can pick up where you left off by adding a card.
+
+## How usage-based billing works
+
+Each plan includes a monthly **usage credit** (for example, the credit equals the
+plan's flat price on the Hobby and Pro plans). Compute usage draws from that credit
+first. Anything past the credit is added to that month's invoice at clear per-hour
+rates:
+
+- **Compute (CPU)** is metered per vCPU and prorated to the second.
+- **Compute (memory)** is metered per GB and prorated to the second.
+- **Bandwidth** is billed per GB of egress past your plan's included transfer.
+
+Storage is included up to each plan's limit and is not billed as overage. Projects,
+services, custom domains, and team seats are plan features, not metered usage.
+
+The exact overage rates and each plan's included credit, storage, and bandwidth are
+listed on the [pricing page](https://fractal.omni.dev/pricing).
+
+## Keeping costs predictable
+
+- **Scale-to-zero**: idle services sleep and stop billing compute, then wake
+  instantly on the next request.
+- **Spend limits**: set a monthly cap so usage charges never exceed an amount you
+  choose.
+- **No surprises**: you only ever pay your flat plan price plus any usage above your
+  credit. There are no per-seat compute markups and no minimums beyond the plan price.
+
+## Managing your plan
+
+Open your workspace **Billing** settings to change plans, update payment methods, or
+open the billing portal. Upgrades are prorated immediately; downgrades apply a credit
+to your next cycle. If you cancel, your data is retained unless you ask us to delete
+it, or we warn you before any deletion.
+
+## Running on your own cluster
+
+Prefer to run Fractal on infrastructure you own? **Bring Your Own Cloud** offers a
+flat per-cluster price with no per-app compute markup, and is rolling out with design
+partners first. See [self-hosting](/grid/fractal/self-hosting) or
+[apply for early access](https://fractal.omni.dev/early-access).
