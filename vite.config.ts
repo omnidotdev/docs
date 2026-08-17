@@ -21,7 +21,12 @@ const viteConfig = defineConfig({
     host: "0.0.0.0",
   },
   ssr: {
-    noExternal: ["@omnidotdev/garden"],
+    // lucide-react ships no `exports` map, so when externalized the SSR
+    // runtime resolves it to its CJS entry, which nitro does not trace into
+    // .output/server/node_modules (only dist/esm is shipped), crashing the
+    // server on boot. Bundling it into the SSR build avoids the runtime
+    // resolution entirely.
+    noExternal: ["@omnidotdev/garden", "lucide-react"],
     // Native modules must be externalized for SSR
     external: ["@resvg/resvg-js"],
   },
