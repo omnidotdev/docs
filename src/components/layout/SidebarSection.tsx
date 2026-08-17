@@ -85,13 +85,20 @@ const SidebarSection = ({
   const IconComponent = iconName ? ICON_COMPONENTS[iconName] : null;
 
   const handleToggle = useCallback(() => {
-    // Save scroll position before toggle
-    const viewport = getScrollViewport();
+    // The manual save/restore only applies to the DESKTOP sidebar scroll area.
+    // On mobile the sidebar lives in a different container, so this targeted the
+    // wrong viewport and yanked the whole page to the top when a realm was
+    // toggled. On mobile, let native scroll behavior handle it.
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+    const viewport = isMobile ? null : getScrollViewport();
     if (viewport) {
       scrollPosRef.current = viewport.scrollTop;
     }
 
     onToggle(!isOpen);
+
+    if (isMobile) return;
 
     // Restore scroll position after React re-render
     requestAnimationFrame(() => {

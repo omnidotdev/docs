@@ -20,6 +20,23 @@ const items = [
   {
     text: (
       <div className="flex gap-1">
+        <span>🔷 Deploy an app, site, or database with</span>
+        <a
+          href="https://fractal.omni.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 border-b-border-b-fd-accent font-bold"
+        >
+          <span className="font-bold underline">Fractal →</span>
+        </a>
+      </div>
+    ),
+    // TODO tokens
+    rainbowColors: ["#3b82f6", "#22d3ee", "#2dd4bf"],
+  },
+  {
+    text: (
+      <div className="flex gap-1">
         <span>ᯅ Build spatial and XR web experiences with</span>
         <a
           href="https://github.com/omnidotdev/rdk"
