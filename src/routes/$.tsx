@@ -228,7 +228,7 @@ export const Route = createFileRoute("/$")({
     await clientLoader.preload(data.path);
 
     // determine active section
-    const pathname = new URL(location.url).pathname;
+    const pathname = location.pathname;
     const activeSection = getSectionFromPath(pathname);
 
     return { data, slugs, activeSection };
@@ -262,7 +262,9 @@ const serverLoader = createServerFn({ method: "GET" })
     };
   });
 
-const clientLoader = browserCollections.docs.createClientLoader({
+const clientLoader = browserCollections.docs.createClientLoader<
+  Record<string, never>
+>({
   component: ({ toc, frontmatter, default: MDX }) => {
     // Get path from window.location (client-side only)
     const path =
