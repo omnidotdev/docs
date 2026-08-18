@@ -1,0 +1,76 @@
+---
+title: Payouts
+description: Connect Stripe, verify your identity, and withdraw your earnings
+---
+
+Payments on Crystal flow directly to your own Stripe account, never through a
+shared pool. That means you set this up **first**: until a Stripe account is
+connected and verified, your public page shows "Coming soon" and no one can
+support you.
+
+## Connect Stripe
+
+1. Open **Payouts** from the sidebar.
+2. In the **Stripe Connect** card, choose **Connect with Stripe**.
+3. You are taken to Stripe to create your account. Provide the business and
+   bank details Stripe asks for. This is where your money will land.
+4. When you finish, Stripe returns you to Crystal.
+
+Your account starts as **Pending Verification**. If you leave before finishing,
+use **Continue Setup** on the Payouts page to pick up where you left off, and
+**Refresh status** to re-check once Stripe has processed your details.
+
+## Verify your identity
+
+Stripe verifies every account before it can take payments or send payouts, in
+line with financial regulations. Verification usually takes only a few minutes,
+though some details can take longer to clear on Stripe's side. Once you are
+**Verified**, your balance appears and your public page opens for support.
+
+You can open your **Stripe Dashboard** from the Payouts page at any time to
+manage bank details, tax information, and account settings directly with Stripe.
+
+## Balances and withdrawing
+
+The Payouts page shows three figures:
+
+| Balance | Meaning |
+|---------|---------|
+| **Available** | Cleared funds ready to withdraw |
+| **Pending** | Recent payments still settling |
+| **Total Earned** | Your lifetime earnings across everything |
+
+Choose **Request Payout** to withdraw from your available balance to your bank.
+Payouts typically arrive in 2 to 7 business days depending on your bank and
+country. You can review every past withdrawal, its amount, and its status under
+**Payout history** (also mirrored on the **Earnings** page).
+
+## Fees
+
+Crystal takes a small platform fee per transaction, and Stripe charges its own
+standard processing fee. Both come out before funds reach your available
+balance. See [payments and fees](/core/crystal/payments-fees) for the exact
+rates.
+
+## Taxes: you are the merchant of record
+
+This part matters, so we are direct about it.
+
+<Callout type="warn">
+  On Crystal, **you are the merchant of record** for the money your supporters
+  send. Crystal facilitates the payment and routes it to your Stripe account; it
+  does not sell on your behalf. You are responsible for your own taxes.
+</Callout>
+
+- **Crystal does not calculate, collect, or remit taxes for you.** Any VAT, GST,
+  or sales tax owed on the support you receive is yours to register for, charge,
+  and remit in the jurisdictions where you have obligations.
+- **Keep your own records.** Use your earnings data and your Stripe Dashboard to
+  gather the figures you need at filing time.
+- **US creators:** Stripe issues a **1099-K** to qualifying US Connect accounts
+  that pass the reporting threshold, and files it with the IRS. Find it in your
+  Stripe Dashboard. This is Stripe's standard tax reporting, separate from any
+  income tax you owe.
+
+If you are unsure about your obligations, talk to a qualified tax professional.
+Crystal cannot give tax advice.
