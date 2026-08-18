@@ -35,9 +35,18 @@ const isRecentlyReleased = (releaseDate?: string) => {
 export const NEW_PRODUCTS = products
   .filter((product) => isRecentlyReleased(product.releaseDate))
   .map((product) => product.name);
-export const COMING_SOON_PRODUCTS = products
-  .filter((product) => product.status === "coming_soon")
-  .map((product) => product.name);
+// Products presented as "coming soon" in the docs sidebar regardless of catalog
+// status. Arbor's app is live but its documentation is still being finalized, so
+// it is badged here until the docs are ready. Docs-only, does not touch the
+// catalog SSOT or the website. Remove the entry once the docs are complete.
+const DOCS_COMING_SOON_OVERRIDES = ["Arbor"];
+
+export const COMING_SOON_PRODUCTS = [
+  ...products
+    .filter((product) => product.status === "coming_soon")
+    .map((product) => product.name),
+  ...DOCS_COMING_SOON_OVERRIDES,
+];
 
 // TODO augment section metadata directly (unsure if this is possible with Fumadocs)
 
