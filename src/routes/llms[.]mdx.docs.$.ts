@@ -13,7 +13,8 @@ export const Route = createFileRoute("/llms.mdx/docs/$")({
       GET: async ({ params }) => {
         const rawSlugs = params._splat?.split("/").filter(Boolean) ?? [];
         // Fumadocs uses empty array for root page (index.mdx)
-        const slugs = rawSlugs.length === 1 && rawSlugs[0] === "index" ? [] : rawSlugs;
+        const slugs =
+          rawSlugs.length === 1 && rawSlugs[0] === "index" ? [] : rawSlugs;
         const page = source.getPage(slugs);
 
         if (!page) throw notFound();

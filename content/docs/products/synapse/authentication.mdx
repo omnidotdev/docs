@@ -1,0 +1,122 @@
+---
+title: Authentication
+description: API key auth, OAuth2/JWT, CSRF protection, and security practices
+---
+
+Synapse supports multiple authentication methods to secure access to its API endpoints.
+
+## API Key Authentication
+
+The default authentication method. Clients pass an API key in the request header, and Synapse validates it by calling the synapse-api service's `/internal/resolve-key` endpoint.
+
+### Header Format
+
+```bash
+# OpenAI-compatible endpoints
+curl -H "Authorization: Bearer your-api-key" \
+  http://localhost:6000/v1/chat/completions ...
+
+# Anthropic-compatible endpoints
+curl -H "x-api-key: your-api-key" \
+  http://localhost:6000/v1/messages ...
+```
+
+### Configuration
+
+```toml
+[auth]
+enabled = true
+api_url = "http://synapse-api:4000"
+gateway_secret = "{{ env.GATEWAY_SECRET }}"
+cache_ttl_seconds = 60
+cache_capacity = 10000
+public_paths = ["/health"]
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `enabled` | Enable API key auth | false |
+| `api_url` | URL of the synapse-api service | -- (required) |
+| `gateway_secret` | Shared secret for gateway-to-API authentication | -- (required) |
+| `cache_ttl_seconds` | How long to cache resolved API keys (seconds) | 30 |
+| `cache_capacity` | Maximum number of cached key resolutions | 10000 |
+| `public_paths` | Paths that skip authentication | `["/health"]` |
+| `tls_skip_verify` | Skip TLS verification for API calls (dev only) | false |
+
+<Callout type="warning">
+  Always use environment variable interpolation for the gateway secret. Never hardcode secrets in config files.
+</Callout>
+
+### How It Works
+
+When a request arrives with an API key, Synapse calls synapse-api's `/internal/resolve-key` endpoint (authenticated with `gateway_secret`) to validate the key and resolve the associated client identity. Resolved keys are cached locally for `cache_ttl_seconds` to avoid per-request API calls.
+
+The synapse-api can push cache invalidations to the gateway via the `/internal/invalidate-key` endpoint when keys are rotated or revoked.
+
+### BYOK Vault Integration
+
+When configured, Synapse resolves BYOK (Bring Your Own Key) provider keys from a Gatekeeper vault instead of the synapse-api database:
+
+```toml
+[auth.vault]
+url = "https://gatekeeper.omni.dev"
+service_key = "{{ env.AUTH_SERVICE_KEY }}"
+cache_ttl_seconds = 300
+cache_capacity = 10000
+```
+
+## CSRF Protection
+
+Synapse includes CSRF protection for browser-based clients.
+
+### Configuration
+
+```toml
+[server.csrf]
+enabled = true
+header_name = "X-Synapse-CSRF-Protection"
+```
+
+When enabled, non-GET requests from browser clients must include a valid CSRF token in the configured header.
+
+<Callout type="info">
+  CSRF protection is primarily relevant when Synapse is accessed directly from a browser. API clients using `Authorization` headers are not affected.
+</Callout>
+
+## Client Identification
+
+Synapse tracks which client is making each request for usage analytics and rate limiting. Clients are identified by:
+
+1. **API key** -- each key maps to a client identity
+2. **JWT claims** -- `sub` or `client_id` claim
+3. **IP address** -- fallback when no other identifier is available
+
+### Custom Client Identification
+
+Client identification is configured separately under `[server.client_identification]`:
+
+```toml
+[server.client_identification]
+header_name = "X-Client-Id"
+```
+
+When set, Synapse uses the value of this header as the client identifier, regardless of the authentication method.
+
+## Security Best Practices
+
+1. **Use TLS in production** -- configure TLS in the [server section](/products/synapse/configuration#tls) or terminate TLS at a reverse proxy
+2. **Rotate API keys regularly** -- use the Omni dashboard or API to rotate keys without downtime
+3. **Use JWT for multi-tenant deployments** -- JWTs carry identity and scope, reducing key management overhead
+4. **Enable CSRF for browser access** -- protect against cross-site request forgery
+5. **Limit CORS origins** -- only allow trusted origins in [CORS configuration](/products/synapse/configuration#cors)
+6. **Monitor authentication failures** -- use [telemetry](/products/synapse/telemetry) to track and alert on auth failures
+7. **Never log API keys or tokens** -- Synapse redacts sensitive values in logs by default
+
+## Unauthenticated Endpoints
+
+Paths listed in `public_paths` skip authentication. By default, only `/health` is public:
+
+```toml
+[auth]
+public_paths = ["/health"]
+```

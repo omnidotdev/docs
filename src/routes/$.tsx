@@ -1,4 +1,9 @@
-import { createFileRoute, notFound, useLocation } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  notFound,
+  redirect,
+  useLocation,
+} from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
@@ -28,6 +33,7 @@ import { useSidebarEscClose } from "@/lib/hooks/useSidebarEscClose";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
 import transformPageTree from "@/lib/pageTreeTransform";
+import { resolveRedirect } from "@/lib/resolveRedirect";
 import { getRealmByPath, getRealmIds } from "@/lib/sections";
 import source from "@/lib/source";
 import seo from "@/lib/util/seo";
@@ -220,6 +226,18 @@ const Page = () => {
  */
 export const Route = createFileRoute("/$")({
   component: Page,
+  // redirect legacy documentation URLs to their canonical targets before load
+  // use `href` + `reloadDocument` so TanStack emits a real full-document 301
+  // with a Location header, which crawlers and external inbound links follow
+  beforeLoad: ({ location }) => {
+    const redirectTarget = resolveRedirect(location.pathname);
+    if (redirectTarget)
+      throw redirect({
+        href: redirectTarget,
+        statusCode: 301,
+        reloadDocument: true,
+      });
+  },
   loader: async ({ params, location }) => {
     const slugs = params._splat?.split("/") ?? [];
 
@@ -237,12 +255,17 @@ export const Route = createFileRoute("/$")({
     const { slugs, data } = loaderData ?? {};
     const slug = slugs?.length ? slugs.join("/") : undefined;
 
+    const base = app.appUrl.replace(/\/+$/, "");
+    const canonical = slug ? `${base}/${slug}` : base;
+
     return {
       meta: seo({
         title: data?.title,
         description: data?.description,
+        url: canonical,
         slug,
       }),
+      links: [{ rel: "canonical", href: canonical }],
     };
   },
 });

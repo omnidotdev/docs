@@ -40,7 +40,7 @@ docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --bu
 
 ### Runa
 
-[Runa](/core/runa) runs three containers:
+[Runa](/products/runa) runs three containers:
 
 | Container | Image | Port |
 |-----------|-------|------|
@@ -60,7 +60,7 @@ docker compose --env-file .env.local up -d
 
 ### Vortex
 
-[Vortex](/grid/vortex) runs six containers:
+[Vortex](/products/vortex) runs six containers:
 
 | Container | Image | Port |
 |-----------|-------|------|
@@ -97,7 +97,7 @@ docker compose up -d
 | `IGGY_USERNAME` | Iggy admin username |
 | `IGGY_PASSWORD` | Iggy admin password |
 
-Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `CACHE_PORT`, and OAuth provider credentials (`GOOGLE_*`, `GITHUB_*`, `OIDC_*`). See the full [Vortex configuration reference](/grid/vortex/configuration).
+Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `CACHE_PORT`, and OAuth provider credentials (`GOOGLE_*`, `GITHUB_*`, `OIDC_*`). See the full [Vortex configuration reference](/products/vortex/configuration).
 
 #### Volumes
 
@@ -111,7 +111,7 @@ Three named volumes persist data across restarts:
 
 ### Manifold
 
-[Manifold](/armory/manifold) runs three containers:
+[Manifold](/products/manifold) runs three containers:
 
 | Container | Port | Description |
 |-----------|------|-------------|
@@ -149,11 +149,11 @@ Manifold supports filesystem or S3-compatible blob storage:
 | `BLOB_S3_ENDPOINT` | — | Custom S3 endpoint (for MinIO, R2) |
 | `BLOB_S3_PREFIX` | `blobs` | S3 key prefix |
 
-See the [Manifold Storage guide](/armory/manifold/storage) for details.
+See the [Manifold Storage guide](/products/manifold/storage) for details.
 
 ### Synapse
 
-[Synapse](/grid/synapse) runs five containers:
+[Synapse](/products/synapse) runs five containers:
 
 | Container | Image | Port |
 |-----------|-------|------|
@@ -191,7 +191,7 @@ Optional: `AUTH_BASE_URL` (HIDRA Gatekeeper), `BILLING_*` (billing), `CORS_ALLOW
 | `db_data` | PostgreSQL | Database files |
 | `valkey_data` | Valkey | Rate limit state and cache |
 
-See the [Synapse self-hosting guide](/grid/synapse/self-hosting) for Helm charts, gateway configuration, and binary installs.
+See the [Synapse self-hosting guide](/products/synapse/self-hosting) for Helm charts, gateway configuration, and binary installs.
 
 ## Database Migrations
 

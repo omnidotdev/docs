@@ -16,3 +16,7 @@ content/docs/fabric/resonance/
 !.env.example
 !.env.*.template
 !.env.template
+
+# Local-only docs migration data (contains unlaunched/private product slugs); never commit
+scripts/migration/data/
+content/_unlaunched/
