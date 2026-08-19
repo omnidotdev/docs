@@ -18,13 +18,11 @@ const app = {
   },
   // Mirrors the omni-api social catalog (SSOT). If these diverge, omni-api wins.
   socials: {
+    threads: "https://www.threads.com/@omnidotdev",
     x: "https://x.com/omnidotdev",
     discord: "https://discord.gg/omnidotdev",
     github: "https://github.com/omnidotdev",
     linkedin: "https://www.linkedin.com/company/omnidotdev",
-    instagram: "https://www.instagram.com/omnidotdev",
-    tiktok: "https://www.tiktok.com/@omnidotdev",
-    threads: "https://www.threads.com/@omnidotdev",
   },
 };
 
