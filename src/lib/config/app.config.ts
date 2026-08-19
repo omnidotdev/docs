@@ -16,11 +16,15 @@ const app = {
     privacyPolicy: "https://omni.dev/privacy-policy",
     termsOfService: "https://omni.dev/terms-of-service",
   },
+  // Mirrors the omni-api social catalog (SSOT). If these diverge, omni-api wins.
   socials: {
     x: "https://x.com/omnidotdev",
-    github: "https://github.com/omnidotdev",
     discord: "https://discord.gg/omnidotdev",
-    linkedin: "https://linkedin.com/company/omnidotdev",
+    github: "https://github.com/omnidotdev",
+    linkedin: "https://www.linkedin.com/company/omnidotdev",
+    instagram: "https://www.instagram.com/omnidotdev",
+    tiktok: "https://www.tiktok.com/@omnidotdev",
+    threads: "https://www.threads.com/@omnidotdev",
   },
 };
 

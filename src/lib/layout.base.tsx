@@ -3,7 +3,13 @@ import {
   FaLinkedin,
   FaRegNewspaper,
 } from "react-icons/fa6";
-import { SiDiscord as DiscordIcon, SiX as XIcon } from "react-icons/si";
+import {
+  SiDiscord as DiscordIcon,
+  SiInstagram as InstagramIcon,
+  SiThreads as ThreadsIcon,
+  SiTiktok as TiktokIcon,
+  SiX as XIcon,
+} from "react-icons/si";
 
 import { app } from "./config";
 
@@ -48,6 +54,27 @@ const baseLayoutOptions = (): BaseLayoutProps => ({
       icon: <DiscordIcon />,
       text: "Discord",
       url: app.socials.discord,
+      secondary: true,
+    },
+    {
+      type: "icon",
+      icon: <InstagramIcon />,
+      text: "Instagram",
+      url: app.socials.instagram,
+      secondary: true,
+    },
+    {
+      type: "icon",
+      icon: <TiktokIcon />,
+      text: "TikTok",
+      url: app.socials.tiktok,
+      secondary: true,
+    },
+    {
+      type: "icon",
+      icon: <ThreadsIcon />,
+      text: "Threads",
+      url: app.socials.threads,
       secondary: true,
     },
   ],
