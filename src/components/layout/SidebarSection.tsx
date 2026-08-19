@@ -139,7 +139,7 @@ const SidebarSection = ({
 
           <span
             className={cn(
-              "mt-1 block text-fd-muted-foreground text-xs italic",
+              "mt-1 line-clamp-1 text-fd-muted-foreground text-xs italic",
               textColors.description,
             )}
           >
