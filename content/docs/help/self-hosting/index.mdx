@@ -17,38 +17,38 @@ Most Omni products follow a [standard Docker Compose pattern](/help/self-hosting
 
 | Product | Realm | Guide |
 |---------|-------|-------|
-| [Runa](/core/runa) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Backfeed](/core/backfeed) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Channel](/core/channel) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Crystal](/core/crystal) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Mantle](/core/mantle) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [MyFi](/core/myfi) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Halo](/core/halo) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Blink](/kindred/blink) | Kindred | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Creator](/fabric/creator) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Gaia](/fabric/gaia) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Trellis](/fabric/trellis) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Beacon](/grid/beacon) | Grid | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Vortex](/grid/vortex) | Grid | [Docker Compose](/help/self-hosting/docker-compose), [Helm](/help/self-hosting/kubernetes) |
-| [Lattice](/grid/lattice) | Grid | [Docker Compose](/help/self-hosting/docker-compose) |
-| [HIDRA](/armory/hidra) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Aether](/armory/aether) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Arbor](/armory/arbor) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
-| [Manifold](/armory/manifold) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Runa](/products/runa) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Backfeed](/products/backfeed) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Channel](/products/channel) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Crystal](/realms/core/crystal) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Mantle](/products/mantle) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [MyFi](/products/myfi) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Halo](/products/halo) | Core | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Blink](/products/blink) | Kindred | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Creator](/products/creator) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Gaia](/products/gaia) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Trellis](/products/trellis) | Fabric | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Beacon](/products/beacon) | Grid | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Vortex](/products/vortex) | Grid | [Docker Compose](/help/self-hosting/docker-compose), [Helm](/help/self-hosting/kubernetes) |
+| [Lattice](/realms/grid/lattice) | Grid | [Docker Compose](/help/self-hosting/docker-compose) |
+| [HIDRA](/products/hidra) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Aether](/products/aether) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Arbor](/realms/armory/arbor) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
+| [Manifold](/products/manifold) | Armory | [Docker Compose](/help/self-hosting/docker-compose) |
 
 ### Kubernetes
 
 | Product | Guide |
 |---------|-------|
-| [Fractal](/grid/fractal) | [Kubernetes](/help/self-hosting/kubernetes) |
-| [Vortex](/grid/vortex) | [Helm chart](/help/self-hosting/kubernetes#vortex-helm-chart) |
+| [Fractal](/products/fractal) | [Kubernetes](/help/self-hosting/kubernetes) |
+| [Vortex](/products/vortex) | [Helm chart](/help/self-hosting/kubernetes#vortex-helm-chart) |
 
 ### Binary / Docker
 
 | Product | Methods | Guide |
 |---------|---------|-------|
-| [Synapse](/grid/synapse) | Docker Compose, Helm, Binary | [Docker Compose](/help/self-hosting/docker-compose#synapse), [Self-Hosting](/grid/synapse/self-hosting) |
-| [Omni Terminal](/armory/omni-terminal) | Binary, Docker | [Binary installs](#omni-terminal) |
+| [Synapse](/products/synapse) | Docker Compose, Helm, Binary | [Docker Compose](/help/self-hosting/docker-compose#synapse), [Self-Hosting](/products/synapse/self-hosting) |
+| [Omni Terminal](/products/omni-terminal) | Binary, Docker | [Binary installs](#omni-terminal) |
 
 ## Binary Installs
 
@@ -56,7 +56,7 @@ Some products ship as standalone binaries and don't require Docker or Kubernetes
 
 ### Synapse
 
-[Synapse](/grid/synapse) runs as a full stack (gateway + API + dashboard) via Docker Compose, or the gateway alone as a standalone binary:
+[Synapse](/products/synapse) runs as a full stack (gateway + API + dashboard) via Docker Compose, or the gateway alone as a standalone binary:
 
 ```bash
 # Full stack (Docker Compose)
@@ -75,11 +75,11 @@ cargo build --release
 
 Prebuilt gateway binaries for Linux (x86_64, aarch64) and macOS (Apple Silicon) are available on the [releases page](https://github.com/omnidotdev/synapse-gateway/releases).
 
-See the [Synapse self-hosting guide](/grid/synapse/self-hosting) for full configuration and environment variable reference.
+See the [Synapse self-hosting guide](/products/synapse/self-hosting) for full configuration and environment variable reference.
 
 ### Omni Terminal
 
-[Omni Terminal](/armory/omni-terminal) runs in the browser via the `serve` subcommand. The WASM frontend is embedded at compile time:
+[Omni Terminal](/products/omni-terminal) runs in the browser via the `serve` subcommand. The WASM frontend is embedded at compile time:
 
 ```bash
 # Via package manager (Homebrew, AUR, etc.)
@@ -107,11 +107,11 @@ docker build -t omni-terminal-web .
 docker run -p 3000:3000 omni-terminal-web
 ```
 
-See the [Omni Terminal Web docs](/armory/omni-terminal/web) for full details including TLS configuration and the npm package.
+See the [Omni Terminal Web docs](/products/omni-terminal/web) for full details including TLS configuration and the npm package.
 
 ## Self-Hosting Simplification
 
-[Run](/grid/run) is Omni's tool for simplifying self-hosted deployments. Check its documentation for the latest on streamlining multi-product setups.
+[Run](/products/run) is Omni's tool for simplifying self-hosted deployments. Check its documentation for the latest on streamlining multi-product setups.
 
 <Cards>
   <Card title="Docker Compose" href="/help/self-hosting/docker-compose">

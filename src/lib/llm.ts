@@ -1,6 +1,5 @@
 import type { InferPageType } from "fumadocs-core/source";
-
-import source from "@/lib/source";
+import type source from "@/lib/source";
 
 /**
  * Convert a page to LLM-readable markdown format.

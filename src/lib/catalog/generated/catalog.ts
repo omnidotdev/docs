@@ -18,6 +18,12 @@ export interface CatalogProduct {
 
 export const products: CatalogProduct[] = [
   {
+    "id": "arbor",
+    "name": "Arbor",
+    "realm": "armory",
+    "status": "coming_soon"
+  },
+  {
     "id": "backfeed",
     "name": "Backfeed",
     "realm": "core",
@@ -68,8 +74,7 @@ export const products: CatalogProduct[] = [
     "id": "herald",
     "name": "Herald",
     "realm": "grid",
-    "status": "active",
-    "releaseDate": "2026-08-12"
+    "status": "coming_soon"
   },
   {
     "id": "life-json",
@@ -123,7 +128,8 @@ export const products: CatalogProduct[] = [
     "id": "sigil",
     "name": "Sigil",
     "realm": "sigil",
-    "status": "active"
+    "status": "active",
+    "releaseDate": "2023-10-30"
   },
   {
     "id": "synapse",

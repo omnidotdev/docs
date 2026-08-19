@@ -1,4 +1,5 @@
 import realmsData from "../../realms.json";
+import { PRODUCT_REALMS } from "./productRealms.generated";
 
 /** Realm IDs. Non-realm sections (welcome, community, help, debug) are excluded. */
 export const REALM_IDS: string[] = realmsData.realms.map((r) => r.id);
@@ -207,38 +208,45 @@ export const getRealmById = (id: string): Realm | undefined => {
  * @returns Realm object or undefined if not found.
  */
 export const getRealmByPath = (pathname: string): Realm | undefined => {
+  const welcome = getRealmById("welcome");
+
   // handle root path specially
   if (pathname === "/" || pathname === "/docs" || pathname === "/docs/")
-    return getRealmById("welcome");
+    return welcome;
 
-  // exclude welcome realm from general search and check other realms
-  const nonWelcomeRealms = REALMS.filter((realm) => realm.id !== "welcome");
+  const normalizedPathname = pathname.replace(/\/+$/, "");
+  const segments = normalizedPathname.split("/").filter(Boolean);
 
-  // sort by path specificity (longer paths first)
-  const sortedRealms = [...nonWelcomeRealms].sort((a, b) => {
-    const maxLengthA = Math.max(...a.paths.map((p) => p.length));
+  // /products/<id>... resolves via the generated public product -> realm map.
+  // Unknown ids (private products in local dev) fall back to welcome.
+  if (segments[0] === "products") {
+    const id = segments[1];
+    const realmId = id ? PRODUCT_REALMS[id] : undefined;
 
-    const maxLengthB = Math.max(...b.paths.map((p) => p.length));
+    return (realmId ? getRealmById(realmId) : undefined) ?? welcome;
+  }
 
-    return maxLengthB - maxLengthA;
-  });
+  // /realms/<realmId>... resolves directly to that realm.
+  if (segments[0] === "realms") {
+    const realmId = segments[1];
 
-  return (
-    sortedRealms.find(
-      (realm) =>
-        realm.paths.some((path) => {
-          // normalize both pathname and path for comparison
-          const normalizedPath = path.replace(/[()]/g, "").replace(/\/+$/, "");
-          const normalizedPathname = pathname.replace(/\/+$/, "");
+    return (realmId ? getRealmById(realmId) : undefined) ?? welcome;
+  }
 
-          return (
-            normalizedPathname.startsWith(normalizedPath) &&
-            normalizedPath !== ""
-          );
-        }),
-      // fall back to welcome
-    ) || getRealmById("welcome")
+  // Ecosystem sections (community, help) still resolve by path prefix.
+  const prefixSections = ADDITIONAL_SECTIONS.filter((s) => s.id !== "welcome");
+
+  const match = prefixSections.find((section) =>
+    section.paths.some((path) => {
+      const normalizedPath = path.replace(/[()]/g, "").replace(/\/+$/, "");
+
+      return (
+        normalizedPath !== "" && normalizedPathname.startsWith(normalizedPath)
+      );
+    }),
   );
+
+  return match ?? welcome;
 };
 
 /**

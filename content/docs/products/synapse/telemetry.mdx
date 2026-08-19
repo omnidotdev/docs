@@ -1,0 +1,192 @@
+---
+title: Telemetry
+description: OpenTelemetry tracing, metrics, and logging configuration
+---
+
+Synapse supports [OpenTelemetry](https://opentelemetry.io) for distributed tracing, metrics, and structured logging. This page covers how to configure each telemetry signal.
+
+## Overview
+
+| Signal | Description | Use Case |
+|--------|-------------|----------|
+| Traces | Distributed request traces across providers | Debugging latency, understanding request flow |
+| Metrics | Counters, histograms, gauges | Monitoring throughput, error rates, costs |
+| Logs | Structured log output | Debugging, auditing |
+
+## Basic Configuration
+
+```toml
+[telemetry]
+service_name = "synapse"
+```
+
+The `service_name` appears in all telemetry data and is used to identify Synapse in your observability stack.
+
+## Tracing
+
+Tracing is configured under `[telemetry.tracing]`. You can either use the shared `[telemetry.exporter]` or provide a tracing-specific override via `[telemetry.tracing.exporter]`.
+
+### OTLP gRPC Exporter
+
+```toml
+[telemetry.tracing]
+sampling_rate = 1.0
+parent_based = true
+
+[telemetry.tracing.exporter]
+endpoint = "http://localhost:4317"
+protocol = "grpc"
+```
+
+### OTLP HTTP Exporter
+
+```toml
+[telemetry.tracing.exporter]
+endpoint = "http://localhost:4318"
+protocol = "http_proto"
+```
+
+### Sampling
+
+```toml
+[telemetry.tracing]
+sampling_rate = 0.1
+parent_based = true
+```
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `sampling_rate` | Fraction of requests to trace (0.0 to 1.0) | 1.0 |
+| `parent_based` | Use parent-based sampler (respects upstream trace decision) | true |
+| `propagation` | Propagation formats: `trace_context`, `xray` | -- |
+| `exporter` | Tracing-specific exporter override (see [Exporter Config](#exporter-config)) | Inherits from `[telemetry.exporter]` |
+
+<Callout type="info">
+  Use `grpc` protocol in production with a collector like Jaeger, Tempo, or the OpenTelemetry Collector.
+</Callout>
+
+### Trace Context
+
+Synapse propagates W3C Trace Context headers (`traceparent`, `tracestate`) to upstream providers. This enables end-to-end distributed tracing across your entire AI pipeline.
+
+## Metrics
+
+Metrics can use the shared `[telemetry.exporter]` or provide a metrics-specific override via `[telemetry.metrics.exporter]`.
+
+### OTLP gRPC Exporter
+
+```toml
+[telemetry.metrics.exporter]
+endpoint = "http://localhost:4317"
+protocol = "grpc"
+
+[telemetry.metrics.exporter.batch]
+scheduled_delay = 30
+```
+
+### Available Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `http.server.request.duration` | Histogram | HTTP request latency |
+| `http.server.request.count` | Counter | Total HTTP requests by endpoint and status |
+| `llm.request.duration` | Histogram | LLM provider request latency |
+| `llm.request.count` | Counter | LLM requests by provider and model |
+| `llm.token.usage` | Counter | Tokens processed (input and output) |
+| `llm.streaming.duration` | Histogram | End-to-end streaming duration |
+| `llm.time_to_first_token` | Histogram | Time to first token in streaming responses |
+| `mcp.tool_call.duration` | Histogram | MCP tool call latency |
+| `mcp.tool_call.count` | Counter | MCP tool calls by tool name |
+| `mcp.search.duration` | Histogram | MCP tool search latency |
+
+## Logs
+
+Synapse uses [tracing](https://docs.rs/tracing) for structured logging. Logs can optionally be exported via OTLP by providing a logs-specific exporter:
+
+```toml
+[telemetry.logs.exporter]
+endpoint = "http://localhost:4317"
+protocol = "grpc"
+```
+
+### Log Levels
+
+Set via the `RUST_LOG` environment variable:
+
+```bash
+RUST_LOG=synapse=debug,tower_http=info
+```
+
+Supported levels: `trace`, `debug`, `info`, `warn`, `error`.
+
+<Callout type="warning">
+  Synapse redacts API keys and sensitive headers in all log output. Never set `trace` level in production as it may include request bodies.
+</Callout>
+
+## Exporter Config
+
+All exporter sections (`[telemetry.exporter]`, `[telemetry.tracing.exporter]`, `[telemetry.metrics.exporter]`, `[telemetry.logs.exporter]`) share the same schema:
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `endpoint` | OTLP endpoint URL | -- |
+| `protocol` | `grpc` or `http_proto` | `grpc` |
+| `headers` | Additional headers as key-value pairs | -- |
+| `batch.max_export_batch_size` | Maximum batch size | 512 |
+| `batch.max_queue_size` | Maximum queue size | 2048 |
+| `batch.scheduled_delay` | Export interval in seconds | 5 |
+| `tls.ca_cert` | CA certificate path | -- |
+| `tls.client_cert` | Client certificate path | -- |
+| `tls.client_key` | Client key path | -- |
+
+A shared exporter under `[telemetry.exporter]` is used by tracing, metrics, and logs unless overridden by a signal-specific exporter.
+
+## Full Example
+
+A complete telemetry configuration sending all signals to [ClickStack](https://clickhouse.com/clickstack) using a shared exporter:
+
+```toml
+[telemetry]
+service_name = "synapse"
+
+[telemetry.exporter]
+endpoint = "http://clickstack:4317"
+protocol = "grpc"
+
+[telemetry.tracing]
+sampling_rate = 0.1
+parent_based = true
+
+[telemetry.metrics.exporter.batch]
+scheduled_delay = 30
+```
+
+Or with per-signal exporter overrides:
+
+```toml
+[telemetry]
+service_name = "synapse"
+
+[telemetry.resource_attributes]
+"deployment.environment" = "production"
+
+[telemetry.tracing]
+sampling_rate = 0.1
+
+[telemetry.tracing.exporter]
+endpoint = "http://tempo:4317"
+protocol = "grpc"
+
+[telemetry.metrics.exporter]
+endpoint = "http://prometheus-otlp:4317"
+protocol = "grpc"
+
+[telemetry.metrics.exporter.batch]
+scheduled_delay = 30
+
+[telemetry.logs.exporter]
+endpoint = "http://loki-otlp:4317"
+protocol = "grpc"
+```
+
+See also: [Configuration](/products/synapse/configuration) for the full TOML reference.

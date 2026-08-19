@@ -1,9 +1,10 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import LinkButton, { type Link } from "./LinkButton";
+import LinkButton from "./LinkButton";
 
 import type { ReactNode } from "react";
+import type { Link } from "./LinkButton";
 
 interface ProductOverviewAlert {
   /**

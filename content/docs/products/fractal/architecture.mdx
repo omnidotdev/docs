@@ -1,0 +1,69 @@
+---
+title: How it works
+description: The core concepts behind Fractal, and how a deploy flows end to end
+---
+
+## Overview
+
+You describe what you want to run, and Fractal builds it, deploys it, scales it,
+and keeps it healthy. You work through the [dashboard](https://fractal.omni.dev),
+the `fractal` CLI, or the API, and Fractal handles everything from the source code
+to a running service on a public HTTPS URL.
+
+## Core concepts
+
+### Project
+
+A **project** is an isolated workspace that groups related services. Each project
+gets its own [environments](/products/fractal/environments) (such as production and
+staging), its own resources, and its own team access. Services in one project are
+isolated from services in another.
+
+### Service
+
+A **service** is a single deployable unit. Every service deploys from a Git
+repository or a prebuilt container image, and can be one of:
+
+- **Web** &mdash; an HTTP service exposed on a URL, with optional custom domains
+- **Worker** &mdash; a background process with no public endpoint
+- **Scheduled job** &mdash; runs on a cron schedule
+- **Static site** &mdash; prebuilt static assets served over a CDN-style edge
+- **Database** &mdash; a managed Postgres database
+
+### Deploy and revision
+
+Every deploy is a versioned **revision**. Rollouts are zero-downtime, and you can
+roll back to any previous revision at any time. Each service tracks its own status
+(building, deploying, running) and its public URL.
+
+## How a deploy works
+
+1. **Connect a source** &mdash; link a GitHub repository (and branch) or point at a
+   container image.
+2. **Build** &mdash; on each push to the tracked branch, Fractal builds your app
+   automatically (from your Dockerfile, or with zero configuration).
+3. **Roll out** &mdash; the new version is deployed with zero downtime and served
+   over HTTPS. Certificates are provisioned and renewed automatically, including
+   for [custom domains](/products/fractal/custom-domains).
+4. **Scale** &mdash; services scale on demand, and idle services can sleep and wake
+   instantly on the next request.
+
+For safer releases, Fractal creates an ephemeral
+[preview environment](/products/fractal/pr-previews) for every pull request, and
+supports weighted canary rollouts.
+
+## Databases
+
+A database is just a service with the **database** type. Fractal provisions a
+managed Postgres database with connection pooling, automatic
+[scheduled backups](/products/fractal/backups), and one-click restore, so there is no
+database to run or maintain yourself. Caches such as Valkey or Redis run as
+ordinary image-based services.
+
+## Working with Fractal
+
+- **Dashboard** &mdash; a visual workflow for deploying, configuring, and monitoring
+  services, with real-time logs, metrics, and deploy history
+- **CLI** &mdash; the `fractal` command-line tool for scripting and CI; see the
+  [CLI Reference](/products/fractal/cli-reference)
+- **API** &mdash; automate everything programmatically with scoped API tokens
