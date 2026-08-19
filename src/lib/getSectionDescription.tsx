@@ -36,9 +36,10 @@ export const NEW_PRODUCTS = products
   .filter((product) => isRecentlyReleased(product.releaseDate))
   .map((product) => product.name);
 // Products presented as "coming soon" in the docs sidebar regardless of catalog
-// status. Arbor's app is live but its documentation is still being finalized, so
-// it is badged here until the docs are ready. Docs-only, does not touch the
-// catalog SSOT or the website. Remove the entry once the docs are complete.
+// status. Kept as a docs-only fast path so the badge is correct before the
+// vendored catalog is regenerated from omni-api; the catalog itself now marks
+// Arbor coming_soon, so this becomes redundant once catalog.ts is refreshed.
+// Does not touch the catalog SSOT or the website. Remove once released.
 const DOCS_COMING_SOON_OVERRIDES = ["Arbor"];
 
 export const COMING_SOON_PRODUCTS = [
