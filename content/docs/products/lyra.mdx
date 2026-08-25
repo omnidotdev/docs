@@ -1,0 +1,73 @@
+---
+title: 🎼 Lyra
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiMusicNotes, PiMetronome, PiDevices } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Music Learning",
+      icon: <PiMusicNotes />,
+      className: "bg-teal-100 text-teal-800 dark:bg-teal-900/20 dark:text-teal-300",
+    },
+    {
+      label: "Practice Trainer",
+      icon: <PiMetronome />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Cross-Platform",
+      icon: <PiDevices />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://lyra.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/lyra-app`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Lyra is in early development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Learn to play, everywhere: interactive lessons plus a real-time practice trainer",
+    },
+  ]}
+/>
+
+**Omni Lyra** teaches you to play music, starting with piano and keys. It pairs zero-hardware, tinker-in-the-page lessons with a real-time practice trainer that grades your timing and accuracy against a scrolling track, on web, desktop, and mobile from a single app.
+
+## Key Features
+
+- **Concept Explorer**: Interactive, no-hardware lessons on beats, notes, chords, and song structure
+- **Practice Trainer**: Real-time timing and accuracy grading against a scrolling note-highway
+- **Play Anywhere**: On-screen keyboard for touch and computer keys, plus MIDI when you plug in a device
+- **Guided Onboarding**: A short placement quiz routes you to lessons or drills and sets your starting difficulty
+- **Progress and Streaks**: Track skill mastery and keep a daily practice habit
+
+## Getting Started
+
+1. Open [lyra.omni.dev](https://lyra.omni.dev) in your browser, or install the app.
+2. Sign in with your Omni account, or continue as a guest to explore the free lessons.
+3. Take the short placement quiz so Lyra can tailor your path.
+4. Calibrate your device (a quick tap-to-the-beat) for honest timing feedback.
+5. Start your first lesson or practice session and build your streak.
+
+## Plans
+
+Lyra is free-first. The concept-explorer lessons and a daily practice quota are free forever. A paid tier unlocks unlimited practice, the full drill and song catalog, the hardware MIDI trainer, and advanced progress analytics.
