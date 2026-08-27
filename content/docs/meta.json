@@ -23,6 +23,7 @@
     "realms/grid/index",
     "products/beacon",
     "products/fractal",
+    "products/herald",
     "products/kiln",
     "products/synapse",
     "products/vortex",
