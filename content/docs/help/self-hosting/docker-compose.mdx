@@ -45,8 +45,8 @@ docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --bu
 | Container | Image | Port |
 |-----------|-------|------|
 | `db` | `postgres:16-alpine` | 5432 |
-| `api` | `manifold.omni.dev/omnidotdev/runa-api:latest` | 4000 |
-| `app` | `manifold.omni.dev/omnidotdev/runa-app:latest` | 3000 |
+| `api` | `ghcr.io/omnidotdev/runa-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/runa-app:latest` | 3000 |
 
 ```bash
 git clone https://github.com/omnidotdev/runa-stack.git
@@ -67,9 +67,9 @@ docker compose --env-file .env.local up -d
 | `db` | `postgres:16-alpine` | 5432 |
 | `cache` | `valkey/valkey:8-alpine` | 6379 |
 | `events` | `apache/iggy:0.7.0` | 8090 (TCP) |
-| `api` | `manifold.omni.dev/omnidotdev/vortex-api:latest` | 4000 |
-| `app` | `manifold.omni.dev/omnidotdev/vortex-app:latest` | 3000 |
-| `worker` | `manifold.omni.dev/omnidotdev/vortex-worker:latest` | 8080 (internal) |
+| `api` | `ghcr.io/omnidotdev/vortex-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/vortex-app:latest` | 3000 |
+| `worker` | `ghcr.io/omnidotdev/vortex-worker:latest` | 8080 (internal) |
 
 Health checks are configured for all services. The API waits for PostgreSQL, Valkey, and Iggy to be healthy before starting.
 
@@ -109,48 +109,6 @@ Three named volumes persist data across restarts:
 | `cache_data` | Valkey | Cache state |
 | `events_data` | Iggy | Event stream segments |
 
-### Manifold
-
-[Manifold](/products/manifold) runs three containers:
-
-| Container | Port | Description |
-|-----------|------|-------------|
-| `db` | 5432 | PostgreSQL |
-| `api` | 4000 | Manifold API |
-| `app` | 3000 | Manifold web UI |
-
-```bash
-git clone https://github.com/omnidotdev/manifold-stack.git
-cd manifold-stack
-
-# Configure required env vars (DB_PASSWORD)
-docker compose --env-file .env.local up -d
-```
-
-#### Required environment variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DB_PASSWORD` | Yes | PostgreSQL password |
-| `CORS_ALLOWED_ORIGINS` | No | Comma-separated allowed origins |
-| `AUTH_BASE_URL` | No | OIDC provider base URL |
-| `VITE_API_BASE_URL` | No | API URL for the web app (default: `http://api:4000`) |
-
-#### Storage backend
-
-Manifold supports filesystem or S3-compatible blob storage:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `BLOB_STORAGE_BACKEND` | `fs` | Storage backend: `fs` or `s3` |
-| `BLOB_STORAGE_DIR` | `/data/manifold/blobs` | Filesystem storage base directory |
-| `BLOB_S3_BUCKET` | — | S3 bucket name (required when backend is `s3`) |
-| `BLOB_S3_REGION` | `us-east-1` | S3 region |
-| `BLOB_S3_ENDPOINT` | — | Custom S3 endpoint (for MinIO, R2) |
-| `BLOB_S3_PREFIX` | `blobs` | S3 key prefix |
-
-See the [Manifold Storage guide](/products/manifold/storage) for details.
-
 ### Synapse
 
 [Synapse](/products/synapse) runs five containers:
@@ -159,9 +117,9 @@ See the [Manifold Storage guide](/products/manifold/storage) for details.
 |-----------|-------|------|
 | `db` | `postgres:16-alpine` | 5432 |
 | `valkey` | `valkey/valkey:8-alpine` | 6379 |
-| `gateway` | `manifold.omni.dev/omnidotdev/synapse-gateway:latest` | 6000 |
-| `api` | `manifold.omni.dev/omnidotdev/synapse-api:latest` | 4000 |
-| `app` | `manifold.omni.dev/omnidotdev/synapse-app:latest` | 3000 |
+| `gateway` | `ghcr.io/omnidotdev/synapse-gateway:latest` | 6000 |
+| `api` | `ghcr.io/omnidotdev/synapse-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/synapse-app:latest` | 3000 |
 
 ```bash
 git clone https://github.com/omnidotdev/synapse-stack.git
@@ -182,7 +140,7 @@ docker compose --env-file .env.local up -d
 | `GATEWAY_SECRET` | Internal gateway auth secret |
 | `ENCRYPTION_KEY` | Provider key encryption at rest |
 
-Optional: `AUTH_BASE_URL` (HIDRA Gatekeeper), `BILLING_*` (billing), `CORS_ALLOWED_ORIGINS`, port overrides. Set `PROTECT_ROUTES=false` to run without an identity provider.
+Optional: `AUTH_BASE_URL` (OIDC provider), `BILLING_*` (billing), `CORS_ALLOWED_ORIGINS`, port overrides. Set `PROTECT_ROUTES=false` to run without an identity provider.
 
 #### Volumes
 

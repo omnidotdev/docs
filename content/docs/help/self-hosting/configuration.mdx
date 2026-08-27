@@ -76,21 +76,4 @@ SELF_HOSTED=true
 
 See the full [Vortex configuration reference](/products/vortex/configuration) for all available variables.
 
-### Manifold
-
-Enable self-hosted mode for simpler deployments without an external identity provider:
-
-```yaml
-environment:
-  SELF_HOSTED: "true"
-  PROTECT_ROUTES: "false"
-  DEFAULT_ORG_ID: my-org
-```
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SELF_HOSTED` | `false` | Enable self-hosted defaults |
-| `PROTECT_ROUTES` | `true` | Require authentication on all routes |
-| `DEFAULT_ORG_ID` | — | Default organization ID for self-hosted mode |
-
 This disables JWT verification and allows unauthenticated access. API tokens still work for programmatic access.
