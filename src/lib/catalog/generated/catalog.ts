@@ -59,6 +59,12 @@ export const products: CatalogProduct[] = [
     "releaseDate": "2025-06-20"
   },
   {
+    "id": "halo",
+    "name": "Halo",
+    "realm": "core",
+    "status": "coming_soon"
+  },
+  {
     "id": "kiln",
     "name": "Kiln",
     "realm": "grid",
