@@ -20,7 +20,8 @@ From the project, choose **New Service** and pick a source:
 - **GitHub repository** &mdash; connect the Fractal GitHub App and select a repo.
   Fractal builds the image in-cluster (automatic language detection, or your own
   `Dockerfile`) and deploys it. Every push to the tracked branch redeploys
-  automatically (push-to-deploy).
+  automatically (push-to-deploy). Deploying one app from a monorepo is supported;
+  see [Monorepos](/products/fractal/configuration#monorepos).
 - **Container image** &mdash; point at any image reference (for example
   `nginx:latest` or a private registry image) to run it directly.
 - **Template** &mdash; one-click deploy a prebuilt app (WordPress, n8n, Metabase,
