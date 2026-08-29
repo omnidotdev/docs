@@ -24,6 +24,61 @@ Every service builds from a Git repository or runs a prebuilt image.
 | `dockerfile` | Build from a `Dockerfile` in the repo |
 | `none` | No build step (image sources) |
 
+Additional build settings:
+
+| Field | Applies to | Description |
+|-------|------------|-------------|
+| `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the repository root (default `Dockerfile`) |
+| `args` | `dockerfile` | Build arguments (for example `VITE_*` values needed at build time) |
+| `resources` | all | CPU and memory for the build pod (defaults: 1 CPU, 2Gi) |
+| `timeoutSeconds` | all | Maximum build time (default 1200) |
+| `packageManager` | `auto` | Override the detected package manager (`npm`, `pnpm`, `yarn`, `bun`) |
+| `installCommand` | `auto` | Override the dependency install command |
+| `buildCommand` | `auto` | Override the build command |
+| `startCommand` | `auto` | Override the runtime start command |
+
+### Monorepos
+
+Fractal always uses the **repository root** as the build context, so one repo can
+hold several independently deployable apps (packages, workspaces). There is no
+separate "root directory" field; you scope a build to one package by its
+Dockerfile path or its build and start commands.
+
+- **Dockerfile mode (recommended for monorepos).** Set `dockerfilePath` to the
+  target app's `Dockerfile` relative to the repo root, for example
+  `apps/web/Dockerfile`. Because the build context is the repo root, that
+  `Dockerfile` can copy the workspace lockfile and shared packages and run a
+  workspace-aware install, then build just the one app.
+- **Auto mode.** The build runs from the repo root, so steer it to a single
+  package with the command overrides. For a workspace, point `installCommand`,
+  `buildCommand`, and `startCommand` at the target package (for example a
+  `--filter` in a bun, pnpm, or npm workspace) and set `packageManager` if needed.
+
+To deploy several apps from one monorepo, create one service per app, each
+pointing at the same repository `url` and `branch` with its own `dockerfilePath`
+(or its own command overrides). In a repo-committed `fractal.yaml`:
+
+```yaml
+services:
+  - name: web
+    source:
+      git:
+        url: https://github.com/acme/monorepo
+        branch: main
+    build:
+      mode: dockerfile
+      dockerfilePath: apps/web/Dockerfile
+  - name: worker
+    source:
+      git:
+        url: https://github.com/acme/monorepo
+        branch: main
+    build:
+      mode: dockerfile
+      dockerfilePath: apps/worker/Dockerfile
+    serviceType: worker
+```
+
 ## Deploy
 
 | Field | Description |
