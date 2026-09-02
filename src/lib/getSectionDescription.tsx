@@ -35,13 +35,13 @@ const isRecentlyReleased = (releaseDate?: string) => {
 export const NEW_PRODUCTS = products
   .filter((product) => isRecentlyReleased(product.releaseDate))
   .map((product) => product.name);
-// Products presented as "coming soon" in the docs sidebar regardless of catalog
-// status. Docs-only escape hatch, does not touch the catalog SSOT or the
-// website. Arbor's documentation is still being finalized, so it is badged here
-// until its docs are ready; remove once complete. (Herald and Nectar previously
-// lived here while private in the catalog; now that they are public coming_soon
-// they badge via the catalog path and no longer need an override.)
-const DOCS_COMING_SOON_OVERRIDES = ["Arbor"];
+// Escape hatch to badge a product "coming soon" in the docs sidebar even when
+// the catalog does not mark it so (docs-only, does not touch the SSOT or the
+// website). Currently empty: every coming-soon product in the docs nav (Arbor,
+// Herald, Nectar, Halo, etc.) is public + coming_soon in the catalog, so it
+// badges via the catalog path. Add a name here only for a product the catalog
+// does not yet reflect.
+const DOCS_COMING_SOON_OVERRIDES: string[] = [];
 
 export const COMING_SOON_PRODUCTS = [
   ...products
