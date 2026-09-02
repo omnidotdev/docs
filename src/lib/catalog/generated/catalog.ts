@@ -201,7 +201,8 @@ export const products: CatalogProduct[] = [
           "2 goals",
           "3 membership tiers",
           "Community support"
-        ]
+        ],
+        "transactionFeeBps": 400
       },
       {
         "tier": "pro",
@@ -216,7 +217,8 @@ export const products: CatalogProduct[] = [
           "API access",
           "Priority support",
           "Unlimited posts"
-        ]
+        ],
+        "transactionFeeBps": 400
       },
       {
         "tier": "team",
@@ -232,7 +234,8 @@ export const products: CatalogProduct[] = [
           "Unlimited goals",
           "Unlimited posts",
           "Unlimited tiers"
-        ]
+        ],
+        "transactionFeeBps": 400
       }
     ]
   },
@@ -392,20 +395,6 @@ export const products: CatalogProduct[] = [
     "status": "coming_soon",
     "plans": [
       {
-        "tier": "enterprise",
-        "name": "Herald Enterprise",
-        "description": "Unlimited volume with SSO, SLA, and dedicated support",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "Dedicated support",
-          "SLA",
-          "SSO and audit logs",
-          "Unlimited sending domains",
-          "Unlimited volume"
-        ]
-      },
-      {
         "tier": "free",
         "name": "Herald Free",
         "description": "Transactional email for small projects and testing",
@@ -417,6 +406,20 @@ export const products: CatalogProduct[] = [
           "Community support",
           "Shared IP pool",
           "Suppression list with bounce and complaint handling"
+        ]
+      },
+      {
+        "tier": "enterprise",
+        "name": "Herald Enterprise",
+        "description": "Unlimited volume with SSO, SLA, and dedicated support",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "Dedicated support",
+          "SLA",
+          "SSO and audit logs",
+          "Unlimited sending domains",
+          "Unlimited volume"
         ]
       },
       {

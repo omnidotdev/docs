@@ -3,7 +3,7 @@ title: Payments & Fees
 description: How money moves, what Crystal costs, and the fees on each transaction
 ---
 
-import { Pricing } from "@/components/docs";
+import { Pricing, PlatformFee } from "@/components/docs";
 
 Crystal has two separate money conversations: the **plan** you pay for Crystal
 itself, and the **fees** taken from each payment your supporters make. This page
@@ -15,7 +15,7 @@ Your plan sets how much you can build: how many tiers and goals you can publish,
 whether you get analytics, custom branding, and API access. Prices are billed to
 your organization.
 
-<Pricing productId="crystal" features />
+<Pricing productId="crystal" features fee={false} />
 
 Manage or upgrade your plan under **Settings** for your organization, where
 **Manage Billing** opens the billing portal to update your payment method and
@@ -23,7 +23,7 @@ view invoices.
 
 ## Fees on each payment
 
-Separately from your plan, a flat **4% platform fee** is taken from each payment
+Separately from your plan, a flat **<PlatformFee productId="crystal" /> platform fee** is taken from each payment
 a supporter makes (memberships, donations, gifts, and digital sales). The same
 rate applies to every paid account. Verified open-source projects and nonprofits
 pay **0%**:
@@ -32,14 +32,14 @@ pay **0%**:
 |-------------------|--------------|
 | Verified open-source project | 0% |
 | Verified nonprofit | 0% |
-| All other accounts | 4% |
+| All other accounts | <PlatformFee productId="crystal" /> |
 
 The 0% rate is verification-gated: it applies once your organization is verified
 as an open-source project or a nonprofit.
 
 On top of the platform fee, **Stripe charges its own standard payment processing
 fee** for handling the card payment, and that processing cost is yours to bear.
-Both the 4% and the Stripe processing fee are deducted before the money reaches
+Both the platform fee and the Stripe processing fee are deducted before the money reaches
 your available balance, so what you withdraw is already net of fees. You can see
 the net figures in your Stripe Dashboard.
 

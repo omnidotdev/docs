@@ -22,7 +22,7 @@ const formatPrice = (cents: number): string => {
  * @param bps Fee in basis points (100 = 1%).
  * @returns Formatted percentage (e.g. "1%", "0.5%").
  */
-const formatFee = (bps: number): string => {
+export const formatFee = (bps: number): string => {
   const percent = bps / 100;
 
   // up to two decimals, without trailing zeros (0.5%, not 0.50%; 1%, not 1.00%)
@@ -44,6 +44,12 @@ interface PricingProps {
    * false.
    */
   features?: boolean;
+  /**
+   * Whether to show the per-sale platform fee column when a plan carries one.
+   * Defaults to true. Set false for products with a flat fee that reads better
+   * as a single value elsewhere (see the PlatformFee component).
+   */
+  fee?: boolean;
 }
 
 /**
@@ -56,13 +62,14 @@ const Pricing: React.FC<PricingProps> = ({
   productId,
   annual = true,
   features = false,
+  fee = true,
 }) => {
   const product = products.find((p) => p.id === productId);
   const plans = product?.plans;
 
   if (!plans?.length) return null;
 
-  const hasFee = plans.some((plan) => plan.transactionFeeBps != null);
+  const hasFee = fee && plans.some((plan) => plan.transactionFeeBps != null);
 
   const cell = "border border-fd-border px-4 py-2 text-left align-top";
 

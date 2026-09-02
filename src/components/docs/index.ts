@@ -1,4 +1,5 @@
 export { default as LinkButton } from "./LinkButton";
+export { default as PlatformFee } from "./PlatformFee";
 export { default as Pricing } from "./Pricing";
 export { default as ProductOverview } from "./ProductOverview";
 export { default as ProductsIndex } from "./ProductsIndex";
