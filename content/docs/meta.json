@@ -14,6 +14,7 @@
     "---Core---",
     "realms/core/index",
     "products/backfeed",
+    "products/crystal",
     "products/runa",
     "---Kindred---",
     "realms/kindred/index",
