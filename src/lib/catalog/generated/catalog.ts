@@ -48,9 +48,9 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "Per-repository dependency graph",
           "1 GB storage",
           "Community support",
+          "Per-repository dependency graph",
           "Unlimited public and private repositories",
           "Up to 5 collaborators per repository"
         ]
@@ -62,12 +62,12 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 1000,
         "yearlyPrice": 9000,
         "features": [
-          "Email support",
-          "Weaver dependency detection",
-          "Everything in Free",
-          "Unlimited collaborators",
           "25 GB storage",
-          "Org-wide polyrepo dependency graph"
+          "Email support",
+          "Everything in Free",
+          "Org-wide polyrepo dependency graph",
+          "Unlimited collaborators",
+          "Weaver dependency detection"
         ]
       },
       {
@@ -78,9 +78,9 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 22500,
         "features": [
           "100 GB storage",
+          "Dependency blast-radius analysis",
           "Everything in Pro",
           "Multi-repo Weaver orchestration",
-          "Dependency blast-radius analysis",
           "Priority support"
         ]
       }
@@ -100,10 +100,10 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "Up to 2 projects",
-          "Up to 5 members",
           "In-app & email feedback capture",
-          "Unlimited feedback submissions"
+          "Unlimited feedback submissions",
+          "Up to 2 projects",
+          "Up to 5 members"
         ]
       },
       {
@@ -113,9 +113,9 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 500,
         "yearlyPrice": 4800,
         "features": [
-          "Unlimited feedback",
-          "Everything in Free plan",
           "AI feedback triage: auto-tag, sentiment & dedupe (coming soon)",
+          "Everything in Free plan",
+          "Unlimited feedback",
           "Up to 10 projects"
         ]
       },
@@ -126,14 +126,14 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 1000,
         "yearlyPrice": 9600,
         "features": [
-          "Unlimited AI feedback triage (coming soon)",
-          "Product reviews (coming soon)",
-          "Everything in Pro plan",
-          "Theme clustering & summaries (coming soon)",
           "API access (coming soon)",
-          "Multi-source ingestion: social, app store & chat (coming soon)",
-          "Team comments & collaboration tools (coming soon)",
           "Custom branding (coming soon)",
+          "Everything in Pro plan",
+          "Multi-source ingestion: social, app store & chat (coming soon)",
+          "Product reviews (coming soon)",
+          "Team comments & collaboration tools (coming soon)",
+          "Theme clustering & summaries (coming soon)",
+          "Unlimited AI feedback triage (coming soon)",
           "Unlimited projects"
         ]
       }
@@ -165,8 +165,8 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 4500,
         "features": [
           "5,000 messages/month",
-          "Voice enabled",
-          "Unlimited conversations"
+          "Unlimited conversations",
+          "Voice enabled"
         ]
       },
       {
@@ -176,9 +176,9 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 1500,
         "yearlyPrice": 13500,
         "features": [
+          "25,000 messages/month",
           "Priority support",
           "Unlimited conversations",
-          "25,000 messages/month",
           "Voice enabled"
         ]
       }
@@ -197,10 +197,10 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "3 membership tiers",
-          "Community support",
+          "10 posts/month",
           "2 goals",
-          "10 posts/month"
+          "3 membership tiers",
+          "Community support"
         ]
       },
       {
@@ -210,12 +210,12 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 1500,
         "yearlyPrice": 14400,
         "features": [
-          "Priority support",
+          "10 goals",
           "10 membership tiers",
           "Analytics dashboard",
-          "Unlimited posts",
           "API access",
-          "10 goals"
+          "Priority support",
+          "Unlimited posts"
         ]
       },
       {
@@ -226,12 +226,12 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 38400,
         "features": [
           "API access",
-          "Unlimited tiers",
-          "Unlimited posts",
-          "Dedicated support",
-          "Unlimited goals",
           "Custom branding",
-          "Full analytics"
+          "Dedicated support",
+          "Full analytics",
+          "Unlimited goals",
+          "Unlimited posts",
+          "Unlimited tiers"
         ]
       }
     ]
@@ -257,14 +257,14 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "2 custom domains",
           "$1 monthly usage credit",
-          "3 services per project",
-          "1 project",
-          "Shared compute resources",
           "1 GB bandwidth/month",
+          "1 project",
+          "2 custom domains",
+          "3 services per project",
+          "500 MB storage",
           "Community support",
-          "500 MB storage"
+          "Shared compute resources"
         ]
       },
       {
@@ -275,13 +275,13 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 4800,
         "features": [
           "$5 monthly usage credit",
-          "10 GB storage",
-          "5 custom domains",
           "10 GB bandwidth/month",
-          "Scale-to-zero when idle",
-          "Community support",
+          "10 GB storage",
           "10 services per project",
-          "5 projects"
+          "5 custom domains",
+          "5 projects",
+          "Community support",
+          "Scale-to-zero when idle"
         ]
       },
       {
@@ -291,14 +291,14 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 2000,
         "yearlyPrice": 19200,
         "features": [
-          "Unlimited custom domains",
-          "50 GB bandwidth/month",
-          "25 services per project",
+          "$20 monthly usage credit",
           "100 GB storage",
-          "Priority support",
           "25 projects",
+          "25 services per project",
+          "50 GB bandwidth/month",
           "Auto-scaling",
-          "$20 monthly usage credit"
+          "Priority support",
+          "Unlimited custom domains"
         ]
       },
       {
@@ -308,14 +308,14 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 5000,
         "yearlyPrice": 48000,
         "features": [
-          "Unlimited projects",
+          "$50 monthly usage credit",
           "500 GB bandwidth/month",
           "500 GB storage",
-          "SLA guarantee",
           "Auto-scaling",
-          "$50 monthly usage credit",
-          "Unlimited services",
-          "Unlimited custom domains"
+          "SLA guarantee",
+          "Unlimited custom domains",
+          "Unlimited projects",
+          "Unlimited services"
         ]
       }
     ]
@@ -340,11 +340,11 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "Custom domain",
           "1 store",
           "500 MB media storage",
-          "Unlimited content types and entries",
           "Community support",
+          "Custom domain",
+          "Unlimited content types and entries",
           "Up to 25 products"
         ],
         "transactionFeeBps": 200
@@ -357,10 +357,10 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 27800,
         "features": [
           "10 GB media storage",
-          "Priority support",
-          "AI product descriptions",
-          "Unlimited products",
           "Advanced discounts",
+          "AI product descriptions",
+          "Priority support",
+          "Unlimited products",
           "Up to 3 stores"
         ],
         "transactionFeeBps": 100
@@ -372,16 +372,79 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 7900,
         "yearlyPrice": 75800,
         "features": [
-          "Up to 10 stores",
           "50 GB media storage",
-          "Audit logs",
-          "Unlimited products",
           "Advanced discounts",
+          "AI product descriptions and custom agents",
+          "Audit logs",
           "Dedicated support",
           "SSO/SAML",
-          "AI product descriptions and custom agents"
+          "Unlimited products",
+          "Up to 10 stores"
         ],
         "transactionFeeBps": 50
+      }
+    ]
+  },
+  {
+    "id": "herald",
+    "name": "Herald",
+    "realm": "grid",
+    "status": "coming_soon",
+    "plans": [
+      {
+        "tier": "enterprise",
+        "name": "Herald Enterprise",
+        "description": "Unlimited volume with SSO, SLA, and dedicated support",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "Dedicated support",
+          "SLA",
+          "SSO and audit logs",
+          "Unlimited sending domains",
+          "Unlimited volume"
+        ]
+      },
+      {
+        "tier": "free",
+        "name": "Herald Free",
+        "description": "Transactional email for small projects and testing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 sending domain",
+          "10,000 emails/month",
+          "Community support",
+          "Shared IP pool",
+          "Suppression list with bounce and complaint handling"
+        ]
+      },
+      {
+        "tier": "starter",
+        "name": "Herald Starter",
+        "description": "Transactional and marketing email for growing apps",
+        "monthlyPrice": 2000,
+        "yearlyPrice": 18000,
+        "features": [
+          "100,000 emails/month",
+          "3 sending domains",
+          "Email support",
+          "Shared IP pool"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Herald Pro",
+        "description": "High-volume sending with managed IP warm-up and audit logs",
+        "monthlyPrice": 20000,
+        "yearlyPrice": 180000,
+        "features": [
+          "1,000,000 emails/month",
+          "10 sending domains",
+          "Audit logs",
+          "Managed IP warm-up",
+          "Priority support"
+        ]
       }
     ]
   },
@@ -397,6 +460,12 @@ export const products: CatalogProduct[] = [
     "realm": "codex",
     "status": "active",
     "releaseDate": "2026-02-06"
+  },
+  {
+    "id": "nectar",
+    "name": "Nectar",
+    "realm": "armory",
+    "status": "coming_soon"
   },
   {
     "id": "omni-cli",
@@ -446,9 +515,9 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "Up to 5 members",
-          "1,500 tasks",
           "1 GB file storage",
+          "1,500 tasks",
+          "Up to 5 members",
           "Up to 5 projects"
         ]
       },
@@ -459,11 +528,11 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 800,
         "yearlyPrice": 7700,
         "features": [
-          "50 projects",
-          "Priority support",
-          "50 GB file storage",
           "25,000 tasks",
-          "5 assignees per task"
+          "5 assignees per task",
+          "50 GB file storage",
+          "50 projects",
+          "Priority support"
         ]
       },
       {
@@ -473,11 +542,11 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 1400,
         "yearlyPrice": 13400,
         "features": [
-          "Unlimited assignees per task",
-          "Unlimited projects",
-          "Unlimited tasks",
           "Dedicated support",
-          "Unlimited file storage"
+          "Unlimited assignees per task",
+          "Unlimited file storage",
+          "Unlimited projects",
+          "Unlimited tasks"
         ]
       }
     ]
@@ -504,9 +573,9 @@ export const products: CatalogProduct[] = [
         "features": [
           "10,000 requests per month",
           "3 API keys",
-          "Usage analytics",
+          "All models supported",
           "Bring your own provider keys",
-          "All models supported"
+          "Usage analytics"
         ]
       },
       {
@@ -516,14 +585,14 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 2900,
         "yearlyPrice": 27800,
         "features": [
-          "Smart routing (cost, quality, latency)",
-          "All modalities (STT, TTS, images, embeddings)",
-          "Priority support",
-          "25 API keys",
-          "Pay-as-you-go managed credits (15% margin)",
           "$0.20 per 1K requests overage",
           "100,000 requests per month",
-          "90-day analytics retention"
+          "25 API keys",
+          "90-day analytics retention",
+          "All modalities (STT, TTS, images, embeddings)",
+          "Pay-as-you-go managed credits (15% margin)",
+          "Priority support",
+          "Smart routing (cost, quality, latency)"
         ]
       },
       {
@@ -533,14 +602,14 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 7900,
         "yearlyPrice": 75800,
         "features": [
-          "Unlimited requests",
           "1-year analytics retention",
           "All modalities (STT, TTS, images, embeddings)",
-          "Team workspaces with roles",
-          "Smart routing (cost, quality, latency)",
-          "Unlimited API keys",
+          "Pay-as-you-go managed credits (15% margin)",
           "Priority support",
-          "Pay-as-you-go managed credits (15% margin)"
+          "Smart routing (cost, quality, latency)",
+          "Team workspaces with roles",
+          "Unlimited API keys",
+          "Unlimited requests"
         ]
       }
     ]
@@ -572,12 +641,12 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "All integrations",
           "1 user",
           "10 connected accounts",
           "2,500 executions/month",
-          "Community support",
-          "5 workflows"
+          "5 workflows",
+          "All integrations",
+          "Community support"
         ]
       },
       {
@@ -587,13 +656,13 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 2900,
         "yearlyPrice": 27800,
         "features": [
-          "Unlimited connected accounts",
           "50,000 executions/month",
-          "Unlimited users",
           "All integrations",
           "Custom plugins",
-          "Unlimited workflows",
-          "Email support"
+          "Email support",
+          "Unlimited connected accounts",
+          "Unlimited users",
+          "Unlimited workflows"
         ]
       },
       {
@@ -603,16 +672,16 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 7900,
         "yearlyPrice": 75800,
         "features": [
-          "SSO/SAML",
-          "All integrations",
           "250,000 executions/month",
+          "All integrations",
+          "Audit logs",
           "Custom plugins",
-          "Unlimited workflows",
-          "SLA guarantee",
-          "Unlimited users",
-          "Unlimited connected accounts",
           "Priority support",
-          "Audit logs"
+          "SLA guarantee",
+          "SSO/SAML",
+          "Unlimited connected accounts",
+          "Unlimited users",
+          "Unlimited workflows"
         ]
       }
     ]

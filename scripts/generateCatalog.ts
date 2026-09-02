@@ -127,9 +127,13 @@ const shapePlans = (slug: string) => {
         description: plan.description ?? undefined,
         monthlyPrice: plan.monthlyPrice,
         yearlyPrice: plan.yearlyPrice,
+        // Sorted for a deterministic vendored file: syncCatalog deletes and
+        // reinserts plans on every catalog sync, so feature row order (and thus
+        // the API's default ordering) is not stable across deploys.
         features: plan.planFeatures.nodes
           .filter((f) => f.kind === "marketing")
-          .map((f) => f.value),
+          .map((f) => f.value)
+          .sort((a, b) => a.localeCompare(b)),
         transactionFeeBps: feePlanFeature
           ? Number(feePlanFeature.value)
           : undefined,
