@@ -1,0 +1,78 @@
+---
+title: 😇 Halo
+description: Modular ecommerce and CMS platform for creators. Sell physical and digital products, model your own content, publish pages and posts, and bring your own Stripe.
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiShoppingCart, PiCreditCard, PiShieldCheck } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "E-commerce",
+      icon: <PiShoppingCart />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Payments",
+      icon: <PiCreditCard />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Security",
+      icon: <PiShieldCheck />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://halo.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/halo`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Halo is in early development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Modular ecommerce and CMS for creators, with your own Stripe account and a self-hostable open-source core",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Halo gives creators a flexible, modular commerce and content platform they can adapt to their business and self-host, while keeping full control of payments through their own Stripe account.",
+    },
+  ]}
+/>
+
+**Omni Halo** is a modular ecommerce and CMS platform for creators. Sign up and get a store, sell physical and digital products, model your own content types, and publish pages and posts, all while bringing your own Stripe account so you stay in control of your payments and payouts.
+
+## Key Features
+
+- **Storefront and merchant dashboard**: A customer-facing store plus a dashboard to manage your catalog, content, and settings
+- **Physical and digital products**: Sell both physical goods and digital products from the same catalog
+- **Content management**: Model your own content types and publish pages and posts alongside your store
+- **Bring your own Stripe**: Connect your own Stripe account and start accepting cards in a few clicks
+- **Modular architecture**: Build your store with the components you need
+- **Self-hostable core**: An open-source core you can run yourself, or use the hosted multi-tenant platform
+- **Multi-vendor marketplaces**: Stores can host multiple vendors and sellers
+- **Plugin system**: Extend your store with plugins
+
+## Documentation
+
+- [Getting Started](/products/halo/getting-started): Create your store and take it live
+- [Storefront](/products/halo/storefront): Stores, products, content types, and publishing
+- [Payments](/products/halo/payments): Connect Stripe and test end to end
+- [Tax](/products/halo/tax): Automatic sales tax at checkout
+- [Pricing](/products/halo/pricing): Plans and the platform fee

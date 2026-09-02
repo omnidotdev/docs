@@ -1,0 +1,74 @@
+---
+title: Getting Started
+description: Verify a sending domain, mint an API key, install the SDK, and send your first email with Herald.
+---
+
+<Callout type="info">
+  Herald is coming soon. The steps below reflect how the product works today and may change as it opens up.
+</Callout>
+
+This guide takes you from a new account to a verified sending domain and your first delivered email.
+
+## Sign in to the dashboard
+
+1. Visit [herald.omni.dev](https://herald.omni.dev) and sign in.
+2. You land on the Herald dashboard, where you can manage sending domains, browse the message log and delivery events, and manage suppressions and API keys.
+
+## Verify a sending domain
+
+Herald sends from domains you own and verify.
+
+1. From the dashboard, open **Domains** and add the domain you want to send from (for example `mail.yourdomain.com`).
+2. Publish the DNS records Herald provides so it can sign your mail with DKIM.
+3. Once the records resolve, the domain is verified and ready to send.
+
+You can also create a domain from the SDK:
+
+```ts
+await herald.domains.create({ domain: "mail.yourdomain.com" });
+```
+
+See [Deliverability](/products/herald/deliverability) for how domain verification, DKIM signing, and reputation isolation work together.
+
+## Create an API key
+
+API keys authenticate every send. Create one from the dashboard under **API keys**, or mint an automation key from the CLI (this requires an existing full key or a Gatekeeper JWT):
+
+```bash
+HERALD_API_KEY=hk_existing_full bun apikey:create
+```
+
+Keep the key secret and provide it to the SDK through an environment variable.
+
+## Install the SDK
+
+The official TypeScript SDK wraps the Herald API:
+
+```sh
+bun add @omnidotdev/herald
+```
+
+## Send your first email
+
+```ts
+import { createHerald } from "@omnidotdev/herald";
+
+const herald = createHerald({ apiKey: process.env.HERALD_API_KEY! });
+
+await herald.emails.send({
+  from: "you@yourdomain.com",
+  to: "customer@example.com",
+  subject: "Welcome, {{name}}",
+  html: "<p>Hello {{name}} 👋</p>",
+  variables: { name: "Ada" },
+});
+```
+
+Herald runs suppression checks and DKIM signing before the message goes out. Once it does, the message and its lifecycle appear in the message log.
+
+## Next steps
+
+- [Transactional Email](/products/herald/transactional-email): batch sends, listing and inspecting messages, and webhooks
+- [Marketing Email](/products/herald/marketing-email): audiences and broadcasts
+- [Deliverability](/products/herald/deliverability): dedicated IPs, suppression, and reputation isolation
+</content>

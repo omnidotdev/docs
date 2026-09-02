@@ -1,0 +1,41 @@
+---
+title: Deliverability
+description: Dedicated IPs, domain verification, suppression, and per-tenant reputation isolation keep Herald mail landing in the inbox.
+---
+
+Herald manages deliverability for you: mail sends from dedicated IPs, each tenant's reputation is isolated from every other tenant's, and suppression happens automatically. This page covers the pieces that keep your mail landing in the inbox.
+
+## Sending domains and DKIM
+
+Herald sends only from domains you own and verify. When you add a sending domain, Herald gives you the DNS records to publish so it can sign outbound mail with DKIM. A verified, DKIM-signed domain is what lets receiving servers trust your mail.
+
+```ts
+await herald.domains.create({ domain: "mail.yourdomain.com" });
+```
+
+## Dedicated IPs and reputation isolation
+
+Herald sends from dedicated IPs with managed deliverability, and each tenant's sending reputation is isolated. One tenant's sending behavior does not affect another's, so your reputation reflects only your own mail.
+
+## Suppression management
+
+Herald keeps a suppression list to protect your reputation:
+
+- Hard bounces and complaints are suppressed automatically.
+- Suppression checks run before every send, so a suppressed address is never mailed again.
+- You can add addresses to the list yourself:
+
+```ts
+await herald.suppressions.add({ address: "bounced@example.com" });
+```
+
+Marketing unsubscribes also feed suppression, so opted-out contacts stay off your sends.
+
+## Deliverability recommendations
+
+For each sending domain, Herald surfaces recommendations in the dashboard: verification gaps to close, bounce and complaint rates to watch, and warm-up guidance as you ramp volume on a domain. Reviewing these keeps small issues from turning into reputation problems.
+
+## Delivery events
+
+Every message's lifecycle (delivered, bounced, complained, opened, clicked) is tracked in the message log and streamed out as CloudEvents. Watching bounce and complaint events is the fastest way to catch a deliverability issue as it develops. See [Transactional Email](/products/herald/transactional-email) for webhook setup.
+</content>

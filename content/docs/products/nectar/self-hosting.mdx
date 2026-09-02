@@ -1,0 +1,83 @@
+---
+title: Self-Hosting
+description: Run Nectar from source inside your own infrastructure, or embed its browser in your own app.
+---
+
+Nectar is licensed under Apache 2.0 and is fully self-hostable. You can run it inside your own infrastructure or embed its database-browser components in your own application.
+
+## Prerequisites
+
+- [Bun](https://bun.sh) 1.3+
+
+## Run from source
+
+The Nectar stack ships configuration templates and a Tilt-based development workflow. From the stack repository:
+
+1. Copy the configuration templates:
+
+   ```sh
+   cp services.yaml.template services.yaml
+   cp .env.local.template .env.local
+   ```
+
+2. Start development:
+
+   ```sh
+   tilt up
+   ```
+
+## Run the app directly
+
+To work on the Nectar app on its own:
+
+```bash
+bun i
+bun dev
+```
+
+To build and serve a production bundle:
+
+```bash
+bun build
+bun start
+```
+
+## Embedding Nectar
+
+Nectar's browser UI is packaged as the framework-neutral `@omnidotdev/nectar-core` package, so the same data grid, schema viewer, and SQL query interface can be embedded in other applications.
+
+The package exposes two entry points to keep the database driver out of client bundles:
+
+- `@omnidotdev/nectar-core` (client-safe): the `NectarProvider`, `useNectarDataSource`, the `DataGrid` / `SchemaViewer` / `QueryInterface` components, the `SchemaProvider` / `useSchema` context, TanStack Query option factories, and the `NectarDataSource` type definitions.
+- `@omnidotdev/nectar-core/server` (server-only): the connection manager and SQL introspection helpers.
+
+To embed the browser, provide a concrete `NectarDataSource` and mount the components under a `NectarProvider`:
+
+```tsx
+import {
+  NectarProvider,
+  SchemaProvider,
+  DataGrid,
+  SchemaViewer,
+  QueryInterface,
+} from "@omnidotdev/nectar-core";
+
+function Browser({ dataSource, schema, table, columns }) {
+  return (
+    <NectarProvider dataSource={dataSource}>
+      <SchemaProvider>
+        <SchemaViewer tableName={table} columns={columns} />
+        <DataGrid schema={schema} tableName={table} columns={columns} />
+        <QueryInterface />
+      </SchemaProvider>
+    </NectarProvider>
+  );
+}
+```
+
+Because the UI is decoupled from any backend through the `NectarDataSource` contract, each host can inject its own data source while the browser experience stays identical across surfaces.
+
+<Callout type="info">
+  `react`, `react-dom`, and `@tanstack/react-query` are peer dependencies
+  provided by the host application.
+</Callout>

@@ -1,0 +1,43 @@
+---
+title: Marketing Email
+description: Build audiences and send compliant broadcasts with one-click unsubscribe and CAN-SPAM footers.
+---
+
+Alongside transactional mail, Herald sends marketing broadcasts to audiences of contacts. Broadcasts ship with one-click unsubscribe and CAN-SPAM compliant footers built in.
+
+## Audiences
+
+An audience is a named list of contacts you can broadcast to, such as an "Omni Clients" list. You can build an audience directly in Herald or keep one in sync from an external source.
+
+### Sync from Mantle
+
+Populate a Herald audience from the Mantle CRM (external, email-consented contacts) and keep it reconciled. The sync is idempotent and re-runnable.
+
+```bash
+# mint an automation API key (needs an existing full key or a Gatekeeper JWT)
+HERALD_API_KEY=hk_existing_full bun apikey:create
+
+# preview what would sync (and, with --prune, what would be removed)
+MANTLE_SERVICE_KEY=... HERALD_API_KEY=hk_... bun audience:sync-mantle --dry-run --prune
+
+# sync and reconcile into the "Omni Clients" audience
+MANTLE_SERVICE_KEY=... HERALD_API_KEY=hk_... bun audience:sync-mantle --prune
+```
+
+- `--dry-run` previews changes without applying them.
+- `--all-emails` adds every consented address for a contact; the default is the primary only.
+- `--prune` removes subscribed contacts no longer present in Mantle, and never touches contacts that have unsubscribed.
+
+<Callout type="info">
+  Only email-consented contacts sync, and pruning leaves unsubscribed contacts alone, so an audience always reflects current consent.
+</Callout>
+
+## Compliance
+
+Every broadcast carries the pieces that keep marketing mail compliant:
+
+- **One-click unsubscribe** so recipients can opt out in a single action.
+- **CAN-SPAM compliant footers** included automatically.
+
+Unsubscribes and complaints feed Herald's suppression list, so a contact who opts out or reports a message is not sent to again. See [Deliverability](/products/herald/deliverability) for how suppression protects your sending reputation.
+</content>

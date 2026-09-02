@@ -1,0 +1,90 @@
+---
+title: 🍯 Nectar
+description: Free and open-source database visualization and management tool. Browse, query, and edit your data with a modern interface.
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaDatabase, FaTable, FaSearch } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Database",
+      icon: <FaDatabase />,
+      className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+    },
+    {
+      label: "Visualization",
+      icon: <FaTable />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    {
+      label: "Query",
+      icon: <FaSearch />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://nectar.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/nectar`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Nectar is in early development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "A modern, open-source tool to browse, query, and manage your databases from a single interface.",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Nectar gives developers a modern, intuitive interface for database management without vendor lock-in or licensing fees, keeping full control of their database tooling.",
+    },
+  ]}
+/>
+
+**Omni Nectar** is a free and open-source database visualization and management tool. Connect to your databases, explore schemas visually, and run queries with a modern, intuitive interface. Nectar is licensed under Apache 2.0 and self-hostable.
+
+## Key Features
+
+- **Multi-database support**: connect to PostgreSQL, MySQL, SQLite, and compatible databases
+- **Visual schema browser**: explore tables, columns, relationships, and indexes
+- **Query editor**: write and execute SQL with syntax highlighting and autocomplete
+- **Data grid**: browse and edit data with inline editing, filtering, and sorting
+- **Export options**: export data to CSV, JSON, or SQL
+- **Connection management**: save and organize multiple database connections
+- **Dark and light theme**: persistent theme preference
+
+## Explore the Docs
+
+<Cards>
+  <Card title="Getting Started" href="/products/nectar/getting-started">
+    Run Nectar locally or use the hosted version.
+  </Card>
+  <Card title="Connections" href="/products/nectar/connections">
+    Connect to your databases and manage saved connections.
+  </Card>
+  <Card title="Browsing and Querying" href="/products/nectar/browsing-and-querying">
+    Explore schemas, run SQL, edit data, and export results.
+  </Card>
+  <Card title="Self-Hosting" href="/products/nectar/self-hosting">
+    Run Nectar from source or embed its browser in your own app.
+  </Card>
+</Cards>
+
+## Architecture
+
+Nectar's database-browsing UI (data grid, schema viewer, SQL editor) and its data layer live in the standalone `@omnidotdev/nectar-core` package. The Nectar app, built with TanStack Start and React, injects a data source backed by its own server functions. Because the core exposes a `NectarDataSource` interface, the same browser UI can be embedded in other products, each supplying its own data source.

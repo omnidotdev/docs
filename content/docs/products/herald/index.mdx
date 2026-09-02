@@ -1,0 +1,76 @@
+---
+title: 🕊️ Herald
+description: Transactional and marketing email platform
+---
+
+import { ProductOverview } from "@/components/docs";
+import { FaEnvelope, FaPaperPlane, FaShieldAlt } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Transactional Email",
+      icon: <FaPaperPlane />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Marketing Email",
+      icon: <FaEnvelope />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Deliverability",
+      icon: <FaShieldAlt />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://herald.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Herald documentation is on the way. Expect these pages to fill in as the product opens up.",
+    },
+  ]}
+/>
+
+**Omni Herald** is a transactional and marketing email platform. It sends receipts, notifications, auth emails, and broadcasts from dedicated IPs with managed deliverability, suppression, and per-tenant reputation isolation, natively wired into the Omni event and workflow stack. Herald is available as a fully managed service.
+
+## Key Features
+
+- **Transactional send API**: A single idempotent endpoint with verified domains, DKIM signing, and suppression checks before send
+- **Delivery tracking**: Every message and its lifecycle (delivered, bounced, complained, opened, clicked) in one searchable log
+- **Deliverability recommendations**: Per-domain guidance on verification gaps, bounce and complaint rates, and warm-up
+- **Suppression management**: Hard bounces and complaints suppress automatically to protect your reputation
+- **Marketing broadcasts**: Audiences, one-click unsubscribe, and CAN-SPAM compliant footers built in
+- **Events everywhere**: Delivery events stream out as CloudEvents for the rest of your stack to react to
+
+<Cards>
+  <Card title="Getting Started" href="/products/herald/getting-started">
+    Verify a sending domain, create an API key, and send your first email
+  </Card>
+  <Card title="Transactional Email" href="/products/herald/transactional-email">
+    Send receipts, notifications, and auth emails via the API and SDK
+  </Card>
+  <Card title="Marketing Email" href="/products/herald/marketing-email">
+    Build audiences and send broadcasts with unsubscribe handling
+  </Card>
+  <Card title="Deliverability" href="/products/herald/deliverability">
+    Dedicated IPs, suppression, and per-tenant reputation isolation
+  </Card>
+</Cards>
+
+## Architecture
+
+Herald is made up of two parts:
+
+- The **API** is what your application sends through: a tenant-scoped GraphQL endpoint that accepts messages, signs and suppresses them, and records every delivery event.
+- The **dashboard** is where your team works: manage sending domains and their deliverability recommendations, browse the message log and delivery events, manage suppressions and API keys, and see sending health at a glance.
+</content>
+</invoke>

@@ -1,0 +1,74 @@
+---
+title: Transactional Email
+description: Send receipts, notifications, and auth emails through Herald's idempotent send API and TypeScript SDK.
+---
+
+Transactional email covers the messages your application sends in response to something a user did: receipts, notifications, and auth emails such as verification and password resets. Herald sends them through a single idempotent endpoint that verifies the sending domain, signs with DKIM, and runs suppression checks before the message goes out.
+
+## Send a single message
+
+```ts
+import { createHerald } from "@omnidotdev/herald";
+
+const herald = createHerald({ apiKey: process.env.HERALD_API_KEY! });
+
+await herald.emails.send({
+  from: "you@yourdomain.com",
+  to: "customer@example.com",
+  subject: "Welcome, {{name}}",
+  html: "<p>Hello {{name}} 👋</p>",
+  variables: { name: "Ada" },
+});
+```
+
+Use `{{variable}}` placeholders in the subject and body and pass their values in `variables`; Herald substitutes them at send time.
+
+## Send a batch
+
+Send up to 100 distinct emails in one call. Each message succeeds or fails on its own:
+
+```ts
+const { sendMessages } = await herald.emails.sendBatch({
+  messages: [
+    { from: "you@yourdomain.com", to: "a@example.com", subject: "Hi", html: "<p>Hi</p>" },
+    { from: "you@yourdomain.com", to: "b@example.com", subject: "Hi", html: "<p>Hi</p>" },
+  ],
+});
+
+for (const result of sendMessages.results) {
+  if (!result.ok) console.error(`message ${result.index} failed: ${result.code}`);
+}
+```
+
+Each result reports its own `ok` status, `index`, and failure `code`, so a single bad address never blocks the rest of the batch.
+
+## List and inspect messages
+
+Every message and its lifecycle (delivered, bounced, complained, opened, clicked) lands in one searchable log. Browse it from the dashboard, or query it from the SDK:
+
+```ts
+const { messages } = await herald.emails.list({ first: 20 });
+const detail = await herald.emails.get(messages.nodes[0].rowId);
+```
+
+## React to delivery events
+
+Register a webhook to receive delivery events as they happen:
+
+```ts
+await herald.webhooks.create({
+  url: "https://yourapp.com/herald",
+  eventTypes: ["delivered", "bounced", "opened", "clicked"],
+});
+```
+
+Delivery events also stream out as CloudEvents, so the rest of your Omni stack can subscribe and react without polling.
+
+## Escape hatch
+
+Every SDK method is a typed wrapper over the generated GraphQL client. For any operation the facade does not surface, drop down to the raw client:
+
+```ts
+herald.raw.sendEmail({ input: { /* ... */ } });
+```
+</content>
