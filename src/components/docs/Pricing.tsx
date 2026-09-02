@@ -39,14 +39,24 @@ interface PricingProps {
    * Whether to show the annual price column. Defaults to true.
    */
   annual?: boolean;
+  /**
+   * Whether to show a column listing each plan's headline features. Defaults to
+   * false.
+   */
+  features?: boolean;
 }
 
 /**
  * Pricing table sourced from the omni-api product catalog. Renders a product's
- * plans (tier, monthly/annual price, and per-sale platform fee where one
- * applies) so pricing stays in sync with the SSOT instead of being hardcoded.
+ * plans (tier, monthly/annual price, per-sale platform fee where one applies,
+ * and optionally its headline features) so pricing stays in sync with the SSOT
+ * instead of being hardcoded.
  */
-const Pricing: React.FC<PricingProps> = ({ productId, annual = true }) => {
+const Pricing: React.FC<PricingProps> = ({
+  productId,
+  annual = true,
+  features = false,
+}) => {
   const product = products.find((p) => p.id === productId);
   const plans = product?.plans;
 
@@ -67,6 +77,7 @@ const Pricing: React.FC<PricingProps> = ({ productId, annual = true }) => {
             {hasFee && (
               <th className={`${cell} font-medium`}>Platform fee per sale</th>
             )}
+            {features && <th className={`${cell} font-medium`}>Features</th>}
           </tr>
         </thead>
         <tbody>
@@ -86,6 +97,19 @@ const Pricing: React.FC<PricingProps> = ({ productId, annual = true }) => {
                   {plan.transactionFeeBps != null
                     ? formatFee(plan.transactionFeeBps)
                     : "-"}
+                </td>
+              )}
+              {features && (
+                <td className={cell}>
+                  {plan.features.length ? (
+                    <ul className="my-0 list-disc space-y-1 ps-4">
+                      {plan.features.map((feature) => (
+                        <li key={feature}>{feature}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "-"
+                  )}
                 </td>
               )}
             </tr>
