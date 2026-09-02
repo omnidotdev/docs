@@ -1,0 +1,94 @@
+---
+title: 😇 Halo
+description: Modular ecommerce platform
+---
+
+import { ProductOverview, Pricing } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiShoppingCart, PiCreditCard, PiShieldCheck } from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "E-commerce",
+      icon: <PiShoppingCart />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Payments",
+      icon: <PiCreditCard />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+    {
+      label: "Security",
+      icon: <PiShieldCheck />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://halo.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/halo`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Halo is in early development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Modular ecommerce with zero-trust architecture and cryptocurrency support",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Halo tackles the inflexibility of traditional ecommerce platforms by providing a modular system that can be adapted to various business models and payment preferences, while maintaining security through a zero-trust architecture.",
+    },
+  ]}
+/>
+
+**Omni Halo** is a modular ecommerce platform with zero-trust architecture and cryptocurrency support. Build your store with exactly the components you need while maintaining enterprise-grade security.
+
+## Key Features
+
+- **Modular Architecture**: Build your store with the exact components you need
+- **Zero-Trust Security**: Enhanced security model that verifies every access request
+- **Multi-Payment Support**: Accept both traditional fiat and cryptocurrency payments
+- **Customizable Workflows**: Tailor the purchase journey to your specific business needs
+- **API-First Design**: Easily integrate with other services and platforms
+
+## Use Cases
+
+- **Digital Product Stores**: Streamlined selling of digital goods with automated delivery
+- **Subscription Services**: Flexible recurring payment models with various billing options
+- **Marketplace Platforms**: Connect buyers and sellers with secure transaction processing
+- **International Commerce**: Reduce friction for cross-border transactions with cryptocurrency support
+
+## Pricing
+
+Halo pairs a simple monthly plan with a small per-sale platform fee that drops as you grow. You bring your own Stripe account, so you stay in control of your payments and payouts.
+
+<Pricing productId="halo" />
+
+The platform fee is deducted automatically through Stripe at checkout and is separate from Stripe's own processing fees. Higher plans carry a lower fee, so the more you scale the less you pay per order.
+
+## Payments
+
+Halo uses Stripe Connect: connect your own Stripe account from **Settings → Payments** in a few clicks and start accepting cards. A built-in **test mode** lets you place real end-to-end orders with no money and no real processor, so you can validate your full store before going live.
+
+## Tax
+
+Halo calculates and collects sales tax automatically at checkout via Stripe Tax. Manage your own tax registrations (the regions where you are required to collect) from **Settings → Tax**; tax is then computed per order based on where you are registered. You remain responsible for registering with the relevant tax authorities and remitting what you collect.
+
+## Getting Started
+
+Detailed documentation and guides coming soon!

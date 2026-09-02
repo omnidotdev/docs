@@ -1,0 +1,106 @@
+---
+title: 🍯 Nectar
+description: Powerful, open-source alternative to proprietary database GUIs
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaDatabase, FaTable, FaSearch } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Database",
+      icon: <FaDatabase />,
+      className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300",
+    },
+    {
+      label: "Visualization",
+      icon: <FaTable />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    {
+      label: "Query",
+      icon: <FaSearch />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://nectar.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/nectar`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Nectar is in early development. Expect this documentation to change rapidly.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "A powerful, open-source alternative to proprietary database GUIs",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Nectar provides a modern, intuitive interface for database management without vendor lock-in or licensing fees, giving developers full control over their database tooling.",
+    },
+  ]}
+/>
+
+**Omni Nectar** is a powerful, open-source alternative to proprietary database GUIs. Connect to multiple database types, explore schemas visually, and run queries with a modern, intuitive interface.
+
+## Key Features
+
+- **Multi-Database Support**: Connect to PostgreSQL, MySQL, SQLite, and more
+- **Visual Schema Browser**: Explore tables, columns, relationships, and indexes
+- **Query Editor**: Write and execute SQL with syntax highlighting and autocomplete
+- **Data Grid**: Browse and edit data with inline editing, filtering, and sorting
+- **Schema Visualization**: ERD-style diagrams showing table relationships
+- **Query History**: Track and re-run previous queries
+- **Export Options**: Export data to CSV, JSON, or SQL
+- **Connection Management**: Save and organize multiple database connections
+- **Dark Mode**: Full dark theme support
+
+## Use Cases
+
+- **Development**: Quickly inspect and modify data during development
+- **Debugging**: Trace data issues with visual query building
+- **Database Design**: Visualize and understand schema relationships
+- **Data Migration**: Export and transform data between formats
+- **Team Collaboration**: Share connection configs (without credentials) across teams
+
+## Why Nectar
+
+- **Fully Open Source**: Apache 2.0 licensed, self-hostable, no usage limits
+- **No Account Required**: Use immediately without sign-up
+- **Privacy First**: All connections stay local, no telemetry
+- **Extensible**: Plugin architecture for custom functionality
+- **Web-Based**: Run in browser or as a desktop app via Tauri
+
+## Supported Databases
+
+- PostgreSQL
+- MySQL / MariaDB
+- SQLite
+- Any PostgreSQL-, MySQL-, or SQLite-compatible database, including popular hosted platforms
+
+## Getting Started
+
+```bash
+# Run locally
+bunx nectar
+
+# Or use the hosted version
+# https://nectar.omni.dev
+```
+
+Detailed documentation and guides coming soon!
