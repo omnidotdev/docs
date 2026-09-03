@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "bun run scripts/generateCatalog.ts && vite build",
+    "build": "bun run scripts/syncProductDocs.ts && bun run scripts/generateCatalog.ts && vite build",
     "catalog:generate": "bun run scripts/generateCatalog.ts",
+    "docs:sync": "bun run scripts/syncProductDocs.ts",
     "start": "node .output/server/index.mjs",
     "format": "biome format --write",
     "lint": "biome lint",
