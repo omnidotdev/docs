@@ -3,7 +3,7 @@ title: Custom Domains
 description: Serve a service on your own domain with automatic TLS
 ---
 
-Every exposed service gets a generated `*.fractal.omni.dev` domain automatically.
+Every exposed service gets a generated `*.fractaldeploy.app` domain automatically.
 To serve it on your own domain instead, add a custom domain from the service's
 **Settings** tab.
 
@@ -19,7 +19,7 @@ To serve it on your own domain instead, add a custom domain from the service's
 <Callout title="Zero-downtime issuance">
 Fractal uses DNS-based certificate validation, so the certificate is issued and
 ready before any traffic moves to your domain. Your existing
-`*.fractal.omni.dev` URL keeps working the whole time.
+`*.fractaldeploy.app` URL keeps working the whole time.
 </Callout>
 
 ## DNS records
@@ -52,7 +52,7 @@ The **Certificate** badge reflects where your domain is in setup:
 - **Error** &mdash; something needs attention (usually a missing or incorrect DNS
   record); double-check the records shown in the dashboard
 
-Your existing `*.fractal.omni.dev` URL keeps serving the whole time, so there is
+Your existing `*.fractaldeploy.app` URL keeps serving the whole time, so there is
 never a gap while a custom domain finishes setting up.
 
 ## Plan limits
