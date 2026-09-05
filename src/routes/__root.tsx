@@ -106,15 +106,17 @@ const RootDocument = ({ children }: PropsWithChildren) => (
       <RootProvider search={{ hotKey: searchHotKey }}>{children}</RootProvider>
 
       {/* NB: dev tools automatically only included when `NODE_ENV=development` */}
-      <TanStackDevtools
-        plugins={[
-          {
-            name: "Router",
-            render: <TanStackRouterDevtoolsPanel />,
-            defaultOpen: true,
-          },
-        ]}
-      />
+      {import.meta.env.DEV && (
+        <TanStackDevtools
+          plugins={[
+            {
+              name: "Router",
+              render: <TanStackRouterDevtoolsPanel />,
+              defaultOpen: true,
+            },
+          ]}
+        />
+      )}
 
       <Scripts />
     </body>
