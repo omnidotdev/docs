@@ -87,6 +87,12 @@ export const products: CatalogProduct[] = [
     ]
   },
   {
+    "id": "aspen",
+    "name": "Aspen",
+    "realm": "worlds",
+    "status": "coming_soon"
+  },
+  {
     "id": "backfeed",
     "name": "Backfeed",
     "realm": "core",
@@ -392,22 +398,8 @@ export const products: CatalogProduct[] = [
     "id": "herald",
     "name": "Herald",
     "realm": "grid",
-    "status": "coming_soon",
+    "status": "active",
     "plans": [
-      {
-        "tier": "free",
-        "name": "Herald Free",
-        "description": "Transactional email for small projects and testing",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "1 sending domain",
-          "10,000 emails/month",
-          "Community support",
-          "Shared IP pool",
-          "Suppression list with bounce and complaint handling"
-        ]
-      },
       {
         "tier": "enterprise",
         "name": "Herald Enterprise",
@@ -416,6 +408,7 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 0,
         "features": [
           "Dedicated support",
+          "Multiple dedicated IPs",
           "SLA",
           "SSO and audit logs",
           "Unlimited sending domains",
@@ -423,30 +416,58 @@ export const products: CatalogProduct[] = [
         ]
       },
       {
-        "tier": "starter",
-        "name": "Herald Starter",
-        "description": "Transactional and marketing email for growing apps",
-        "monthlyPrice": 2000,
-        "yearlyPrice": 18000,
+        "tier": "free",
+        "name": "Herald Free",
+        "description": "Transactional email for small projects and testing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
         "features": [
-          "100,000 emails/month",
-          "3 sending domains",
-          "Email support",
-          "Shared IP pool"
+          "1 sending domain",
+          "3,000 emails/month (100/day)",
+          "Community support",
+          "Shared IP pool",
+          "Suppression list with bounce and complaint handling"
         ]
       },
       {
-        "tier": "pro",
-        "name": "Herald Pro",
-        "description": "High-volume sending with managed IP warm-up and audit logs",
-        "monthlyPrice": 20000,
-        "yearlyPrice": 180000,
+        "tier": "starter",
+        "name": "Herald Starter",
+        "description": "Transactional and marketing email for growing apps",
+        "monthlyPrice": 1800,
+        "yearlyPrice": 16200,
         "features": [
-          "1,000,000 emails/month",
-          "10 sending domains",
+          "5 sending domains",
+          "50,000 emails/month",
+          "Email support",
+          "Shared IP pool with managed reputation"
+        ]
+      },
+      {
+        "tier": "growth",
+        "name": "Herald Growth",
+        "description": "Dedicated IP with managed warm-up for growing senders",
+        "monthlyPrice": 14900,
+        "yearlyPrice": 134100,
+        "features": [
+          "1 dedicated IP with managed warm-up",
+          "25 sending domains",
+          "250,000 emails/month",
           "Audit logs",
-          "Managed IP warm-up",
           "Priority support"
+        ]
+      },
+      {
+        "tier": "scale",
+        "name": "Herald Scale",
+        "description": "High-volume sending with multiple dedicated IPs and SSO",
+        "monthlyPrice": 49900,
+        "yearlyPrice": 449100,
+        "features": [
+          "1,500,000 emails/month",
+          "2 dedicated IPs with managed warm-up",
+          "Priority support",
+          "SSO and audit logs",
+          "Unlimited sending domains"
         ]
       }
     ]
