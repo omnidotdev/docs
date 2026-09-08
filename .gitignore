@@ -5,11 +5,6 @@
 .vite
 node_modules
 
-# Unreleased product docs: kept locally, never committed
-content/docs/kindred/blink/
-content/docs/fabric/resonance/
-/fractal/
-
 # Environment files (never commit secrets). Templates are allowed.
 .env
 .env.*
@@ -20,3 +15,86 @@ content/docs/fabric/resonance/
 # Local-only docs migration data (contains unlaunched/private product slugs); never commit
 scripts/migration/data/
 content/_unlaunched/
+
+# Unreleased product docs: kept locally, never committed until the product is public
+content/docs/products/index.mdx
+content/docs/products/aether.mdx
+content/docs/products/alexandria.mdx
+content/docs/products/artifact.mdx
+content/docs/products/aura.mdx
+content/docs/products/blink/
+content/docs/products/blossom.mdx
+content/docs/products/channel.mdx
+content/docs/products/chronicle.mdx
+content/docs/products/creator.mdx
+content/docs/products/forage.mdx
+content/docs/products/forever.mdx
+content/docs/products/foundry.mdx
+content/docs/products/frame.mdx
+content/docs/products/gaia.mdx
+content/docs/products/ghost.mdx
+content/docs/products/glass.mdx
+content/docs/products/halcyon.mdx
+content/docs/products/harmony.mdx
+content/docs/products/heartbeat.mdx
+content/docs/products/hidra/
+content/docs/products/homestead.mdx
+content/docs/products/horcrux.mdx
+content/docs/products/intranet.mdx
+content/docs/products/keystone.mdx
+content/docs/products/launcher.mdx
+content/docs/products/launchpad.mdx
+content/docs/products/lens.mdx
+content/docs/products/manifold/
+content/docs/products/mantle.mdx
+content/docs/products/mastic.mdx
+content/docs/products/mimic/
+content/docs/products/moment.mdx
+content/docs/products/mosaic.mdx
+content/docs/products/myfi.mdx
+content/docs/products/nano.mdx
+content/docs/products/odk.mdx
+content/docs/products/omni-api.mdx
+content/docs/products/quilt/
+content/docs/products/resense.mdx
+content/docs/products/resonance/
+content/docs/products/retrace.mdx
+content/docs/products/run.mdx
+content/docs/products/say-less.mdx
+content/docs/products/see-less.mdx
+content/docs/products/taproot/
+content/docs/products/timever.mdx
+content/docs/products/totem.mdx
+content/docs/products/trellis.mdx
+content/docs/products/trove/
+content/docs/products/weaver/
+content/docs/products/zdk.mdx
+# vortex is public; these pages are still in progress
+content/docs/products/vortex/best-practices.mdx
+content/docs/products/vortex/concepts.mdx
+content/docs/products/vortex/examples.mdx
+content/docs/products/vortex/webhooks.mdx
+
+# Work-in-progress content, kept local until ready
+content/docs/community/contributing/dots.mdx
+content/docs/realms/codex/organizations.mdx
+content/docs/realms/core/social-media-post.mdx
+content/docs/realms/sigil/fonts/
+content/docs/support-omni/meta.json
+
+# Local-only tooling scaffolding, not yet wired into the app
+src/lib/flags/
+src/lib/config/env.config.ts
+src/components/mdx/Mermaid.tsx
+scripts/generateVault.ts
+vitest.config.ts
+# documents the above scaffolding's env vars; local until the feature lands
+/.env.local.template
+
+# Local scratch (Obsidian vault, generated notes, in-repo plan drafts)
+vault/
+odk/
+plans/
+
+# Local editor/agent settings
+.claude/settings.local.json
