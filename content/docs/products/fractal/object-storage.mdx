@@ -1,0 +1,100 @@
+---
+title: Object Storage
+description: S3-compatible buckets for uploads, assets, and media, with optional public URLs
+---
+
+Fractal gives every project **S3-compatible object storage**: durable buckets for
+user uploads, exports, generated files, and media. Buckets are provisioned from
+the dashboard, work with any standard S3 client, and can be **private** (the
+default) or **public** with a ready-to-use media URL.
+
+## Create a bucket
+
+1. Open your project and go to the **Storage** tab.
+2. Click **New bucket** and give it a name.
+3. Choose **Private** or **Public** (see below), then create it.
+
+Bucket names are a single DNS label: 3 to 63 characters, lowercase letters,
+digits, and hyphens, with no leading or trailing hyphen (for example
+`app-uploads` or `user-avatars`). The bucket is ready within a few seconds.
+
+## Private vs public buckets
+
+- **Private** (default): objects are reachable only with the bucket's
+  credentials. Serve files to users by generating presigned URLs from your app,
+  or by proxying them through your backend. Use this for anything sensitive.
+- **Public**: objects are readable by anyone at a stable URL, with no
+  credentials. A public bucket is served at `https://<bucket>.media.omni.dev`, so
+  an object stored at `avatars/jane.png` in the `user-avatars` bucket is served
+  at `https://user-avatars.media.omni.dev/avatars/jane.png`. Use this for
+  avatars, images, video, and other assets you want browsers to load directly.
+
+Writes always require the bucket's credentials, whether the bucket is public or
+private. Public only affects read access.
+
+You can switch a bucket between private and public later, and its public URL
+starts or stops serving accordingly.
+
+## Connect a bucket to your app
+
+Attach a bucket to a service and Fractal injects its credentials into the
+service as environment variables, so no secrets are ever written into your repo
+or image. A service receives:
+
+- an **endpoint** (the S3 API URL to point your client at),
+- the **bucket** name,
+- an **access key ID** and **secret access key**,
+- a **region**.
+
+Point any standard S3 client (the AWS SDK, `aws s3`, `rclone`, and so on) at the
+endpoint with those credentials and the bucket behaves like any other S3 bucket.
+A minimal upload with the AWS SDK for JavaScript:
+
+```ts
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({
+  endpoint: process.env.S3_ENDPOINT,
+  region: process.env.S3_REGION,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  },
+  forcePathStyle: true,
+});
+
+await s3.send(
+  new PutObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: "avatars/jane.png",
+    Body: file,
+    ContentType: "image/png",
+  }),
+);
+```
+
+Set `forcePathStyle: true` (path-style addressing); the platform serves buckets
+by path (`/bucket/key`) rather than by virtual host.
+
+## Serving public media
+
+For a public bucket, the object's public URL is simply its key appended to the
+bucket's media host:
+
+```
+https://<bucket>.media.omni.dev/<key>
+```
+
+Public objects are served over HTTPS with a valid certificate and hardened
+response headers (a restrictive content-security-policy plus `nosniff`, so a
+stored file cannot execute as script), and permissive CORS for `GET`/`HEAD` so
+browsers and canvases can load them. There is nothing else to configure: upload
+with your credentials, then link to the public URL.
+
+## Limits
+
+Each plan includes an object-storage allowance: a maximum number of buckets per
+project and a total-bytes ceiling across them. Storage above the included
+allowance is billed per gigabyte-month (see [Billing](./billing)). Buckets are
+deleted from the **Storage** tab; deleting a bucket removes its objects
+permanently.
