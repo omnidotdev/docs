@@ -6,6 +6,7 @@
     "environments",
     "pr-previews",
     "custom-domains",
+    "object-storage",
     "backups",
     "shell",
     "cli-reference",
