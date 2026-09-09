@@ -23,7 +23,16 @@ export const Route = createFileRoute("/sitemap.xml")({
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
 
-        const locs = [...new Set(source.getPages().map((page) => page.url))]
+        const locs = [
+          ...new Set(
+            source
+              .getPages()
+              // mirrored product docs are canonical elsewhere; list them in the
+              // owning product's sitemap, not here, to avoid duplicate URLs
+              .filter((page) => !page.data.canonical)
+              .map((page) => page.url),
+          ),
+        ]
           .sort()
           .map((url) => `  <url><loc>${escapeXml(`${base}${url}`)}</loc></url>`)
           .join("\n");
