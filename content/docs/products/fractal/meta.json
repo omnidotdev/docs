@@ -9,6 +9,7 @@
     "object-storage",
     "backups",
     "shell",
+    "api-tokens",
     "cli-reference",
     "self-hosting",
     "billing",
