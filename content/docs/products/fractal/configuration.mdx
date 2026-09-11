@@ -90,6 +90,42 @@ services:
 | `healthCheck` | HTTP path used for liveness/readiness |
 | `sleep` | Pause the service (scale to 0) |
 | `autoscale` | Autoscaling policy (see below) |
+| `release` | Pre-deploy command run before a new version takes traffic (see below) |
+
+### Release command
+
+Run a command once per deploy **before** the new version takes traffic. This is
+the place for database migrations: the command runs on the freshly built image,
+with the same environment and secrets as the app, and the rollout is gated on it
+succeeding.
+
+- On **success**, the new image is promoted normally.
+- On **failure**, the new version is **not** promoted and the previous healthy
+  version keeps serving. The failure and the command's log output are shown on
+  the service, so nobody has to run migrations against production by hand.
+
+It runs once per deploy (not once per replica), so migrations never race across
+instances.
+
+| Field | Description |
+|-------|-------------|
+| `command` | The command to run, as a list (for example `["bun", "db:migrate"]`) |
+| `timeoutSeconds` | Max run time before the release is failed (default 600) |
+
+In a repo-committed `fractal.yaml`:
+
+```yaml
+services:
+  api:
+    # ...
+    deploy:
+      release:
+        command: ["bun", "db:migrate"]
+        timeoutSeconds: 300
+```
+
+Release commands apply to web and worker services. A rollback reuses an
+already-released image, so it does not re-run the release command.
 
 ### Environment variables
 
