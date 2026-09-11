@@ -90,6 +90,7 @@ services:
 | `healthCheck` | HTTP path used for liveness/readiness |
 | `sleep` | Pause the service (scale to 0) |
 | `autoscale` | Autoscaling policy (see below) |
+| `requiredEnv` | Names of env vars the service must have (see below) |
 
 ### Environment variables
 
@@ -100,6 +101,26 @@ dashboard use the **Variables** tab; from the CLI:
 fractal env set my-api NODE_ENV=production
 fractal env set-secret my-api DATABASE_URL --secret main-db-app --key uri
 ```
+
+#### Required environment variables
+
+List the env vars your service cannot run without in `requiredEnv`. When any are
+missing from `env`, the service surfaces a **`RequiredEnv`** condition naming the
+absent variables, so a deploy that would crash on missing config is flagged with
+the specific cause up front.
+
+```yaml
+services:
+  api:
+    deploy:
+      requiredEnv:
+        - DATABASE_URL
+        - BETTER_AUTH_SECRET
+```
+
+If a service does crash anyway, its status now shows the failure reason (for
+example `CrashLoopBackOff` or the exit code) and a recent slice of the container
+logs, so you can see why without digging through the cluster.
 
 ### Volumes
 
