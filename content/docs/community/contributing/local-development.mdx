@@ -19,10 +19,20 @@ Omni projects use a **metarepo** (or *polyrepo*) pattern rather than a monorepo 
 - Services are cloned into a `services/` directory (git-ignored)
 - Each service, being its own individual repo, maintains its own dependencies and deployment lifecycle
 
-Exmaples:
+Examples:
 
 - [Backfeed (GitHub)](https://github.com/omnidotdev/backfeed)
 - [Runa (GitHub)](https://github.com/omnidotdev/runa)
+
+### Why polyrepo
+
+This is a deliberate choice, not the default. The tradeoffs that make it the right fit for Omni:
+
+- **License boundaries are repo boundaries.** Git visibility is all-or-nothing per repository (there is no public subdirectory inside a private repo), so keeping each service in its own repo lets us open-source one part of a product while keeping another proprietary, for example a FOSS API alongside a closed UI, without maintaining fragile public mirrors.
+- **Independent release cadence.** Each service ships, versions, and deploys on its own lifecycle, so an API release is not coupled to an unrelated app change.
+- **Clean audit trails.** `git log`, `blame`, and `bisect` stay scoped to a single service, so history reads as one concern rather than an interleaved stream of unrelated commits.
+- **Predictable tooling performance.** Editors, language servers, and CI operate over one service at a time, avoiding the indexing and build-graph costs a large monorepo incurs as it grows.
+- **The tradeoff we accept.** Cross-cutting changes span multiple repositories and shared code is consumed as published (or commit-pinned) packages rather than edited in place. We manage this with [changesets](/community/contributing/changesets) and the Tilt-based workflow below rather than by collapsing services into one repo.
 
 ### Structure
 
