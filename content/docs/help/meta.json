@@ -2,5 +2,11 @@
   "title": "Help",
   "tagline": "Get help",
   "description": "Get help in the Omni ecosystem",
-  "pages": ["account-security", "install-pwa", "...self-hosting", "..."]
+  "pages": [
+    "account-security",
+    "organizations",
+    "install-pwa",
+    "...self-hosting",
+    "..."
+  ]
 }
