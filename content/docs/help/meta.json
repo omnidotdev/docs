@@ -4,7 +4,7 @@
   "description": "Get help in the Omni ecosystem",
   "pages": [
     "account-security",
-    "organizations",
+    "workspaces",
     "install-pwa",
     "...self-hosting",
     "..."
