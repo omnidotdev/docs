@@ -28,7 +28,8 @@ Additional build settings:
 
 | Field | Applies to | Description |
 |-------|------------|-------------|
-| `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the repository root (default `Dockerfile`) |
+| `rootDir` | all | Build subdirectory for a monorepo (for example `apps/web`). The build runs from here instead of the repository root. Default: repository root |
+| `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the build context (`rootDir` when set, otherwise the repository root; default `Dockerfile`) |
 | `args` | `dockerfile` | Build arguments (for example `VITE_*` values needed at build time) |
 | `resources` | all | CPU and memory for the build pod (defaults: 1 CPU, 2Gi) |
 | `timeoutSeconds` | all | Maximum build time (default 1200) |
@@ -39,24 +40,29 @@ Additional build settings:
 
 ### Monorepos
 
-Fractal always uses the **repository root** as the build context, so one repo can
-hold several independently deployable apps (packages, workspaces). There is no
-separate "root directory" field; you scope a build to one package by its
-Dockerfile path or its build and start commands.
+One repository can hold several independently deployable apps (packages,
+workspaces). Point a service at the app it should build with **`rootDir`** (the
+"Root directory" field in the create-service form).
 
-- **Dockerfile mode (recommended for monorepos).** Set `dockerfilePath` to the
-  target app's `Dockerfile` relative to the repo root, for example
-  `apps/web/Dockerfile`. Because the build context is the repo root, that
-  `Dockerfile` can copy the workspace lockfile and shared packages and run a
-  workspace-aware install, then build just the one app.
-- **Auto mode.** The build runs from the repo root, so steer it to a single
-  package with the command overrides. For a workspace, point `installCommand`,
-  `buildCommand`, and `startCommand` at the target package (for example a
-  `--filter` in a bun, pnpm, or npm workspace) and set `packageManager` if needed.
+Fractal clones the **whole** repository, then builds from `rootDir`. Cloning the
+whole repo means a sub-app can still reference sibling packages and the workspace
+lockfile; building from `rootDir` means auto-detection and `dockerfilePath`
+resolve there:
+
+- **Auto mode.** Set `rootDir` to the app's directory (for example
+  `apps/web`) and Fractal detects and builds that package. Use the command
+  overrides (`installCommand`, `buildCommand`, `startCommand`, `packageManager`)
+  only if your workspace needs to steer the install/build further.
+- **Dockerfile mode.** Set `rootDir` to the app's directory and `dockerfilePath`
+  to the `Dockerfile` **relative to `rootDir`** (so just `Dockerfile` for
+  `apps/web/Dockerfile`).
+
+`rootDir` must be a relative path inside the repo (no absolute paths or `..`).
+Leave it blank to build from the repository root.
 
 To deploy several apps from one monorepo, create one service per app, each
-pointing at the same repository `url` and `branch` with its own `dockerfilePath`
-(or its own command overrides). In a repo-committed `fractal.yaml`:
+pointing at the same repository `url` and `branch` with its own `rootDir`. In a
+repo-committed `fractal.yaml`:
 
 ```yaml
 services:
@@ -66,16 +72,16 @@ services:
         url: https://github.com/acme/monorepo
         branch: main
     build:
-      mode: dockerfile
-      dockerfilePath: apps/web/Dockerfile
+      mode: auto
+      rootDir: apps/web
   - name: worker
     source:
       git:
         url: https://github.com/acme/monorepo
         branch: main
     build:
-      mode: dockerfile
-      dockerfilePath: apps/worker/Dockerfile
+      mode: auto
+      rootDir: apps/worker
     serviceType: worker
 ```
 
