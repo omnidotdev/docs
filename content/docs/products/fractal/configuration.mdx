@@ -61,6 +61,17 @@ resolve there:
 `rootDir` must be a relative path inside the repo (no absolute paths or `..`).
 Leave it blank to build from the repository root.
 
+<Callout type="warn">
+`rootDir` suits a **self-contained** subdirectory (its own dependencies, no
+cross-package imports). A **workspace** monorepo whose app imports sibling
+packages via `workspace:*` (a bun, pnpm, or yarn workspace) can't be built from
+the subdirectory alone -- the buildpack installs only that folder and can't
+resolve the siblings. For those, build with a **Dockerfile** whose context is
+the repo root (set `build.mode: dockerfile` and `dockerfilePath` to the app's
+`Dockerfile`, and leave `rootDir` blank). `turbo prune <app> --docker` is the
+clean way to install and build just that app and its workspace dependencies.
+</Callout>
+
 By default every service on a repo rebuilds on every push to its branch. Set
 **`watchPaths`** to rebuild a service only when a push changes files under those
 paths (for example its own `rootDir` plus any shared packages it depends on), so
