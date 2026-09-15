@@ -29,6 +29,7 @@ Additional build settings:
 | Field | Applies to | Description |
 |-------|------------|-------------|
 | `rootDir` | all | Build subdirectory for a monorepo (for example `apps/web`). The build runs from here instead of the repository root. Default: repository root |
+| `watchPaths` | all | Paths (relative to the repo root) that scope monorepo rebuilds: a push rebuilds this service only when a changed file is under one of them. Default: rebuild on any push |
 | `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the build context (`rootDir` when set, otherwise the repository root; default `Dockerfile`) |
 | `args` | `dockerfile` | Build arguments (for example `VITE_*` values needed at build time) |
 | `resources` | all | CPU and memory for the build pod (defaults: 1 CPU, 2Gi) |
@@ -60,9 +61,15 @@ resolve there:
 `rootDir` must be a relative path inside the repo (no absolute paths or `..`).
 Leave it blank to build from the repository root.
 
+By default every service on a repo rebuilds on every push to its branch. Set
+**`watchPaths`** to rebuild a service only when a push changes files under those
+paths (for example its own `rootDir` plus any shared packages it depends on), so
+a change to one app does not rebuild the others. Watch paths apply to webhook
+pushes; a service still rebuilds when its branch is reconciled by other means.
+
 To deploy several apps from one monorepo, create one service per app, each
-pointing at the same repository `url` and `branch` with its own `rootDir`. In a
-repo-committed `fractal.yaml`:
+pointing at the same repository `url` and `branch` with its own `rootDir` (and
+optionally `watchPaths`). In a repo-committed `fractal.yaml`:
 
 ```yaml
 services:
@@ -74,6 +81,9 @@ services:
     build:
       mode: auto
       rootDir: apps/web
+      watchPaths:
+        - apps/web
+        - packages/ui
   - name: worker
     source:
       git:
@@ -82,6 +92,8 @@ services:
     build:
       mode: auto
       rootDir: apps/worker
+      watchPaths:
+        - apps/worker
     serviceType: worker
 ```
 
