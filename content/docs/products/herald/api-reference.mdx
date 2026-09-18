@@ -1,0 +1,59 @@
+---
+title: API Reference
+description: The Herald TypeScript SDK surface, the raw escape hatch, and the GraphQL API.
+---
+
+Herald exposes a typed TypeScript SDK (`@omnidotdev/herald`) over its GraphQL API. The SDK is the recommended interface; the GraphQL endpoint is available for other languages.
+
+## SDK
+
+```ts
+import { createHerald } from "@omnidotdev/herald";
+
+const herald = createHerald({ apiKey: process.env.HERALD_API_KEY! });
+```
+
+### Emails
+
+```ts
+herald.emails.send({ from, to, subject, html, text?, variables?, ... });
+herald.emails.sendBatch({ messages: [ /* up to 100 */ ] });  // -> { sendMessages }
+herald.emails.list({ first: 20 });                            // -> { messages }
+herald.emails.get(rowId);
+```
+
+`send` is idempotent when you pass an `idempotencyKey`. Use `{{variable}}` placeholders and supply `variables`. A future `sendAt` schedules the send.
+
+### Domains, suppressions, webhooks
+
+```ts
+herald.domains.create({ domain: "mail.yourdomain.com" });
+herald.suppressions.add({ address: "bounced@example.com" });
+herald.webhooks.create({ url, eventTypes: ["delivered", "bounced", "opened", "clicked"] });
+```
+
+### Raw escape hatch
+
+Any operation not surfaced on the facade is available on `herald.raw`, a typed client over the full GraphQL schema:
+
+```ts
+herald.raw.sendEmail({ input: { /* ... */ } });
+```
+
+## GraphQL API
+
+The GraphQL endpoint is at `https://api.herald.omni.dev/graphql`, authenticated with the same `Authorization: Bearer <api-key>` header (or a dashboard JWT). Management surfaces that are not on the SDK facade — audiences, segments, templates, broadcasts, and sequences — are available as GraphQL mutations, and are also managed in the dashboard.
+
+Reads are tenant-scoped: an API key only ever sees its own workspace's data.
+
+## REST send endpoint
+
+For a minimal integration, a single message can also be sent over REST:
+
+```
+POST https://api.herald.omni.dev/messages
+Authorization: Bearer <api-key>
+Content-Type: application/json
+
+{ "from": "...", "to": "...", "subject": "...", "html": "..." }
+```

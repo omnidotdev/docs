@@ -1,0 +1,34 @@
+---
+title: Sequences
+description: Automatically drip a timed series of emails to contacts after they join an audience.
+---
+
+A sequence is an automated, multi-step email drip. When a contact joins an attached audience, Herald enrolls them and sends each step on a schedule you set, without any manual work. It is the automated counterpart to a one-off [broadcast](/docs/products/herald/broadcasts).
+
+A typical use: an ad drives sign-ups to a lead-capture form, the email lands in an audience, and a 3-8 email sequence welcomes the lead and nurtures them toward a conversion.
+
+## Build a sequence
+
+In the dashboard, go to **Sequences** and create one. Add ordered **steps**; each step is:
+
+- a [template](/docs/products/herald/templates) for the content,
+- a **delay** relative to enrollment (a number and a unit — minutes, hours, or days; step 1 is usually "on signup"),
+- an optional subject override.
+
+Use **Preview** on a step to see the template it will send.
+
+## Activate and attach
+
+Set a from-address and **Activate** the sequence (this requires your sender name and postal address in Settings, like a broadcast). Then **Attach** it to an audience.
+
+While the sequence is active, every new contact added to that audience is automatically enrolled at step 1, and the drip advances on schedule.
+
+## Enrollment lifecycle
+
+- Each enrolled contact moves step by step until the sequence completes.
+- If a contact **unsubscribes** or is **suppressed**, their enrollment exits immediately and no further steps are sent.
+- Pausing a sequence holds existing enrollments; reactivating resumes them.
+
+## Getting contacts in
+
+Point your capture form (or CSV import, or the contacts API) at the attached audience. Anything that adds a contact to that audience starts the drip.

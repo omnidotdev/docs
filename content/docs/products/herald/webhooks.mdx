@@ -1,0 +1,30 @@
+---
+title: Webhooks
+description: Receive delivery, bounce, open, and click events at your own endpoint.
+---
+
+Webhooks push Herald's message events to your application in real time, so you can react to what happens after a send.
+
+## Register an endpoint
+
+In the dashboard, go to **Webhooks** and register an endpoint URL, or via the SDK:
+
+```ts
+await herald.webhooks.create({
+  url: "https://yourapp.com/herald",
+  eventTypes: ["delivered", "bounced", "opened", "clicked"],
+});
+```
+
+A **signing secret** is returned once at creation. Store it to verify incoming posts.
+
+## Event types
+
+- `delivered` — the receiving server accepted the message.
+- `bounced` — the message hard-bounced.
+- `opened` — the recipient opened the message (requires open tracking).
+- `clicked` — the recipient clicked a tracked link (requires click tracking).
+
+## Verifying and replaying
+
+Each delivery is signed with your endpoint's secret; verify the signature before trusting a payload. Deliveries are retried with backoff, and you can **replay** a past delivery from the webhook log in the dashboard if your endpoint was down.

@@ -1,0 +1,24 @@
+---
+title: Suppressions
+description: The list of addresses Herald will never send to, and how unsubscribes populate it.
+---
+
+The suppression list is the set of addresses Herald refuses to send to for a workspace. It protects your sending reputation by preventing repeat sends to addresses that bounce, complain, or opt out.
+
+## How addresses get suppressed
+
+- **Hard bounces and spam complaints** are added automatically from delivery events. Soft/transient failures (a temporary block on a warming IP) are **not** suppressed, so a blip never nukes valid recipients.
+- **Unsubscribes** from the one-click link in marketing mail add the address automatically.
+- **Manually**, via the dashboard or the SDK:
+
+```ts
+await herald.suppressions.add({ address: "bounced@example.com" });
+```
+
+## Enforcement
+
+Every send checks the suppression list first (including CC and BCC recipients). A suppressed recipient is skipped, and in a broadcast or sequence the fan-out excludes them up front.
+
+## Managing the list
+
+In the dashboard, go to **Suppressions** to review the list and remove an address if it was suppressed in error (for example a transient issue that has since resolved).
