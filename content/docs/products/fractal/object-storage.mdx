@@ -23,11 +23,16 @@ digits, and hyphens, with no leading or trailing hyphen (for example
 - **Private** (default): objects are reachable only with the bucket's
   credentials. Serve files to users by generating presigned URLs from your app,
   or by proxying them through your backend. Use this for anything sensitive.
-- **Public**: objects are readable by anyone at a stable URL, with no
-  credentials. A public bucket is served at `https://<bucket>.media.omni.dev`, so
-  an object stored at `avatars/jane.png` in the `user-avatars` bucket is served
-  at `https://user-avatars.media.omni.dev/avatars/jane.png`. Use this for
-  avatars, images, video, and other assets you want browsers to load directly.
+- **Public** (paid plans): objects are readable by anyone at a stable URL, with
+  no credentials. A public bucket is served at
+  `https://<bucket>.fractalusercontent.com`, so an object stored at
+  `avatars/jane.png` in the `user-avatars` bucket is served at
+  `https://user-avatars.fractalusercontent.com/avatars/jane.png`. Use this for
+  avatars, images, video, and other assets you want browsers to load directly,
+  and optionally turn on the **CDN** to serve them from a global edge (see
+  [Serving public media](#serving-public-media)). Public buckets and the CDN are
+  a paid-plan feature; on the free tier a bucket you mark public is served
+  privately instead.
 
 Writes always require the bucket's credentials, whether the bucket is public or
 private. Public only affects read access.
@@ -82,14 +87,25 @@ For a public bucket, the object's public URL is simply its key appended to the
 bucket's media host:
 
 ```
-https://<bucket>.media.omni.dev/<key>
+https://<bucket>.fractalusercontent.com/<key>
 ```
 
-Public objects are served over HTTPS with a valid certificate and hardened
-response headers (a restrictive content-security-policy plus `nosniff`, so a
-stored file cannot execute as script), and permissive CORS for `GET`/`HEAD` so
-browsers and canvases can load them. There is nothing else to configure: upload
-with your credentials, then link to the public URL.
+Media is served from a dedicated `fractalusercontent.com` domain, isolated from
+your app's own origin so untrusted uploads can never share cookies or scripting
+context with your services. Public objects are served over HTTPS with a valid
+certificate and hardened response headers (a restrictive content-security-policy
+plus `nosniff`, so a stored file cannot execute as script), and permissive CORS
+for `GET`/`HEAD` so browsers and canvases can load them. There is nothing else to
+configure: upload with your credentials, then link to the public URL.
+
+### Edge caching (CDN)
+
+Turn on the **CDN** for a public bucket to serve it through a global content
+delivery network: reads are cached at points of presence worldwide and delivered
+over the edge with valid HTTPS, so assets load fast for users everywhere and
+origin load drops. The CDN URL uses the same `<bucket>.fractalusercontent.com`
+host, so nothing in your app changes when you enable it. Like public buckets, the
+CDN is a paid-plan feature.
 
 ## Limits
 
