@@ -399,22 +399,8 @@ export const products: CatalogProduct[] = [
     "name": "Herald",
     "realm": "grid",
     "status": "active",
+    "releaseDate": "2026-09-18",
     "plans": [
-      {
-        "tier": "enterprise",
-        "name": "Herald Enterprise",
-        "description": "Unlimited volume with SSO, SLA, and dedicated support",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "Dedicated support",
-          "Multiple dedicated IPs",
-          "SLA",
-          "SSO and audit logs",
-          "Unlimited sending domains",
-          "Unlimited volume"
-        ]
-      },
       {
         "tier": "free",
         "name": "Herald Free",
@@ -427,6 +413,21 @@ export const products: CatalogProduct[] = [
           "Community support",
           "Shared IP pool",
           "Suppression list with bounce and complaint handling"
+        ]
+      },
+      {
+        "tier": "enterprise",
+        "name": "Herald Enterprise",
+        "description": "Unlimited volume with SSO, SLA, and dedicated support",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "Dedicated IP available on request",
+          "Dedicated support",
+          "SLA",
+          "SSO and audit logs",
+          "Unlimited sending domains",
+          "Unlimited volume"
         ]
       },
       {
@@ -445,26 +446,26 @@ export const products: CatalogProduct[] = [
       {
         "tier": "growth",
         "name": "Herald Growth",
-        "description": "Dedicated IP with managed warm-up for growing senders",
+        "description": "Managed shared IP pool with warm-up for growing senders",
         "monthlyPrice": 14900,
         "yearlyPrice": 134100,
         "features": [
-          "1 dedicated IP with managed warm-up",
           "25 sending domains",
-          "250,000 emails/month",
+          "450,000 emails/month",
           "Audit logs",
+          "Managed shared IP pool with warm-up",
           "Priority support"
         ]
       },
       {
         "tier": "scale",
         "name": "Herald Scale",
-        "description": "High-volume sending with multiple dedicated IPs and SSO",
+        "description": "High-volume sending on a managed shared pool with SSO",
         "monthlyPrice": 49900,
         "yearlyPrice": 449100,
         "features": [
           "1,500,000 emails/month",
-          "2 dedicated IPs with managed warm-up",
+          "Managed shared IP pool with warm-up",
           "Priority support",
           "SSO and audit logs",
           "Unlimited sending domains"
@@ -586,7 +587,7 @@ export const products: CatalogProduct[] = [
     "id": "synapse",
     "name": "Synapse",
     "realm": "grid",
-    "status": "coming_soon",
+    "status": "active",
     "plans": [
       {
         "tier": "free",
@@ -656,7 +657,7 @@ export const products: CatalogProduct[] = [
     "id": "vortex",
     "name": "Vortex",
     "realm": "grid",
-    "status": "coming_soon",
+    "status": "active",
     "plans": [
       {
         "tier": "free",
