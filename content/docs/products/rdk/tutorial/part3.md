@@ -1,4 +1,7 @@
-# RDK location-based tutorial - Part 3 - Using a real API with a database
+---
+title: "Part 3: Using a Database"
+description: Serve the tutorial's points of interest from a real SQLite database.
+---
 
 In Part 3 we will further enhance our app by retrieving the points of interest from an actual, real database. For simplicity we will use [SQLite](https://sqlite.org) though note that a real-world AR app would probably use a geographically-aware database such [PostgreSQL](https://postgresql.org) with [PostGIS](https://postgis.org).
 
@@ -250,10 +253,10 @@ Try it out - you should now see the POIs loaded from the database and represente
 
 Here is a screenshot on a real device, facing north:
 
-![Screenshot of tutorial Part 3](images/part3.png)
+![Screenshot of tutorial Part 3](/img/rdk/tutorial/part3.png)
 
 ### For you to try
 
 Try adding a query string (use `req.query` to read) to your API endpoint, specifying a `bbox` (bounding box). This should take a comma-separated list of the west, south, east and north bounds of a geographical box. Modify the database query to find only points of interest within the bounding box.
 
-Once you have finished go on to [Part 4](part4.md).
+Once you have finished go on to [Part 4](/products/rdk/tutorial/part4).

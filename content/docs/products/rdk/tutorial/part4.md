@@ -1,4 +1,7 @@
-# RDK location-based tutorial - Part 4 - Rendering roads and paths 
+---
+title: "Part 4: Rendering Roads and Paths"
+description: Render lines such as roads and paths with RDK's GeoLine component.
+---
 
 In Part 4 we will enhance our app to render lines (e.g roads and paths) with RDK's `GeoLine` component.
 
@@ -131,7 +134,7 @@ So we will now look at the `GeoDataRenderer` component which actually renders th
 
 ```tsx
 
-import { GeolocationAnchor, GeoLine } from "@omnidotdev/rdk";
+import { GeolocationAnchor, GeoLine } from "@omnidotdev/rdk/geolocation";
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import Tree  from './basicModels/tree';
@@ -213,4 +216,4 @@ What is this doing? In order to view our scene more clearly, we need to elevate 
 
 Here is a screenshot on a real device, facing north (I have used a pushpin for the POI to improve the look of the screenshot).
 
-![Screenshot of tutorial Part 4](images/part4.png)
+![Screenshot of tutorial Part 4](/img/rdk/tutorial/part4.png)

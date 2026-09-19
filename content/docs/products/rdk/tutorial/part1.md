@@ -1,4 +1,7 @@
-# RDK location-based tutorial - Part 1 - Hello World!
+---
+title: "Part 1: Hello World"
+description: Set up an RDK project and render your first location-based AR object, a red cube at a fixed latitude and longitude.
+---
 
 In part 1 we will cover the absolute basics of an RDK app by creating the "Hello World" of location-based augmented reality: a red cube positioned at a specific latitude and longitude. The tutorial will use TypeScript, and Vite as a development server and bundler. You should have some basic knowledge of TypeScript and React as well as [three.js](https://threejs.org), including, for example, familiarity with the concept of meshes, geometries and materials.
 
@@ -7,7 +10,7 @@ In part 1 we will cover the absolute basics of an RDK app by creating the "Hello
 The first thing you will need to do is create a project with the appropriate dependencies. You can use an IDE, such as VS Code, or pure command line. On the console, install the dependencies with `npm`:
 
 ```console
-npm i @omnidotdev/rdk @react-three/fiber locar react react-dom 
+npm i @omnidotdev/rdk @react-three/fiber @react-three/xr locar react react-dom three
 ```
 
 ```console
@@ -144,6 +147,6 @@ You will then be able to access your AR Hello World app on `http://localhost:517
 
 Here is a screenshot on a real device, facing north:
 
-![Screenshot of Hello World RDK app](images/part1.png)
+![Screenshot of Hello World RDK app](/img/rdk/tutorial/part1.png)
 
-Now go on to [Part 2](part2.md).
+Now go on to [Part 2](/products/rdk/tutorial/part2).

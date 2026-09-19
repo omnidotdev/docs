@@ -1,4 +1,7 @@
-# RDK location-based tutorial - Part 2 - Connecting to a server
+---
+title: "Part 2: Connecting to a Server"
+description: Extend the app to fetch points of interest from a server API instead of hard-coding them.
+---
 
 In Part 2 we will start to make our app a bit more useful by connecting to a server and retrieving some hard-coded POIs from an API. For now, these will not be stored in a database, but we will come back to that in Part 3.
 
@@ -191,6 +194,6 @@ You will then be able to access your AR app on `http://localhost:3000`. As the f
 
 Here is a screenshot on a real device, facing north:
 
-![Screenshot of tutorial Part 2](images/part2.png)
+![Screenshot of tutorial Part 2](/img/rdk/tutorial/part2.png)
 
-Now go on to [Part 3](part3.md).
+Now go on to [Part 3](/products/rdk/tutorial/part3).
