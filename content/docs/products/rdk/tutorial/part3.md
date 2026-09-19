@@ -3,7 +3,7 @@ title: "Part 3: Using a Database"
 description: Serve the tutorial's points of interest from a real SQLite database.
 ---
 
-In Part 3 we will further enhance our app by retrieving the points of interest from an actual, real database. For simplicity we will use [SQLite](https://sqlite.org) though note that a real-world AR app would probably use a geographically-aware database such [PostgreSQL](https://postgresql.org) with [PostGIS](https://postgis.org).
+In Part 3 we will further enhance our app by retrieving the points of interest from an actual, real database. For simplicity we will use [SQLite](https://sqlite.org) though note that a real-world AR app would probably use a geographically-aware database such as [PostgreSQL](https://postgresql.org) with [PostGIS](https://postgis.org).
 
 ## Setting up the project
 

@@ -3,7 +3,7 @@ title: "Part 4: Rendering Roads and Paths"
 description: Render lines such as roads and paths with RDK's GeoLine component.
 ---
 
-In Part 4 we will enhance our app to render lines (e.g roads and paths) with RDK's `GeoLine` component.
+In Part 4 we will enhance our app to render lines (e.g. roads and paths) with RDK's `GeoLine` component.
 
 
 ## Populating our database

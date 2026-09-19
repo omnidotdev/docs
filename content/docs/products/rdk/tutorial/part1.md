@@ -137,7 +137,7 @@ Within the `GeolocationAnchor` we then specify whatever mesh, or group of meshes
 
 ### Run it!
 
-We are using Vite as a development server. To run it, run the apprpriate script:
+We are using Vite as a development server. To run it, run the appropriate script:
 
 ```console
 npm run dev
