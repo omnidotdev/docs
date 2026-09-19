@@ -1,0 +1,25 @@
+---
+title: Templates
+description: Reusable subject and body content with per-recipient variables.
+---
+
+A template is a reusable subject and HTML body you can load into the composer, a broadcast, or a sequence step. Templates keep your content in one place instead of pasting it into every send.
+
+## Create a template
+
+In the dashboard, go to **Templates** and create one with a subject and HTML body. Use `{{variable}}` placeholders anywhere in the subject or body:
+
+```html
+Subject: Welcome, {{first_name}} 👋
+Body:    <p>Thanks for joining, {{first_name}}.</p>
+```
+
+The editor detects the variables you reference and lets you preview the rendered result with sample values.
+
+## Edit a template
+
+Click any template in the list to open it in edit mode, change the subject or body, and save. The live preview shows exactly what recipients will see.
+
+## Variables at send time
+
+When a template is used in a broadcast or sequence, each recipient's variables come from their **contact attributes** (see [Audiences and Segments](/products/herald/audiences-and-segments)). A referenced variable with no value renders as an empty string, so a partial data set never breaks a send.

@@ -6,6 +6,22 @@
  * knip ignore. Refresh with `bun run catalog:generate`.
  */
 
+/** A pricing plan (tier) for a product. Prices are in cents. */
+export interface CatalogPlan {
+  tier: string;
+  name: string;
+  description?: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  /** Marketing feature strings shown on pricing surfaces. */
+  features: string[];
+  /**
+   * Platform take-rate in basis points applied per sale, when the product
+   * charges one (100 = 1%). Absent for products without a transaction fee.
+   */
+  transactionFeeBps?: number;
+}
+
 export interface CatalogProduct {
   id: string;
   name: string;
@@ -14,6 +30,8 @@ export interface CatalogProduct {
   status?: string;
   /** ISO release date. Absent means the product has not launched yet. */
   releaseDate?: string;
+  /** Pricing plans, ordered cheapest first. Absent for products without any. */
+  plans?: CatalogPlan[];
 }
 
 export const products: CatalogProduct[] = [
@@ -21,6 +39,57 @@ export const products: CatalogProduct[] = [
     "id": "arbor",
     "name": "Arbor",
     "realm": "armory",
+    "status": "coming_soon",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Arbor Free",
+        "description": "Graph-based git hosting for individuals and small teams",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 GB storage",
+          "Community support",
+          "Per-repository dependency graph",
+          "Unlimited public and private repositories",
+          "Up to 5 collaborators per repository"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Arbor Pro",
+        "description": "Org-wide polyrepo graph for growing teams",
+        "monthlyPrice": 1000,
+        "yearlyPrice": 9000,
+        "features": [
+          "25 GB storage",
+          "Email support",
+          "Everything in Free",
+          "Org-wide polyrepo dependency graph",
+          "Unlimited collaborators",
+          "Weaver dependency detection"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Arbor Team",
+        "description": "Dependency intelligence and Weaver orchestration at scale",
+        "monthlyPrice": 2500,
+        "yearlyPrice": 22500,
+        "features": [
+          "100 GB storage",
+          "Dependency blast-radius analysis",
+          "Everything in Pro",
+          "Multi-repo Weaver orchestration",
+          "Priority support"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "aspen",
+    "name": "Aspen",
+    "realm": "worlds",
     "status": "coming_soon"
   },
   {
@@ -28,20 +97,153 @@ export const products: CatalogProduct[] = [
     "name": "Backfeed",
     "realm": "core",
     "status": "active",
-    "releaseDate": "2025-05-06"
+    "releaseDate": "2025-05-06",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Backfeed Free",
+        "description": "Start collecting feedback",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "In-app & email feedback capture",
+          "Unlimited feedback submissions",
+          "Up to 2 projects",
+          "Up to 5 members"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Backfeed Pro",
+        "description": "For small teams",
+        "monthlyPrice": 500,
+        "yearlyPrice": 4800,
+        "features": [
+          "AI feedback triage: auto-tag, sentiment & dedupe (coming soon)",
+          "Everything in Free plan",
+          "Unlimited feedback",
+          "Up to 10 projects"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Backfeed Team",
+        "description": "For growing businesses",
+        "monthlyPrice": 1000,
+        "yearlyPrice": 9600,
+        "features": [
+          "API access (coming soon)",
+          "Custom branding (coming soon)",
+          "Everything in Pro plan",
+          "Multi-source ingestion: social, app store & chat (coming soon)",
+          "Product reviews (coming soon)",
+          "Team comments & collaboration tools (coming soon)",
+          "Theme clustering & summaries (coming soon)",
+          "Unlimited AI feedback triage (coming soon)",
+          "Unlimited projects"
+        ]
+      }
+    ]
   },
   {
     "id": "beacon",
     "name": "Beacon",
     "realm": "grid",
     "status": "active",
-    "releaseDate": "2026-02-09"
+    "releaseDate": "2026-02-09",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Beacon Free",
+        "description": "Try the AI assistant runtime",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "100 messages/month",
+          "Up to 5 conversations"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Beacon Pro",
+        "description": "Full-featured AI assistant",
+        "monthlyPrice": 500,
+        "yearlyPrice": 4500,
+        "features": [
+          "5,000 messages/month",
+          "Unlimited conversations",
+          "Voice enabled"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Beacon Team",
+        "description": "AI assistants for your organization",
+        "monthlyPrice": 1500,
+        "yearlyPrice": 13500,
+        "features": [
+          "25,000 messages/month",
+          "Priority support",
+          "Unlimited conversations",
+          "Voice enabled"
+        ]
+      }
+    ]
   },
   {
-    "id": "charm",
-    "name": "Charm",
-    "realm": "kindred",
-    "status": "coming_soon"
+    "id": "crystal",
+    "name": "Crystal",
+    "realm": "core",
+    "status": "coming_soon",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Crystal Free",
+        "description": "Start monetizing your content",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "10 posts/month",
+          "2 goals",
+          "3 membership tiers",
+          "Community support"
+        ],
+        "transactionFeeBps": 400
+      },
+      {
+        "tier": "pro",
+        "name": "Crystal Pro",
+        "description": "Creator monetization with full analytics",
+        "monthlyPrice": 1500,
+        "yearlyPrice": 14400,
+        "features": [
+          "10 goals",
+          "10 membership tiers",
+          "Analytics dashboard",
+          "API access",
+          "Priority support",
+          "Unlimited posts"
+        ],
+        "transactionFeeBps": 400
+      },
+      {
+        "tier": "team",
+        "name": "Crystal Team",
+        "description": "Full-featured creator monetization platform",
+        "monthlyPrice": 3900,
+        "yearlyPrice": 38400,
+        "features": [
+          "API access",
+          "Custom branding",
+          "Dedicated support",
+          "Full analytics",
+          "Unlimited goals",
+          "Unlimited posts",
+          "Unlimited tiers"
+        ],
+        "transactionFeeBps": 400
+      }
+    ]
   },
   {
     "id": "eden",
@@ -55,7 +257,77 @@ export const products: CatalogProduct[] = [
     "name": "Fractal",
     "realm": "grid",
     "status": "active",
-    "releaseDate": "2026-08-17"
+    "releaseDate": "2026-08-17",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Fractal Free",
+        "description": "Deploy and experiment with cloud infrastructure",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "$1 monthly usage credit",
+          "1 GB bandwidth/month",
+          "1 project",
+          "2 custom domains",
+          "3 services per project",
+          "500 MB storage",
+          "Community support",
+          "Shared compute resources"
+        ]
+      },
+      {
+        "tier": "hobby",
+        "name": "Fractal Hobby",
+        "description": "For solo developers and side projects",
+        "monthlyPrice": 500,
+        "yearlyPrice": 4800,
+        "features": [
+          "$5 monthly usage credit",
+          "10 GB bandwidth/month",
+          "10 GB storage",
+          "10 services per project",
+          "5 custom domains",
+          "5 projects",
+          "Community support",
+          "Scale-to-zero when idle"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Fractal Pro",
+        "description": "Production-ready deployments for growing teams",
+        "monthlyPrice": 2000,
+        "yearlyPrice": 19200,
+        "features": [
+          "$20 monthly usage credit",
+          "100 GB storage",
+          "25 projects",
+          "25 services per project",
+          "50 GB bandwidth/month",
+          "Auto-scaling",
+          "Priority support",
+          "Unlimited custom domains"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Fractal Team",
+        "description": "Scale infrastructure across your organization",
+        "monthlyPrice": 5000,
+        "yearlyPrice": 48000,
+        "features": [
+          "$50 monthly usage credit",
+          "500 GB bandwidth/month",
+          "500 GB storage",
+          "Auto-scaling",
+          "SLA guarantee",
+          "Unlimited custom domains",
+          "Unlimited projects",
+          "Unlimited services"
+        ]
+      }
+    ]
   },
   {
     "id": "garden",
@@ -65,16 +337,147 @@ export const products: CatalogProduct[] = [
     "releaseDate": "2025-06-20"
   },
   {
-    "id": "heartbeat",
-    "name": "Heartbeat",
-    "realm": "grid",
-    "status": "coming_soon"
+    "id": "halo",
+    "name": "Halo",
+    "realm": "core",
+    "status": "coming_soon",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Halo Free",
+        "description": "Launch your first store",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 store",
+          "500 MB media storage",
+          "Community support",
+          "Custom domain",
+          "Unlimited content types and entries",
+          "Up to 25 products"
+        ],
+        "transactionFeeBps": 200
+      },
+      {
+        "tier": "pro",
+        "name": "Halo Pro",
+        "description": "Grow your business with advanced commerce tools",
+        "monthlyPrice": 2900,
+        "yearlyPrice": 27800,
+        "features": [
+          "10 GB media storage",
+          "Advanced discounts",
+          "AI product descriptions",
+          "Priority support",
+          "Unlimited products",
+          "Up to 3 stores"
+        ],
+        "transactionFeeBps": 100
+      },
+      {
+        "tier": "team",
+        "name": "Halo Team",
+        "description": "Scale your commerce operation",
+        "monthlyPrice": 7900,
+        "yearlyPrice": 75800,
+        "features": [
+          "50 GB media storage",
+          "Advanced discounts",
+          "AI product descriptions and custom agents",
+          "Audit logs",
+          "Dedicated support",
+          "SSO/SAML",
+          "Unlimited products",
+          "Up to 10 stores"
+        ],
+        "transactionFeeBps": 50
+      }
+    ]
   },
   {
     "id": "herald",
     "name": "Herald",
     "realm": "grid",
-    "status": "coming_soon"
+    "status": "active",
+    "releaseDate": "2026-09-18",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Herald Free",
+        "description": "Transactional email for small projects and testing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 sending domain",
+          "3,000 emails/month (100/day)",
+          "Community support",
+          "Shared IP pool",
+          "Suppression list with bounce and complaint handling"
+        ]
+      },
+      {
+        "tier": "enterprise",
+        "name": "Herald Enterprise",
+        "description": "Unlimited volume with SSO, SLA, and dedicated support",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "Dedicated IP available on request",
+          "Dedicated support",
+          "SLA",
+          "SSO and audit logs",
+          "Unlimited sending domains",
+          "Unlimited volume"
+        ]
+      },
+      {
+        "tier": "starter",
+        "name": "Herald Starter",
+        "description": "Transactional and marketing email for growing apps",
+        "monthlyPrice": 1800,
+        "yearlyPrice": 16200,
+        "features": [
+          "5 sending domains",
+          "50,000 emails/month",
+          "Email support",
+          "Shared IP pool with managed reputation"
+        ]
+      },
+      {
+        "tier": "growth",
+        "name": "Herald Growth",
+        "description": "Managed shared IP pool with warm-up for growing senders",
+        "monthlyPrice": 14900,
+        "yearlyPrice": 134100,
+        "features": [
+          "25 sending domains",
+          "450,000 emails/month",
+          "Audit logs",
+          "Managed shared IP pool with warm-up",
+          "Priority support"
+        ]
+      },
+      {
+        "tier": "scale",
+        "name": "Herald Scale",
+        "description": "High-volume sending on a managed shared pool with SSO",
+        "monthlyPrice": 49900,
+        "yearlyPrice": 449100,
+        "features": [
+          "1,500,000 emails/month",
+          "Managed shared IP pool with warm-up",
+          "Priority support",
+          "SSO and audit logs",
+          "Unlimited sending domains"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "kiln",
+    "name": "Kiln",
+    "realm": "grid",
+    "status": "active"
   },
   {
     "id": "life-json",
@@ -82,6 +485,12 @@ export const products: CatalogProduct[] = [
     "realm": "codex",
     "status": "active",
     "releaseDate": "2026-02-06"
+  },
+  {
+    "id": "nectar",
+    "name": "Nectar",
+    "realm": "armory",
+    "status": "coming_soon"
   },
   {
     "id": "omni-cli",
@@ -122,7 +531,50 @@ export const products: CatalogProduct[] = [
     "name": "Runa",
     "realm": "core",
     "status": "active",
-    "releaseDate": "2025-12-21"
+    "releaseDate": "2025-12-21",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Runa Free",
+        "description": "Project management to get started",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 GB file storage",
+          "1,500 tasks",
+          "Up to 5 members",
+          "Up to 5 projects"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Runa Pro",
+        "description": "For growing teams",
+        "monthlyPrice": 800,
+        "yearlyPrice": 7700,
+        "features": [
+          "25,000 tasks",
+          "5 assignees per task",
+          "50 GB file storage",
+          "50 projects",
+          "Priority support"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Runa Team",
+        "description": "For scaling organizations",
+        "monthlyPrice": 1400,
+        "yearlyPrice": 13400,
+        "features": [
+          "Dedicated support",
+          "Unlimited assignees per task",
+          "Unlimited file storage",
+          "Unlimited projects",
+          "Unlimited tasks"
+        ]
+      }
+    ]
   },
   {
     "id": "sigil",
@@ -135,7 +587,57 @@ export const products: CatalogProduct[] = [
     "id": "synapse",
     "name": "Synapse",
     "realm": "grid",
-    "status": "coming_soon"
+    "status": "active",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Synapse Free",
+        "description": "BYOK AI gateway with basic routing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "10,000 requests per month",
+          "3 API keys",
+          "All models supported",
+          "Bring your own provider keys",
+          "Usage analytics"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Synapse Pro",
+        "description": "Full-featured AI gateway with smart routing",
+        "monthlyPrice": 2900,
+        "yearlyPrice": 27800,
+        "features": [
+          "$0.20 per 1K requests overage",
+          "100,000 requests per month",
+          "25 API keys",
+          "90-day analytics retention",
+          "All modalities (STT, TTS, images, embeddings)",
+          "Pay-as-you-go managed credits (15% margin)",
+          "Priority support",
+          "Smart routing (cost, quality, latency)"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Synapse Team",
+        "description": "AI gateway for teams with collaboration",
+        "monthlyPrice": 7900,
+        "yearlyPrice": 75800,
+        "features": [
+          "1-year analytics retention",
+          "All modalities (STT, TTS, images, embeddings)",
+          "Pay-as-you-go managed credits (15% margin)",
+          "Priority support",
+          "Smart routing (cost, quality, latency)",
+          "Team workspaces with roles",
+          "Unlimited API keys",
+          "Unlimited requests"
+        ]
+      }
+    ]
   },
   {
     "id": "thornberry",
@@ -145,10 +647,69 @@ export const products: CatalogProduct[] = [
     "releaseDate": "2026-07-06"
   },
   {
+    "id": "thrivestream",
+    "name": "Thrivestream",
+    "realm": "kindred",
+    "status": "active",
+    "releaseDate": "2026-06-05"
+  },
+  {
     "id": "vortex",
     "name": "Vortex",
     "realm": "grid",
-    "status": "coming_soon"
+    "status": "active",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Vortex Free",
+        "description": "For individuals exploring automation",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 user",
+          "10 connected accounts",
+          "2,500 executions/month",
+          "5 workflows",
+          "All integrations",
+          "Community support"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Vortex Pro",
+        "description": "Workflow automation with full platform access",
+        "monthlyPrice": 2900,
+        "yearlyPrice": 27800,
+        "features": [
+          "50,000 executions/month",
+          "All integrations",
+          "Custom plugins",
+          "Email support",
+          "Unlimited connected accounts",
+          "Unlimited users",
+          "Unlimited workflows"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Vortex Team",
+        "description": "Workflow automation at scale for organizations",
+        "monthlyPrice": 7900,
+        "yearlyPrice": 75800,
+        "features": [
+          "250,000 executions/month",
+          "All integrations",
+          "Audit logs",
+          "Custom plugins",
+          "Priority support",
+          "SLA guarantee",
+          "SSO/SAML",
+          "Unlimited connected accounts",
+          "Unlimited users",
+          "Unlimited workflows"
+        ]
+      }
+    ]
   },
   {
     "id": "zenpetal",

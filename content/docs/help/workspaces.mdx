@@ -1,0 +1,86 @@
+---
+title: Workspaces & Teams
+description: Create workspaces, invite members, assign roles, and manage teams from your Omni account
+icon: Building2
+---
+
+Your Omni account can belong to more than one **workspace**, a shared space for a company, project, or group. This page explains how to create workspaces, invite people, give them the right roles, and group them into teams, all from [account.omni.dev](https://account.omni.dev).
+
+## Personal and shared workspaces
+
+Everything you access in Omni lives under a **workspace**, addressed by an `@handle` (for example `@acme`). There are two kinds:
+
+- **Your personal workspace**: created for you automatically. It is just you, so there is nothing to manage.
+- **A shared workspace**: one you create for a team. You can belong to many, each with its own members, roles, and teams.
+
+## Creating a workspace
+
+**1. Open [account.omni.dev](https://account.omni.dev)** and go to **Workspaces**.
+
+**2. Select New workspace.** Enter a name and a handle. The handle is checked as you type, so you will know right away if it is available. It becomes your `@handle` across every Omni product, so pick something recognizable.
+
+**3. Select Create.** You are the owner of the new workspace and can start inviting people.
+
+## Inviting members
+
+Open a workspace, then use **Invite a member**:
+
+**1. Enter their email address** and choose a role (see roles below).
+
+**2. Select Invite.** They receive an email with a link to join.
+
+Invitations you have sent appear under **Pending invitations** until they are accepted. An invitation expires after seven days; an expired one is labelled **Expired** and offers a **Resend** button that issues a fresh link.
+
+## Roles
+
+Every member has one of three roles, which control what they can do:
+
+| Role | Can do |
+|------|--------|
+| **Owner** | Everything, including editing the workspace, managing all members, and deleting the workspace. |
+| **Admin** | Invite and remove members, change member roles, and manage teams. Cannot delete the workspace or manage owners. |
+| **Member** | Belong to the workspace and its teams, with no management access. |
+
+<Callout type="info">
+  Only an owner can grant or change the **owner** role. A workspace always keeps at least one owner, so the last owner cannot be removed or demoted.
+</Callout>
+
+To change someone's role, open the workspace and pick a new role next to their name. To remove someone, select **Remove** next to their name and confirm. They lose access but stay in any other workspaces they belong to, and you can invite them back later.
+
+<Callout type="info">
+  When a member list gets long, use the search box to find someone by name or email, filter by role, or change the sort order. Your own row is marked **(you)**.
+</Callout>
+
+## Teams
+
+Within a workspace you can create **teams**, smaller groups used to organize members and their access (for example an "Engineering" team). Teams live inside a workspace; they are not separate workspaces.
+
+- **Create a team**: select **New team** and give it a name.
+- **Rename or delete a team**: use the controls next to the team.
+- **Manage a team's members**: select **Members** on a team to expand it, then add any workspace member to the team or remove them from it.
+
+Removing someone from a team does not remove them from the workspace; it only changes that team's membership.
+
+## Editing a workspace
+
+Owners and admins can select **Edit** on a workspace to update its **name**, **handle**, **logo**, and **description**.
+
+<Callout type="warn">
+  Changing the handle updates the workspace's `@handle` everywhere it is used, so existing links that reference the old handle may need updating.
+</Callout>
+
+## Leaving or deleting a workspace
+
+- **Leaving**: if you are not the sole owner, select **Leave workspace** and confirm. You lose access, and an owner can invite you back later.
+- **Deleting**: an owner can delete a workspace from the danger zone. Because this removes it for **every** member, you are asked to type the workspace's name to confirm, and it stays restorable for a grace period before it is permanently removed.
+
+<Callout type="warn">
+  Deleting a workspace affects everyone in it. Only delete a workspace you are sure is no longer needed.
+</Callout>
+
+Your personal workspace cannot be deleted.
+
+## Related
+
+- [Account security](/help/account-security)
+- [Get support](/help/support)

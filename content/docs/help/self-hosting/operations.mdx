@@ -90,17 +90,6 @@ curl http://localhost:4000/ready
 
 The Compose configurations include health checks that ensure services start in the correct order (e.g. `db` → `api` → `app`).
 
-### Manifold
-
-Manifold uses the same pattern:
-
-```bash
-curl http://localhost:4000/health
-curl http://localhost:4000/ready
-```
-
-Upload session cleanup runs automatically as a background job every hour, requiring no manual intervention.
-
 ## Observability
 
 ### OpenTelemetry

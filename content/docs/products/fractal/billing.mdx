@@ -3,14 +3,18 @@ title: Pricing and billing
 description: How Fractal plans, usage credits, and metered overage work
 ---
 
+import { Pricing } from "@/components/docs";
+
 Fractal plans pair a flat monthly price with a monthly usage credit that covers
 your compute. You only pay more if your usage goes past the credit, billed by the
 hour. See [fractal.omni.dev/pricing](https://fractal.omni.dev/pricing) for current
 plans and prices.
 
+<Pricing productId="fractal" />
+
 ## Start with a trial
 
-New teams start with a **14-day free trial** of the Pro plan, no card required.
+New teams start with a **14-day free trial** of the Pro plan.
 When the trial ends, add a payment method to continue. If you do not, your
 services are paused (scaled to zero) and your data is retained for a grace period
 so you can pick up where you left off by adding a card.
@@ -28,6 +32,9 @@ rates:
 
 Storage is included up to each plan's limit and is not billed as overage. Projects,
 services, custom domains, and team seats are plan features, not metered usage.
+Public object-storage buckets and their CDN are a paid-plan feature; on the free
+tier a bucket marked public is served privately instead (see
+[Object Storage](./object-storage)).
 
 The exact overage rates and each plan's included credit, storage, and bandwidth are
 listed on the [pricing page](https://fractal.omni.dev/pricing).

@@ -1,0 +1,32 @@
+---
+title: Sending Domains
+description: Add and verify a sending domain so Herald can sign and send mail as your brand.
+---
+
+Before Herald can send on your behalf you must verify a **sending domain**. Verification proves you control the domain and lets Herald sign your mail with DKIM.
+
+## Add a domain
+
+In the dashboard, go to **Domains** and add a domain (for example `mail.yourbrand.com`), or via the SDK:
+
+```ts
+await herald.domains.create({ domain: "mail.yourbrand.com" });
+```
+
+Herald generates a dedicated DKIM key for the domain and returns the DNS records to publish.
+
+## Publish the DNS records
+
+Add these records at your DNS host:
+
+- **DKIM** — a `TXT` record at `herald._domainkey.<domain>` with the generated public key. Herald signs every message from the domain with the matching private key.
+- **SPF** — a `TXT` record at the domain: `v=spf1 include:_spf.herald.omni.dev ~all`. The `_spf.herald.omni.dev` indirection means a change to Herald's sending IPs never requires you to edit your DNS again.
+- **DMARC** — a `TXT` record at `_dmarc.<domain>`: `v=DMARC1; p=none; rua=mailto:dmarc@omni.dev` to start in monitor mode.
+
+## Verify
+
+Click **Verify** in the dashboard once the records have propagated. Herald checks the DKIM record live and flips the domain to **verified**. Sending from an unverified domain is rejected.
+
+## Ramping DMARC
+
+Start at `p=none` (monitor). Once your DMARC reports are clean, ramp to `p=quarantine` and eventually `p=reject` to protect your domain from spoofing. Herald's deliverability recommendations surface when a domain is ready to ramp.

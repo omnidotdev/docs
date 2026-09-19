@@ -1,0 +1,26 @@
+---
+title: Audiences and Segments
+description: Build contact lists and filter them into reusable segments for targeted sends.
+---
+
+An **audience** is a list of contacts. A **segment** is a saved filter over an audience's contacts. Together they let you send to the right subset of people.
+
+## Audiences
+
+In the dashboard, go to **Audiences** and create a list (for example "Newsletter"). Add contacts individually or import a CSV in bulk. Each contact has an email address and an optional bag of **attributes** (merge data such as `first_name`, `plan`, `country`).
+
+Imports are idempotent: re-importing a CSV only adds new addresses, never duplicates, and syntactically invalid addresses are dropped so a bad list can't erode your sending reputation.
+
+You can also add contacts programmatically as your own signup forms capture them (for example a lead-capture form behind an ad).
+
+## Segments
+
+A segment filters an audience by contact attributes. In **Segments**, choose an audience, set the match mode (**all** or **any** conditions), and add conditions:
+
+- `attribute` + operator (`equals`, `does not equal`, `contains`, `greater than`, `less than`, `exists`) + value.
+
+Each saved segment shows a live count of matching contacts. Target a segment in a **broadcast** to reach just that subset instead of the whole audience.
+
+## Attributes power personalization
+
+The same attributes you filter on are the `{{variables}}` used to personalize templates at send time, so "engaged US customers" can each receive their own `{{first_name}}`.

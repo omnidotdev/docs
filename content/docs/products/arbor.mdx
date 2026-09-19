@@ -1,0 +1,43 @@
+---
+title: 🌲 Arbor
+description: A graph-UI git provider for visualizing and modeling repositories, especially multi-repo setups.
+---
+
+import { ProductOverview } from "@/components/docs";
+import { FaCodeBranch, FaProjectDiagram, FaCubes } from "react-icons/fa";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Git Provider",
+      icon: <FaCodeBranch />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Repo Visualization",
+      icon: <FaProjectDiagram />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Multi-repo",
+      icon: <FaCubes />,
+      className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
+    },
+  ]}
+  links={[
+    { href: "https://arbor.omni.dev", label: "Visit Website", type: "website" },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Arbor is in a closed beta and its documentation is still being written. Expect these pages to fill in as the beta opens up.",
+    },
+  ]}
+/>
+
+**Omni Arbor** is a graph-UI git provider that helps you visualize and model your code repositories, with a focus on multi-repo configurations. Arbor is Apache-2.0 licensed and self-hostable.
+
+<Callout type="warn">
+  Arbor is in a closed beta. **[Apply for the closed beta](https://arbor.omni.dev/apply)** to get early access.
+</Callout>

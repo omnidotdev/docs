@@ -1,0 +1,18 @@
+{
+  "title": "🕊️ Herald",
+  "pages": [
+    "getting-started",
+    "domains",
+    "api-keys",
+    "transactional-email",
+    "templates",
+    "marketing-email",
+    "audiences-and-segments",
+    "broadcasts",
+    "sequences",
+    "suppressions",
+    "webhooks",
+    "deliverability",
+    "api-reference"
+  ]
+}

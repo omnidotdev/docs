@@ -1,0 +1,31 @@
+---
+title: API Keys
+description: Mint scoped API keys to send and manage Herald programmatically.
+---
+
+API keys authenticate programmatic access to Herald. Each key belongs to one workspace and carries a permission scope.
+
+## Create a key
+
+In the dashboard, go to **Keys** and create a key. The secret is shown **once** at creation, so copy it immediately.
+
+Pass it to the SDK:
+
+```ts
+import { createHerald } from "@omnidotdev/herald";
+
+const herald = createHerald({ apiKey: process.env.HERALD_API_KEY! });
+```
+
+Or send the raw HTTP header `Authorization: Bearer <key>`.
+
+## Permission scopes
+
+- **`sending`** — can send email only. Cannot manage domains, keys, suppressions, or other resources. Use this for application servers that only need to send.
+- **`full`** — can send and manage everything in the workspace. Use this for administrative automation.
+
+A `sending` key that attempts a management operation is rejected server-side, so a leaked send-only key cannot reconfigure your account.
+
+## Rotation
+
+Create a new key, roll it out, then revoke the old one from the **Keys** page. Revocation takes effect immediately.

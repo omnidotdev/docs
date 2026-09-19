@@ -27,7 +27,6 @@ import {
   SidebarSeparator,
 } from "@/components/layout";
 import { LLMCopyButton, ViewOptions } from "@/components/llm";
-import { Button } from "@/components/ui/button";
 import { app } from "@/lib/config";
 import { useSidebarEscClose } from "@/lib/hooks/useSidebarEscClose";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
@@ -121,24 +120,6 @@ const Page = () => {
         sidebar={{
           banner: (
             <div className="text-xs">
-              <span>
-                We turn ideas into products, from apps to websites to email
-                automation.
-                <a
-                  href="https://omni.dev/#contact"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="ml-2 cursor-pointer px-0 text-fd-primary text-xs"
-                  >
-                    Hire Us →
-                  </Button>
-                </a>
-              </span>
-
               <div className="mb-1.5 -ml-1.5 flex gap-1">
                 <button
                   type="button"
@@ -256,7 +237,9 @@ export const Route = createFileRoute("/$")({
     const slug = slugs?.length ? slugs.join("/") : undefined;
 
     const base = app.appUrl.replace(/\/+$/, "");
-    const canonical = slug ? `${base}/${slug}` : base;
+    // a mirrored page's canonical points home to the product's own docs domain;
+    // otherwise this page here is canonical
+    const canonical = data?.canonical ?? (slug ? `${base}/${slug}` : base);
 
     return {
       meta: seo({
@@ -281,6 +264,9 @@ const serverLoader = createServerFn({ method: "GET" })
       path: page.path,
       title: page.data.title,
       description: page.data.description,
+      // mirrored product docs carry a canonical pointing at the product's own
+      // docs domain; absent for first-party pages
+      canonical: page.data.canonical ?? null,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });
@@ -295,7 +281,11 @@ const clientLoader = browserCollections.docs.createClientLoader<
         ? window.location.pathname.slice(1) || "index"
         : "index";
     const markdownUrl = `/${path}.mdx`;
-    const githubUrl = `${GITHUB_REPO_URL}/blob/${GITHUB_BRANCH}/${CONTENT_PATH}/${path}.mdx`;
+    // mirrored product docs link "view source" to the upstream file in the
+    // product's own repo; first-party pages link to this repo
+    const githubUrl =
+      frontmatter.sourceUrl ??
+      `${GITHUB_REPO_URL}/blob/${GITHUB_BRANCH}/${CONTENT_PATH}/${path}.mdx`;
 
     return (
       <DocsPage toc={toc}>

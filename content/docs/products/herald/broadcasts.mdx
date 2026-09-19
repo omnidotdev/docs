@@ -1,0 +1,21 @@
+---
+title: Broadcasts
+description: Send one marketing email to an audience or segment, with built-in compliance.
+---
+
+A broadcast is a one-off marketing email to every contact in an [audience](/products/herald/audiences-and-segments) (optionally narrowed to a segment). For an automated multi-step series, use [Sequences](/products/herald/sequences) instead.
+
+## Before you send
+
+Broadcasts are bulk marketing mail, so Herald requires a sender identity for compliance. In **Settings**, set your **sender name** and **physical postal address** (CAN-SPAM). Herald injects a compliant footer and a one-click unsubscribe into every broadcast, so a broadcast cannot go out without a working opt-out.
+
+## Send a broadcast
+
+In the dashboard, go to **Broadcasts**, create one, pick the audience (and optionally a segment), choose a verified from-address, and send. Herald fans it out to every subscribed contact, rendering each recipient's `{{variables}}` from their attributes.
+
+## What is excluded
+
+- Contacts who unsubscribed, and any address on your [suppression list](/products/herald/suppressions), are automatically skipped.
+- Each recipient gets a one-click `List-Unsubscribe` header (RFC 8058) and the compliance footer.
+
+Broadcasts count toward your monthly send quota the same as any other message.

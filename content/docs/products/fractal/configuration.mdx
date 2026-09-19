@@ -24,6 +24,90 @@ Every service builds from a Git repository or runs a prebuilt image.
 | `dockerfile` | Build from a `Dockerfile` in the repo |
 | `none` | No build step (image sources) |
 
+Additional build settings:
+
+| Field | Applies to | Description |
+|-------|------------|-------------|
+| `rootDir` | all | Build subdirectory for a monorepo (for example `apps/web`). The build runs from here instead of the repository root. Default: repository root |
+| `watchPaths` | all | Paths (relative to the repo root) that scope monorepo rebuilds: a push rebuilds this service only when a changed file is under one of them. Default: rebuild on any push |
+| `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the build context (`rootDir` when set, otherwise the repository root; default `Dockerfile`) |
+| `args` | `dockerfile` | Build arguments (for example `VITE_*` values needed at build time) |
+| `resources` | all | CPU and memory for the build pod (defaults: 1 CPU, 2Gi) |
+| `timeoutSeconds` | all | Maximum build time (default 1200) |
+| `packageManager` | `auto` | Override the detected package manager (`npm`, `pnpm`, `yarn`, `bun`) |
+| `installCommand` | `auto` | Override the dependency install command |
+| `buildCommand` | `auto` | Override the build command |
+| `startCommand` | `auto` | Override the runtime start command |
+
+### Monorepos
+
+One repository can hold several independently deployable apps (packages,
+workspaces). Point a service at the app it should build with **`rootDir`** (the
+"Root directory" field in the create-service form).
+
+Fractal clones the **whole** repository, then builds from `rootDir`. Cloning the
+whole repo means a sub-app can still reference sibling packages and the workspace
+lockfile; building from `rootDir` means auto-detection and `dockerfilePath`
+resolve there:
+
+- **Auto mode.** Set `rootDir` to the app's directory (for example
+  `apps/web`) and Fractal detects and builds that package. Use the command
+  overrides (`installCommand`, `buildCommand`, `startCommand`, `packageManager`)
+  only if your workspace needs to steer the install/build further.
+- **Dockerfile mode.** Set `rootDir` to the app's directory and `dockerfilePath`
+  to the `Dockerfile` **relative to `rootDir`** (so just `Dockerfile` for
+  `apps/web/Dockerfile`).
+
+`rootDir` must be a relative path inside the repo (no absolute paths or `..`).
+Leave it blank to build from the repository root.
+
+<Callout type="warn">
+`rootDir` suits a **self-contained** subdirectory (its own dependencies, no
+cross-package imports). A **workspace** monorepo whose app imports sibling
+packages via `workspace:*` (a bun, pnpm, or yarn workspace) can't be built from
+the subdirectory alone -- the buildpack installs only that folder and can't
+resolve the siblings. For those, build with a **Dockerfile** whose context is
+the repo root (set `build.mode: dockerfile` and `dockerfilePath` to the app's
+`Dockerfile`, and leave `rootDir` blank). `turbo prune <app> --docker` is the
+clean way to install and build just that app and its workspace dependencies.
+</Callout>
+
+By default every service on a repo rebuilds on every push to its branch. Set
+**`watchPaths`** to rebuild a service only when a push changes files under those
+paths (for example its own `rootDir` plus any shared packages it depends on), so
+a change to one app does not rebuild the others. Watch paths apply to webhook
+pushes; a service still rebuilds when its branch is reconciled by other means.
+
+To deploy several apps from one monorepo, create one service per app, each
+pointing at the same repository `url` and `branch` with its own `rootDir` (and
+optionally `watchPaths`). In a repo-committed `fractal.yaml`:
+
+```yaml
+services:
+  - name: web
+    source:
+      git:
+        url: https://github.com/acme/monorepo
+        branch: main
+    build:
+      mode: auto
+      rootDir: apps/web
+      watchPaths:
+        - apps/web
+        - packages/ui
+  - name: worker
+    source:
+      git:
+        url: https://github.com/acme/monorepo
+        branch: main
+    build:
+      mode: auto
+      rootDir: apps/worker
+      watchPaths:
+        - apps/worker
+    serviceType: worker
+```
+
 ## Deploy
 
 | Field | Description |
@@ -35,6 +119,43 @@ Every service builds from a Git repository or runs a prebuilt image.
 | `healthCheck` | HTTP path used for liveness/readiness |
 | `sleep` | Pause the service (scale to 0) |
 | `autoscale` | Autoscaling policy (see below) |
+| `release` | Pre-deploy command run before a new version takes traffic (see below) |
+| `requiredEnv` | Names of env vars the service must have (see below) |
+
+### Release command
+
+Run a command once per deploy **before** the new version takes traffic. This is
+the place for database migrations: the command runs on the freshly built image,
+with the same environment and secrets as the app, and the rollout is gated on it
+succeeding.
+
+- On **success**, the new image is promoted normally.
+- On **failure**, the new version is **not** promoted and the previous healthy
+  version keeps serving. The failure and the command's log output are shown on
+  the service, so nobody has to run migrations against production by hand.
+
+It runs once per deploy (not once per replica), so migrations never race across
+instances.
+
+| Field | Description |
+|-------|-------------|
+| `command` | The command to run, as a list (for example `["bun", "db:migrate"]`) |
+| `timeoutSeconds` | Max run time before the release is failed (default 600) |
+
+In a repo-committed `fractal.yaml`:
+
+```yaml
+services:
+  api:
+    # ...
+    deploy:
+      release:
+        command: ["bun", "db:migrate"]
+        timeoutSeconds: 300
+```
+
+Release commands apply to web and worker services. A rollback reuses an
+already-released image, so it does not re-run the release command.
 
 ### Environment variables
 
@@ -45,6 +166,26 @@ dashboard use the **Variables** tab; from the CLI:
 fractal env set my-api NODE_ENV=production
 fractal env set-secret my-api DATABASE_URL --secret main-db-app --key uri
 ```
+
+#### Required environment variables
+
+List the env vars your service cannot run without in `requiredEnv`. When any are
+missing from `env`, the service surfaces a **`RequiredEnv`** condition naming the
+absent variables, so a deploy that would crash on missing config is flagged with
+the specific cause up front.
+
+```yaml
+services:
+  api:
+    deploy:
+      requiredEnv:
+        - DATABASE_URL
+        - BETTER_AUTH_SECRET
+```
+
+If a service does crash anyway, its status now shows the failure reason (for
+example `CrashLoopBackOff` or the exit code) and a recent slice of the container
+logs, so you can see why without digging through the cluster.
 
 ### Volumes
 

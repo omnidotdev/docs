@@ -1,14 +1,15 @@
 {
   "title": "🔷 Fractal",
   "pages": [
-    "index",
     "getting-started",
     "---Guides---",
     "environments",
     "pr-previews",
     "custom-domains",
+    "object-storage",
     "backups",
     "shell",
+    "api-tokens",
     "cli-reference",
     "self-hosting",
     "billing",

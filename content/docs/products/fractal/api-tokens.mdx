@@ -1,0 +1,56 @@
+---
+title: API Tokens
+description: Create and manage workspace API tokens for CI, IaC, and the CLI
+---
+
+API tokens are bearer credentials that let automation act on your workspace
+without a browser login: continuous integration, infrastructure-as-code, the
+`fractal` CLI, and agent-driven deploys. A token acts with your access across
+the workspace it belongs to.
+
+## Create a token
+
+In the dashboard, open your workspace and go to **API Tokens** (under the
+workspace admin area). Create one with:
+
+- **Name** a label so you can recognize it later (e.g. `github-actions-ci`).
+- **Expiry** an optional lifetime. Omit it for a non-expiring token.
+
+The token's secret is shown **once**, at creation. Copy it then and store it
+somewhere safe (your CI provider's secret store, a password manager). It is
+stored only as a hash, so it can never be shown again; if you lose it, revoke
+it and create a new one.
+
+## Use a token
+
+Send the token as a bearer credential:
+
+```bash
+curl -H "Authorization: Bearer ftk_..." https://<your-fractal-api>/graphql
+```
+
+The `fractal` CLI reads its token from `~/.config/fractal/config.toml` after
+`fractal auth login`; for CI, set the token in the environment your CLI or
+API client reads instead.
+
+## List and revoke
+
+The **API Tokens** page lists every token in the workspace with its status
+(active, expired, or revoked), when it was last used, and when it expires.
+
+**Revoke** a token to stop it working immediately, for example when a secret
+leaks or a pipeline is retired. Revocation cannot be undone: anything using
+that token stops working at once, so issue a replacement first if the workload
+still needs access. A revoked token is kept (not deleted) so it stays in the
+audit trail.
+
+## From the CLI
+
+The same tokens can be managed with the CLI (see the
+[CLI Reference](/products/fractal/cli-reference)):
+
+```bash
+fractal tokens list
+fractal tokens create --name <label> [--scope <project>]... [--expires-in-days <n>]
+fractal tokens revoke <name>
+```
