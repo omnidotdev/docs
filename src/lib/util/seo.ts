@@ -12,21 +12,13 @@ interface Params {
 }
 
 /**
- * Cache-busting version for OG images. Social crawlers (LinkedIn, X) cache a
- * fetched image by its exact URL, so a URL that was crawled while the generator
- * was broken stays poisoned even after a fix. Bump this to hand them a fresh
- * URL and force a re-fetch.
- */
-const OG_IMAGE_VERSION = "2";
-
-/**
  * Generate dynamic OG image URL from slug.
  */
 const getOgImageUrl = (slug?: string): string => {
   // Use "index" for homepage, otherwise use the slug
   const path = slug || "index";
 
-  return `${app.appUrl}/og/${path}.png?v=${OG_IMAGE_VERSION}`;
+  return `${app.appUrl}/og/${path}.png`;
 };
 
 /**
