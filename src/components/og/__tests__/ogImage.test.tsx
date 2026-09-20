@@ -35,12 +35,16 @@ const fontData = readFileSync(
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 /** Render OgImage through the production pipeline and return the PNG bytes. */
-const renderOgPng = async (realm: Realm | null): Promise<Buffer> => {
+const renderOgPng = async (
+  realm: Realm | null,
+  label?: string,
+): Promise<Buffer> => {
   const svg = await satori(
     <OgImage
       title={realm?.name ?? "Omni Docs"}
       description={realm?.tagline ?? "Documentation for the Omni ecosystem"}
       realm={realm}
+      label={label}
     />,
     {
       width: 1200,
@@ -81,4 +85,11 @@ describe("OG image generation", () => {
       assertValidPng(await renderOgPng(realm));
     },
   );
+
+  // A product page shows the product name in the footer while keeping its
+  // realm's icon and color.
+  it("renders a product card (realm + product label) as a valid PNG", async () => {
+    const realm = realmsData.realms.find((r) => r.id === "grid") ?? null;
+    assertValidPng(await renderOgPng(realm, "Fractal"));
+  });
 });

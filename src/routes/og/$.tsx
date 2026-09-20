@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import satori from "satori";
 
 import OgImage from "@/components/og/OgImage";
+import { products } from "@/lib/catalog/generated/catalog";
+import { PRODUCT_REALMS } from "@/lib/productRealms.generated";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import stripEmojis from "@/lib/util/stripEmojis";
@@ -42,15 +44,50 @@ const getRealmById = (id: string): Realm | undefined => {
   return realmsData.realms.find((r) => r.id === id);
 };
 
+/** Display name for a product id, from the public catalog. */
+const getProductName = (id: string): string | undefined => {
+  return products.find((product) => product.id === id)?.name;
+};
+
 interface OgMetadata {
   realm: Realm | null;
   title: string;
   description: string;
+  /** Footer product label, when the page belongs to a product. */
+  productName?: string;
 }
+
+/**
+ * Resolve the realm (and product, if any) a docs path belongs to.
+ *
+ * After the URL restructure, product pages live at /products/<id>/... and realm
+ * hubs at /realms/<realm>, so the realm can no longer be read from the first
+ * path segment. Product pages resolve their realm through the generated public
+ * product -> realm map.
+ */
+const resolveRealmAndProduct = (
+  segments: string[],
+): { realm: Realm | null; productName?: string } => {
+  if (segments[0] === "products" && segments[1]) {
+    const id = segments[1];
+    const realmId = PRODUCT_REALMS[id];
+
+    return {
+      realm: (realmId ? getRealmById(realmId) : undefined) ?? null,
+      productName: getProductName(id) ?? formatSlugToTitle(id),
+    };
+  }
+
+  if (segments[0] === "realms" && segments[1]) {
+    return { realm: getRealmById(segments[1]) ?? null };
+  }
+
+  return { realm: null };
+};
 
 /** Resolve OG metadata from a path. */
 const getOgMetadata = (path: string): OgMetadata => {
-  // "core/crystal.png" → ["core", "crystal"]
+  // "products/fractal/object-storage.png" → ["products", "fractal", ...]
   const cleaned = path.replace(/\.png$/, "");
   const segments = cleaned.split("/").filter(Boolean);
 
@@ -66,28 +103,15 @@ const getOgMetadata = (path: string): OgMetadata => {
     };
   }
 
-  const realmId = segments[0];
-  const realm = getRealmById(realmId) ?? null;
-
-  // Try to get page from source
+  const { realm, productName } = resolveRealmAndProduct(segments);
   const page = source.getPage(segments);
-
-  if (page) {
-    return {
-      realm,
-      title: page.data.title ?? formatSlugToTitle(segments.at(-1) ?? ""),
-      description:
-        page.data.description ?? realm?.tagline ?? "Omni Documentation",
-    };
-  }
-
-  // Fallback: format the last segment as title
-  const lastSegment = segments.at(-1) ?? "";
 
   return {
     realm,
-    title: formatSlugToTitle(lastSegment),
-    description: realm?.tagline ?? "Omni Documentation",
+    productName,
+    title: page?.data.title ?? formatSlugToTitle(segments.at(-1) ?? ""),
+    description:
+      page?.data.description ?? realm?.tagline ?? "Omni Documentation",
   };
 };
 
@@ -106,7 +130,7 @@ export const Route = createFileRoute("/og/$")({
           return new Response("Not found", { status: 404 });
         }
 
-        const { realm, title, description } = getOgMetadata(path);
+        const { realm, title, description, productName } = getOgMetadata(path);
 
         try {
           const fontData = await fetchFont();
@@ -117,6 +141,7 @@ export const Route = createFileRoute("/og/$")({
               title={cleanTitle}
               description={description}
               realm={realm}
+              label={productName ? stripEmojis(productName) : undefined}
             />,
             {
               width: 1200,

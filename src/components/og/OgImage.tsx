@@ -188,16 +188,26 @@ interface OgImageProps {
   title: string;
   description?: string;
   realm?: Realm | null;
+  /**
+   * Footer label. Overrides the realm name, so a product page can name the
+   * product while still showing its realm icon and color.
+   */
+  label?: string;
 }
 
 /**
  * OG image component for Satori rendering.
  * Uses inline styles (Satori requirement).
  */
-const OgImage = ({ title, description, realm }: OgImageProps): ReactNode => {
+const OgImage = ({
+  title,
+  description,
+  realm,
+  label,
+}: OgImageProps): ReactNode => {
   const colors = realm?.ogColors ?? DEFAULT_GRADIENT;
   const realmId = realm?.id ?? "welcome";
-  const realmName = realm?.name ?? "DOCS";
+  const footerLabel = label ?? realm?.name ?? "DOCS";
   const realmIcon = REALM_ICONS[realmId] ?? null;
 
   const containerStyle: CSSProperties = {
@@ -290,7 +300,7 @@ const OgImage = ({ title, description, realm }: OgImageProps): ReactNode => {
       <div style={footerStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {realmIcon}
-          <span style={realmLabelStyle}>{realmName}</span>
+          <span style={realmLabelStyle}>{footerLabel}</span>
         </div>
         <span style={domainStyle}>docs.omni.dev</span>
       </div>
