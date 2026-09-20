@@ -137,6 +137,10 @@ export const Route = createFileRoute("/og/$")({
               mode: "width",
               value: 1200,
             },
+            // Satori already vectorizes all text to paths, so resvg never needs
+            // a font. Skipping the system-font scan cuts each render from ~10s
+            // (resvg building a full OS font database) to ~30ms.
+            font: { loadSystemFonts: false },
           });
 
           const pngData = resvg.render();

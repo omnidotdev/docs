@@ -1,35 +1,126 @@
-import {
-  BookOpen,
-  Box,
-  Brush,
-  FileCode,
-  Glasses,
-  Globe,
-  Hammer,
-  Heart,
-  HelpCircle,
-  Palette,
-  Server,
-  Users,
-} from "lucide-react";
-
 import type { CSSProperties, ReactNode } from "react";
 import type realmsData from "../../../realms.json";
 
-/** Realm icon mapping. */
+/** Footer realm-icon stroke color. */
+const ICON_COLOR = "rgba(255, 255, 255, 0.9)";
+
+/**
+ * Satori-safe wrapper for a realm footer icon.
+ *
+ * These icons deliberately do NOT use lucide-react components. lucide v1 icons
+ * read a React context via a hook, and Satori renders a component by invoking
+ * it directly with no React renderer active, so the hook dispatcher is null and
+ * the render throws, 500ing every OG image site-wide. Inlining the raw SVG
+ * geometry (mirrored from lucide-react 1.31.0) keeps the render pure.
+ */
+const RealmIcon = ({ children }: { children: ReactNode }): ReactNode => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={20}
+    height={20}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={ICON_COLOR}
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    role="img"
+    aria-hidden="true"
+  >
+    {children}
+  </svg>
+);
+
+/** Realm icon mapping (raw inline SVG, mirrors lucide-react 1.31.0). */
 const REALM_ICONS: Record<string, ReactNode> = {
-  welcome: <BookOpen size={20} color="rgba(255,255,255,0.9)" />,
-  core: <Box size={20} color="rgba(255,255,255,0.9)" />,
-  kindred: <Heart size={20} color="rgba(255,255,255,0.9)" />,
-  fabric: <Brush size={20} color="rgba(255,255,255,0.9)" />,
-  grid: <Server size={20} color="rgba(255,255,255,0.9)" />,
-  armory: <Hammer size={20} color="rgba(255,255,255,0.9)" />,
-  codex: <FileCode size={20} color="rgba(255,255,255,0.9)" />,
-  sigil: <Palette size={20} color="rgba(255,255,255,0.9)" />,
-  reality: <Glasses size={20} color="rgba(255,255,255,0.9)" />,
-  worlds: <Globe size={20} color="rgba(255,255,255,0.9)" />,
-  community: <Users size={20} color="rgba(255,255,255,0.9)" />,
-  help: <HelpCircle size={20} color="rgba(255,255,255,0.9)" />,
+  welcome: (
+    <RealmIcon>
+      <path d="M12 5v16" />
+      <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" />
+    </RealmIcon>
+  ),
+  core: (
+    <RealmIcon>
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+      <path d="m3.3 7 8.7 5 8.7-5" />
+      <path d="M12 22V12" />
+    </RealmIcon>
+  ),
+  kindred: (
+    <RealmIcon>
+      <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
+    </RealmIcon>
+  ),
+  fabric: (
+    <RealmIcon>
+      <path d="m11 10 3 3" />
+      <path d="M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z" />
+      <path d="M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031" />
+    </RealmIcon>
+  ),
+  grid: (
+    <RealmIcon>
+      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+      <line x1="6" x2="6.01" y1="6" y2="6" />
+      <line x1="6" x2="6.01" y1="18" y2="18" />
+    </RealmIcon>
+  ),
+  armory: (
+    <RealmIcon>
+      <path d="m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9" />
+      <path d="m18 15 4-4" />
+      <path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5" />
+    </RealmIcon>
+  ),
+  codex: (
+    <RealmIcon>
+      <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+      <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+      <path d="M10 12.5 8 15l2 2.5" />
+      <path d="m14 12.5 2 2.5-2 2.5" />
+    </RealmIcon>
+  ),
+  sigil: (
+    <RealmIcon>
+      <path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" />
+      <circle cx="13.5" cy="6.5" r=".5" fill={ICON_COLOR} />
+      <circle cx="17.5" cy="10.5" r=".5" fill={ICON_COLOR} />
+      <circle cx="6.5" cy="12.5" r=".5" fill={ICON_COLOR} />
+      <circle cx="8.5" cy="7.5" r=".5" fill={ICON_COLOR} />
+    </RealmIcon>
+  ),
+  reality: (
+    <RealmIcon>
+      <circle cx="6" cy="15" r="4" />
+      <circle cx="18" cy="15" r="4" />
+      <path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2" />
+      <path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2" />
+      <path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2" />
+    </RealmIcon>
+  ),
+  worlds: (
+    <RealmIcon>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+      <path d="M2 12h20" />
+    </RealmIcon>
+  ),
+  community: (
+    <RealmIcon>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <path d="M16 3.128a4 4 0 0 1 0 7.744" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <circle cx="9" cy="7" r="4" />
+    </RealmIcon>
+  ),
+  help: (
+    <RealmIcon>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <path d="M12 17h.01" />
+    </RealmIcon>
+  ),
 };
 
 /** Omni logo as inline SVG component (Satori-compatible). */

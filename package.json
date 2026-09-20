@@ -13,6 +13,7 @@
     "lint": "biome lint",
     "check": "fumadocs-mdx && biome check --diagnostic-level=error",
     "knip": "knip-bun",
+    "test": "vitest run",
     "prepare": "husky"
   },
   "dependencies": {
