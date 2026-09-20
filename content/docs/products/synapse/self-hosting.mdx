@@ -15,9 +15,9 @@ Synapse runs five containers:
 |-----------|-------|------|
 | `db` | `postgres:18-alpine` | 5432 |
 | `valkey` | `valkey/valkey:8-alpine` | 6379 |
-| `gateway` | `manifold.omni.dev/omni/synapse:latest` | 6000 |
-| `api` | `manifold.omni.dev/omni/synapse-api:latest` | 4000 |
-| `app` | `manifold.omni.dev/omni/synapse-app:latest` | 3000 |
+| `gateway` | `ghcr.io/omnidotdev/synapse:latest` | 6000 |
+| `api` | `ghcr.io/omnidotdev/synapse-api:latest` | 4000 |
+| `app` | `ghcr.io/omnidotdev/synapse-app:latest` | 3000 |
 
 Health checks are configured for all services. The gateway waits for the API and Valkey to be healthy before starting. The API waits for PostgreSQL.
 
@@ -46,7 +46,7 @@ Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT
 
 ### Without authentication
 
-Override `PROTECT_ROUTES=false` in `.env.local` and omit `AUTH_BASE_URL` to bypass JWT verification. The API accepts unauthenticated requests. Billing features return 503 gracefully.
+Set `PROTECT_ROUTES=false` in `.env.local` and omit `AUTH_BASE_URL` to bypass JWT verification on the API, which then accepts unauthenticated requests (billing features return 503 gracefully). The gateway enforces auth separately, so for a fully unauthenticated stack also set `[auth] enabled = false` in the mounted `config/synapse.toml`. Remember to pass `--env-file .env.local` to `docker compose` so these values are loaded.
 
 Suitable for: local development, internal networks behind a VPN, testing.
 
