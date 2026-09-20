@@ -27,7 +27,28 @@ While the sequence is active, every new contact added to that audience is automa
 
 - Each enrolled contact moves step by step until the sequence completes.
 - If a contact **unsubscribes** or is **suppressed**, their enrollment exits immediately and no further steps are sent.
+- If a contact **converts** (see below), their enrollment exits with reason `converted`, so a lead who has already booked or bought stops receiving the nurture.
 - Pausing a sequence holds existing enrollments; reactivating resumes them.
+
+## Stop nurturing on conversion
+
+The point of a nurture is a conversion (a booked call, a purchase), and those usually happen outside Herald, on a scheduler or a checkout page. When that happens you want the lead to stop receiving the rest of the drip.
+
+Give a sequence an optional **goal event**, a short label that names its conversion (for example `booked_call` or `purchased_plan`), set on the sequence when you create or update it through the [API or SDK](/products/herald/api-reference). Then, when the lead converts, have the system that knows about it (your booking page, checkout, or a webhook from your scheduler) call the `recordConversion` mutation with the contact's email address:
+
+```graphql
+mutation {
+  recordConversion(input: { address: "lead@example.com", event: "booked_call" }) {
+    exited
+  }
+}
+```
+
+- With an `event`, only enrollments in sequences whose goal event matches are exited, so a lead who booked a call can still finish a separate purchase nurture.
+- Omit `event` for a blanket conversion that exits **every** active enrollment for that address ("they converted, stop everything").
+- An unknown address or no match is a harmless no-op that returns `exited: 0`, so a webhook that fires for a non-lead does nothing.
+
+`recordConversion` accepts a full or sending [API key](/products/herald/api-reference), and Herald emits a `herald.contact.converted` event when an enrollment exits, so the rest of your stack can react.
 
 ## Getting contacts in
 
