@@ -1,0 +1,72 @@
+---
+title: Self-Hosting
+description: Build the Facet static app and serve it on your own infrastructure
+---
+
+Facet is fully open source (Apache 2.0). It is a static single-page app with no backend: the editor, the CSG kernels, the viewport, and STL export all run in the browser. Hosting it is a matter of building the app and serving the resulting `dist/` folder from any static web server. The Rust kernel is vendored as WebAssembly, so no Rust toolchain is needed to build or run it.
+
+## Prerequisites
+
+- [Bun](https://bun.sh) (the app uses `bun`, matching `packageManager` in `package.json`)
+- [Git](https://git-scm.com/)
+- Optionally, [Docker](https://docs.docker.com/get-docker/) if you want to run the containerized build
+
+## Build from source
+
+```sh
+# Clone the app repo
+git clone https://github.com/omnidotdev/facet-app
+cd facet-app
+
+# Install dependencies
+bun install
+
+# Build the static site into dist/
+bun run build
+```
+
+`bun run build` generates the router routes, type-checks, and produces a Vite production build in `dist/`. That folder is a self-contained static site, including the vendored WASM kernel; serve it with any static file server.
+
+To iterate locally instead, run the dev server:
+
+```sh
+bun run dev   # serves the Studio at http://localhost:5173
+```
+
+## Serve the build
+
+`dist/` is plain static files, with one requirement: it is a single-page app, so unknown routes must fall back to `index.html`. Any static host that supports an SPA fallback works. For example, with a simple static server or your web server of choice, point the document root at `dist/` and rewrite unmatched paths to `/index.html`.
+
+## Docker
+
+The repo ships a `Dockerfile` that builds the SPA and serves it with nginx. It is a multi-stage build: `oven/bun` compiles the site, then the static output is copied into an `nginx:alpine` image. Because the WASM kernel is vendored under `src/wasm`, the image needs no Rust toolchain.
+
+```sh
+# From the repo root
+docker build -t facet .
+docker run --rm -p 8080:8080 facet
+```
+
+The container serves Facet on port `8080`. Open `http://localhost:8080`.
+
+The bundled `nginx.conf` does two things worth knowing:
+
+- **SPA fallback**, unmatched paths fall through to `index.html` (`try_files $uri $uri/ /index.html`), so client-side routes resolve
+- **Immutable assets**, fingerprinted files under `/assets/` are served with a one-year `Cache-Control: public, immutable` header
+
+If you serve `dist/` from your own nginx, reuse `nginx.conf` as the source of truth for that routing and caching.
+
+## Rebuilding the WASM kernel (optional)
+
+You do not need this to run Facet: the WebAssembly kernel is committed under `src/wasm` and loaded at runtime, and the app runs on the TypeScript kernel alone if it is ever absent. To rebuild it from the Rust source in `crates/facet-kernel`, you need a Rust toolchain and [`wasm-pack`](https://rustwasm.github.io/wasm-pack/):
+
+```sh
+bun run wasm:build
+```
+
+This compiles the crate to WebAssembly and writes the vendored bundle back into `src/wasm`, after which a normal `bun run build` picks it up.
+
+## Notes
+
+- Facet stores nothing server-side and requires no database, cache, or auth service to run standalone. It is static files plus in-browser compute.
+- All features are available in a self-hosted build; there is no billing or entitlement gate on the modeling tools.

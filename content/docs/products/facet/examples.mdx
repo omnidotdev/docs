@@ -1,0 +1,184 @@
+---
+title: Examples
+description: Worked Facet models you can paste into the Studio
+---
+
+Every model below ships as a starter in the Studio's examples dropdown. Load one to try it, or paste the code into the editor. Each ends by returning a shape.
+
+## Parametric plate
+
+A rectangular plate with an optional through-hole, driven entirely by sliders. Shows `param.number`, an array-sized `cube`, a conditional, and `subtract`.
+
+```ts
+// Drag the sliders (top-left of the viewport) - the model is live
+const w = param.number("width", { min: 20, max: 90, default: 50, step: 1 });
+const d = param.number("depth", { min: 20, max: 90, default: 34, step: 1 });
+const h = param.number("height", { min: 4, max: 40, default: 12, step: 1 });
+const r = param.number("hole", { min: 0, max: 14, default: 6, step: 0.5 });
+
+let plate = cube([w, d, h]);
+if (r > 0) {
+  plate = plate.subtract(cylinder(r, h + 2, { segments: 48 }));
+}
+return plate;
+```
+
+Drag `hole` to `0` and the conditional drops the cut entirely; the drilled cylinder is made slightly taller than the plate so it punches cleanly through both faces.
+
+## L-bracket
+
+Two boxes fused into an L, then drilled. Shows `{ center: false }` positioning, `union`, and subtracting the same hole twice at different positions.
+
+```ts
+// L-bracket with two bolt holes
+const t = 5;   // thickness
+const w = 40;  // width
+
+const base = cube([w, 40, t], { center: false });
+const wall = cube([w, t, 30], { center: false });
+let part = base.union(wall);
+
+// drill two holes through the base
+const hole = cylinder(3.2, t * 4, { segments: 32 });
+part = part.subtract(
+  hole.translate(12, 20, t / 2),
+  hole.translate(28, 20, t / 2),
+);
+
+return part;
+```
+
+Because `subtract` accepts multiple shapes, both holes are removed in one call.
+
+## Bolt flange
+
+A bored disc with a ring of bolt holes placed by a loop. Shows generating repeated geometry with trigonometry.
+
+```ts
+// Pipe flange with a ring of bolt holes
+const flange = cylinder(30, 6, { segments: 72 });
+const bore = cylinder(14, 20, { segments: 72 });
+let part = flange.subtract(bore);
+
+const bolts = 6;
+for (let i = 0; i < bolts; i++) {
+  const a = (i / bolts) * Math.PI * 2;
+  const hole = cylinder(3, 20, { segments: 24 })
+    .translate(Math.cos(a) * 22, Math.sin(a) * 22, 0);
+  part = part.subtract(hole);
+}
+
+return part;
+```
+
+Raise `segments` on the flange and bore for a rounder disc; the bolt holes can stay coarse.
+
+## Faceted gem
+
+A coarse sphere clipped flat and stretched. Shows using a low `segments` count as a design choice, plus `subtract` and non-uniform `scale`.
+
+```ts
+// A cut gem - a coarse sphere clipped flat to a table facet
+const stone = sphere(20, { segments: 10 });
+const table = cube([60, 60, 40], { center: true }).translate(0, 0, 32);
+return stone.subtract(table).scale(1, 1, 1.25);
+```
+
+The 10-segment sphere is intentionally faceted, so the result reads as a cut gem rather than a smooth ball.
+
+## LEGO brick
+
+A 2x4 studded brick: a hollow body, studs unioned on top, and tubes underneath, all built with nested loops. Shows how far ordinary code scales a model.
+
+```ts
+// A 2x4 LEGO-style brick: hollow body, studs on top, tubes underneath
+const P = 8;               // stud pitch
+const cols = 4, rows = 2;
+const W = cols * P, D = rows * P, H = 9.6;
+const wall = 1.5;
+const studR = 2.4, studH = 1.8;
+
+// hollow body: top stays closed, bottom is open
+const outer = cube([W, D, H], { center: false });
+const inner = cube([W - 2 * wall, D - 2 * wall, H - wall], { center: false })
+  .translate(wall, wall, -0.01);
+let brick = outer.subtract(inner);
+
+// studs on top
+for (let cx = 0; cx < cols; cx++) {
+  for (let cy = 0; cy < rows; cy++) {
+    const stud = cylinder(studR, studH, { center: false, segments: 24 })
+      .translate((cx + 0.5) * P, (cy + 0.5) * P, H);
+    brick = brick.union(stud);
+  }
+}
+
+// underside tubes between the studs
+for (let i = 1; i < cols; i++) {
+  const tube = cylinder(3.25, H - wall, { center: false, segments: 24 })
+    .subtract(cylinder(2.4, H - wall + 0.1, { center: false, segments: 24 }))
+    .translate(i * P, D / 2, 0);
+  brick = brick.union(tube);
+}
+
+return brick;
+```
+
+Each tube is itself a small subtraction (an outer cylinder minus an inner one) before being unioned into the brick.
+
+## Dice (d6)
+
+A cube with pips drilled on every face, arranged so opposite faces sum to seven. Shows a helper function that returns a shape and a data-driven layout.
+
+```ts
+// A d6 with pips drilled on all six faces (opposite faces sum to 7)
+let die = cube(20);
+const s = 10;    // half-size (face distance)
+const d = 4.6;   // pip spacing
+const r = 2.0;   // pip radius
+
+// one pip, placed by which face ('x'|'y'|'z'), its sign, and in-face (u, v)
+const pip = (face, sign, u, v) => {
+  const p = face === "x" ? [sign * s, u, v]
+          : face === "y" ? [u, sign * s, v]
+          :                [u, v, sign * s];
+  return sphere(r, { segments: 16 }).translate(p[0], p[1], p[2]);
+};
+
+const layouts = {
+  1: [[0, 0]],
+  2: [[-d, -d], [d, d]],
+  3: [[-d, -d], [0, 0], [d, d]],
+  4: [[-d, -d], [-d, d], [d, -d], [d, d]],
+  5: [[-d, -d], [-d, d], [0, 0], [d, -d], [d, d]],
+  6: [[-d, -d], [-d, 0], [-d, d], [d, -d], [d, 0], [d, d]],
+};
+
+// value per face, arranged so opposite faces sum to 7
+const faces = [
+  ["z", 1, 1], ["z", -1, 6],
+  ["x", 1, 2], ["x", -1, 5],
+  ["y", 1, 3], ["y", -1, 4],
+];
+
+for (const [face, sign, value] of faces) {
+  for (const [u, v] of layouts[value]) {
+    die = die.subtract(pip(face, sign, u, v));
+  }
+}
+
+return die;
+```
+
+The `pip` helper returns a positioned sphere, and the loops subtract one per pip. This is a model that would be tedious by hand and trivial in code.
+
+## Next steps
+
+<Cards>
+  <Card title="Modeling API" href="/products/facet/modeling">
+    The full reference for every call used above
+  </Card>
+  <Card title="Getting Started" href="/products/facet/getting-started">
+    Load these in the Studio and export an STL
+  </Card>
+</Cards>

@@ -1,0 +1,70 @@
+---
+title: Concepts
+description: How Facet turns code into geometry
+---
+
+Facet is small in surface area but specific in how it works. This page explains the ideas the rest of the docs assume.
+
+## Code-first, parametric modeling
+
+A Facet model is a program, not a drawing. You describe a part by composing operations in code, so everything a program can do is available: variables, arithmetic, conditionals, loops, and functions. A ring of bolt holes is a `for` loop; a wall thickness is a variable reused everywhere it matters.
+
+Because the part is code, it is **parametric** by construction. Named inputs declared with `param.number(...)` drive the geometry, and changing one re-derives the whole model. This is the idea behind script-based CAD, but authored in a real programming language rather than a bespoke one.
+
+## The op-graph
+
+Calling a modeling function does not compute any geometry. It builds a node in an **op-graph**, a serializable tree that records what you asked for: "a cube of this size", "translated by this vector", "with these cylinders subtracted". A `Shape` is an immutable handle onto one node, and every method returns a new `Shape` wrapping a new node:
+
+```ts
+cube(10)               // a cube node
+  .translate(5, 0, 0)  // a translate node whose child is the cube
+  .subtract(sphere(6)) // a difference node over both
+```
+
+Keeping authoring and evaluation separate is what lets Facet hand the same graph to different kernels, and re-evaluate cheaply when only a parameter value changes.
+
+## The CSG kernel
+
+A **kernel** takes the op-graph and turns it into geometry. Facet uses constructive solid geometry (CSG): primitives are combined with boolean operations (union, difference, intersection) to build the final solid.
+
+Facet ships two kernels behind one interface, and you pick between them in the Studio:
+
+- **TypeScript CSG kernel**, a BSP-tree CSG evaluator that runs in-process. Always available.
+- **Rust/WASM kernel**, the same operations implemented in Rust and compiled to WebAssembly. Offered when its bundle is vendored with the app.
+
+Both consume the same op-graph and produce the same kind of mesh, so a model behaves the same whichever you choose. The kernel's job ends at a triangle mesh.
+
+## Mesh vs solid
+
+You author against **solids** (a cube is a filled box, a subtraction removes material), but what the kernel returns, and what the viewport draws and STL stores, is a **mesh**: a tessellated set of triangles approximating that solid.
+
+Curved primitives are approximated by facets. `sphere` and `cylinder` take a `segments` option that controls how finely the curve is divided: more segments means a smoother surface and more triangles. The mesh is non-indexed with flat, per-face normals, which is why the preview shows crisp facets.
+
+## The eval, preview, export loop
+
+Everything you do in the Studio is one loop:
+
+1. **Author**, your code builds an op-graph and returns its root `Shape`.
+2. **Evaluate**, the active kernel walks the graph and produces a mesh. The status line reports its triangle count, the time it took, and which kernel ran.
+3. **Preview**, the viewport draws the mesh, reframing the camera on a fresh model or a new example.
+4. **Adjust**, drag a parameter slider and the model re-evaluates live, in place, without reframing.
+5. **Export**, download the current mesh as a binary STL.
+
+Code edits re-run automatically shortly after you stop typing; slider drags re-run immediately.
+
+## Parameters and units
+
+`param.number(name, { min, max, step, default })` declares an input and returns its current value. The Studio reads the declarations after each run to build the sliders, and writes a value back when you drag one. A value defaults to `default` (falling back to `min`, then `0`) and persists across code edits.
+
+Facet geometry is **unitless**: the numbers in a model are just lengths, and STL itself carries no unit. By convention models are authored in millimeters, which is what most slicers assume, so a `cube(20)` prints as a 20 mm cube unless you tell your slicer otherwise.
+
+## Next steps
+
+<Cards>
+  <Card title="Modeling API" href="/products/facet/modeling">
+    The exact functions you call to build a model
+  </Card>
+  <Card title="Examples" href="/products/facet/examples">
+    See the concepts applied in full models
+  </Card>
+</Cards>
