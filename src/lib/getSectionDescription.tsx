@@ -32,8 +32,15 @@ const isRecentlyReleased = (releaseDate?: string) => {
 // Sidebar status badges derive from the omni-api catalog (SSOT), vendored into
 // `catalog/generated/catalog.ts` at build time. Matched against sidebar item
 // names, so these hold product display names.
+// A product is either "coming soon" or "new", never both: a coming_soon product
+// has not launched, so it can never also badge "New" even if it carries a recent
+// releaseDate.
 export const NEW_PRODUCTS = products
-  .filter((product) => isRecentlyReleased(product.releaseDate))
+  .filter(
+    (product) =>
+      product.status !== "coming_soon" &&
+      isRecentlyReleased(product.releaseDate),
+  )
   .map((product) => product.name);
 // Escape hatch to badge a product "coming soon" in the docs sidebar even when
 // the catalog does not mark it so (docs-only, does not touch the SSOT or the

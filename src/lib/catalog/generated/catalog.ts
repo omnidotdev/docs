@@ -90,7 +90,52 @@ export const products: CatalogProduct[] = [
     "id": "aspen",
     "name": "Aspen",
     "realm": "worlds",
-    "status": "coming_soon"
+    "status": "coming_soon",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Aspen Free",
+        "description": "The full open-source engine and editor, with instant play-links",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "\"Made with Aspen\" badge",
+          "3 cloud projects",
+          "Community support",
+          "Full engine and editor (Apache-2.0)",
+          "Instant click-to-play links",
+          "Publish and share /play links"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Aspen Pro",
+        "description": "Unlimited projects, cloud sync, and custom domains",
+        "monthlyPrice": 1900,
+        "yearlyPrice": 19000,
+        "features": [
+          "Badge removed",
+          "Cloud sync across devices",
+          "Custom domains",
+          "Everything in Free",
+          "Higher AI and build priority",
+          "Unlimited cloud projects"
+        ]
+      },
+      {
+        "tier": "studio",
+        "name": "Aspen Studio",
+        "description": "Collaboration and teams for studios shipping together",
+        "monthlyPrice": 9900,
+        "yearlyPrice": 99000,
+        "features": [
+          "Everything in Pro",
+          "Priority support",
+          "Real-time collaboration and teams",
+          "Shared workspace projects"
+        ]
+      }
+    ]
   },
   {
     "id": "backfeed",
@@ -253,6 +298,13 @@ export const products: CatalogProduct[] = [
     "releaseDate": "2026-01-01"
   },
   {
+    "id": "facet",
+    "name": "Facet",
+    "realm": "fabric",
+    "status": "active",
+    "releaseDate": "2026-09-22"
+  },
+  {
     "id": "fractal",
     "name": "Fractal",
     "realm": "grid",
@@ -290,6 +342,7 @@ export const products: CatalogProduct[] = [
           "5 custom domains",
           "5 projects",
           "Community support",
+          "Public buckets + global CDN",
           "Scale-to-zero when idle"
         ]
       },
@@ -307,6 +360,7 @@ export const products: CatalogProduct[] = [
           "50 GB bandwidth/month",
           "Auto-scaling",
           "Priority support",
+          "Public buckets + global CDN",
           "Unlimited custom domains"
         ]
       },
@@ -321,6 +375,7 @@ export const products: CatalogProduct[] = [
           "500 GB bandwidth/month",
           "500 GB storage",
           "Auto-scaling",
+          "Public buckets + global CDN",
           "SLA guarantee",
           "Unlimited custom domains",
           "Unlimited projects",
@@ -588,6 +643,7 @@ export const products: CatalogProduct[] = [
     "name": "Synapse",
     "realm": "grid",
     "status": "active",
+    "releaseDate": "2026-09-20",
     "plans": [
       {
         "tier": "free",
@@ -628,13 +684,13 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 75800,
         "features": [
           "1-year analytics retention",
+          "1M requests/mo, then $0.10 per 1K",
           "All modalities (STT, TTS, images, embeddings)",
           "Pay-as-you-go managed credits (15% margin)",
           "Priority support",
           "Smart routing (cost, quality, latency)",
           "Team workspaces with roles",
-          "Unlimited API keys",
-          "Unlimited requests"
+          "Unlimited API keys"
         ]
       }
     ]
@@ -658,6 +714,7 @@ export const products: CatalogProduct[] = [
     "name": "Vortex",
     "realm": "grid",
     "status": "active",
+    "releaseDate": "2026-09-20",
     "plans": [
       {
         "tier": "free",
