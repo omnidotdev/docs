@@ -1,0 +1,183 @@
+---
+title: Modeling API
+description: Primitives, transforms, boolean operations, and parameters
+---
+
+This is the full authoring surface. A model builds shapes by calling these functions and chaining methods, then `return`s a shape. Everything here is provided to your model already, so you never import anything.
+
+<Callout type="info">
+A model must end by returning a `Shape`. Returning anything else raises "Your model must `return` a shape".
+</Callout>
+
+## Primitives
+
+Primitives create a `Shape`. Sizes are plain numbers (see [units](/products/facet/concepts#parameters-and-units)).
+
+### `cube`
+
+```ts
+cube(size: number | [w, d, h] = 1, opts?: { center?: boolean }): Shape
+```
+
+A box. A single number is a cube of that side length; an array is a rectangular box of width, depth, and height. Centered on the origin by default; pass `{ center: false }` to put its near corner at the origin.
+
+```ts
+cube(10);                          // 10 x 10 x 10, centered
+cube([40, 40, 5], { center: false }); // rectangular, corner at origin
+```
+
+`box` is an alias for `cube`.
+
+### `sphere`
+
+```ts
+sphere(r: number = 1, opts?: { segments?: number }): Shape
+```
+
+A sphere of radius `r`, centered on the origin. `segments` (default `32`) controls how finely the surface is faceted; higher is smoother and heavier. A low value gives a deliberately coarse, faceted stone.
+
+```ts
+sphere(20, { segments: 10 }); // coarse, visibly faceted
+```
+
+### `cylinder`
+
+```ts
+cylinder(r: number = 1, h: number = 1, opts?: { center?: boolean; segments?: number }): Shape
+```
+
+A cylinder of radius `r` and height `h` along the Z axis. Centered on the origin by default; `{ center: false }` sits its base at `z = 0`. `segments` (default `32`) sets the number of sides.
+
+```ts
+cylinder(3.2, 20, { segments: 48 });
+```
+
+## Transforms
+
+Transforms are methods on a `Shape`. Each returns a new `Shape`, so they chain. All accept either separate `x, y, z` numbers or a single `[x, y, z]` vector.
+
+### `translate` / `move`
+
+```ts
+shape.translate(x: number | [x, y, z], y?: number, z?: number): Shape
+```
+
+Moves the shape by the given offset. `move` is an alias.
+
+```ts
+cylinder(3, 20).translate(22, 0, 0);
+cube(10).move([5, 5, 0]);
+```
+
+### `rotate`
+
+```ts
+shape.rotate(x: number | [x, y, z], y?: number, z?: number): Shape
+```
+
+Rotates in **degrees** about the X, Y, and Z axes, applied in that order.
+
+```ts
+cube(10).rotate(0, 0, 45);
+```
+
+### `scale`
+
+```ts
+shape.scale(x: number | [x, y, z], y?: number, z?: number): Shape
+```
+
+Scales the shape. A single number scales uniformly; a vector scales per axis.
+
+```ts
+sphere(10).scale(1, 1, 1.25); // stretched along Z
+```
+
+## Boolean operations
+
+Booleans combine solids. They come in two forms that do the same thing: chainable methods on a `Shape`, and free functions that read well at the top level. Each takes one or more other shapes.
+
+### Union
+
+Fuse shapes into one.
+
+```ts
+a.union(b, c);   // method  (add is an alias)
+union(a, b, c);  // free function
+```
+
+### Difference
+
+Cut shapes out of a base.
+
+```ts
+base.subtract(cut1, cut2);   // method  (sub is an alias)
+difference(base, cut1, cut2); // free function: first arg is the base
+```
+
+### Intersection
+
+Keep only the overlapping volume.
+
+```ts
+a.intersect(b);       // method
+intersection(a, b);   // free function
+```
+
+## Parameters
+
+Declare a live input with `param.number`. It registers the parameter, returns its current value, and drives a slider in the Studio's Parameters panel.
+
+```ts
+param.number(name: string, opts?: {
+  min?: number;
+  max?: number;
+  step?: number;
+  default?: number;
+}): number
+```
+
+- `default` is the starting value (falls back to `min`, then `0`)
+- `min` defaults to `0`
+- `max` and `step` are derived if you omit them, but set them for predictable sliders
+- the returned value is a plain number you use like any other
+
+```ts
+const w = param.number("width", { min: 20, max: 90, default: 50, step: 1 });
+let plate = cube([w, w, 8]);
+return plate;
+```
+
+Values persist as you edit the code, so refining a model does not reset your sliders.
+
+## Composing with code
+
+Because a model is ordinary code, build repetitive geometry with loops and helpers. A ring of holes is a loop that subtracts a translated cylinder each turn:
+
+```ts
+let part = cylinder(30, 6, { segments: 72 }).subtract(cylinder(14, 20, { segments: 72 }));
+const bolts = 6;
+for (let i = 0; i < bolts; i++) {
+  const a = (i / bolts) * Math.PI * 2;
+  const hole = cylinder(3, 20, { segments: 24 }).translate(Math.cos(a) * 22, Math.sin(a) * 22, 0);
+  part = part.subtract(hole);
+}
+return part;
+```
+
+`Math` and standard JavaScript are available inside a model.
+
+## Export
+
+The Studio exports the current model as a **binary STL** via the **Export STL** button. STL is the only export format today. The Rust B-rep kernel and formats such as STEP are on the roadmap.
+
+## Next steps
+
+<Cards>
+  <Card title="Examples" href="/products/facet/examples">
+    Full models using every part of this API
+  </Card>
+  <Card title="Concepts" href="/products/facet/concepts">
+    The op-graph and CSG kernel behind these calls
+  </Card>
+</Cards>

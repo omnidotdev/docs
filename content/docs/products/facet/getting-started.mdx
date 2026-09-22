@@ -1,0 +1,79 @@
+---
+title: Getting Started
+description: Model, preview, and export your first part in the Facet Studio
+---
+
+Facet runs in the browser. There is nothing to install: open the Studio, edit a model, watch it update live, and download an STL.
+
+## 1. Open the Studio
+
+Go to [facet.omni.dev](https://facet.omni.dev). The Studio has three parts:
+
+- a **code editor** on the left, where you write the model
+- a **3D viewport** on the right, where the solid is drawn
+- a **status line** under the editor, showing triangle count, evaluation time, and the active kernel (or an error if the model fails)
+
+The header carries an examples dropdown, a kernel selector, a theme toggle, and an **Export STL** button.
+
+## 2. Load or write a model
+
+Pick a starter from the examples dropdown to see a working model, or write your own. A model is code that ends by returning a shape. The default example is a parametric plate:
+
+```ts
+// Drag the sliders (top-left of the viewport) - the model is live
+const w = param.number("width", { min: 20, max: 90, default: 50, step: 1 });
+const d = param.number("depth", { min: 20, max: 90, default: 34, step: 1 });
+const h = param.number("height", { min: 4, max: 40, default: 12, step: 1 });
+const r = param.number("hole", { min: 0, max: 14, default: 6, step: 0.5 });
+
+let plate = cube([w, d, h]);
+if (r > 0) {
+  plate = plate.subtract(cylinder(r, h + 2, { segments: 48 }));
+}
+return plate;
+```
+
+Your model must `return` a shape. If it returns something else, or throws, the status line shows the error and the viewport keeps the last good result. Edits re-run automatically a moment after you stop typing.
+
+<Callout type="info">
+The functions available to a model (`cube`, `box`, `sphere`, `cylinder`, `union`, `difference`, `intersection`, and `param`) are provided for you. Do not import anything; just call them.
+</Callout>
+
+## 3. Drag the parameter sliders
+
+Any `param.number(name, ...)` call in your model becomes a labeled slider in the **Parameters** panel over the viewport. Dragging a slider recomputes the model live, once per animation frame, without reframing the camera, so you get instant feedback. Parameter values persist as you edit the code, so tweaking the model does not reset your sliders.
+
+## 4. Switch the kernel
+
+The **kernel selector** in the header chooses which geometry engine evaluates your model:
+
+- **TS**, the TypeScript CSG kernel, always available
+- **Rust/WASM**, the Rust kernel compiled to WebAssembly, offered when the vendored WASM bundle is present
+
+Both implement the same interface and produce the same operations, so you can switch between them on the same model. The status line names the active kernel after each run.
+
+## 5. Preview in 3D
+
+The viewport draws a flat-shaded, Z-up preview of the current solid. Facets read crisply because normals are per-face. Loading an example or editing the code reframes the camera to fit the part; dragging a slider recomputes in place without moving the camera.
+
+## 6. Export STL
+
+Click **Export STL** to download a binary STL of the current model (`facet-model.stl`), ready to drop into a slicer for 3D printing. Export uses the active kernel. If the model is currently in an error state there is nothing to export, and the status line says so; fix the model first.
+
+## Keyboard and theme
+
+Press `T` (when the editor is not focused) or click the theme button to toggle light and dark. The choice applies to the editor and the viewport together.
+
+## Next steps
+
+<Cards>
+  <Card title="Concepts" href="/products/facet/concepts">
+    How parametric modeling, the op-graph, and the CSG kernel fit together
+  </Card>
+  <Card title="Modeling API" href="/products/facet/modeling">
+    Every primitive, transform, boolean, and parameter, with exact signatures
+  </Card>
+  <Card title="Examples" href="/products/facet/examples">
+    Worked models you can paste into the Studio
+  </Card>
+</Cards>

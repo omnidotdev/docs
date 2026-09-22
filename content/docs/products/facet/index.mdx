@@ -1,0 +1,109 @@
+---
+title: Facet
+description: Code-first parametric CAD in the browser
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaCube, FaBalanceScale } from "react-icons/fa";
+import { SiRust, SiWebassembly } from "react-icons/si";
+import { TbBrowser } from "react-icons/tb";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Parametric CAD",
+      icon: <FaCube />,
+      className: "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300",
+    },
+    {
+      label: "In-Browser",
+      icon: <TbBrowser />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    {
+      label: "Rust Kernel",
+      icon: <SiRust />,
+      className: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+    },
+    {
+      label: "WASM",
+      icon: <SiWebassembly />,
+      className: "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      label: "Apache-2.0",
+      icon: <FaBalanceScale />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://facet.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/facet`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "Under Construction",
+      description: "Facet is pre-launch and evolving quickly. The authoring API and kernels are usable today; expect additions and refinement.",
+    },
+    {
+      title: "Big Idea",
+      description: "Write code, get geometry. A model is a program that returns a shape, a CSG kernel evaluates it into a mesh, and a live 3D viewport shows the result as you type.",
+    },
+  ]}
+/>
+
+**Facet** is code-first parametric CAD that runs entirely in your browser. You write a model as code, a solid-geometry (CSG) kernel evaluates it into a mesh, a 3D viewport shows it live, and you export a print-ready STL. Nothing installs and nothing leaves the tab.
+
+Think script-based modeling, but authored in a real programming language: primitives, transforms, and boolean operations compose with variables, loops, and functions, and named parameters become live sliders.
+
+## Write code, get geometry
+
+A model is a snippet that builds a shape and returns it:
+
+```ts
+const base = cube([40, 40, 5], { center: false });
+const hole = cylinder(3.2, 20, { segments: 32 });
+return base.subtract(hole.translate(20, 20, 2.5));
+```
+
+Each call builds an op-graph rather than computing geometry directly. When you stop typing, Facet evaluates that graph with the active kernel, tessellates it to triangles, and reframes the viewport. Change a number and the solid updates in place.
+
+## Key Features
+
+- **Code-first authoring**, primitives (`cube`, `sphere`, `cylinder`), chainable transforms, and boolean operations, written in a TypeScript-flavored language
+- **Live parameters**, declare `param.number(...)` and Facet renders a slider that recomputes the model as you drag it
+- **Two kernels**, a TypeScript CSG kernel and a Rust kernel compiled to WebAssembly, selectable at runtime behind one interface
+- **Live 3D viewport**, a flat-shaded, Z-up preview that reframes on demand and shows triangle count and evaluation time
+- **STL export**, download a binary STL of the current model, ready for a slicer
+- **Built-in examples**, load a starter model (parametric plate, L-bracket, bolt flange, and more) and edit it in place
+- **Light and dark themes**, toggle with the theme button or the `T` key
+- **Runs in the browser**, a static single-page app with no backend, self-hostable under Apache-2.0
+
+## Explore the docs
+
+<Cards>
+  <Card title="Getting Started" href="/products/facet/getting-started">
+    Open the Studio, edit a model, drag a slider, switch kernels, and export an STL
+  </Card>
+  <Card title="Concepts" href="/products/facet/concepts">
+    Parametric and code-first modeling, the op-graph, the CSG kernel, and the eval-preview-export loop
+  </Card>
+  <Card title="Modeling API" href="/products/facet/modeling">
+    Primitives, transforms, boolean operations, and parameters, with exact signatures
+  </Card>
+  <Card title="Examples" href="/products/facet/examples">
+    Worked models: parametric plate, L-bracket, bolt flange, faceted gem, LEGO brick, and a d6
+  </Card>
+  <Card title="Self-Hosting" href="/products/facet/self-hosting">
+    Build the static app and serve it yourself with Docker and nginx
+  </Card>
+</Cards>
