@@ -71,11 +71,11 @@ const hole = cylinder(3.2, 20, { segments: 32 });
 return base.subtract(hole.translate(20, 20, 2.5));
 ```
 
-Each call builds an op-graph rather than computing geometry directly. When you stop typing, Facet evaluates that graph with the active kernel, tessellates it to triangles, and reframes the viewport. Change a number and the solid updates in place.
+Each call builds an op-graph rather than computing geometry directly. When you stop typing, Facet evaluates that graph with the active kernel, tessellates it to triangles, and renders it. Change a number and the solid updates in place.
 
 ## Key Features
 
-- **Code-first authoring**, primitives (`cube`, `sphere`, `cylinder`), chainable transforms, and boolean operations, written in a TypeScript-flavored language
+- **Code-first authoring**, primitives (`cube`, `sphere`, `cylinder`), chainable transforms, and boolean operations, written in plain JavaScript
 - **Live parameters**, declare `param.number(...)` and Facet renders a slider that recomputes the model as you drag it
 - **Two kernels**, a TypeScript CSG kernel and a Rust kernel compiled to WebAssembly, selectable at runtime behind one interface
 - **Live 3D viewport**, a flat-shaded, Z-up preview that reframes on demand and shows triangle count and evaluation time
