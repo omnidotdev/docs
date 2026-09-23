@@ -79,7 +79,7 @@ Each call builds an op-graph rather than computing geometry directly. When you s
 - **Live parameters**, declare `param.number(...)` and Facet renders a slider that recomputes the model as you drag it
 - **Two kernels**, a TypeScript CSG kernel and a Rust kernel compiled to WebAssembly, selectable at runtime behind one interface
 - **Live 3D viewport**, a flat-shaded, Z-up preview that reframes on demand and shows triangle count and evaluation time
-- **STL export**, download a binary STL of the current model, ready for a slicer
+- **STL and 3MF export**, download the current model in either format, ready for a slicer
 - **Built-in examples**, load a starter model (parametric plate, L-bracket, bolt flange, and more) and edit it in place
 - **Light and dark themes**, toggle with the theme button or the `T` key
 - **Runs in the browser**, a static single-page app with no backend, self-hostable under Apache-2.0
@@ -88,7 +88,7 @@ Each call builds an op-graph rather than computing geometry directly. When you s
 
 <Cards>
   <Card title="Getting Started" href="/products/facet/getting-started">
-    Open the Studio, edit a model, drag a slider, switch kernels, and export an STL
+    Open the Studio, edit a model, drag a slider, switch kernels, and export STL or 3MF
   </Card>
   <Card title="Concepts" href="/products/facet/concepts">
     Parametric and code-first modeling, the op-graph, the CSG kernel, and the eval-preview-export loop
