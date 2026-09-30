@@ -1,0 +1,73 @@
+---
+title: How to Set Up Professional Email
+description: Get email at your own domain, set the records that keep it out of spam, and send app email that actually lands
+icon: Mail
+---
+
+This is the walkthrough for having email at your own domain (`you@yourbusiness.com`) that reaches people's inboxes instead of their spam folder, and for sending email from your app without wrecking your domain's reputation.
+
+By the end you will have mailboxes at your domain, the records that prove your mail is really yours, and a clean way to send email from your product.
+
+## The three pieces
+
+Email quietly splits into three jobs:
+
+- **Mailboxes** — the inboxes people log into and send from as humans.
+- **Authentication** — DNS records that prove mail from your domain is genuinely yours, so it is trusted and not spoofed.
+- **App email** — the automated messages your product sends (sign-up confirmations, receipts, alerts).
+
+Keep human mailboxes and app email separate. They have different needs and different failure modes.
+
+## Step 1: Get mailboxes at your domain
+
+Use a reputable hosted mailbox provider. Do not run your own mail server, and do not use a free personal address for business, it looks unserious and you do not control it.
+
+What to look for in a provider:
+
+- **Reliable delivery and strong spam filtering**, both incoming and outgoing.
+- **Admin control** over accounts, so mailboxes belong to the business, not to whoever created them.
+- **Standards support** for the authentication records in Step 2.
+
+<Callout type="info">
+  Whichever provider you choose, connect it to the domain you set up in
+  **[How to Set Up a Domain](/learn/set-up-a-domain)**. Mailboxes are only as
+  safe as the domain they sit on, so keep that domain locked down (auto-renew,
+  transfer lock, privacy).
+</Callout>
+
+## Step 2: Add the authentication records (the part everyone skips)
+
+This is what keeps your email out of spam and stops others from sending as you. Add three records to your DNS (in Cloudflare, if you followed the domain guide). Your mailbox and app-email providers give you the exact values.
+
+- **SPF** lists which servers are allowed to send mail for your domain. Without it, your mail looks suspicious.
+- **DKIM** cryptographically signs your messages, so receivers can verify nothing was tampered with and it really came from you.
+- **DMARC** ties the two together and tells receivers what to do with mail that fails, and can report attempts to spoof you.
+
+<Callout type="warn">
+  Skipping DKIM and DMARC is the single most common reason legitimate business
+  email lands in spam or gets impersonated. Set all three. Start DMARC in a
+  monitoring-only policy, confirm your real mail passes, then tighten it.
+</Callout>
+
+## Step 3: Send app email the right way
+
+Email your product sends automatically (confirmations, password resets, receipts, notifications) should not go through a human mailbox. Send it through a dedicated sending service.
+
+On Omni, use **[Herald](/products/herald)**, our email service for sending mail from apps and products. It handles the sending infrastructure and the same SPF and DKIM setup from Step 2, so your automated mail is authenticated and lands reliably.
+
+Keep bulk or marketing sends on a separate subdomain (for example `mail.yourbusiness.com`) so a bad campaign can never drag down the reputation of the domain your everyday mail depends on.
+
+## The mistakes that actually cost people
+
+- **Using a free personal address for business.** It undercuts trust and you do not own it.
+- **Skipping DKIM or DMARC.** Your mail lands in spam, or someone spoofs your domain.
+- **Running your own mail server.** Deliverability is a full-time job; a hosted provider does it better.
+- **Sending app and marketing email from your main domain.** One bad batch poisons the reputation of your real mail.
+- **No DMARC reporting.** You never find out you are being impersonated until a customer does.
+
+## Recap
+
+1. **Mailboxes** at your domain from a reputable hosted provider, not a free personal address.
+2. **SPF, DKIM, and DMARC** records in your DNS, DMARC tightened after monitoring.
+3. **App email** through Herald, kept separate from human mailboxes.
+4. **Marketing sends** on their own subdomain to protect your main domain's reputation.

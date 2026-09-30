@@ -1,0 +1,72 @@
+---
+title: How to Launch a Website
+description: Choose what to build with, deploy it, put it on your own domain, and check the things that matter before you go live
+icon: Rocket
+---
+
+This is the walkthrough for getting a real website online: picking how to build it, deploying it, putting it on your own domain, and the checks worth doing before you announce it.
+
+By the end you will have a live site on your own domain, served over HTTPS, that you can update whenever you want.
+
+## What launching a website actually takes
+
+Three things, no more:
+
+- **Something to serve** — the site or app itself.
+- **A place to run it** — where it is deployed, your **host**.
+- **A domain** — the name people type to reach it.
+
+Most of the work is deciding what to build with. The rest is wiring, and it is mostly automatic on Omni.
+
+## Step 1: Decide what you are building
+
+One question sorts this out: **do you need custom code?**
+
+- **A marketing site, portfolio, docs, or landing page** (mostly content, no custom app logic): you do not need to write code. Build and publish it with **[Keystone](/products/keystone)**, our web builder.
+- **A web app** (accounts, dashboards, anything interactive and custom): you have a codebase. Deploy it with **[Fractal](/products/fractal)**, our deployment platform.
+
+<Callout type="info">
+  When in doubt, start with Keystone. If you outgrow it and need custom code
+  later, you move to a Fractal-deployed app, and the domain and DNS you set up
+  here come with you unchanged.
+</Callout>
+
+## Step 2: Build it
+
+- **With Keystone:** create your site in the builder and publish. There is nothing to install and no repository to manage.
+- **As an app:** build it in a git repository as you normally would. Anything that runs as a standard web app deploys on Fractal.
+
+## Step 3: Deploy it
+
+- **Keystone** publishes to Fractal for you, so this step is already done when you hit publish.
+- **An app on Fractal:** connect its git repository once. From then on, every push builds and deploys the new version automatically, and HTTPS certificates are provisioned and renewed for you. There are no servers to manage by hand.
+
+## Step 4: Put it on your own domain
+
+A fresh deployment comes with a default URL, which is fine for testing but not what you hand to customers. Point your own domain at it.
+
+The full walkthrough is in **[How to Set Up a Domain](/learn/set-up-a-domain)**: register the name, put it on fast DNS, and add the records that connect it. On Omni you add your custom domain in the project's settings, paste the records it gives you into your DNS, and Fractal issues the certificate automatically once the domain points at it.
+
+## Step 5: Before you go live
+
+Quick checks that separate a site that is merely up from one that is ready:
+
+- **It works on a phone.** Most visitors are on mobile. Open it on an actual phone, not just a narrow browser window.
+- **HTTPS is on.** The address should show `https://` with no warning. On Omni this is automatic; if you see a certificate warning, the domain records are not fully in place yet.
+- **The basics for search.** Every page has a clear title and description, and the site has a way for search engines to find its pages.
+- **Analytics, if you want them.** Decide before launch so you capture traffic from day one rather than backfilling.
+- **A way to be contacted.** A form or an email address that actually reaches you, tied to your domain (see **[How to Set Up Professional Email](/learn/set-up-professional-email)**).
+
+<Callout type="warn">
+  Do not announce the site before the domain resolves and HTTPS is live for
+  everyone. Check it from a device that has never visited, or a phone on mobile
+  data, so you are not fooled by your own cached version.
+</Callout>
+
+## Recap
+
+1. **Decide**: content site with no code, use Keystone; a custom app, use Fractal.
+2. **Build** it in the builder or in your repository.
+3. **Deploy** it. Keystone publishes to Fractal for you; an app deploys on every push.
+4. **Connect your domain** (see the domain guide). HTTPS is automatic on Omni.
+5. **Check** mobile, HTTPS, search basics, analytics, and contact before announcing.

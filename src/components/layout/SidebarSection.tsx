@@ -5,12 +5,12 @@ import {
   FileCode,
   Glasses,
   Globe,
+  GraduationCap,
   Hammer,
   Heart,
   HelpCircle,
   Palette,
   Server,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -25,12 +25,23 @@ import { cn } from "@/lib/utils";
 
 import type { VirtualFolder } from "@/lib/pageTreeTransform";
 
+/** Omni logo rendered as a section icon, matching the header treatment
+    (black in light mode, inverted to white in dark mode) */
+const OmniLogo = ({ className }: { className?: string }) => (
+  <img
+    src="/svg/logo.svg"
+    alt=""
+    aria-hidden="true"
+    className={cn(className, "opacity-90 invert-0 dark:invert")}
+  />
+);
+
 /** Map icon names to Lucide components */
 const ICON_COMPONENTS: Record<
   string,
   React.ComponentType<{ className?: string }>
 > = {
-  Sparkles,
+  OmniLogo,
   Box,
   Heart,
   Brush,
@@ -40,6 +51,7 @@ const ICON_COMPONENTS: Record<
   Palette,
   Glasses,
   Globe,
+  GraduationCap,
   Users,
   HelpCircle,
 };
@@ -166,7 +178,9 @@ const SidebarSection = ({
         <div className="space-y-1">
           {children}
 
-          {docCount <= 0 && (
+          {/* "coming soon" is a realm concept (unlaunched products), so it must
+              never render for editorial sections like Learn/Community/Help */}
+          {isRealm && docCount <= 0 && (
             <div className="flex flex-col items-center py-3 text-fd-muted-foreground text-xs italic">
               <span>
                 {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}{" "}

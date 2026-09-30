@@ -175,6 +175,18 @@ const getSectionTextColors = (
         closed: "group-hover:text-red-600 dark:group-hover:text-red-400",
       },
     },
+    learn: {
+      title: {
+        open: "text-indigo-800 dark:text-white",
+        hover: "group-hover:text-indigo-700 dark:group-hover:text-indigo-200",
+        closed: "",
+      },
+      description: {
+        open: "text-indigo-700 dark:text-indigo-200",
+        hover: "group-hover:text-indigo-600 dark:group-hover:text-indigo-300",
+        closed: "group-hover:text-indigo-600 dark:group-hover:text-indigo-400",
+      },
+    },
   };
 
   const colors = colorMappings[sectionId as keyof typeof colorMappings];

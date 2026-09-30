@@ -1,0 +1,12 @@
+{
+  "title": "Learn",
+  "tagline": "Plain-English guides",
+  "description": "Opinionated, jargon-free explanations of the web concepts behind running an online presence",
+  "pages": [
+    "index",
+    "set-up-a-domain",
+    "launch-a-website",
+    "set-up-professional-email",
+    "..."
+  ]
+}

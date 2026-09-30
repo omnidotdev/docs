@@ -1,0 +1,116 @@
+---
+title: How to Set Up a Domain
+description: Register a domain the right way, put it on fast DNS, point it at your site, and avoid the mistakes that cost people their name
+icon: Globe
+---
+
+This is the walkthrough for getting a domain like `yourbusiness.com`, from buying it to having it point at your website or app, done in the order we actually do it for clients.
+
+By the end you will own a domain, have it on fast and portable DNS, and have it wired to whatever you are hosting, set up so you do not lose it later.
+
+## The three pieces (60-second version)
+
+Setting up a domain is really three separate jobs that people tend to blur together:
+
+- **Registration** is buying and holding the name. This is your **registrar**.
+- **DNS** is the settings that point the name at your website and email. This can live at your registrar, or somewhere better.
+- **Hosting** is the actual site or app the name points to.
+
+The single most important rule: **keep these separate.** Do not let one company own your name, your DNS, and your hosting all at once. Separation keeps you portable and keeps a single outage or dispute from taking down everything.
+
+## Step 1: Register the domain (we recommend Namecheap)
+
+Buy the name from a registrar whose only job is selling and holding domains. Our default recommendation is **[Namecheap](https://www.namecheap.com)**, for reasons that matter after checkout, not just on day one:
+
+- **Honest renewal pricing.** The common trap is a cheap first year followed by a steep renewal. Namecheap's renewal prices are fair and transparent, so the domain does not quietly balloon in cost.
+- **Free WHOIS privacy for life.** Your personal name, address, and phone stay off the public record at no extra charge. Many registrars upsell this.
+- **No checkout gauntlet.** Far less pressure to bolt on hosting, email, and add-ons you do not need.
+- **Clean nameserver control**, which matters for Step 2.
+
+<Callout type="info">
+  A domain costs roughly ten to fifteen dollars a year. It is the cheapest
+  critical asset your business owns, and everything (your site, your email)
+  depends on it. Spend the two minutes to set it up properly.
+</Callout>
+
+When you register:
+
+**1. Search for and buy the name.** Skip every upsell. You only need the domain itself.
+
+**2. Register it under an email you control separately.** Do not use an address at the domain you are buying. If `you@yourbusiness.com` breaks, you must still be able to receive the account-recovery email to fix it.
+
+**3. Register it in an account the business owns**, not a contractor's or an employee's personal account. Whoever's account holds the domain controls it, regardless of who paid.
+
+## Step 2: Move DNS to Cloudflare (optional, strongly recommended)
+
+Your registrar can run DNS, but a dedicated DNS provider is faster, more capable, and keeps your DNS config separate from where the name is registered. We recommend **[Cloudflare](https://www.cloudflare.com)** for this, and set it up for nearly every client:
+
+- **Free and extremely fast**, with a global network answering DNS lookups close to your visitors.
+- **A real API**, so DNS changes can be scripted and version-controlled instead of clicked by hand.
+- **Optional proxying** in front of your site for DDoS protection, edge caching, and a free HTTPS certificate.
+- **Portable.** Because DNS lives at Cloudflare and registration stays at Namecheap, you can change either one later without redoing the other.
+
+You keep the domain at Namecheap. You only change its **nameservers** to the two Cloudflare gives you:
+
+**1. Add the site in Cloudflare** and let it import your existing records.
+
+**2. Copy the two Cloudflare nameservers** it shows you.
+
+**3. In Namecheap, set the domain's nameservers to Custom DNS** and paste in the two Cloudflare ones.
+
+Propagation usually finishes within an hour. From then on you manage all DNS in Cloudflare.
+
+<Callout type="info">
+  This step is optional. If you would rather keep things simple, leave DNS at
+  Namecheap for now. You can move it to Cloudflare later without buying the
+  domain again.
+</Callout>
+
+## Step 3: Deploy your site or app (we recommend Fractal)
+
+Before a domain has anywhere to point, you need your site or app running somewhere. This is **hosting**, the third piece from the top.
+
+For anything you are building on Omni, deploy it on **[Fractal](/products/fractal)**, our deployment platform. The model is simple: you connect a git repository, and every time you push, Fractal builds your project, deploys the new version, and serves it, no servers to manage by hand. It issues and renews HTTPS certificates for you automatically, so you never touch certificate setup.
+
+- **Push to deploy.** Merge your changes and the new version goes live on its own.
+- **Custom domains built in.** Point your own domain at a deployment and Fractal serves it directly.
+- **HTTPS handled.** Certificates are provisioned and renewed automatically.
+
+If you want a website without writing code, build and publish it with **[Keystone](/products/keystone)**, our web builder. It runs on Fractal underneath, so you get the same automatic deploys, custom-domain support, and HTTPS, without managing a repository yourself.
+
+<Callout type="info">
+  Not hosting on Omni? The rest of this still applies. Any host (a static-site
+  service, a cloud provider, an app platform) gives you DNS records to point at
+  it. The steps below are the same wherever you deploy.
+</Callout>
+
+## Step 4: Point the domain at your deployment
+
+Now connect the name to what you deployed in Step 3 by adding DNS records (in Cloudflare, or at Namecheap if you skipped Step 2). Your host tells you exactly which records to add, usually an `A` record or a `CNAME`.
+
+On Omni this is short: in your project's settings, **add your custom domain** to the deployment. Fractal (or Keystone) then shows you the precise DNS records to add. Paste them into Cloudflare, or drive it through Cloudflare's API, and Fractal issues the HTTPS certificate automatically once it sees the domain pointing at it. Within a few minutes you are live on your own domain.
+
+<Callout type="warn">
+  If you proxy an Omni-hosted domain through Cloudflare (the orange cloud), set
+  the SSL/TLS mode to **Full (strict)** so Cloudflare and the platform agree on
+  certificates. If you would rather let the platform handle HTTPS end to end,
+  leave the record **DNS only** (grey cloud).
+</Callout>
+
+## The mistakes that actually cost people their domain
+
+These are avoidable, and every one of them has bitten someone.
+
+- **Letting it expire.** The most common way to lose a domain, and a lapsed name can be grabbed by a squatter within days. Turn on **auto-renew** and keep a working card on file, then confirm the renewal each year.
+- **Login tied to the domain.** Covered in Step 1: if your registrar login is an address at the same domain, a domain problem locks you out of fixing it.
+- **Registration in someone else's account.** The domain leaves with whoever's account holds it. It must live in an account the business controls.
+- **Leaving the transfer lock off.** Keep the registrar's **transfer lock on** so nobody can move the domain without your say-so.
+- **Turning off WHOIS privacy.** Leave it **on** so your personal details are not published publicly.
+
+## Recap
+
+1. **Register** at Namecheap, under a separately-controlled email, in a business-owned account.
+2. **Move DNS to Cloudflare** (optional but recommended) by changing nameservers.
+3. **Deploy** your site or app. On Omni, use Fractal, or Keystone for a no-code site.
+4. **Point the domain at it**: add the records your host gives you. On Omni, Fractal and Keystone hand you the records and handle HTTPS.
+5. **Lock it down**: auto-renew on, transfer lock on, privacy on.

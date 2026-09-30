@@ -116,13 +116,20 @@ const SECTION_GRADIENTS: Record<
     closed:
       "bg-gradient-to-r from-red-100/80 via-red-100/70 to-rose-100/80 dark:from-red-800/20 dark:via-red-900/15 dark:to-rose-900/20",
   },
+  learn: {
+    open: "bg-gradient-to-r from-indigo-200/60 via-indigo-200/50 to-blue-200/60 dark:from-indigo-800/90 dark:via-indigo-900/80 dark:to-blue-900/90",
+    hover:
+      "hover:bg-gradient-to-r hover:from-indigo-100/50 hover:via-indigo-100/40 hover:to-blue-100/50 dark:hover:from-indigo-700/70 dark:hover:via-indigo-800/60 dark:hover:to-blue-800/70 hover:shadow-md hover:shadow-indigo-500/10",
+    closed:
+      "bg-gradient-to-r from-indigo-100/80 via-indigo-100/70 to-blue-100/80 dark:from-indigo-800/20 dark:via-indigo-900/15 dark:to-blue-900/20",
+  },
 };
 
 /**
  * Icon mapping for each realm.
  */
 export const SECTION_ICONS: Record<string, string> = {
-  welcome: "Sparkles",
+  welcome: "OmniLogo",
   core: "Box",
   kindred: "Heart",
   fabric: "Brush",
@@ -134,6 +141,7 @@ export const SECTION_ICONS: Record<string, string> = {
   worlds: "Globe",
   community: "Users",
   help: "HelpCircle",
+  learn: "GraduationCap",
 };
 
 /**
@@ -148,6 +156,15 @@ const ADDITIONAL_SECTIONS: Realm[] = [
     href: "/",
     icon: SECTION_ICONS.welcome,
     gradients: SECTION_GRADIENTS.welcome,
+  },
+  {
+    id: "learn",
+    name: "Learn",
+    tagline: "Plain-English web guides",
+    paths: ["/(learn)/", "/learn/"],
+    href: "/learn",
+    icon: SECTION_ICONS.learn,
+    gradients: SECTION_GRADIENTS.learn,
   },
   {
     id: "community",
