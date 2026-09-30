@@ -1,9 +1,11 @@
+import { fileURLToPath } from "node:url";
+
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
+import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import mdx from "fumadocs-mdx/vite";
-import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
@@ -19,6 +21,14 @@ const viteConfig = defineConfig({
   server: {
     port: 3000,
     host: "0.0.0.0",
+  },
+  resolve: {
+    // Explicit alias in addition to vite-tsconfig-paths: the tsconfig-paths
+    // plugin does not resolve "@/" imports inside compiled MDX under the SSR
+    // module runner, so aliased imports in content files fail to load
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
   },
   ssr: {
     // lucide-react ships no `exports` map, so when externalized the SSR
@@ -53,7 +63,10 @@ const viteConfig = defineConfig({
     react(),
     // see https://tanstack.com/start/latest/docs/framework/react/guide/hosting for hosting config
     // Force node-server preset so the build output runs on Node, not Bun
-    nitro({ preset: "node-server" }),
+    // Fleet standard: the nitro v2 vite plugin. Nitro v3 (nitro/vite) is still an
+    // untested alpha whose dev server strips the content-type header off server
+    // function responses, which breaks all client-side navigation in dev
+    nitroV2Plugin({ preset: "node-server" }),
   ],
 });
 
