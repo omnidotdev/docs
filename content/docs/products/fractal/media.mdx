@@ -1,0 +1,142 @@
+---
+title: Media and Video
+description: Transcode and serve video with automatic encoding, posters, and CDN delivery
+---
+
+Fractal transcodes and serves video for you. Upload a raw video and Fractal
+converts it to a web-safe H.264/AAC MP4 plus a poster thumbnail, then serves both
+from the media CDN at a stable URL you can drop straight into a `<video>` tag.
+There is no encoding pipeline to run and no player to host. Transcoding is billed
+per transcode minute, and the stored output and its delivery meter on the usual
+object-storage and bandwidth meters.
+
+## What you get
+
+- **Automatic transcoding** of an uploaded source video to a broadly compatible
+  progressive MP4 (H.264 video, AAC audio), so it plays in any modern browser.
+- **A poster thumbnail** generated from the video, for the player's preview frame.
+- **CDN delivery** of the output over HTTPS from the media domain, with range
+  requests (seeking) supported, so a plain `<video>` element just works.
+- **Asset status** you can poll: the operator reports when an asset is ready and
+  publishes its playback and poster URLs, plus the probed duration.
+
+## The `FractalMedia` resource
+
+One `FractalMedia` represents a single uploaded video to transcode and serve. The
+output bucket is shared across a tenant's assets (the same model as
+[object storage](./object-storage)), so each asset owns only its input key and
+rendition set.
+
+`spec` fields:
+
+- **`project`** (required): the project (tenant) the asset belongs to.
+- **`bucket`** (required): the output bucket the transcoded renditions are written
+  to and served from. Shared across a tenant's assets. It becomes the
+  `<bucket>.<media-domain>` host, so it must be a single DNS label (3 to 63
+  characters, lowercase letters, digits, and hyphens, with no leading or trailing
+  hyphen), the same constraint as an object-storage bucket.
+- **`inputKey`** (required): the object key of the raw uploaded video inside the
+  bucket. This is the transcode input.
+- **`renditions`** (optional, defaults to `[mp4]`): the output formats to produce.
+  `mp4` is the progressive H.264/AAC output. `hls` is reserved for a later version
+  and is not produced yet.
+- **`public`** (optional): serve the output bucket publicly (anonymous read).
+  Playback expects public serving; on tiers without the public-serving
+  entitlement, the output is served privately instead.
+- **`cdn`** (optional): put a Cloudflare CDN edge in front of the public output.
+
+`status` fields (written by the operator, read-only):
+
+- **`phase`**: the asset lifecycle, one of `pending`, `processing`, `ready`, or
+  `error`.
+- **`playbackUrl`**: the CDN URL of the transcoded MP4, set once the asset is
+  `ready`.
+- **`posterUrl`**: the CDN URL of the poster image, set once the asset is `ready`.
+- **`durationSec`**: the source duration in whole seconds, probed during the
+  transcode.
+- **`lastError`**: the last transcode error, if any (cleared on a later success).
+
+## How it works
+
+1. **Upload the raw video** into the output bucket, at some object key (for
+   example `uploads/demo.mov`). The upload path is specific to your product's own
+   upload flow: your app writes the source object into the bucket before creating
+   the asset.
+2. **Create a `FractalMedia`** whose `spec.bucket` is that bucket and whose
+   `spec.inputKey` points at the object you just uploaded.
+3. **The operator runs a transcode Job.** It probes the source, encodes the
+   web-safe MP4 and poster, and writes the outputs back into the same bucket under
+   `assets/<name>/` (where `<name>` is the `FractalMedia` name), as `video.mp4`
+   and `poster.jpg`.
+4. **The status fills in.** `phase` moves from `pending` to `processing` to
+   `ready`, and `status.playbackUrl` becomes a CDN URL. Play it with a normal
+   `<video>` tag:
+
+   ```html
+   <video controls poster="https://my-media.media.omni.dev/assets/demo/poster.jpg">
+     <source
+       src="https://my-media.media.omni.dev/assets/demo/video.mp4"
+       type="video/mp4"
+     />
+   </video>
+   ```
+
+   An HLS rendition (for adaptive bitrate via a player such as hls.js) is planned
+   but not produced in this version.
+
+## Example
+
+Upload the source (`uploads/demo.mov`) into the `my-media` bucket, then apply:
+
+```yaml
+apiVersion: fractal.omni.dev/v1alpha1
+kind: FractalMedia
+metadata: { name: demo, namespace: fractal-prj-<id> }
+spec:
+  project: <id>
+  bucket: my-media
+  inputKey: uploads/demo.mov
+  renditions: [mp4]
+  public: true
+  cdn: true
+```
+
+Once `status.phase` is `ready`, the playback URL follows the shape:
+
+```
+https://<bucket>.<media-domain>/assets/<name>/video.mp4
+```
+
+so this asset is served at
+`https://my-media.media.omni.dev/assets/demo/video.mp4`, with its poster at
+`https://my-media.media.omni.dev/assets/demo/poster.jpg`.
+
+## Billing and entitlements
+
+Media is a gated, metered capability:
+
+- **Entitlements.** Transcoding is gated by the `media_transcode` plan
+  entitlement, and public serving of the output by `media_public_serving`. A tier
+  without `media_transcode` cannot create assets. A tier with transcoding but
+  without public serving still transcodes, but the output is served privately
+  rather than at an anonymous public URL.
+- **Metering.** Each transcode records `transcode_minutes` (the probed source
+  duration, in minutes). The stored renditions meter on `object_storage_gb_hours`
+  like any other object storage, and delivery meters on `bandwidth_bytes` (egress)
+  like any other public read. See [Billing](./billing) for how metered usage and
+  overage work.
+
+## Limits
+
+- **Single MP4 rendition in this version.** Fractal produces one progressive
+  H.264/AAC MP4 and a poster. HLS adaptive-bitrate streaming (`renditions: [hls]`)
+  is reserved for a later version and is not produced yet.
+- **The raw upload path is tenant-specific.** Fractal transcodes an object that is
+  already in the bucket; getting the source video into the bucket is done through
+  your product's own upload flow, not by `FractalMedia` itself.
+
+<Callout title="Public playback needs the public-serving entitlement">
+Without `media_public_serving` the output is served privately, so a `<video>` tag
+pointing at the public URL will not load for anonymous viewers. Transcoding still
+runs, but you serve the result through your own authenticated path instead.
+</Callout>
