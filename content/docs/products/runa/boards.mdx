@@ -1,0 +1,51 @@
+---
+title: Boards and columns
+description: Organize work visually with Kanban boards, columns, and filters
+---
+
+A project's **board** is a Kanban view of its tasks, arranged in columns. It is the
+default way to see a project.
+
+## Columns
+
+**Columns** are the stages work moves through. Drag a task's card from one column to
+the next as it progresses, or reorder cards within a column to set priority.
+
+Admins and Owners manage columns in the project: add, rename, reorder, and remove
+them, and give each a name and an emoji. A workspace can also define a default set
+of columns that every new project starts with.
+
+### The done column
+
+One column per project is marked the **done column**. Tasks in it count as complete:
+they show as done on the [calendar](/docs/products/runa/calendar) and are excluded
+from the overdue flag. New projects default their last column to done; an Admin or
+Owner can change which column that is.
+
+## Filtering
+
+Filter the board to focus on a slice of work. Filter by **assignee**, **label**, or
+**priority**; active filters show as chips you can clear individually. The same
+filters apply across the board, list, and calendar views.
+
+## Board backgrounds
+
+Give a board a background to make projects easy to tell apart: choose a preset, a
+pattern, or upload your own image. Boards are neutral by default.
+
+## List view
+
+Switch a project to **list view** for a dense, scannable layout. It shows the same
+tasks as rows rather than cards, which suits quick triage and keyboard-driven work.
+Switch views from the project header.
+
+## Public boards
+
+Any project can be made **public** for a read-only view that anyone with the link
+can open, no sign-in required. Projects are **private by default**; only an Admin or
+Owner can change visibility in **Project Settings**.
+
+- A public project is served at its normal link, `https://runa.omni.dev/@{workspace}/{project}`.
+- A badge on the project header marks it as publicly visible.
+- The public view is read-only: no drag-and-drop, editing, or filtering.
+- While a project is private, that link returns a 404 for anyone who is not a member.

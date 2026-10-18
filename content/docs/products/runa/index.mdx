@@ -3,7 +3,7 @@ title: 🌙 Runa
 description: Streamlined project management
 ---
 
-import { ProductOverview } from "@/components/docs";
+import { ProductOverview, Pricing } from "@/components/docs";
 import app from "@/lib/config/app.config";
 import { FaClipboardList, FaColumns, FaUsers } from "react-icons/fa";
 
@@ -63,10 +63,12 @@ import { FaClipboardList, FaColumns, FaUsers } from "react-icons/fa";
 ## Key Features
 
 - **Intuitive Kanban Boards**: Visualize your workflow with drag-and-drop task management and customizable columns
-- **Flexible Task Management**: Create tasks with labels, priorities, due dates, and rich text descriptions
-- **Team Collaboration**: Assign tasks to team members, leave comments, and mention teammates with @mentions
-- **Custom Workflows**: Design columns and statuses that match how your team actually works
-- **Multiple Views**: Switch between board view for visual organization and list view for quick scanning
+- **Flexible Task Management**: Create tasks with labels, priorities, due dates, assignees, attachments, and rich text descriptions
+- **Team Collaboration**: Assign tasks, leave comments, and mention teammates with @mentions
+- **Custom Workflows**: Design columns to match how your team works, and mark a done column that drives completion
+- **Calendar View**: See due dates by month or week, reschedule by dragging, and view your tasks across every project
+- **Calendar Subscriptions**: Follow a project or your own tasks from any iCal-compatible calendar app
+- **Multiple Views**: Switch between board, list, and calendar for the same tasks
 - **Real-time Updates**: Changes sync instantly across your team
 - **Dark/Light Themes**: Work comfortably in any lighting condition
 
@@ -80,13 +82,11 @@ import { FaClipboardList, FaColumns, FaUsers } from "react-icons/fa";
 
 ## Pricing
 
-Runa is **free for individuals and small teams**. The free tier includes:
+Runa is **free for individuals and small teams**, with paid tiers for larger teams
+that need more capacity. These plans come straight from the Omni catalog, so they
+are always current:
 
-- Up to 2 projects
-- Up to 500 tasks
-- Unlimited team members
-
-Paid tiers are available for larger teams with additional features and capacity.
+<Pricing productId="runa" features />
 
 ## Open Source
 
