@@ -1,0 +1,127 @@
+---
+title: 🏃 Run
+description: Universal self-hosting made simple
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { FaDocker, FaServer, FaTerminal } from "react-icons/fa";
+import { SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "CLI",
+      icon: <FaTerminal />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Docker Compose",
+      icon: <FaDocker />,
+      className: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-300",
+    },
+    {
+      label: "Self-Hosting",
+      icon: <FaServer />,
+      className: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://run.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/run-cli`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "💡 Big Idea",
+      description:
+        "Self-host any app on your own machine with a single command, no DevOps expertise required",
+    },
+    {
+      title: "🚩 Problem Solved",
+      description:
+        "Run removes the busywork of self-hosting. No hand-written Docker Compose files, reverse proxy config, or certificate wrangling. One command generates the whole stack and starts it.",
+    },
+  ]}
+/>
+
+**Run** is a command-line tool for self-hosting apps on your own machine. Point it
+at an app and it generates and starts the full container stack locally, with a
+reverse proxy, local HTTPS, generated secrets, and health checks wired up for you.
+
+Run is universal. It can start an app from a built-in catalog, from a recipe file
+you write (`run.toml` or `run.yaml`), from an existing Docker Compose file, or
+straight from a bare image reference. It is a CLI, not a hosted platform.
+Everything it does happens on your own machine through Docker Compose.
+
+```bash
+# Start a catalog app
+run up runa
+
+# Start your own stack from the current directory
+run up .
+
+# Start any image directly
+run up nginx
+```
+
+Each command resolves a target, generates any secrets and certificates it needs,
+writes a Docker Compose file and a Caddy reverse-proxy config, starts the
+containers, waits for them to become healthy, and prints the URLs to open.
+
+## Key Features
+
+- **One-Command Start**: Bring up a complete stack with `run up <target>`
+- **Works With Anything**: A catalog app, a recipe file, a Compose file, or a bare image, all through the same command
+- **Built-in Catalog**: A set of ready-to-run app stacks ships embedded in the CLI, with nothing to download or template
+- **Local HTTPS**: Trusted certificates via [mkcert](https://github.com/FiloSottile/mkcert) when it is installed, with an automatic fallback to HTTP
+- **Reverse Proxy**: A Caddy proxy is generated and configured to route to each service
+- **Generated Secrets**: Passwords and credentials are generated on first run and wired in through the environment
+- **Health Checks**: `up` waits for every service to report healthy before printing the URLs
+- **Snapshots**: Back up and restore a stack's data volumes with `run backup` and `run restore`
+- **Dry Runs**: Preview exactly what a target would start with `run plan <target>`
+
+## Installation
+
+| Platform | Channel | Command |
+| --- | --- | --- |
+| macOS / Linux | Shell | `curl -fsSL https://run.omni.dev/install.sh \| sh` |
+| macOS / Linux | [Homebrew](https://github.com/omnidotdev/homebrew-tap) | `brew install omnidotdev/tap/run-cli` |
+| Arch Linux | [AUR](https://aur.archlinux.org/packages/omnidotdev-run-cli) | `paru -S omnidotdev-run-cli` (or `paru -S omnidotdev-run-cli-bin`) |
+| Any | Source | `cargo build --release` (see below) |
+
+### Build from source
+
+```bash
+git clone https://github.com/omnidotdev/run-cli
+cd run-cli
+cargo build --release
+# binary is at target/release/run
+```
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) with the Compose plugin
+- [mkcert](https://github.com/FiloSottile/mkcert), optional, for trusted local HTTPS (without it, Run serves over HTTP)
+
+## Open Source
+
+Run is open source under the Apache 2.0 license. Read the source, file issues, and
+contribute on [GitHub](https://github.com/omnidotdev/run-cli).
+
+## Next Steps
+
+Head to [Getting Started](/docs/products/run/getting-started) to install the CLI
+and bring up your first app.

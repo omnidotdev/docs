@@ -1,0 +1,68 @@
+---
+title: Backups
+description: Snapshot, list, and restore a stack's data volumes
+---
+
+Run can snapshot a stack's Docker volumes to a local gzip-tarball snapshot and
+restore them later. Backups cover the stack's data volumes, so you can experiment,
+upgrade, or wipe with a way back.
+
+## Take a backup
+
+```bash
+run backup <target>
+run backup <target> --name before-upgrade
+```
+
+This archives the stack's Docker volumes into a local gzip-tarball snapshot. Pass
+`--name` to label the snapshot, otherwise Run names it automatically (for example
+by timestamp).
+
+## List backups
+
+```bash
+run backups <target>
+```
+
+Lists the snapshots saved for the target, so you can pick one to restore.
+
+## Restore a backup
+
+```bash
+run restore <target> <snapshot>
+run restore <target> <snapshot> --yes
+```
+
+Restores the stack's data volumes from the named snapshot. This overwrites the
+current volume contents, so Run confirms first. Pass `--yes` to skip the
+confirmation in scripts.
+
+<Callout type="warn">
+  `run restore` overwrites the current data volumes with the snapshot's contents.
+  There is no undo once it completes.
+</Callout>
+
+## Automatic pre-wipe backup
+
+Wiping a stack with [`run down <target> --fresh`](/docs/products/run/commands#down)
+deletes its data volumes. To make that reversible, `--fresh` takes an automatic
+backup of the volumes before wiping them. If the wipe was a mistake, bring the
+stack back up and restore from that snapshot:
+
+```bash
+run down my-app --fresh      # wipes, after taking a pre-wipe snapshot
+run up my-app                # start fresh
+run backups my-app           # find the pre-wipe snapshot
+run restore my-app <snapshot>
+```
+
+Pass `--no-backup` to skip the pre-wipe snapshot:
+
+```bash
+run down my-app --fresh --no-backup
+```
+
+<Callout type="warn">
+  Pairing `--fresh` with `--no-backup` deletes the data volumes with no snapshot
+  to restore from. Use it only when the data is disposable.
+</Callout>

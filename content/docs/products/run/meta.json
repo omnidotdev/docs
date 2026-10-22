@@ -1,0 +1,15 @@
+{
+  "title": "🏃 Run",
+  "pages": [
+    "index",
+    "getting-started",
+    "---Usage---",
+    "commands",
+    "targets",
+    "catalog",
+    "recipes",
+    "backups",
+    "---Reference---",
+    "concepts"
+  ]
+}

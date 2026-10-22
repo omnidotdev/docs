@@ -1,0 +1,82 @@
+---
+title: Concepts
+description: How Run assembles and starts a stack
+---
+
+Run turns a single command into a complete, running stack. This page explains what
+it does under the hood, so the generated files and printed URLs make sense.
+Whatever the [target](/docs/products/run/targets) (a catalog app, a recipe, a
+Compose file, or a bare image), Run normalizes it into the same assembled stack.
+
+## From target to stack
+
+Run first resolves the target to a stack definition:
+
+- A **catalog** name maps to a manifest embedded in the CLI.
+- A **recipe** (`run.toml` or `run.yaml`) is parsed into the same shape.
+- A **Compose file** is wrapped as-is, with Run's secrets, proxy, and TLS layered on.
+- A **bare image** is synthesized into a single-service stack.
+
+Because the catalog manifests are built into the binary, `run up <catalog-name>`
+works without fetching anything.
+
+## Generated Docker Compose
+
+Run translates the resolved stack into a Docker Compose file and starts it with
+Docker Compose. Every service, image, environment variable, volume, and health
+check in the running stack comes from that generated file. Run is Docker Compose
+orchestration on your local machine, not a remote platform.
+
+## Caddy reverse proxy
+
+Run generates a [Caddy](https://caddyserver.com) configuration and runs Caddy as
+the stack's reverse proxy. Caddy terminates TLS and routes each incoming port to
+the service behind it (for example an app, its API, and its authentication
+service), so you reach everything through clean local URLs.
+
+## Local TLS with mkcert
+
+When [mkcert](https://github.com/FiloSottile/mkcert) is installed, Run generates
+locally-trusted certificates with it and serves the stack over HTTPS. When mkcert
+is not present, Run falls back to plain HTTP and adjusts the printed URLs
+accordingly. TLS is for local development trust via mkcert; Run does not issue
+public certificates.
+
+## Generated secrets
+
+On a stack's first run, Run generates its secrets (such as database passwords and
+authentication client credentials) and wires them in through a generated `.env`
+file, so secret values never land in the Compose file. Secrets come from a
+recipe's `[secrets]` block, a catalog manifest, or a Compose file's declared
+needs. The values are stored locally alongside the stack's other generated files,
+and later runs reuse them so the stack stays consistent across stops and starts.
+`run down --fresh` removes them and the next start generates new ones.
+
+## Typed inputs
+
+A recipe can declare typed [inputs](/docs/products/run/recipes#inputs) for values a
+user supplies, such as a domain or an admin email. Run resolves each `${input.KEY}`
+from its `RUN_INPUT_<KEY>` environment variable, then the input's default, and
+otherwise by prompting, before it generates the Compose file.
+
+## Health checks
+
+After starting the containers, `up` waits for every service to report healthy
+before it continues. Only once the stack is up does Run run post-start hooks and
+print the URLs, so the addresses it shows are ready to use.
+
+## Hooks
+
+Some stacks need a one-time setup step after their containers are healthy. Run
+executes these as hooks, declared in a recipe's `[hooks]` section or a catalog
+manifest. For Runa, a hook seeds the authentication client so sign-in works out of
+the box. Hooks run only after the health checks pass.
+
+## Local state and project directories
+
+Run keeps each stack's generated files (the Compose file, the Caddy config, the
+generated `.env`, the certificates, backups, and a small state record) in a
+per-stack directory on your machine. `run down` leaves these in place so a later
+`run up` resumes from them; `run down --fresh` deletes them for a clean slate,
+after taking an automatic [backup](/docs/products/run/backups) of the data
+volumes.

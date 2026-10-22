@@ -1,0 +1,132 @@
+---
+title: Getting Started
+description: Install Run and bring up your first app
+---
+
+This walkthrough installs the CLI and starts your first app, first from the
+built-in catalog and then from a directory of your own.
+
+<Callout type="info">
+  Run orchestrates containers through Docker Compose on your local machine. Make
+  sure Docker and the Compose plugin are installed and running first.
+</Callout>
+
+## 1. Install the CLI
+
+Use the install script, or pick a package manager from the
+[install matrix](/docs/products/run#installation).
+
+```bash
+curl -fsSL https://run.omni.dev/install.sh | sh
+```
+
+For trusted local HTTPS, install [mkcert](https://github.com/FiloSottile/mkcert)
+and run `mkcert -install` once. Without mkcert, Run serves over HTTP instead.
+
+## 2. Preview the plan (optional)
+
+Before starting anything, see exactly what a target would bring up:
+
+```bash
+run plan runa
+```
+
+This prints the services and images, the secrets that would be generated, the TLS
+mode (HTTPS if mkcert is detected, otherwise HTTP), and the proxy routes. It makes
+no changes.
+
+## 3. Start a catalog app
+
+[Runa](/docs/products/runa), a project management app, ships in the built-in
+[catalog](/docs/products/run/catalog):
+
+```bash
+run up runa
+```
+
+`run runa` is shorthand for the same command. On the first run, Run:
+
+1. Checks that Docker is available
+2. Generates the app's secrets and, if mkcert is present, local TLS certificates
+3. Writes a Docker Compose file and a Caddy reverse-proxy config
+4. Starts the containers and waits for every service to report healthy
+5. Runs post-start hooks (for Runa, seeding its authentication client)
+
+When it finishes, Run prints where the app is running:
+
+```text
+Runa is running at https://localhost
+  Auth:  https://localhost:3001
+  API:   https://localhost:4000
+  Stop:  run down runa
+  Logs:  run logs runa
+  Wipe:  run down runa --fresh
+```
+
+<Callout type="info">
+  Without mkcert, the same URLs are served over `http://` instead of `https://`.
+</Callout>
+
+## 4. Bring up your own app
+
+Run is not limited to the catalog. Point it at a directory that holds a Run recipe
+(`run.toml` or `run.yaml`) or a Docker Compose file, and it brings that up the same
+way:
+
+```bash
+# from a directory containing run.toml, run.yaml, or a compose file
+run up .
+```
+
+You can also start a single container straight from an image reference, with no
+files at all:
+
+```bash
+run up nginx
+```
+
+See [Targets](/docs/products/run/targets) for everything `<target>` accepts, and
+[Recipes](/docs/products/run/recipes) for authoring your own `run.toml`.
+
+## 5. Create the first user
+
+Open the printed app URL (for example `https://localhost`) in your browser. For an
+app with bundled authentication such as Runa, sign up to create the first account,
+then sign in to start using it.
+
+## 6. Watch the logs
+
+Tail the running containers in another terminal:
+
+```bash
+run logs runa -f
+```
+
+Pass a service name to narrow the output, for example `run logs runa api`.
+
+## 7. Stop the app
+
+Stop the containers but keep the data (volumes, secrets, and certificates) so the
+next `run up runa` resumes where you left off:
+
+```bash
+run down runa
+```
+
+To stop and wipe everything (volumes, generated secrets, and certificates) for a
+clean start:
+
+```bash
+run down runa --fresh
+```
+
+A `--fresh` wipe takes an automatic backup first, so the data can be restored.
+See [Backups](/docs/products/run/backups).
+
+## Next Steps
+
+- [Commands](/docs/products/run/commands) for the full command reference
+- [Targets](/docs/products/run/targets) for everything you can point Run at
+- [Catalog](/docs/products/run/catalog) for the apps that ship built in
+- [Recipes](/docs/products/run/recipes) for authoring your own stack
+- [Concepts](/docs/products/run/concepts) for how Run assembles a stack

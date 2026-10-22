@@ -1,0 +1,67 @@
+---
+title: Targets
+description: The four kinds of target Run can start, and how it resolves them
+---
+
+Every command that acts on a stack takes a single **target**. A target can be one
+of four kinds, and Run figures out which from the value you pass.
+
+## The four kinds
+
+| Kind | Example | What it is |
+|------|---------|------------|
+| Catalog name | `runa` | An app from the built-in [catalog](/docs/products/run/catalog) |
+| Recipe | `./my-app` or `./run.toml` | A Run recipe (`run.toml` or `run.yaml`), or a directory holding one |
+| Compose file | `.` or `./docker-compose.yml` | A Docker Compose file (`docker-compose.yml` or `compose.yaml`), or a directory holding one |
+| Image | `nginx` or `ghcr.io/acme/app:1.2` | A bare container image reference |
+
+### Catalog name
+
+A plain name such as `runa` resolves to a built-in catalog app. Run `run ls` to
+see the available names. The catalog ships embedded in the CLI, so no files are
+needed.
+
+### Recipe
+
+A [recipe](/docs/products/run/recipes) is a `run.toml` or `run.yaml` file that
+declares the stack's services, secrets, inputs, TLS, and proxy routes. Pass the
+file path directly, or a directory that contains one.
+
+```bash
+run up ./my-app        # directory holding run.toml or run.yaml
+run up ./my-app/run.toml
+```
+
+### Compose file
+
+Point Run at an existing Docker Compose file (`docker-compose.yml` or
+`compose.yaml`), or a directory that contains one. Run wraps it with generated
+secrets, a Caddy proxy, and local TLS, then brings it up.
+
+```bash
+run up .                       # directory holding a compose file
+run up ./deploy/compose.yaml
+```
+
+### Image
+
+A bare image reference synthesizes a single-service stack on the fly, with no
+files at all.
+
+```bash
+run up nginx
+run up ghcr.io/acme/app:1.2
+```
+
+## Resolution cascade
+
+When a target could match more than one kind, Run resolves it in a fixed order and
+takes the first match:
+
+1. A **catalog name**
+2. Otherwise, a **Run recipe** (`run.toml` or `run.yaml`) at the path or in the directory
+3. Otherwise, a **Docker Compose file** at the path or in the directory
+4. Otherwise, a **bare image** reference, synthesized into a single-service stack
+
+Within a directory, a Run recipe takes priority over a Compose file. If both a
+`run.toml` and a `docker-compose.yml` sit in the same folder, Run uses the recipe.

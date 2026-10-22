@@ -1,0 +1,187 @@
+---
+title: Commands
+description: Reference for every Run command
+---
+
+Run has a small, focused command set. Every command that acts on a stack takes a
+**target**: a catalog name, a path to a Run recipe or Docker Compose file (or a
+directory containing one), or a bare image reference. See
+[Targets](/docs/products/run/targets) for how a target is resolved.
+
+| Command | Description |
+|---------|-------------|
+| `run up <target>` | Start a stack |
+| `run <target>` | Shorthand for `run up <target>` |
+| `run down <target>` | Stop a stack, keeping its data |
+| `run down <target> --fresh` | Stop and wipe all data (takes a backup first) |
+| `run ls` | List the built-in catalog apps |
+| `run logs <target> [service]` | Tail container logs |
+| `run plan <target>` | Preview what would happen, without making changes |
+| `run backup <target>` | Snapshot the stack's data volumes |
+| `run backups <target>` | List snapshots for a target |
+| `run restore <target> <snapshot>` | Restore data volumes from a snapshot |
+| `run status [target]` | Show a stack's services, or list every known stack |
+| `run update <target>` | Pull the latest images and recreate, rolling back on failure |
+| `run deploy <target>` | Emit a `fractal.yaml` to deploy the stack to Fractal cloud |
+
+## up
+
+```bash
+run up <target>
+```
+
+Starts a stack. `run <target>` is shorthand for the same thing.
+
+On the first run for a target, `up` generates secrets and (when mkcert is
+installed) local TLS certificates, writes a Docker Compose file and a Caddy
+reverse-proxy config, starts the containers, waits for them to become healthy,
+runs any post-start hooks, and prints the URLs to open. On later runs it reuses
+the existing secrets and certificates.
+
+## down
+
+```bash
+run down <target>
+run down <target> --fresh
+run down <target> --fresh --no-backup
+```
+
+Stops a running stack.
+
+By default the data is preserved, so the volumes, generated secrets, and
+certificates survive and the next `run up` resumes from them.
+
+With `--fresh`, `down` also removes the volumes, the generated secrets, the
+certificates, and the generated Compose and proxy files. The next `run up` starts
+the stack from scratch. Before wiping, `--fresh` takes an automatic pre-wipe
+backup of the data volumes, so a wipe can be undone with
+[`run restore`](/docs/products/run/backups). Pass `--no-backup` to skip that
+snapshot.
+
+<Callout type="warn">
+  `run down <target> --fresh` permanently deletes the stack's data volumes. The
+  automatic pre-wipe backup is the only way back, so do not pair `--fresh` with
+  `--no-backup` unless you are certain the data is disposable.
+</Callout>
+
+## ls
+
+```bash
+run ls
+```
+
+Lists the apps in the built-in [catalog](/docs/products/run/catalog), one per
+line. These names can be used directly as targets.
+
+## logs
+
+```bash
+run logs <target> [service] [-f]
+```
+
+Tails the container logs for a running stack.
+
+- Pass an optional `service` name to show logs for a single service only.
+- Pass `-f` (or `--follow`) to stream new log output as it arrives.
+
+The stack must have been started at least once; otherwise `logs` reports that it
+is not initialized.
+
+## plan
+
+```bash
+run plan <target>
+```
+
+Prints what `up` would do, without touching Docker or writing any files. The
+output lists:
+
+- The resolved target and its name
+- Each service and its image
+- The secrets that would be generated on first run
+- The TLS mode (HTTPS when mkcert is detected, otherwise HTTP)
+- The proxy routes (listen port to target service)
+
+## backup
+
+```bash
+run backup <target> [--name <snapshot>]
+```
+
+Snapshots the stack's Docker volumes to a local gzip-tarball snapshot. Pass
+`--name` to label the snapshot, otherwise Run names it automatically. See
+[Backups](/docs/products/run/backups).
+
+## backups
+
+```bash
+run backups <target>
+```
+
+Lists the snapshots saved for a target.
+
+## restore
+
+```bash
+run restore <target> <snapshot> [--yes]
+```
+
+Restores the stack's data volumes from a snapshot. This overwrites the current
+volume contents, so Run confirms first unless `--yes` is passed.
+
+<Callout type="warn">
+  `run restore` overwrites the current data volumes with the snapshot's contents.
+  There is no undo once it completes.
+</Callout>
+
+## status
+
+```bash
+run status [target]
+```
+
+With a target, shows that stack's services and their current state (the
+equivalent of `docker compose ps` for the stack). With no target, lists every
+stack Run knows about along with its last saved status.
+
+## update
+
+```bash
+run update <target> [--no-backup]
+```
+
+Updates a running stack to the latest images for its recipe's tags: it takes a
+pre-update backup of the data volumes, pulls the latest images, recreates the
+containers, and waits for them to become healthy.
+
+If the new images fail to become healthy, `update` automatically rolls back to
+the exact images that were running before and restores the pre-update snapshot,
+so a bad upstream release never leaves the stack down or loses data. Pass
+`--no-backup` to skip the pre-update snapshot.
+
+A stack pinned to image digests updates only when its recipe's digests change; a
+stack on moving tags (such as `:latest` or `:1`) picks up the newest image each
+time.
+
+## deploy
+
+```bash
+run deploy <target> [--to fractal]
+```
+
+Translates a stack into a `fractal.yaml` and prints it, so the same stack can be
+deployed to Fractal cloud. The command makes no network calls: it only emits the
+manifest, along with warnings about anything that does not map cleanly from a
+local stack to the cloud (for example proxy and TLS settings, which Fractal
+supplies itself). Copy the output into a repository and import it from the
+Fractal dashboard.
+
+### Deploy button
+
+Any repository that ships a `run.yaml` can carry a one-click deploy button.
+Visitors land on a review page that reads the recipe and shows the stack, then
+hand it off to Fractal:
+
+```markdown
+[![Deploy to Fractal](https://run.omni.dev/button.svg)](https://run.omni.dev/deploy?repo=https://github.com/you/your-repo)
+```

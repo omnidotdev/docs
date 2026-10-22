@@ -1,0 +1,43 @@
+---
+title: Catalog
+description: The apps that ship built in to Run
+---
+
+Run ships with a built-in catalog of ready-to-run app stacks. Each entry's full
+stack (services, secrets, proxy routes, and startup hooks) is embedded in the CLI,
+so there is nothing to download or configure by hand. A catalog name is just one
+kind of [target](/docs/products/run/targets): you can equally point Run at your
+own recipe, a Compose file, or a bare image.
+
+List the current set any time:
+
+```bash
+run ls
+```
+
+## Available apps
+
+| App | What it is | Start it |
+|-----|------------|----------|
+| [Runa](/docs/products/runa) | Project management with Kanban boards | `run up runa` |
+| [Backfeed](/docs/products/backfeed) | Feedback boards and roadmaps | `run up backfeed` |
+| [Vortex](/docs/products/vortex) | CloudEvents bus and event routing | `run up vortex` |
+| Uptime Kuma | Self-hosted uptime and status monitoring | `run up uptime-kuma` |
+| Pi-hole | Network-wide DNS sinkhole and ad blocker | `run up pihole` |
+
+Runa, Backfeed, and Vortex are Omni products. Uptime Kuma and Pi-hole are
+third-party apps, included to show that Run self-hosts anything, not only Omni's
+own products.
+
+<Callout type="info">
+  The catalog is embedded in the CLI, so the set of available apps grows as you
+  update Run. Install the latest release to pick up newly added apps, then run
+  `run ls` to see them.
+</Callout>
+
+## Beyond the catalog
+
+The catalog is a convenience, not a limit. To self-host something that is not
+listed, write a [recipe](/docs/products/run/recipes), point Run at an existing
+Docker Compose file, or start a bare image directly. See
+[Targets](/docs/products/run/targets) for all of the options.

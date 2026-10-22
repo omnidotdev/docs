@@ -1,0 +1,136 @@
+---
+title: Recipes
+description: Author your own stack with run.toml or run.yaml
+---
+
+A recipe describes a stack Run can bring up. Write it as `run.toml` or `run.yaml`
+and point Run at the file or its directory (`run up ./my-app`). A recipe gives you
+the same generated secrets, Caddy proxy, local TLS, and health checks that the
+[catalog](/docs/products/run/catalog) apps use.
+
+The examples below use TOML; the YAML form mirrors the same structure.
+
+## Minimal recipe
+
+```toml
+name = "my-app"
+
+[[services]]
+name = "web"
+image = "nginx:1.27"
+ports = ["8080:80"]
+```
+
+`run up .` from that directory starts the `web` service.
+
+## Services
+
+Declare one `[[services]]` block per container. Each service takes:
+
+| Field | Purpose |
+|-------|---------|
+| `name` | Service name (required) |
+| `image` | Container image (required) |
+| `ports` | Published ports, `host:container` |
+| `command` | Override the container command |
+| `environment` | Environment variables for the service |
+| `volumes` | Named or bind-mounted volumes |
+| `depends_on` | Services that must start first |
+| `cap_add` | Linux capabilities to add |
+| `security_opt` | Security options |
+| `ulimits` | Resource limits |
+| `healthcheck` | Health check Run waits on before reporting ready |
+
+```toml
+name = "notes"
+
+[[services]]
+name = "db"
+image = "postgres:17"
+environment = { POSTGRES_PASSWORD = "${secret.DB_PASSWORD}" }
+volumes = ["db-data:/var/lib/postgresql/data"]
+
+[[services]]
+name = "api"
+image = "ghcr.io/acme/notes-api:1.4"
+depends_on = ["db"]
+ports = ["4000:4000"]
+environment = { DATABASE_URL = "postgres://postgres:${secret.DB_PASSWORD}@db:5432/notes" }
+```
+
+## Secrets
+
+Declare secrets Run should generate on first run under `[secrets]`. Each entry in
+`auto` is generated once, stored locally, and reused on later runs.
+
+```toml
+[secrets]
+auto = [
+  { name = "DB_PASSWORD", method = "hex", length = 32 },
+]
+```
+
+Reference a generated secret anywhere in a string value with `${secret.NAME}`. Run
+wires the value in through the generated `.env` file; the secret value is never
+written into the Compose file itself.
+
+## Inputs
+
+Declare typed `[[inputs]]` for values a user supplies at start time, such as a
+domain or an admin email.
+
+| Field | Purpose |
+|-------|---------|
+| `key` | Input key, referenced as `${input.KEY}` (required) |
+| `label` | Human-readable prompt label |
+| `type` | Value type |
+| `default` | Value used when none is supplied |
+| `required` | Whether a value must be provided |
+
+```toml
+[[inputs]]
+key = "ADMIN_EMAIL"
+label = "Administrator email"
+type = "string"
+required = true
+
+[[inputs]]
+key = "PORT"
+type = "number"
+default = 8080
+```
+
+Reference an input with `${input.KEY}`. Run resolves it in order: the
+`RUN_INPUT_<KEY>` environment variable first, then the input's `default`, and
+otherwise an interactive prompt.
+
+```bash
+RUN_INPUT_ADMIN_EMAIL=me@example.com run up .
+```
+
+## TLS, proxy, and hooks
+
+A recipe can also declare optional sections:
+
+- `[tls]` to configure local TLS.
+- `[proxy]` with routes that map incoming ports to services behind the Caddy proxy.
+- `[hooks]` to run one-time setup steps after the containers are healthy.
+
+See [Concepts](/docs/products/run/concepts) for how Run assembles these into the
+running stack.
+
+## Magic tokens
+
+Run expands these tokens in recipe string values before generating the Compose
+file:
+
+| Token | Expands to |
+|-------|------------|
+| `${secret.NAME}` | A generated secret, wired in through the generated `.env` |
+| `${input.KEY}` | A typed input (from `RUN_INPUT_<KEY>`, then the default, else a prompt) |
+| `${app.name}` | The stack's name |
+| `${app.fqdn}` | The stack's fully qualified local domain |
+| `${app.data_dir}` | The stack's local data directory |
+
+Plain `${VAR}` and `${VAR:-default}` are left untouched for Docker Compose to
+expand itself, so existing Compose variable syntax keeps working.
