@@ -56,6 +56,10 @@ Both implement the same interface and produce the same operations, so you can sw
 
 The viewport draws a flat-shaded, Z-up preview of the current solid. Facets read crisply because normals are per-face. Loading an example reframes the camera to fit the part; editing the code or dragging a slider recomputes in place without moving the camera.
 
+<Callout type="info">
+The 3D preview uses WebGPU, so it needs a current version of Chrome, Edge, Safari, or Firefox. On a browser without WebGPU the viewport shows a notice instead, but you can still write models and export (the geometry is computed without a GPU).
+</Callout>
+
 ## 6. Export
 
 Choose a format (**STL** or **3MF**) next to the **Export** button and click it to download the current model (`facet-model.stl` or `facet-model.3mf`), ready to drop into a slicer for 3D printing. Export uses the active kernel. If the model is currently in an error state there is nothing to export, and the status line says so; fix the model first.
