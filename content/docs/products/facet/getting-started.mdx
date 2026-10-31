@@ -13,7 +13,7 @@ Go to [facet.omni.dev](https://facet.omni.dev). The Studio has three parts:
 - a **3D viewport** on the right, where the solid is drawn
 - a **status line** under the editor, showing triangle count, evaluation time, and the active kernel (or an error if the model fails)
 
-The header carries an examples dropdown, a kernel selector, a theme toggle, and an **Export STL** button.
+The header carries an examples dropdown, a kernel selector, a theme toggle, and export controls (a format selector and an **Export** button).
 
 ## 2. Load or write a model
 
@@ -47,10 +47,11 @@ Any `param.number(name, ...)` call in your model becomes a labeled slider in the
 
 The **kernel selector** in the header chooses which geometry engine evaluates your model:
 
-- **TS**, the TypeScript CSG kernel, always available
+- **TS**, the TypeScript CSG kernel, the default and always available
 - **Rust/WASM**, the Rust kernel compiled to WebAssembly, offered when the vendored WASM bundle is present
+- **B-rep (OCCT)**, the OpenCascade kernel for exact geometry, loaded on demand the first time it is used
 
-Both implement the same interface and produce the same operations, so you can switch between them on the same model. The status line names the active kernel after each run.
+All three implement the same interface and read the same model, so you can switch between them. The B-rep kernel also powers the `fillet`, `chamfer`, and `shell` operations, and Facet selects it automatically when a model uses one of those, so you rarely pick it by hand. The status line names the active kernel after each run.
 
 ## 5. Preview in 3D
 
@@ -62,7 +63,7 @@ The 3D preview uses WebGPU, so it needs a current version of Chrome, Edge, Safar
 
 ## 6. Export
 
-Choose a format (**STL** or **3MF**) next to the **Export** button and click it to download the current model (`facet-model.stl` or `facet-model.3mf`), ready to drop into a slicer for 3D printing. Export uses the active kernel. If the model is currently in an error state there is nothing to export, and the status line says so; fix the model first.
+Choose a format (**STL**, **3MF**, or **STEP**) next to the **Export** button and click it to download the current model (`facet-model.stl`, `facet-model.3mf`, or `facet-model.step`). STL and 3MF are triangle meshes ready to drop into a slicer for 3D printing; **STEP** (ISO-10303 AP242) is exact B-rep geometry for CAD and manufacturing interchange, and comes from the B-rep kernel. Export uses the active kernel. If the model is currently in an error state there is nothing to export, and the status line says so; fix the model first.
 
 ## Your work is saved
 
@@ -76,7 +77,7 @@ Press `T` (when the editor is not focused) or click the theme button to toggle l
 
 <Cards>
   <Card title="Concepts" href="/products/facet/concepts">
-    How parametric modeling, the op-graph, and the CSG kernel fit together
+    How parametric modeling, the op-graph, and the kernels fit together
   </Card>
   <Card title="Modeling API" href="/products/facet/modeling">
     Every primitive, transform, boolean, and parameter, with exact signatures
