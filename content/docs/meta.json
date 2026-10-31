@@ -35,6 +35,7 @@
     "realms/armory/index",
     "products/arbor",
     "products/eden",
+    "products/manifold",
     "products/nectar",
     "products/omni-cli",
     "products/omni-terminal",

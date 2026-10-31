@@ -1,0 +1,141 @@
+---
+title: Authentication
+description: JWT and API token authentication
+---
+
+Manifold supports two authentication methods: JWT-based authentication for users and scoped API tokens for programmatic access.
+
+## JWT Authentication (OIDC)
+
+The web dashboard and SSO integrations use JWT authentication:
+
+1. User authenticates via an OIDC provider (e.g. Omni ID)
+2. The provider issues a signed JWT
+3. Manifold verifies the signature against the provider's JWKS endpoint (`AUTH_BASE_URL/.well-known/jwks.json`)
+4. User claims (`sub`, `email`, `name`) are extracted and used for authorization
+
+JWTs are validated for:
+- Signature (via remote JWKS)
+- Expiration (`exp` claim)
+- Issued-at (`iat` claim)
+- Issuer (`iss` claim)
+
+### Usage
+
+```bash
+curl -H "Authorization: Bearer eyJhbG..." \
+  https://manifold.omni.dev/graphql
+```
+
+## API Tokens
+
+API tokens provide scoped, long-lived credentials for automation and CI/CD.
+
+### Token Format
+
+- **Prefix**: `mf_` (identifies as a Manifold token)
+- **Entropy**: 43 base64url characters (256 bits)
+- **Storage**: SHA-256 hash (plaintext is never stored)
+- **Identification**: First 11 characters serve as the token prefix for display
+
+Example: `mf_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm`
+
+### Scopes
+
+| Scope | Permissions |
+|-------|------------|
+| `read` | Pull artifacts, list repositories and tags |
+| `write` | Push artifacts, create tags (includes `read`) |
+| `admin` | Manage tokens, delete artifacts, modify settings (includes `write`) |
+
+### Scope Targets
+
+Tokens can be scoped to different levels:
+
+- **Namespace-scoped**: Access all repositories within a namespace
+- **Repository-scoped**: Access a single repository only
+
+### Creating Tokens
+
+Create tokens through the GraphQL API:
+
+```graphql
+mutation {
+  createApiToken(input: {
+    apiToken: {
+      name: "ci-pipeline"
+      namespaceId: "..."
+      scope: "write"
+      description: "CI/CD push access"
+    }
+  }) {
+    apiToken {
+      rowId
+      tokenPrefix
+    }
+  }
+}
+```
+
+<Callout type="warning">
+  The full token is only returned once at creation time. Store it securely — it cannot be retrieved later.
+</Callout>
+
+### Using Tokens
+
+Include the token in the `Authorization` header:
+
+```bash
+# OCI API
+curl -H "Authorization: Bearer mf_..." \
+  https://manifold.omni.dev/v2/myorg/myapp/tags/list
+
+# GraphQL API
+curl -X POST https://manifold.omni.dev/graphql \
+  -H "Authorization: Bearer mf_..." \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ namespaces { nodes { name } } }"}'
+
+# Docker login
+echo "mf_..." | docker login manifold.omni.dev --username token --password-stdin
+```
+
+### Token Lifecycle
+
+- **Expiration**: Tokens can optionally have an `expiresAt` date
+- **Deactivation**: Set `isActive` to `false` to disable without deleting
+- **Last used**: `lastUsedAt` is updated on each use for auditing
+- **Deletion**: Remove permanently via the GraphQL API
+
+## Scope Enforcement
+
+API token scopes are enforced at both the OCI and GraphQL layers:
+
+- **OCI API**: Token scope is checked against the operation type (pull requires `read`, push requires `write`)
+- **GraphQL queries**: Require `read` scope
+- **GraphQL mutations**: Require `write` scope
+- **Destructive mutations** (delete namespace, repository, or artifact): Require `admin` scope
+
+Namespace and repository-scoped tokens are additionally restricted to their bound resources. A token scoped to namespace `myorg` cannot access artifacts in other namespaces, even with `admin` scope.
+
+<Callout type="info">
+JWT-authenticated users bypass token scope enforcement and use organization-level role-based access control instead.
+</Callout>
+
+## Route Protection Modes
+
+The API supports two protection modes controlled by the `PROTECT_ROUTES` environment variable:
+
+| Mode | Value | Behavior |
+|------|-------|----------|
+| Protected | `true` | All routes require authentication |
+| Resolve-only | `false` | Authentication is optional; unauthenticated requests get limited access |
+
+## Security Considerations
+
+- Tokens are hashed with SHA-256 before storage
+- Token plaintext is only visible once at creation
+- Use the minimum scope required for each use case
+- Set expiration dates for CI/CD tokens
+- Rotate tokens periodically
+- Revoke tokens that are no longer needed
