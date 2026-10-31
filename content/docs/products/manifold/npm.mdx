@@ -1,0 +1,72 @@
+---
+title: npm Registry
+description: Publish and install scoped npm packages
+---
+
+Manifold is a private [npm](https://docs.npmjs.com/cli/v10/using-npm/registry) registry. Packages are **scoped**, and the scope is your Manifold namespace: a package published to the `acme` namespace is named `@acme/<package>`.
+
+## Base URL
+
+The npm endpoints are served under `/npm`:
+
+```
+https://manifold.omni.dev/npm
+```
+
+## Configuration
+
+Point your scope at Manifold and attach an API token in `.npmrc` (project-local or `~/.npmrc`). The scope must match the namespace you publish to:
+
+```ini
+@acme:registry=https://manifold.omni.dev/npm
+//manifold.omni.dev/npm/:_authToken=mf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+The token is a Manifold API token (`mf_…`); see [Authentication](./authentication). Publishing requires a token with `write` scope on the namespace. Anonymous installs work for public packages.
+
+## Publishing
+
+Set the package name to your scope in `package.json`, then publish:
+
+```json
+{
+  "name": "@acme/widgets",
+  "version": "1.0.0"
+}
+```
+
+```bash
+npm publish
+```
+
+Manifold stores the tarball, records the version, and updates the packument. Re-publishing an existing version is rejected (immutable versions).
+
+## Installing
+
+With the scope configured, install as usual:
+
+```bash
+npm install @acme/widgets
+```
+
+## Dist-tags
+
+Dist-tags (e.g. `latest`, `next`) are supported:
+
+```bash
+# List tags
+npm dist-tag ls @acme/widgets
+
+# Move a tag to a version
+npm dist-tag add @acme/widgets@1.2.0 next
+```
+
+## Endpoints
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/npm/@:scope/:pkg` | Packument (all versions) |
+| `GET` | `/npm/@:scope/:pkg/-/:file` | Download a tarball |
+| `PUT` | `/npm/@:scope/:pkg` | Publish a version |
+| `GET` | `/npm/-/package/@:scope/:pkg/dist-tags` | List dist-tags |
+| `PUT` | `/npm/-/package/@:scope/:pkg/dist-tags/:tag` | Set a dist-tag |

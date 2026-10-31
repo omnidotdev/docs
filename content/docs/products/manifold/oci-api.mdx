@@ -1,0 +1,206 @@
+---
+title: OCI API
+description: OCI Distribution Spec v2 API reference
+---
+
+Manifold implements the [OCI Distribution Spec v2](https://github.com/opencontainers/distribution-spec). Any OCI-compatible client (Docker, Podman, ORAS, etc.) can push and pull artifacts.
+
+## Base URL
+
+All OCI endpoints are prefixed with `/v2/`. The version check endpoint confirms compatibility:
+
+```bash
+curl https://manifold.omni.dev/v2/
+
+# Response headers include:
+# Docker-Distribution-API-Version: registry/2.0
+```
+
+## Endpoints
+
+### Version Check
+
+```
+GET /v2/
+```
+
+Returns `200 OK` with the `Docker-Distribution-API-Version: registry/2.0` header.
+
+### Manifests
+
+#### Pull a manifest
+
+```
+GET /v2/:name/manifests/:reference
+```
+
+- `:name` — Repository name (e.g. `myorg/myapp` or `myapp`)
+- `:reference` — Tag name or `sha256:...` digest
+
+```bash
+curl -H "Accept: application/vnd.oci.image.manifest.v1+json" \
+  https://manifold.omni.dev/v2/myorg/myapp/manifests/latest
+```
+
+#### Push a manifest
+
+```
+PUT /v2/:name/manifests/:reference
+```
+
+```bash
+curl -X PUT \
+  -H "Content-Type: application/vnd.oci.image.manifest.v1+json" \
+  -d @manifest.json \
+  https://manifold.omni.dev/v2/myorg/myapp/manifests/v1.0.0
+```
+
+#### Check manifest existence
+
+```
+HEAD /v2/:name/manifests/:reference
+```
+
+Returns `200 OK` if the manifest exists, `404` otherwise. The `Docker-Content-Digest` header contains the digest.
+
+### Blobs
+
+#### Pull a blob
+
+```
+GET /v2/:name/blobs/:digest
+```
+
+```bash
+curl https://manifold.omni.dev/v2/myorg/myapp/blobs/sha256:abc123...
+```
+
+#### Check blob existence
+
+```
+HEAD /v2/:name/blobs/:digest
+```
+
+Returns `200 OK` with `Content-Length` if the blob exists.
+
+### Uploads
+
+Manifold supports both monolithic and chunked blob uploads.
+
+#### Initiate an upload
+
+```
+POST /v2/:name/blobs/uploads/
+```
+
+Returns `202 Accepted` with a `Location` header containing the upload URL.
+
+```bash
+# Start upload
+UPLOAD_URL=$(curl -s -D- -X POST \
+  https://manifold.omni.dev/v2/myorg/myapp/blobs/uploads/ \
+  | grep -i location | cut -d' ' -f2 | tr -d '\r')
+```
+
+#### Upload a chunk
+
+```
+PATCH /v2/:name/blobs/uploads/:uuid
+```
+
+```bash
+curl -X PATCH \
+  -H "Content-Type: application/octet-stream" \
+  -H "Content-Range: 0-1023" \
+  --data-binary @chunk1.bin \
+  "$UPLOAD_URL"
+```
+
+#### Complete an upload
+
+```
+PUT /v2/:name/blobs/uploads/:uuid?digest=sha256:...
+```
+
+For monolithic uploads, include the full blob content. For chunked uploads, send the final chunk (or empty body) with the computed digest.
+
+```bash
+curl -X PUT \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @layer.tar.gz \
+  "$UPLOAD_URL&digest=sha256:abc123..."
+```
+
+### Tags
+
+#### List tags
+
+```
+GET /v2/:name/tags/list
+```
+
+Supports pagination with `n` (page size) and `last` (cursor) query parameters.
+
+```bash
+# List first 10 tags
+curl "https://manifold.omni.dev/v2/myorg/myapp/tags/list?n=10"
+
+# Next page
+curl "https://manifold.omni.dev/v2/myorg/myapp/tags/list?n=10&last=v1.5.0"
+```
+
+Response:
+
+```json
+{
+  "name": "myorg/myapp",
+  "tags": ["latest", "v1.0.0", "v1.1.0"]
+}
+```
+
+## Repository Naming
+
+Repositories follow the format `namespace/name`:
+
+- `myorg/myapp` — Explicit namespace
+- `myapp` — Defaults to the `library` namespace
+
+## Docker CLI Usage
+
+```bash
+# Log in (uses API token or OIDC credentials)
+docker login manifold.omni.dev
+
+# Tag a local image
+docker tag myapp:latest manifold.omni.dev/myorg/myapp:v1.0.0
+
+# Push
+docker push manifold.omni.dev/myorg/myapp:v1.0.0
+
+# Pull
+docker pull manifold.omni.dev/myorg/myapp:v1.0.0
+```
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `NAME_UNKNOWN` | Repository not found |
+| `BLOB_UNKNOWN` | Blob not found |
+| `MANIFEST_UNKNOWN` | Manifest not found |
+| `DIGEST_INVALID` | Provided digest does not match content |
+| `DENIED` | Authentication required or insufficient permissions |
+
+Errors follow the OCI error response format:
+
+```json
+{
+  "errors": [
+    {
+      "code": "MANIFEST_UNKNOWN",
+      "message": "manifest not found",
+      "detail": {}
+    }
+  ]
+}
+```
