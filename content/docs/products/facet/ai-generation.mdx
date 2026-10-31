@@ -1,0 +1,67 @@
+---
+title: AI Generation
+description: Describe a part in plain English and let Facet write the model
+---
+
+Facet can turn a plain-English description into a working model. Open the
+**Describe a part** panel in the Studio, type what you want, and Facet writes
+the Facet code, loads it into the editor, and runs it. The result is ordinary
+code: read it, edit it, add parameters, and iterate like any other model.
+
+<Callout type="info">
+AI generation is in **Beta**. It writes the same API you would write by hand
+(`cube`, `cylinder`, `union`, `subtract`, `fillet`, and the rest), so treat its
+output as a starting point you refine, not a finished part.
+</Callout>
+
+## Generate a model
+
+1. Open the Studio at [facet.omni.dev](https://facet.omni.dev).
+2. In the **Describe a part** panel, enter a prompt. Be specific about
+   dimensions and units (Facet works in millimeters), for example:
+   `a 60 by 40 by 20 mm enclosure with 2 mm walls and four 3 mm mounting holes`.
+3. Select **Generate**. Facet writes the model into the editor, runs it, and
+   shows the result in the viewport.
+
+If the generated model fails to build, Facet automatically sends the error back
+and tries to repair it a couple of times before showing you a message. Your
+previous model is kept if generation does not produce a working result.
+
+## Access and credits
+
+Local modeling and export never require an account and always run on your
+device. AI generation has two paths:
+
+- **Bring your own key.** Expand **Use your own key** and paste an AI model
+  provider API key. The key is stored only in your browser and is sent with each
+  request so it reaches the provider directly. Generation with your own key needs
+  no account and is billed to your provider, not metered against Facet credits.
+- **Managed generation** (rolling out). Sign in with your Omni account to
+  generate without supplying a key. Managed generation is metered in credits (one
+  credit is about one US cent of model spend): the free tier includes a fixed
+  monthly allowance and is hard-capped, and paid tiers include more. During the
+  Beta, managed generation is still rolling out, so bring-your-own-key is the way
+  to generate today.
+
+<Callout type="warn">
+Bring-your-own-key is the no-account option and the way to generate during the
+Beta. Expand **Use your own key** in the panel and paste your provider key.
+</Callout>
+
+## Your data
+
+When you generate, the prompt you enter (and any code resubmitted to refine or
+repair a result) is sent to Facet's AI gateway and routed through the Synapse AI
+router to a third-party AI model provider, which processes it to return a result.
+Prompts and generated output are not stored on Facet's servers; only a per-user
+monthly credit count is kept, to enforce plan limits. Local modeling and file
+export send nothing off your device unless you use AI generation. See the
+[Privacy Policy](https://omni.dev/legal/privacy) for details.
+
+## Tips
+
+- Name real dimensions and units; vague prompts produce vague parts.
+- Ask for exact-geometry operations by name (fillet, chamfer, shell) when you
+  want them; the Studio switches to the B-rep kernel automatically.
+- Generate a rough first version, then wire up `param.number(...)` sliders and
+  adjust the code by hand for a precise, reusable model.
