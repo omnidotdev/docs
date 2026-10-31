@@ -124,6 +124,50 @@ a.intersect(b);       // method
 intersection(a, b);   // free function
 ```
 
+## Exact-geometry operations
+
+These methods reshape a whole solid rather than combining shapes, and they need **exact geometry**, so they run only on the B-rep (OCCT) kernel. You do not have to select it: when a model calls any of them, the Studio switches to the B-rep kernel and renders automatically (see [the kernels](/products/facet/concepts#the-kernels)).
+
+### `fillet`
+
+```ts
+shape.fillet(radius: number): Shape
+```
+
+Rounds every edge of the solid to `radius`.
+
+```ts
+cube(20).fillet(3); // a cube with all edges rounded
+```
+
+### `chamfer`
+
+```ts
+shape.chamfer(size: number): Shape
+```
+
+Bevels every edge of the solid by `size`, a flat cut instead of a round.
+
+```ts
+cube(20).chamfer(2); // a cube with all edges beveled
+```
+
+### `shell`
+
+```ts
+shape.shell(thickness: number): Shape
+```
+
+Hollows the solid to a wall of `thickness`, opening its top face so the inside is reachable. Turns a solid block into an open box or enclosure.
+
+```ts
+cube([40, 40, 30]).shell(2); // an open-topped box with 2 mm walls
+```
+
+<Callout type="warn">
+Order matters: fillet or chamfer the solid first, then shell it. Filleting a thin shelled wall by a radius as large as the wall thickness leaves no material for the round to resolve against and fails, so round the outer solid before hollowing it.
+</Callout>
+
 ## Parameters
 
 Declare a live input with `param.number`. It registers the parameter, returns its current value, and drives a slider in the Studio's Parameters panel.
@@ -169,7 +213,7 @@ return part;
 
 ## Export
 
-Pick a format (**STL** or **3MF**) beside the **Export** button and click it to download the current model. Both are triangle-mesh formats a slicer can open; 3MF is the newer, richer container. Export uses the active kernel. The Rust B-rep kernel and exact formats such as STEP are on the roadmap.
+Pick a format (**STL**, **3MF**, or **STEP**) beside the **Export** button and click it to download the current model. STL and 3MF are triangle-mesh formats a slicer can open (3MF is the newer, richer container); **STEP** (ISO-10303 AP242) is exact B-rep geometry for CAD and manufacturing interchange, written from the B-rep kernel's analytic solid. Export uses the active kernel, so STEP needs the B-rep kernel.
 
 ## Next steps
 

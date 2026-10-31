@@ -21,24 +21,28 @@ cube(10)               // a cube node
   .subtract(sphere(6)) // a difference node over both
 ```
 
-Keeping authoring and evaluation separate is what lets Facet hand the same graph to different kernels, and re-evaluate cheaply when only a parameter value changes.
+Keeping authoring and evaluation separate is what lets Facet hand the same graph to different kernels, and re-evaluate cheaply when only a parameter value changes. The op-graph is the single contract every kernel reads, so the mesh and B-rep kernels below stay in lockstep rather than drifting apart.
 
-## The CSG kernel
+## The kernels
 
-A **kernel** takes the op-graph and turns it into geometry. Facet uses constructive solid geometry (CSG): primitives are combined with boolean operations (union, difference, intersection) to build the final solid.
+A **kernel** takes the op-graph and turns it into geometry. Facet ships three kernels behind one interface. You pick between them in the Studio, or let Facet pick for you (see below).
 
-Facet ships two kernels behind one interface, and you pick between them in the Studio:
+Two are **mesh kernels**. They use constructive solid geometry (CSG): primitives are combined with boolean operations (union, difference, intersection), and the result is a triangle mesh that approximates the solid.
 
-- **TypeScript CSG kernel**, a BSP-tree CSG evaluator that runs in-process. Always available.
+- **TypeScript CSG kernel**, a BSP-tree CSG evaluator that runs in-process. The default, always available.
 - **Rust/WASM kernel**, the same operations implemented in Rust and compiled to WebAssembly. Offered when its bundle is vendored with the app.
 
-Both consume the same op-graph and produce the same kind of mesh, so a model behaves the same whichever you choose. The kernel's job ends at a triangle mesh.
+The third is the **B-rep kernel**, an OpenCascade (OCCT) boundary-representation kernel compiled to WebAssembly. It keeps **exact geometry**: curved faces stay analytic instead of being tessellated up front, so surfaces come out smooth and the true solid can be exported (as STEP). It also provides operations the mesh kernels cannot express (fillet, chamfer, shell). Because its bundle is larger, it loads on demand the first time a model needs it, not at startup.
+
+All three consume the same op-graph, so a model behaves the same whichever runs. A model built from only primitives, transforms, and booleans renders on the lightweight default mesh kernel; a model that uses fillet, chamfer, or shell switches to the B-rep kernel automatically.
 
 ## Mesh vs solid
 
 You author against **solids** (a cube is a filled box, a subtraction removes material), but what the kernel returns, and what the viewport draws and STL stores, is a **mesh**: a tessellated set of triangles approximating that solid.
 
-Curved primitives are approximated by facets. `sphere` and `cylinder` take a `segments` option that controls how finely the curve is divided: more segments means a smoother surface and more triangles. The mesh is non-indexed with flat, per-face normals, which is why the preview shows crisp facets.
+On the mesh kernels, curved primitives are approximated by facets. `sphere` and `cylinder` take a `segments` option that controls how finely the curve is divided: more segments means a smoother surface and more triangles. The mesh is non-indexed with flat, per-face normals, which is why the preview shows crisp facets.
+
+The B-rep kernel is the exception. It holds an exact, analytic solid, and tessellates it with smooth, per-vertex normals only for the preview, so curved surfaces render smooth rather than faceted. The exact solid itself, not the preview mesh, is what a STEP export writes out.
 
 ## The eval, preview, export loop
 
@@ -48,7 +52,7 @@ Everything you do in the Studio is one loop:
 2. **Evaluate**, the active kernel walks the graph and produces a mesh. The status line reports its triangle count, the time it took, and which kernel ran.
 3. **Preview**, the viewport draws the mesh, reframing the camera on a fresh model or a new example.
 4. **Adjust**, drag a parameter slider and the model re-evaluates live, in place, without reframing.
-5. **Export**, download the current mesh as STL or 3MF.
+5. **Export**, download the model as STL or 3MF, or as STEP when the B-rep kernel is active.
 
 Code edits re-run automatically shortly after you stop typing; slider drags re-run immediately.
 
