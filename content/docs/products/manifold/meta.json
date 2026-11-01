@@ -1,0 +1,11 @@
+{
+  "title": "➰ Manifold",
+  "pages": [
+    "oci-api",
+    "npm",
+    "cargo",
+    "graphql-api",
+    "authentication",
+    "storage"
+  ]
+}

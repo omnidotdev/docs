@@ -1,0 +1,70 @@
+---
+title: Cargo Registry
+description: Publish and depend on Rust crates
+---
+
+Manifold is a private [Cargo](https://doc.rust-lang.org/cargo/) registry implementing the [sparse index](https://doc.rust-lang.org/cargo/reference/registries.html) protocol. Each namespace is its own registry.
+
+## Base URL
+
+Cargo endpoints are served per namespace under `/cargo/<namespace>`:
+
+```
+https://manifold.omni.dev/cargo/acme
+```
+
+The sparse index lives at `/cargo/<namespace>/index/`, and `index/config.json` advertises the download and API endpoints Cargo uses.
+
+## Configuration
+
+Register the index in `.cargo/config.toml` (project-local or `~/.cargo/config.toml`):
+
+```toml
+[registries.manifold]
+index = "sparse+https://manifold.omni.dev/cargo/acme/index/"
+```
+
+Put an API token in `~/.cargo/credentials.toml` (a Manifold `mf_…` token with `write` scope on the namespace; see [Authentication](./authentication)):
+
+```toml
+[registries.manifold]
+token = "mf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+## Publishing
+
+```bash
+cargo publish --registry manifold
+```
+
+Manifold stores the crate, records the version in the sparse index, and rejects re-publishing an existing version (immutable versions).
+
+## Depending on a crate
+
+Point the dependency at the registry in `Cargo.toml`:
+
+```toml
+[dependencies]
+widgets = { version = "1.0", registry = "manifold" }
+```
+
+## Yanking
+
+```bash
+cargo yank --registry manifold --version 1.0.0 widgets
+cargo yank --registry manifold --version 1.0.0 --undo widgets
+```
+
+## Endpoints
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/cargo/<ns>/index/config.json` | Sparse-index config (`dl` + `api`) |
+| `GET` | `/cargo/<ns>/index/<prefix>/<crate>` | Crate index metadata |
+| `PUT` | `/cargo/<ns>/api/v1/crates/new` | Publish a crate |
+| `GET` | `/cargo/<ns>/api/v1/crates/:crate/:version/download` | Download a `.crate` |
+| `DELETE` / `PUT` | `/cargo/<ns>/api/v1/crates/:crate/:version/yank` | Yank / unyank |
+
+## Authentication note
+
+Cargo sends `Authorization: <token>` (no `Bearer` prefix), which Manifold accepts. Anonymous downloads work for public crates; publishing and yanking require a `write`-scoped token.
