@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { SiX } from "react-icons/si";
 
 import getSectionDescription from "@/lib/getSectionDescription";
@@ -44,13 +44,16 @@ const ICON_COMPONENTS: Record<
   HelpCircle,
 };
 
-// Find the sidebar scroll viewport
-const getScrollViewport = (): HTMLElement | null => {
-  // Fumadocs uses a scroll viewport inside the sidebar
-  return document.querySelector(
+// Find the live sidebar scroll viewport. Fumadocs renders the mobile sidebar as
+// a separate `#nd-sidebar-mobile` drawer, so prefer it when it is mounted (the
+// drawer only exists while open) and fall back to the desktop `#nd-sidebar`
+const getScrollViewport = (): HTMLElement | null =>
+  document.querySelector<HTMLElement>(
+    "#nd-sidebar-mobile [data-radix-scroll-area-viewport]",
+  ) ??
+  document.querySelector<HTMLElement>(
     "#nd-sidebar [data-radix-scroll-area-viewport]",
-  ) as HTMLElement | null;
-};
+  );
 
 interface SidebarSectionProps {
   item: VirtualFolder;
@@ -73,7 +76,6 @@ const SidebarSection = ({
   originalSeparator,
 }: SidebarSectionProps) => {
   const textColors = getSectionTextColors(sectionId, isOpen);
-  const scrollPosRef = useRef<number>(0);
 
   const iconName = SECTION_ICONS[sectionId];
 
@@ -85,28 +87,29 @@ const SidebarSection = ({
   const IconComponent = iconName ? ICON_COMPONENTS[iconName] : null;
 
   const handleToggle = useCallback(() => {
-    // The manual save/restore only applies to the DESKTOP sidebar scroll area.
-    // On mobile the sidebar lives in a different container, so this targeted the
-    // wrong viewport and yanked the whole page to the top when a realm was
-    // toggled. On mobile, let native scroll behavior handle it.
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-
-    const viewport = isMobile ? null : getScrollViewport();
-    if (viewport) {
-      scrollPosRef.current = viewport.scrollTop;
-    }
+    // Fumadocs' sidebar scrolls inside a Radix ScrollArea whose viewport wraps
+    // content in a `display: table` element, which disables the browser's native
+    // scroll anchoring. Without compensation the list jumps when a section
+    // expands or collapses. Pin the live viewport's scroll position across the
+    // React re-render and the 200ms collapse animation, on the desktop sidebar
+    // and the mobile drawer alike (an earlier fix handled only desktop, so
+    // mobile was left to jump).
+    const viewport = getScrollViewport();
+    const top = viewport?.scrollTop ?? 0;
 
     onToggle(!isOpen);
 
-    if (isMobile) return;
+    if (!viewport) return;
 
-    // Restore scroll position after React re-render
-    requestAnimationFrame(() => {
-      const vp = getScrollViewport();
-      if (vp) {
-        vp.scrollTop = scrollPosRef.current;
-      }
-    });
+    const restore = () => {
+      viewport.scrollTop = top;
+    };
+
+    // Immediately, after the re-render paints, and once more after the collapse
+    // animation and Radix's resize observer settle
+    restore();
+    requestAnimationFrame(restore);
+    setTimeout(restore, 120);
   }, [onToggle, isOpen]);
 
   return (
