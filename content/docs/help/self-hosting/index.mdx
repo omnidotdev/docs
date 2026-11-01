@@ -3,17 +3,27 @@ title: Self-Hosting
 description: Run Omni products on your own infrastructure
 ---
 
+import { RunPaths } from "@/components/docs";
+
 <Callout type="info">
   These self-hosting docs are new and experimental. Have feedback or running into issues? [Join our Discord](https://discord.gg/omnidotdev) to let us know.
 </Callout>
 
 Omni products are designed to run on your infrastructure. No vendor lock-in, no cloud dependency — your data stays yours. See our [Ethos](/ethos) for more on why sovereignty matters to us.
 
+## Run it with one command
+
+The fastest way to stand up an Omni product on your own machine is [**run**](/products/run), the universal self-hosting CLI. One command pulls the images, generates secrets, wires a reverse proxy with trusted local HTTPS, and waits for every service to report healthy. To contribute instead, [Tilt](https://tilt.dev) brings up the full source with live reload.
+
+<RunPaths appName="Runa" slug="runa" />
+
+Swap `runa` for any app in the [catalog](/products/run/catalog), or point `run` at your own Compose file, [recipe](/products/run/recipes), or image. Prefer to drive Docker Compose, Kubernetes, or a binary directly? Those paths are below.
+
 ## Product Support Matrix
 
 ### Docker Compose
 
-Most Omni products follow a [standard Docker Compose pattern](/help/self-hosting/docker-compose) for self-hosting.
+Every product above also runs under [raw Docker Compose](/help/self-hosting/docker-compose). `run` wraps this same Compose pattern, so it is the recommended default, but the manual path stays available.
 
 | Product | Realm | Guide |
 |---------|-------|-------|
@@ -97,6 +107,9 @@ docker run -p 3000:3000 omni-terminal-web
 See the [Omni Terminal Web docs](/products/omni-terminal/web) for full details including TLS configuration and the npm package.
 
 <Cards>
+  <Card title="Run CLI" href="/products/run">
+    One-command self-hosting with SSL, reverse proxy, secrets, and health checks
+  </Card>
   <Card title="Docker Compose" href="/help/self-hosting/docker-compose">
     Standard Omni Docker Compose pattern and product-specific quickstarts
   </Card>

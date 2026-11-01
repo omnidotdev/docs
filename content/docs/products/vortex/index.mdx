@@ -3,7 +3,7 @@ title: Vortex
 description: Workflow automation and orchestration engine
 ---
 
-import { ProductOverview, Pricing } from "@/components/docs";
+import { ProductOverview, Pricing, RunPaths } from "@/components/docs";
 import app from "@/lib/config/app.config";
 import { FaNetworkWired } from "react-icons/fa";
 import { SiApachekafka, SiTypescript, SiWebassembly } from "react-icons/si";
@@ -255,6 +255,13 @@ The worker includes an MCP (Model Context Protocol) client for connecting to ext
   "arguments": { "query": "{{searchTerm}}" }
 }
 ```
+
+## Self-Hosting
+
+Run Vortex on your own machine with one command. For the full stack via Docker
+Compose or Kubernetes, see the [self-hosting guide](/grid/vortex/self-hosting).
+
+<RunPaths appName="Vortex" slug="vortex" accent="purple" />
 
 ## Plans and Pricing
 
