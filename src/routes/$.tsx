@@ -15,7 +15,14 @@ import {
 } from "fumadocs-ui/layouts/docs/page";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import browserCollections from "fumadocs-mdx:collections/browser";
 import { RealmTOC } from "@/components/docs";
@@ -196,7 +203,14 @@ const Page = () => {
           },
         }}
       >
-        <Content />
+        {/* The MDX renderer suspends on initial load (its client preload cache
+            is populated server-side, so it is empty in the browser). Without a
+            boundary that suspension bubbles up and React blanks the whole tree
+            while the chunk loads (a white flash). A boundary lets React 19 keep
+            the server-rendered content in place while it hydrates. */}
+        <Suspense fallback={null}>
+          <Content />
+        </Suspense>
       </DocsLayout>
     </>
   );
@@ -275,11 +289,12 @@ const clientLoader = browserCollections.docs.createClientLoader<
   Record<string, never>
 >({
   component: ({ toc, frontmatter, default: MDX }) => {
-    // Get path from window.location (client-side only)
-    const path =
-      typeof window !== "undefined"
-        ? window.location.pathname.slice(1) || "index"
-        : "index";
+    // Read the path from the router so it matches on server and client. Reading
+    // `window` here rendered "index" on the server but the real path on the
+    // client, a hydration mismatch that makes React throw away the SSR DOM and
+    // re-render it (the white flash on load)
+    const { pathname } = useLocation();
+    const path = pathname.slice(1) || "index";
     const markdownUrl = `/${path}.mdx`;
     // mirrored product docs link "view source" to the upstream file in the
     // product's own repo; first-party pages link to this repo
