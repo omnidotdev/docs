@@ -41,6 +41,10 @@ npm publish
 
 Manifold stores the tarball, records the version, and updates the packument. Re-publishing an existing version is rejected (immutable versions).
 
+## Visibility
+
+A newly published package is **private** by default, matching the OCI and Cargo registries: installing it requires a token with `read` scope on the namespace, and the first publish of a package counts toward your plan's private-repository limit. Make a package public from its repository page in the dashboard (or via the `updateRepository` GraphQL mutation) to allow anonymous installs.
+
 ## Installing
 
 With the scope configured, install as usual:
