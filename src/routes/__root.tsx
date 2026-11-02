@@ -69,7 +69,6 @@ export const Route = createRootRoute({
     ],
     // TODO manifest (TSS template https://github.com/omnidotdev/template-tanstack-start/pull/7)
     links: [
-      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico" },
       {
         rel: "icon",
@@ -99,6 +98,13 @@ export const Route = createRootRoute({
 const RootDocument = ({ children }: PropsWithChildren) => (
   <html suppressHydrationWarning lang="en">
     <head>
+      {/* Render the app stylesheet as a stable element in the document head,
+          not through the route's reconciling head() links. In head() links a
+          head-tag change (e.g. the per-page title) remounts the stylesheet link
+          and briefly detaches it, flashing unstyled (dark) content on load.
+          See TanStack/router#7510. */}
+      <link rel="stylesheet" href={appCss} />
+
       <HeadContent />
     </head>
 
