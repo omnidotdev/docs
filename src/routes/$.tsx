@@ -73,6 +73,11 @@ const Page = () => {
   useSidebarEscClose();
 
   const Content = clientLoader.getComponent(data.path);
+  // Keep the element stable so re-renders of this page (sidebar state, the
+  // Fumadocs loader, etc.) do not re-render <Content> while it is still
+  // hydrating, which would swap the retained server content for the Suspense
+  // fallback and flash the page blank.
+  const content = useMemo(() => <Content />, [Content]);
 
   const { pathname } = useLocation();
 
@@ -208,9 +213,7 @@ const Page = () => {
             boundary that suspension bubbles up and React blanks the whole tree
             while the chunk loads (a white flash). A boundary lets React 19 keep
             the server-rendered content in place while it hydrates. */}
-        <Suspense fallback={null}>
-          <Content />
-        </Suspense>
+        <Suspense fallback={null}>{content}</Suspense>
       </DocsLayout>
     </>
   );
@@ -320,3 +323,11 @@ const clientLoader = browserCollections.docs.createClientLoader<
     );
   },
 });
+
+// On the client, start fetching the current page's MDX the moment this route
+// module runs (during hydration), so its chunk is already in flight before
+// <Content> renders instead of suspending and blanking the content on slower
+// networks.
+if (typeof window !== "undefined") {
+  void clientLoader.preload(window.location.pathname.slice(1) || "index");
+}
