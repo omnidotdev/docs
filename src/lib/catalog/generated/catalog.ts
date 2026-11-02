@@ -30,6 +30,8 @@ export interface CatalogProduct {
   status?: string;
   /** ISO release date. Absent means the product has not launched yet. */
   releaseDate?: string;
+  /** SPDX license identifier, e.g. "Apache-2.0". */
+  license?: string;
   /** Pricing plans, ordered cheapest first. Absent for products without any. */
   plans?: CatalogPlan[];
 }
@@ -40,6 +42,7 @@ export const products: CatalogProduct[] = [
     "name": "Arbor",
     "realm": "armory",
     "status": "coming_soon",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -91,6 +94,7 @@ export const products: CatalogProduct[] = [
     "name": "Aspen",
     "realm": "worlds",
     "status": "coming_soon",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -143,6 +147,7 @@ export const products: CatalogProduct[] = [
     "realm": "core",
     "status": "active",
     "releaseDate": "2025-05-06",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -196,6 +201,7 @@ export const products: CatalogProduct[] = [
     "realm": "grid",
     "status": "active",
     "releaseDate": "2026-02-09",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -240,6 +246,7 @@ export const products: CatalogProduct[] = [
     "name": "Crystal",
     "realm": "core",
     "status": "coming_soon",
+    "license": "Proprietary",
     "plans": [
       {
         "tier": "free",
@@ -295,14 +302,48 @@ export const products: CatalogProduct[] = [
     "name": "Eden",
     "realm": "armory",
     "status": "active",
-    "releaseDate": "2026-01-01"
+    "releaseDate": "2026-01-01",
+    "license": "Apache-2.0"
   },
   {
     "id": "facet",
     "name": "Facet",
     "realm": "fabric",
     "status": "active",
-    "releaseDate": "2026-09-22"
+    "releaseDate": "2026-09-22",
+    "license": "Apache-2.0",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Facet Free",
+        "description": "Code-first parametric CAD, self-hostable",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "AI generation: 100 credits/mo",
+          "Code-first parametric modeling",
+          "Community support",
+          "Example models",
+          "Self-hostable (Apache-2.0)",
+          "Solid-geometry and exact B-rep (OCCT) kernels",
+          "STL / 3MF / STEP export"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Facet Pro",
+        "description": "More AI credits, conversational refinement, and BYOK",
+        "monthlyPrice": 1900,
+        "yearlyPrice": 19000,
+        "features": [
+          "Bring your own LLM key (BYOK)",
+          "Conversational refinement",
+          "Everything in Free",
+          "More AI generation credits",
+          "Priority models"
+        ]
+      }
+    ]
   },
   {
     "id": "fractal",
@@ -310,6 +351,7 @@ export const products: CatalogProduct[] = [
     "realm": "grid",
     "status": "active",
     "releaseDate": "2026-08-17",
+    "license": "Proprietary",
     "plans": [
       {
         "tier": "free",
@@ -343,7 +385,8 @@ export const products: CatalogProduct[] = [
           "5 projects",
           "Community support",
           "Public buckets + global CDN",
-          "Scale-to-zero when idle"
+          "Scale-to-zero when idle",
+          "Video transcoding + media CDN"
         ]
       },
       {
@@ -361,7 +404,8 @@ export const products: CatalogProduct[] = [
           "Auto-scaling",
           "Priority support",
           "Public buckets + global CDN",
-          "Unlimited custom domains"
+          "Unlimited custom domains",
+          "Video transcoding + media CDN"
         ]
       },
       {
@@ -379,7 +423,8 @@ export const products: CatalogProduct[] = [
           "SLA guarantee",
           "Unlimited custom domains",
           "Unlimited projects",
-          "Unlimited services"
+          "Unlimited services",
+          "Video transcoding + media CDN"
         ]
       }
     ]
@@ -389,13 +434,15 @@ export const products: CatalogProduct[] = [
     "name": "Garden",
     "realm": "codex",
     "status": "active",
-    "releaseDate": "2025-06-20"
+    "releaseDate": "2025-06-20",
+    "license": "Apache-2.0"
   },
   {
     "id": "halo",
     "name": "Halo",
     "realm": "core",
     "status": "coming_soon",
+    "license": "Proprietary",
     "plans": [
       {
         "tier": "free",
@@ -455,6 +502,7 @@ export const products: CatalogProduct[] = [
     "realm": "grid",
     "status": "active",
     "releaseDate": "2026-09-18",
+    "license": "Proprietary",
     "plans": [
       {
         "tier": "free",
@@ -532,54 +580,119 @@ export const products: CatalogProduct[] = [
     "id": "kiln",
     "name": "Kiln",
     "realm": "grid",
-    "status": "active"
+    "status": "active",
+    "license": "Apache-2.0"
   },
   {
     "id": "life-json",
     "name": "life.json",
     "realm": "codex",
     "status": "active",
-    "releaseDate": "2026-02-06"
+    "releaseDate": "2026-02-06",
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "manifold",
+    "name": "Manifold",
+    "realm": "armory",
+    "status": "active",
+    "releaseDate": "2026-10-31",
+    "license": "Apache-2.0",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Manifold Free",
+        "description": "Get started with artifact hosting",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "10 GB bandwidth/month",
+          "2 GB storage",
+          "3 private repos"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Manifold Pro",
+        "description": "Serious artifact hosting for teams",
+        "monthlyPrice": 1200,
+        "yearlyPrice": 11500,
+        "features": [
+          "100 GB storage",
+          "500 GB bandwidth/month",
+          "Priority support",
+          "Unlimited private repos"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Manifold Team",
+        "description": "Scale artifact hosting across your organization",
+        "monthlyPrice": 4900,
+        "yearlyPrice": 47000,
+        "features": [
+          "1 TB storage",
+          "2 TB bandwidth/month",
+          "Priority support",
+          "Unlimited namespaces",
+          "Unlimited private repos"
+        ]
+      }
+    ]
   },
   {
     "id": "nectar",
     "name": "Nectar",
     "realm": "armory",
-    "status": "coming_soon"
+    "status": "coming_soon",
+    "license": "Apache-2.0"
   },
   {
     "id": "omni-cli",
     "name": "Omni CLI",
     "realm": "armory",
     "status": "active",
-    "releaseDate": "2026-01-27"
+    "releaseDate": "2026-01-27",
+    "license": "Apache-2.0"
   },
   {
     "id": "omni-terminal",
     "name": "Omni Terminal",
     "realm": "armory",
     "status": "active",
-    "releaseDate": "2026-02-27"
+    "releaseDate": "2026-02-27",
+    "license": "Apache-2.0"
   },
   {
     "id": "orin",
     "name": "Orin",
     "realm": null,
-    "status": "coming_soon"
+    "status": "coming_soon",
+    "license": "Apache-2.0"
   },
   {
     "id": "persona-json",
     "name": "persona.json",
     "realm": "codex",
     "status": "active",
-    "releaseDate": "2026-02-06"
+    "releaseDate": "2026-02-06",
+    "license": "Apache-2.0"
   },
   {
     "id": "rdk",
     "name": "RDK",
     "realm": "reality",
     "status": "active",
-    "releaseDate": "2025-10-31"
+    "releaseDate": "2025-10-31",
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "run",
+    "name": "Run",
+    "realm": "grid",
+    "status": "active",
+    "releaseDate": "2026-10-31",
+    "license": "Apache-2.0"
   },
   {
     "id": "runa",
@@ -587,6 +700,7 @@ export const products: CatalogProduct[] = [
     "realm": "core",
     "status": "active",
     "releaseDate": "2025-12-21",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -632,11 +746,19 @@ export const products: CatalogProduct[] = [
     ]
   },
   {
+    "id": "sift",
+    "name": "Sift",
+    "realm": null,
+    "status": "coming_soon",
+    "license": "Apache-2.0"
+  },
+  {
     "id": "sigil",
     "name": "Sigil",
     "realm": "sigil",
     "status": "active",
-    "releaseDate": "2023-10-30"
+    "releaseDate": "2023-10-30",
+    "license": "Apache-2.0"
   },
   {
     "id": "synapse",
@@ -644,6 +766,7 @@ export const products: CatalogProduct[] = [
     "realm": "grid",
     "status": "active",
     "releaseDate": "2026-09-20",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -700,14 +823,16 @@ export const products: CatalogProduct[] = [
     "name": "Thornberry",
     "realm": "sigil",
     "status": "active",
-    "releaseDate": "2026-07-06"
+    "releaseDate": "2026-07-06",
+    "license": "Apache-2.0"
   },
   {
     "id": "thrivestream",
     "name": "Thrivestream",
     "realm": "kindred",
     "status": "active",
-    "releaseDate": "2026-06-05"
+    "releaseDate": "2026-06-05",
+    "license": "Proprietary"
   },
   {
     "id": "vortex",
@@ -715,6 +840,7 @@ export const products: CatalogProduct[] = [
     "realm": "grid",
     "status": "active",
     "releaseDate": "2026-09-20",
+    "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
@@ -773,6 +899,7 @@ export const products: CatalogProduct[] = [
     "name": "Zenpetal",
     "realm": "sigil",
     "status": "active",
-    "releaseDate": "2023-10-30"
+    "releaseDate": "2023-10-30",
+    "license": "Apache-2.0"
   }
 ];

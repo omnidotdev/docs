@@ -150,6 +150,7 @@ const products = [...catalog.products]
     realm: p.realm,
     status: p.status,
     releaseDate: p.releaseDate,
+    license: p.license,
     plans: shapePlans(p.id),
   }));
 
@@ -187,6 +188,8 @@ export interface CatalogProduct {
   status?: string;
   /** ISO release date. Absent means the product has not launched yet. */
   releaseDate?: string;
+  /** SPDX license identifier, e.g. "Apache-2.0". */
+  license?: string;
   /** Pricing plans, ordered cheapest first. Absent for products without any. */
   plans?: CatalogPlan[];
 }
