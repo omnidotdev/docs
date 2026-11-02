@@ -32,17 +32,19 @@ previous model is kept if generation does not produce a working result.
 Local modeling and export never require an account and always run on your
 device. AI generation has two paths:
 
-- **Bring your own key.** Expand **Use your own key** and paste an AI model
-  provider API key. The key is stored only in your browser and is sent with each
-  request so it reaches the provider directly. Generation with your own key needs
-  no account and is billed to your provider, not metered against Facet credits.
+- **Bring your own key.** Expand **Use your own Synapse key** and paste your own
+  key for the Synapse AI router (get one at [synapse.omni.dev](https://synapse.omni.dev)).
+  The key is stored only in your browser and is sent with each request to Facet's
+  AI gateway, which routes it through Synapse the same way as a managed request.
+  Generation with your own key needs no account and is billed to your Synapse
+  account, not metered against Facet credits.
 - **Managed generation.** Sign in with your Omni account to generate without
   supplying a key. Managed generation is metered in credits (one credit is about
   one US cent of model spend), with a monthly allowance that is hard-capped.
 
 <Callout type="warn">
 Signed in, you generate on your managed credit allowance. Not signed in, expand
-**Use your own key** and paste a provider key to generate without an account.
+**Use your own Synapse key** and paste your Synapse key to generate without an account.
 </Callout>
 
 ## Your data
