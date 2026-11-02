@@ -9,8 +9,15 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import { useEffect, useState } from "react";
 
-import appCss from "@/lib/styles/app.css?url";
 import createMetaTags from "@/lib/util/seo";
+
+// Import the global stylesheet as a side effect (not `?url` + a manual <link>).
+// With `?url` the SSR build computed its own content hash for app.css, which in
+// the production build environment diverged from the client's emitted hash, so
+// the server-rendered <link> pointed at a file that 404s and the page flashed
+// unstyled. Importing it lets Vite/TanStack inject the stylesheet from the
+// client manifest, so the server and client always reference the same hash.
+import "@/lib/styles/app.css";
 
 import type { PropsWithChildren } from "react";
 
@@ -98,13 +105,6 @@ export const Route = createRootRoute({
 const RootDocument = ({ children }: PropsWithChildren) => (
   <html suppressHydrationWarning lang="en">
     <head>
-      {/* Render the app stylesheet as a stable element in the document head,
-          not through the route's reconciling head() links. In head() links a
-          head-tag change (e.g. the per-page title) remounts the stylesheet link
-          and briefly detaches it, flashing unstyled (dark) content on load.
-          See TanStack/router#7510. */}
-      <link rel="stylesheet" href={appCss} />
-
       <HeadContent />
     </head>
 
