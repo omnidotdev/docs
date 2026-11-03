@@ -1,0 +1,90 @@
+---
+title: Embedding
+description: Use Taproot as a library in any Rust application
+---
+
+## Overview
+
+Taproot is a library first, server second. The `taproot-core` crate provides everything needed to embed a Postgres-backed GraphQL API in any Rust application.
+
+## TaprootSubgraph builder
+
+The simplest way to embed Taproot:
+
+```rust
+use std::sync::Arc;
+use taproot_core::db::SqlxBackend;
+use taproot_core::embed::{TaprootSubgraph, TaprootSubgraphOptions};
+
+let backend = SqlxBackend::connect("postgres://localhost/mydb").await?;
+let db: Arc<dyn taproot_core::db::Database> = Arc::new(backend);
+
+let subgraph = TaprootSubgraph::build(db, TaprootSubgraphOptions {
+    schemas: vec!["public".into()],
+    exclude_tables: vec!["_migrations".into()],
+    ..Default::default()
+}).await?;
+
+// Execute queries
+let result = subgraph.execute(
+    "{ users(first: 10) { edges { node { name } } } }",
+    None,
+    None,
+).await;
+
+// Get federation SDL
+let sdl = subgraph.sdl();
+
+// Access the underlying async-graphql schema
+let schema = subgraph.schema();
+```
+
+## Embedding in an axum server
+
+```rust
+use axum::{Router, Json, routing::post};
+use taproot_core::embed::{TaprootSubgraph, TaprootSubgraphOptions};
+
+let subgraph = TaprootSubgraph::build(db, TaprootSubgraphOptions::default()).await?;
+
+let app = Router::new()
+    .route("/graphql", post({
+        let schema = subgraph.schema().clone();
+        move |Json(req): Json<async_graphql::Request>| async move {
+            Json(schema.execute(req).await)
+        }
+    }));
+
+axum::serve(listener, app).await?;
+```
+
+## Embedding in a Tauri app
+
+```rust
+// In your Tauri Rust backend
+use taproot_core::embed::{TaprootSubgraph, TaprootSubgraphOptions};
+
+let subgraph = TaprootSubgraph::build(db, TaprootSubgraphOptions {
+    schemas: vec!["public".into()],
+    ..Default::default()
+}).await?;
+
+// Register as a Tauri command
+#[tauri::command]
+async fn graphql(query: String) -> Result<serde_json::Value, String> {
+    let result = subgraph.execute(&query, None, None).await;
+    Ok(result)
+}
+```
+
+## With plugins
+
+```rust
+use taproot_core::plugin::SmartCommentsPlugin;
+
+let subgraph = TaprootSubgraph::build(db, TaprootSubgraphOptions {
+    schemas: vec!["public".into()],
+    plugins: vec![Arc::new(SmartCommentsPlugin)],
+    ..Default::default()
+}).await?;
+```

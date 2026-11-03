@@ -1,0 +1,160 @@
+---
+title: Mutations
+description: Auto-generated create, update, and delete mutations
+---
+
+## Generated mutations
+
+For every non-view table with a single-column primary key, Taproot generates three mutations:
+
+### Create
+
+```graphql
+mutation {
+  createUser(input: { user: { name: "Alice", email: "alice@example.com", role: admin } }) {
+    user {
+      id
+      name
+      email
+    }
+    clientMutationId
+  }
+}
+```
+
+The create input nests the row under a field named for the type (`createUser(input: { user: { ... } })`), matching the standard database-to-GraphQL convention. The inner `UserInput` includes all non-generated columns; columns with defaults are optional. Mutations return a Payload type wrapping the entity (e.g. `CreateUserPayload` contains a `user` field and `clientMutationId`), plus a `query` field that re-enters the Query root so a client can refetch related data in the same round trip.
+
+### Update
+
+```graphql
+mutation {
+  updateUser(input: { rowId: "user-123", patch: { name: "Alice Cooper" } }) {
+    user {
+      rowId
+      name
+    }
+    clientMutationId
+  }
+}
+```
+
+The base `updateUser` keys on the primary key (`rowId`). The patch type (`UserPatch`) includes all non-PK, non-generated columns; all patch fields are optional, so only provided fields are updated.
+
+Two more variants are generated for convenience:
+
+- `updateUserById(input: { id, patch })` keys on the global node `id`.
+- `updateUserBy<Column>` keys on a unique constraint, e.g. `updateUserByEmail(input: { email: "a@b.com", patch })`.
+
+### Delete
+
+```graphql
+mutation {
+  deleteUser(input: { rowId: "user-123" }) {
+    deletedUserId
+    user {
+      rowId
+      name
+    }
+    clientMutationId
+  }
+}
+```
+
+The base `deleteUser` keys on the primary key, with `deleteUserById` (by global `id`) and `deleteUserBy<Column>` (by unique constraint) variants. The payload wraps the deleted entity, the `clientMutationId`, and `deletedUserId` — the global `id` of the removed row.
+
+## Enum handling
+
+Postgres enum columns are automatically cast in the generated SQL. If a table has a `role` column of type `user_role`, Taproot emits explicit casts (`$1::"schema"."user_role"`) to prevent type mismatch errors.
+
+## RLS support
+
+All mutations respect RLS context when enabled. The mutation executes within the same `SET LOCAL ROLE` transaction as queries, so Postgres RLS policies enforce authorization on writes.
+
+## Upsert (ON CONFLICT)
+
+Create mutations support upsert via the optional `onConflict` field. Specify the Postgres constraint name and which columns to update when a conflict occurs:
+
+```graphql
+mutation {
+  createUser(input: { user: {
+    name: "Alice"
+    email: "alice@example.com"
+    onConflict: {
+      constraint: "users_email_key"
+      updateColumns: ["name"]
+    }
+  } }) {
+    user {
+      id
+      name
+      email
+    }
+  }
+}
+```
+
+The `onConflict` input contains:
+
+- `constraint` — the name of a unique constraint or primary key constraint
+- `updateColumns` — array of column names to SET from the excluded row on conflict
+
+This generates `INSERT ... ON CONFLICT ON CONSTRAINT ... DO UPDATE SET`. Invalid column names in `updateColumns` are silently ignored.
+
+## Bulk mutations
+
+Taproot generates bulk create, update, and delete mutations for every table. These operate on multiple rows and return `affectedRows` plus the list of affected entities.
+
+### Bulk create
+
+Insert multiple rows in a single mutation using the `objects` array:
+
+```graphql
+mutation {
+  createUsers(input: {
+    objects: [
+      { name: "Alice", email: "alice@example.com" }
+      { name: "Bob", email: "bob@example.com" }
+    ]
+  }) {
+    affectedRows
+    users { rowId name email }
+  }
+}
+```
+
+### Bulk update
+
+Update all rows matching a `where` condition with a `patch`:
+
+```graphql
+mutation {
+  updateUsers(input: {
+    where: { role: { equalTo: "guest" } }
+    patch: { role: "member" }
+  }) {
+    affectedRows
+    users { rowId name role }
+  }
+}
+```
+
+### Bulk delete
+
+Delete all rows matching a `where` condition:
+
+```graphql
+mutation {
+  deleteUsers(input: {
+    where: { deactivatedAt: { isNull: false } }
+  }) {
+    affectedRows
+    users { rowId name }
+  }
+}
+```
+
+Bulk mutation field names use the pluralized type name (e.g. `createUsers`, `updateUsers`, `deleteUsers`). Each returns a payload with `clientMutationId`, `affectedRows`, and the entity list.
+
+## Views
+
+Views are read-only — Taproot does not generate mutations for views.

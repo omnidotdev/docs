@@ -1,0 +1,104 @@
+---
+title: Plugins
+description: Trait-based extension system for customizing schema and query behavior
+---
+
+## Overview
+
+Taproot uses a trait-based plugin system. Plugins are compiled Rust traits — no WASM, no runtime overhead.
+
+```rust
+pub trait Plugin: Send + Sync {
+    fn name(&self) -> &str;
+    fn on_introspect(&self, schema: &mut IntrospectedSchema) {}
+    fn on_plan(&self, plan: &mut PlanNode) {}
+    fn filter_table(&self, table: &TableInfo) -> bool { true }
+}
+```
+
+## Plugin hooks
+
+### `on_introspect`
+
+Modify the introspected schema before GraphQL types are generated. Use this to rename tables, add/remove columns, or inject metadata.
+
+### `on_plan`
+
+Modify the SQL execution plan before it runs. Use this to inject filters (tenant isolation, soft deletes), modify ordering, or add limits.
+
+```rust
+struct TenantIsolation;
+
+impl Plugin for TenantIsolation {
+    fn name(&self) -> &str { "tenant-isolation" }
+
+    fn on_plan(&self, plan: &mut PlanNode) {
+        match plan {
+            PlanNode::Scan { filter, table, .. }
+            | PlanNode::LateralJoin { filter, child_table: table, .. } => {
+                if table == "projects" {
+                    let tenant_filter = FilterExpr::Raw {
+                        sql: "t.\"tenant_id\" = current_setting('app.tenant_id')".into(),
+                        params: vec![],
+                    };
+                    *filter = Some(match filter.take() {
+                        Some(existing) => FilterExpr::And(vec![existing, tenant_filter]),
+                        None => tenant_filter,
+                    });
+                }
+            }
+            _ => {}
+        }
+    }
+}
+```
+
+The `on_plan` hook is applied **recursively** to all plan nodes, including lateral join children. This means a tenant isolation plugin automatically applies to nested relationship queries.
+
+### `filter_table`
+
+Return `false` to exclude a table from the schema entirely. The table won't appear in queries, mutations, or relationships.
+
+```rust
+struct HideInternalTables;
+
+impl Plugin for HideInternalTables {
+    fn name(&self) -> &str { "hide-internal" }
+
+    fn filter_table(&self, table: &TableInfo) -> bool {
+        !table.name.starts_with('_')
+    }
+}
+```
+
+## Built-in plugins
+
+### Smart Comments
+
+Reads Postgres `COMMENT ON` statements for metadata directives:
+
+```sql
+COMMENT ON TABLE internal_logs IS '@omit';
+COMMENT ON COLUMN users.password_hash IS '@omit';
+COMMENT ON COLUMN users.display_name IS '@name displayName';
+COMMENT ON COLUMN users.legacy_field IS '@deprecated Use newField instead';
+```
+
+| Directive | Effect |
+|-----------|--------|
+| `@omit` | Hide the table or column from the schema |
+| `@name newName` | Rename the field in GraphQL |
+| `@deprecated reason` | Mark the field as deprecated |
+
+## Registering plugins
+
+```rust
+use std::sync::Arc;
+
+let plugins: Vec<Arc<dyn Plugin>> = vec![
+    Arc::new(TenantIsolation),
+    Arc::new(SmartCommentsPlugin),
+];
+
+let schema = build_schema(&schemas, &db, &options, &plugins, None)?;
+```

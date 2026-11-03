@@ -1,0 +1,76 @@
+---
+title: Computed Fields
+description: Expose SQL functions as fields on table types
+---
+
+## Overview
+
+Taproot can expose SQL functions as computed fields on table types. If a function's first parameter accepts a table's row type, it becomes a field on that table's GraphQL type.
+
+Only `STABLE` and `IMMUTABLE` functions are exposed. `VOLATILE` functions are excluded from computed fields (they appear as [custom mutations](/docs/armory/taproot/custom-queries) instead).
+
+## Naming
+
+Computed field names are derived from the function name. If the function follows the `table_name_field_name` convention, the table prefix is stripped before converting to camelCase:
+
+| Function name | Table | GraphQL field |
+|---|---|---|
+| `user_full_name` | `user` | `fullName` |
+| `user_age` | `user` | `age` |
+| `compute_score` | `user` | `computeScore` |
+
+## Example
+
+Given a SQL function:
+
+```sql
+CREATE FUNCTION user_full_name(u users) RETURNS text AS $$
+  SELECT u.first_name || ' ' || u.last_name;
+$$ LANGUAGE sql STABLE;
+```
+
+Taproot exposes `fullName` on the `User` type:
+
+```graphql
+{
+  users {
+    edges {
+      node {
+        firstName
+        lastName
+        fullName
+      }
+    }
+  }
+}
+```
+
+## Function arguments
+
+Additional function parameters (after the first table-row parameter) become GraphQL arguments on the computed field:
+
+```sql
+CREATE FUNCTION user_posts_by_status(u users, status text)
+RETURNS SETOF posts AS $$
+  SELECT * FROM posts WHERE author_id = u.id AND posts.status = status;
+$$ LANGUAGE sql STABLE;
+```
+
+```graphql
+{
+  users {
+    edges {
+      node {
+        postsByStatus(status: "published") {
+          id
+          title
+        }
+      }
+    }
+  }
+}
+```
+
+## SETOF returns
+
+Functions returning `SETOF` produce a list field. If the return type matches a known table, the result includes the full table type with all its fields and relationships.

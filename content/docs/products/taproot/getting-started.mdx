@@ -1,0 +1,95 @@
+---
+title: Getting Started
+description: Get a GraphQL API from your Postgres database in under a minute
+---
+
+## Installation
+
+### From source
+
+```bash
+cargo install --path crates/taproot-server
+```
+
+### As a library
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+taproot-core = { git = "https://github.com/omnidotdev/taproot" }
+```
+
+## Configuration
+
+Create a `taproot.yaml` file:
+
+```yaml
+database:
+  url: "postgres://user:pass@localhost:5432/mydb"
+  pool_size: 20
+  schemas: ["public"]
+  exclude_tables: ["_migrations", "_jobs"]
+
+server:
+  listen: "0.0.0.0:4001"
+  playground: true
+
+schema:
+  default_page_size: 25
+  max_page_size: 100
+  max_depth: 15
+  max_complexity: 1000
+  federation: false
+  subscriptions: false
+```
+
+## Start the server
+
+```bash
+taproot --config taproot.yaml
+```
+
+Open `http://localhost:4001` for the GraphiQL playground.
+
+## What you get
+
+For every table in your database, Taproot generates:
+
+| GraphQL | Example | Description |
+|---------|---------|-------------|
+| Object type | `User` | Fields for each column |
+| Singular query | `user(rowId: UUID!)` | Fetch by primary key (an `id` column is exposed as `rowId`) |
+| List query | `users(first: Int, condition: UserCondition, filter: UserFilter, orderBy: [UserOrderBy!])` | Paginated list with filtering and ordering |
+| Unique queries | `userByEmail(email: String!)` | Fetch by unique constraint |
+| Create mutation | `createUser(input: CreateUserInput!)` | Insert a row (supports nested `create`/`connect`) |
+| Update mutation | `updateUser(input: UpdateUserInput!)` | Update by PK |
+| Delete mutation | `deleteUser(input: DeleteUserInput!)` | Delete by PK |
+| Connections | `UserConnection` | Relay-style cursor pagination with `edges`, `nodes`, `pageInfo`, `totalCount` |
+| Filtering | `UserCondition` / `UserFilter` | Flat equality via `condition`; rich operators (`equalTo`, `in`, `includesInsensitive`, ...) via `filter` |
+| Ordering | `UserOrderBy` | Per-column sort with nulls handling |
+| Relationships | `postsByAuthorId` | Auto-detected from foreign keys |
+
+## Library usage
+
+```rust
+use std::sync::Arc;
+use taproot_core::db::SqlxBackend;
+use taproot_core::{introspect, build_schema, IntrospectOptions, SchemaOptions};
+
+let backend = SqlxBackend::connect("postgres://localhost/mydb").await?;
+let db: Arc<dyn taproot_core::db::Database> = Arc::new(backend);
+
+let schemas = introspect(
+    db.as_ref(),
+    &IntrospectOptions {
+        schemas: vec!["public".into()],
+        ..Default::default()
+    },
+).await?;
+
+let schema = build_schema(&schemas, &db, &SchemaOptions::default(), &[], None)?;
+
+// Execute queries programmatically
+let result = schema.execute("{ users(first: 10) { edges { node { name } } } }").await;
+```

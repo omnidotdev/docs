@@ -1,0 +1,92 @@
+---
+title: Relationships
+description: How foreign keys become GraphQL relationship fields
+---
+
+## Automatic relationship detection
+
+Taproot detects foreign keys during introspection and generates relationship fields automatically.
+
+### Belongs-to (many-to-one)
+
+A foreign key on table A pointing to table B creates a belongs-to field on A's type:
+
+```sql
+CREATE TABLE posts (
+  id UUID PRIMARY KEY,
+  author_id UUID REFERENCES users(id),
+  title TEXT NOT NULL
+);
+```
+
+Produces:
+
+```graphql
+type Post {
+  rowId: UUID!
+  authorId: UUID!
+  title: String!
+  author: User  # belongs-to field
+}
+```
+
+The field name drops the `_id` suffix from the foreign-key column (`author_id` becomes `author`). A foreign key whose column is not `<name>_id` keeps the disambiguated `<table>By<Column>` form.
+
+Belongs-to fields use **DataLoader batching** to avoid N+1 queries. Multiple posts requesting their author are resolved in a single `WHERE id IN (...)` query.
+
+### Has-many (one-to-many)
+
+The inverse relationship is also generated. If `posts.author_id` references `users.id`, the `User` type gets:
+
+```graphql
+type User {
+  rowId: UUID!
+  name: String!
+  postsByAuthorId(first: Int, after: Cursor): PostConnection!  # has-many field
+}
+```
+
+Has-many fields return Relay connections with pagination support. The name collapses to the pluralized child (e.g. `comments` when `comment.post_id` references `post`) if the child's foreign-key column is `<parent>_id`; otherwise it keeps the disambiguated `<children>By<Column>` form, as with `postsByAuthorId` above.
+
+## Lateral join optimization
+
+When querying a list of parents with their children (e.g. all users with their posts), Taproot uses SQL lateral joins to fetch everything in a single query:
+
+```graphql
+{
+  users(first: 10) {
+    edges {
+      node {
+        name
+        postsByAuthorId(first: 5) {
+          edges {
+            node { title }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+This produces one SQL query, not N+1:
+
+```sql
+SELECT row_to_json(sub.*) FROM (
+  SELECT t.*, lj0.rows AS "__lateral_posts"
+  FROM "public"."users" t
+  LEFT JOIN LATERAL (
+    SELECT COALESCE(json_agg(row_to_json(c.*)), '[]'::json) AS rows
+    FROM "public"."posts" c
+    WHERE c."author_id" = t."id"
+  ) lj0 ON true
+) sub
+```
+
+## Deep nesting
+
+Lateral joins nest recursively. A query like `users -> posts -> comments` still produces a single SQL query with nested `LEFT JOIN LATERAL` subqueries. Cycle detection prevents infinite recursion from circular foreign keys.
+
+## Fallback behavior
+
+When a parent is fetched by a singular query (not a list), has-many fields fall back to a separate query per parent. The lateral join optimization only applies to list queries.

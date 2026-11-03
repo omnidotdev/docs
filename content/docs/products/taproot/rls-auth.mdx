@@ -1,0 +1,96 @@
+---
+title: RLS Auth
+description: Row-Level Security authorization via Postgres
+---
+
+## Overview
+
+Taproot delegates authorization to Postgres Row-Level Security (RLS). Instead of checking permissions in application code, the database enforces access rules.
+
+Each GraphQL request runs inside a Postgres transaction with `SET LOCAL` statements that set the role and JWT claims. RLS policies then filter rows based on these settings.
+
+## Configuration
+
+```yaml
+auth:
+  rls: true
+  role_claim: "pg_role"           # JWT claim -> SET LOCAL ROLE
+  claims_setting: "request.jwt.claims"  # Postgres setting name for claims
+  default_role: "anonymous"       # Role when no JWT is present
+  jwt_secret: "your-secret"       # Optional: verify JWT signatures (HS256)
+```
+
+## How it works
+
+1. Client sends a request with `Authorization: Bearer <jwt>`
+2. Taproot decodes the JWT and extracts claims
+3. Before executing SQL, Taproot runs in a transaction:
+   ```sql
+   SET LOCAL ROLE 'authenticated';
+   SET LOCAL "request.jwt.claims" = '{"sub":"user-123","org_id":"org-456"}';
+   -- Query executes here, RLS policies are active
+   COMMIT;
+   ```
+4. Postgres RLS policies reference the claims:
+   ```sql
+   CREATE POLICY user_isolation ON users
+     FOR SELECT USING (
+       id::text = current_setting('request.jwt.claims', true)::jsonb->>'sub'
+     );
+   ```
+
+## Setting up RLS
+
+### 1. Enable RLS on tables
+
+```sql
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users FORCE ROW LEVEL SECURITY;
+```
+
+### 2. Create a role for authenticated users
+
+```sql
+CREATE ROLE authenticated NOLOGIN;
+GRANT USAGE ON SCHEMA public TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+```
+
+### 3. Create policies
+
+```sql
+-- Users can only see their own row
+CREATE POLICY user_own_row ON users
+  FOR SELECT USING (
+    id::text = current_setting('request.jwt.claims', true)::jsonb->>'sub'
+  );
+
+-- Users can only see posts by users in their org
+CREATE POLICY org_posts ON posts
+  FOR SELECT USING (
+    author_id IN (
+      SELECT id FROM users
+      WHERE org_id = current_setting('request.jwt.claims', true)::jsonb->>'org_id'
+    )
+  );
+```
+
+### 4. Configure Taproot
+
+Set `auth.rls: true` and include the `pg_role` claim in your JWT:
+
+```json
+{
+  "sub": "user-123",
+  "org_id": "org-456",
+  "pg_role": "authenticated"
+}
+```
+
+## JWT verification
+
+If `auth.jwt_secret` is set, Taproot verifies JWT signatures using HS256. If not set, tokens are decoded without verification (useful when a gateway handles verification upstream).
+
+## RLS with subscriptions
+
+Subscription queries also respect RLS. The `SET LOCAL` statements are applied before fetching the changed row, so users only receive notifications for rows they can access.

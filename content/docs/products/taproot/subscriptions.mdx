@@ -1,0 +1,111 @@
+---
+title: Subscriptions
+description: Real-time change notifications via Postgres LISTEN/NOTIFY
+---
+
+## Overview
+
+Taproot provides GraphQL subscriptions powered by Postgres `LISTEN/NOTIFY`. When a row is inserted, updated, or deleted, a trigger sends a notification on a configured channel. Taproot listens on that channel and pushes the changed row to subscribed clients via WebSocket.
+
+## Configuration
+
+```yaml
+schema:
+  subscriptions: true
+
+subscriptions:
+  enabled: true
+  notify_channel: "graphql_subscriptions"
+```
+
+## Generated subscription fields
+
+For every table with a single-column primary key, Taproot generates:
+
+```graphql
+type Subscription {
+  onUserChanged: User
+  onPostChanged: Post
+  onCommentChanged: Comment
+}
+```
+
+## Setting up triggers
+
+Taproot listens for notifications but does not create triggers. You create them:
+
+```sql
+-- Generic trigger function (reusable across tables)
+CREATE OR REPLACE FUNCTION notify_graphql_change() RETURNS trigger AS $$
+BEGIN
+  PERFORM pg_notify(
+    'graphql_subscriptions',
+    json_build_object(
+      'table', TG_TABLE_NAME,
+      'op', TG_OP,
+      'id', COALESCE(NEW.id, OLD.id)
+    )::text
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to each table
+CREATE TRIGGER users_notify
+  AFTER INSERT OR UPDATE OR DELETE ON users
+  FOR EACH ROW EXECUTE FUNCTION notify_graphql_change();
+
+CREATE TRIGGER posts_notify
+  AFTER INSERT OR UPDATE OR DELETE ON posts
+  FOR EACH ROW EXECUTE FUNCTION notify_graphql_change();
+```
+
+### Notification payload format
+
+The trigger must send a JSON payload with these fields:
+
+```json
+{
+  "table": "users",
+  "op": "INSERT",
+  "id": "user-123"
+}
+```
+
+| Field | Type | Values |
+|-------|------|--------|
+| `table` | string | Postgres table name |
+| `op` | string | `INSERT`, `UPDATE`, or `DELETE` |
+| `id` | string | Primary key value of the changed row |
+
+## WebSocket endpoint
+
+Subscriptions connect via WebSocket at `/graphql/ws` using the `graphql-transport-ws` protocol.
+
+```javascript
+import { createClient } from "graphql-ws";
+
+const client = createClient({
+  url: "ws://localhost:4001/graphql/ws",
+});
+
+const subscription = client.subscribe(
+  { query: "subscription { onUserChanged { name email } }" },
+  {
+    next: (data) => console.log("Changed:", data),
+    error: (err) => console.error(err),
+    complete: () => console.log("Done"),
+  },
+);
+```
+
+## How it works internally
+
+1. A background task calls `LISTEN graphql_subscriptions` on a dedicated Postgres connection
+2. When a `NOTIFY` arrives, the payload is parsed into a `ChangeNotification`
+3. The notification is broadcast via `tokio::sync::broadcast` to all active subscription resolvers
+4. Each resolver filters by table name, fetches the changed row by PK, and yields it to the client
+
+## DELETE handling
+
+For `DELETE` operations, the row no longer exists in the database. The subscription resolver will attempt to fetch it but find nothing — the client receives no data for that notification. To include deleted row data, include it in the NOTIFY payload and handle it in the trigger.

@@ -1,0 +1,136 @@
+---
+title: Architecture
+description: Internal architecture of Taproot's introspection, planning, and execution pipeline
+---
+
+## System overview
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Binary Crate                    │
+│            CLI + config + HTTP server            │
+│               (axum, clap, tokio)                │
+├─────────────────────────────────────────────────┤
+│                 Library Crate                    │
+│                                                  │
+│  ┌─────────────┐  ┌──────────┐  ┌────────────┐ │
+│  │ Introspector │  │ Planner  │  │  Executor  │ │
+│  │              │→ │          │→ │            │ │
+│  │ pg_catalog   │  │ GraphQL  │  │ sqlx       │ │
+│  │ → schema     │  │ → SQL    │  │ → JSON     │ │
+│  └─────────────┘  └──────────┘  └────────────┘ │
+│                                                  │
+│  ┌─────────────┐  ┌──────────┐  ┌────────────┐ │
+│  │  Registry   │  │ Plugins  │  │ Federation │ │
+│  │              │  │          │  │            │ │
+│  │ types,      │  │ trait-   │  │ _service,  │ │
+│  │ resolvers   │  │ based    │  │ _entities  │ │
+│  └─────────────┘  └──────────┘  └────────────┘ │
+└─────────────────────────────────────────────────┘
+```
+
+## Modules
+
+### Introspector (`introspect/`)
+
+Queries `pg_catalog` and `information_schema` to discover:
+- Tables and views (with schema)
+- Columns (type, nullability, defaults, generated)
+- Primary keys and unique constraints
+- Foreign keys (for relationship detection)
+- Enums
+- Smart comments (`COMMENT ON` directives)
+
+### Registry (`registry/`)
+
+Builds the executable `async_graphql::dynamic::Schema`:
+- **builder.rs** — main schema construction, type generation, resolver wiring
+- **filters.rs** — auto-generated per-scalar condition input types
+- **ordering.rs** — per-table order-by enum types
+- **connection.rs** — Relay cursor pagination (Connection, Edge, PageInfo)
+- **mutations.rs** — create/update/delete SQL generation
+- **loader.rs** — DataLoader for belongs-to N+1 elimination
+- **federation.rs** — EntityMap for `_entities` resolver
+- **scalars.rs** — Postgres → GraphQL scalar type mapping
+
+### Planner (`planner/`)
+
+Translates GraphQL operations into optimized SQL:
+
+- **plan.rs** — `PlanNode` enum (`Scan`, `BatchLookup`, `LateralJoin`, `Column`, `Mutation`)
+- **compile.rs** — compile `PlanNode` trees into parameterized SQL
+- **executor.rs** — execute compiled SQL against the database
+- **bridge.rs** — convert GraphQL filter/order inputs to planner types
+
+### Plugin (`plugin/`)
+
+Trait-based extension system:
+- **mod.rs** — `Plugin` trait definition
+- **smart_comments.rs** — `SmartCommentsPlugin` (reads `@omit`, `@name`, `@deprecated`)
+- **tags.rs** — comment tag parser
+
+### Subscription (`subscription.rs`)
+
+Change notification broadcasting:
+- `ChangeNotification` — parsed NOTIFY payload
+- `ChangeBroadcaster` — `tokio::sync::broadcast` fan-out
+
+### Embed (`embed.rs`)
+
+Library embedding API:
+- `TaprootSubgraph` — builder pattern for creating federation-ready schemas
+- `TaprootSubgraphOptions` — configuration for embedding
+
+### Database (`db.rs`)
+
+Database abstraction:
+- `Database` trait — `query`, `execute`, `query_raw`, `query_with_rls`
+- `SqlxBackend` — implementation using `sqlx::PgPool`
+- `RlsContext` — per-request role and claims for RLS transactions
+
+## Query execution flow
+
+```
+GraphQL Query
+    ↓
+Registry (resolver)
+    ↓
+Bridge (GraphQL args → FilterExpr, OrderByExpr)
+    ↓
+PlanNode tree (Scan + LateralJoin children)
+    ↓
+on_plan hooks (plugins inject filters)
+    ↓
+Compiler (PlanNode → parameterized SQL)
+    ↓
+Executor (SQL → database via query_with_rls)
+    ↓
+JSON response
+```
+
+## The planner's N+1 strategy
+
+| Pattern | Strategy | SQL technique |
+|---------|----------|---------------|
+| Root list query | `Scan` | `SELECT row_to_json(t.*) FROM table t` |
+| Has-many (list context) | `LateralJoin` | `LEFT JOIN LATERAL (json_agg(...))` |
+| Has-many (singular context) | `Scan` per parent | Separate query (fallback) |
+| Belongs-to | `BatchLookup` via DataLoader | `WHERE id IN (...)` |
+| Deep nesting | Recursive `LateralJoin` | Nested `LEFT JOIN LATERAL` |
+| Entity resolution | `Scan` by PK | `WHERE pk = $1 LIMIT 1` |
+
+## Database abstraction
+
+The `Database` trait abstracts over the connection:
+
+```rust
+#[async_trait]
+pub trait Database: Send + Sync + 'static {
+    async fn query(&self, sql: &str, params: &[Value]) -> Result<Vec<JsonRow>>;
+    async fn execute(&self, sql: &str, params: &[Value]) -> Result<u64>;
+    async fn query_raw(&self, sql: &str) -> Result<Vec<JsonRow>>;
+    async fn query_with_rls(&self, sql: &str, params: &[Value], rls: Option<&RlsContext>) -> Result<Vec<JsonRow>>;
+}
+```
+
+This enables future backends (PGlite, embedded Postgres, mock backend for testing) without changing any planner or registry code.

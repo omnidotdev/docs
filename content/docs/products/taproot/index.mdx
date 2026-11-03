@@ -1,0 +1,117 @@
+---
+title: 🫚 Taproot
+description: The most direct path from Postgres to GraphQL
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust, SiPostgresql, SiGraphql } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    {
+      label: "PostgreSQL",
+      icon: <SiPostgresql />,
+      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "GraphQL",
+      icon: <SiGraphql />,
+      className: "bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://taproot.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/taproot`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "No codegen, no schema files",
+      description:
+        "Point Taproot at any Postgres database and get a full GraphQL API instantly. Tables become types, foreign keys become relationships, and RLS policies enforce authorization.",
+    },
+  ]}
+/>
+
+**Omni Taproot** is a pure Rust library and server that auto-generates a full GraphQL API from a PostgreSQL database. It introspects tables, columns, relationships, and enums at startup and serves a dynamic, queryable schema with zero codegen.
+
+## Why Taproot
+
+- **No V8 runtime** — pure Rust, compiles to a single static binary
+- **Embeddable** — use as a library crate in any Rust application, or run as a standalone server
+- **Federation-ready** — every instance is a valid Apollo Federation v2 subgraph
+- **N+1 eliminated** — the query planner collapses nested relationships into lateral joins
+- **RLS-native** — authorization via Postgres Row-Level Security, not application code
+
+## How it works
+
+```
+PostgreSQL → Introspect → Build Schema → Serve
+```
+
+1. **Introspect** — reads `pg_catalog` to discover tables, columns, types, foreign keys, enums, and constraints
+2. **Build** — generates GraphQL types, queries, mutations, filters, connections, and relationship fields
+3. **Plan** — translates GraphQL operations into optimized SQL using lateral joins and batched lookups
+4. **Execute** — runs SQL against Postgres and streams results as JSON
+
+## Quick example
+
+```bash
+# Start Taproot pointing at any Postgres database
+taproot --config taproot.yaml
+```
+
+```yaml
+# taproot.yaml
+database:
+  url: "postgres://user:pass@localhost:5432/mydb"
+  schemas: ["public"]
+
+server:
+  listen: "0.0.0.0:4001"
+  playground: true
+```
+
+Then query your database:
+
+```graphql
+{
+  users(first: 10, filter: { role: { equalTo: "admin" } }) {
+    edges {
+      node {
+        name
+        email
+        postsByAuthorId(first: 5) {
+          edges {
+            node {
+              title
+              comments {
+                edges {
+                  node {
+                    body
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+This produces a single SQL query with nested lateral joins — no N+1.

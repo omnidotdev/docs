@@ -1,0 +1,65 @@
+---
+title: Type Mapping
+description: How Postgres types map to GraphQL types
+---
+
+## Scalar mapping
+
+| Postgres | GraphQL | Rust |
+|----------|---------|------|
+| `text`, `varchar`, `bpchar`, `name`, `citext`, `char` | `String` | `String` |
+| `int2`, `smallint`, `smallserial` | `Int` | `i16` |
+| `int4`, `int`, `serial` | `Int` | `i32` |
+| `int8`, `bigint`, `bigserial` | `BigInt` | `i64` |
+| `float4`, `real` | `Float` | `f32` |
+| `float8`, `double precision` | `Float` | `f64` |
+| `bool`, `boolean` | `Boolean` | `bool` |
+| `uuid` | `UUID` | `Uuid` |
+| `timestamptz`, `timestamp` | `Datetime` | `Datetime<Utc>` |
+| `date` | `Date` | `NaiveDate` |
+| `json`, `jsonb` | `JSON` | `serde_json::Value` |
+| `numeric`, `decimal` | `BigDecimal` | `BigDecimal` |
+| Unknown types | `String` | `String` |
+
+Pagination uses an opaque `Cursor` scalar for `after`/`before` and edge cursors. Every table type also exposes a global Relay `id: ID!`; a column literally named `id` is exposed as `rowId`, freeing `id` for the global identifier.
+
+## Table to type mapping
+
+| Postgres | GraphQL |
+|----------|---------|
+| Table | Object type + connection type (Relay cursor pagination) |
+| View | Object type (read-only, no mutations) |
+| Primary key | `@key` directive (federation), singular query |
+| Foreign key | Relationship field (belongs-to / has-many) |
+| Column | Field with mapped scalar type |
+| Unique constraint | Singular query (e.g. `userByEmail`) |
+| Postgres enum | GraphQL enum |
+| Array column | List field |
+
+## Naming conventions
+
+Taproot singularizes table names for type generation:
+
+| Table name | Type name | Singular query | List query |
+|------------|-----------|----------------|------------|
+| `users` | `User` | `user(rowId: UUID!)` | `users(first: Int)` |
+| `posts` | `Post` | `post(rowId: UUID!)` | `posts(first: Int)` |
+| `categories` | `Category` | `category(rowId: UUID!)` | `categories(first: Int)` |
+
+## Enums
+
+Postgres enums are mapped directly to GraphQL enums:
+
+```sql
+CREATE TYPE user_role AS ENUM ('admin', 'editor', 'viewer');
+```
+
+Produces:
+
+```graphql
+enum UserRole {
+  admin
+  editor
+  viewer
+}
+```
