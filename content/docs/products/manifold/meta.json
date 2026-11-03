@@ -4,8 +4,12 @@
     "oci-api",
     "npm",
     "cargo",
+    "schema",
+    "wasm",
     "graphql-api",
     "authentication",
+    "oidc",
+    "webhooks",
     "storage"
   ]
 }

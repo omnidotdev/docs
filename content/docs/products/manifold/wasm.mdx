@@ -1,0 +1,53 @@
+---
+title: WASM Registry
+description: Publish and fetch WebAssembly modules
+---
+
+Manifold hosts **WebAssembly** modules. Each module is validated by the engine's own compiler on publish, and its exports, imports, and runtime are extracted and stored. Versions are immutable and scoped per namespace.
+
+## Base URL
+
+WASM endpoints are served per namespace under `/wasm/<namespace>`:
+
+```
+https://api.manifold.omni.dev/wasm/acme
+```
+
+## Publishing
+
+`PUT` the `.wasm` binary with a Manifold `mf_…` token (`write` scope):
+
+```bash
+curl -X PUT \
+  "https://api.manifold.omni.dev/wasm/acme/filters/1.0.0" \
+  -H "Authorization: Bearer mf_xxxxxxxx" \
+  -H "Content-Type: application/wasm" \
+  --data-binary @filters.wasm
+```
+
+The binary is validated; a non-WASM or malformed module is rejected with `400`. On success the response reports the inferred runtime (`core` or `wasi`) and export/import counts:
+
+```json
+{ "name": "filters", "version": "1.0.0", "runtime": "wasi", "exports": 3, "imports": 1 }
+```
+
+Re-publishing an existing `name@version` returns `409` (immutable versions).
+
+## Listing versions
+
+```bash
+curl -H "Authorization: Bearer mf_xxxxxxxx" \
+  https://api.manifold.omni.dev/wasm/acme/filters
+```
+
+Each version includes its runtime and the extracted exports and imports.
+
+## Fetching a module
+
+```bash
+curl -H "Authorization: Bearer mf_xxxxxxxx" \
+  -o filters.wasm \
+  https://api.manifold.omni.dev/wasm/acme/filters/1.0.0
+```
+
+Public repositories are readable anonymously; private ones require a token scoped to the namespace (see [Authentication](./authentication)).

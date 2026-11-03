@@ -1,0 +1,52 @@
+---
+title: Schema Registry
+description: Publish and fetch OpenAPI, GraphQL, and JSON Schema documents
+---
+
+Manifold is a schema registry for **OpenAPI**, **GraphQL SDL**, and **JSON Schema** documents. Schemas are validated on publish, versioned immutably, and scoped per namespace.
+
+## Base URL
+
+Schema endpoints are served per namespace under `/schema/<namespace>`:
+
+```
+https://api.manifold.omni.dev/schema/acme
+```
+
+## Publishing
+
+`PUT` the raw schema document, with the format as a query parameter and a Manifold `mf_…` token (`write` scope) in the `Authorization` header:
+
+```bash
+curl -X PUT \
+  "https://api.manifold.omni.dev/schema/acme/orders/1.4.0?format=openapi" \
+  -H "Authorization: Bearer mf_xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  --data-binary @openapi.json
+```
+
+`format` is one of `openapi`, `graphql`, or `jsonschema`. The document is validated (structural checks for OpenAPI/JSON Schema, `buildSchema` for GraphQL SDL); validity and any errors are recorded and returned, but an invalid schema is still stored so it stays inspectable:
+
+```json
+{ "name": "orders", "version": "1.4.0", "format": "openapi", "valid": true, "validationErrors": [] }
+```
+
+Versions are immutable: re-publishing an existing `name@version` returns `409`.
+
+## Listing versions
+
+```bash
+curl -H "Authorization: Bearer mf_xxxxxxxx" \
+  https://api.manifold.omni.dev/schema/acme/orders
+```
+
+Returns each version with its validity and title.
+
+## Fetching a schema
+
+```bash
+curl -H "Authorization: Bearer mf_xxxxxxxx" \
+  https://api.manifold.omni.dev/schema/acme/orders/1.4.0
+```
+
+Public repositories are readable anonymously; private ones require a token scoped to the namespace (see [Authentication](./authentication)).
