@@ -595,14 +595,13 @@ export const products: CatalogProduct[] = [
     "id": "manifold",
     "name": "Manifold",
     "realm": "armory",
-    "status": "active",
-    "releaseDate": "2026-10-31",
+    "status": "coming_soon",
     "license": "Apache-2.0",
     "plans": [
       {
         "tier": "free",
         "name": "Manifold Free",
-        "description": "Get started with artifact hosting",
+        "description": "Your personal artifact hub, free forever",
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
@@ -614,20 +613,21 @@ export const products: CatalogProduct[] = [
       {
         "tier": "pro",
         "name": "Manifold Pro",
-        "description": "Serious artifact hosting for teams",
+        "description": "A production hub for a shipping team",
         "monthlyPrice": 1200,
         "yearlyPrice": 11500,
         "features": [
           "100 GB storage",
           "500 GB bandwidth/month",
           "Priority support",
-          "Unlimited private repos"
+          "Unlimited private repos",
+          "Webhooks"
         ]
       },
       {
         "tier": "team",
         "name": "Manifold Team",
-        "description": "Scale artifact hosting across your organization",
+        "description": "One connected hub for your whole organization",
         "monthlyPrice": 4900,
         "yearlyPrice": 47000,
         "features": [
@@ -635,7 +635,8 @@ export const products: CatalogProduct[] = [
           "2 TB bandwidth/month",
           "Priority support",
           "Unlimited namespaces",
-          "Unlimited private repos"
+          "Unlimited private repos",
+          "Webhooks"
         ]
       }
     ]
