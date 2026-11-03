@@ -1,0 +1,83 @@
+---
+title: Custom Queries & Mutations
+description: Expose SQL functions as root query and mutation fields
+---
+
+## Overview
+
+SQL functions that are **not** computed fields (i.e. their first parameter is not a table row type) are exposed as root-level fields:
+
+- `STABLE` and `IMMUTABLE` functions become **Query** fields
+- `VOLATILE` functions become **Mutation** fields
+
+Function names are converted to camelCase for the GraphQL field name. All function parameters become GraphQL arguments.
+
+## Scalar returns
+
+Functions returning a scalar value produce a simple field:
+
+```sql
+CREATE FUNCTION app_version() RETURNS text AS $$
+  SELECT '1.0.0';
+$$ LANGUAGE sql STABLE;
+```
+
+```graphql
+{
+  appVersion
+}
+```
+
+## SETOF table returns (connections)
+
+Functions returning `SETOF <table>` use the connection pattern with edges, pagination, and all the table's fields:
+
+```sql
+CREATE FUNCTION search_users(query text) RETURNS SETOF users AS $$
+  SELECT * FROM users WHERE name ILIKE '%' || query || '%';
+$$ LANGUAGE sql STABLE;
+```
+
+```graphql
+{
+  searchUsers(query: "alice") {
+    id
+    name
+    email
+  }
+}
+```
+
+## SETOF scalar returns (lists)
+
+Functions returning `SETOF <scalar>` produce a list field:
+
+```sql
+CREATE FUNCTION active_tags() RETURNS SETOF text AS $$
+  SELECT DISTINCT tag FROM posts WHERE published = true;
+$$ LANGUAGE sql STABLE;
+```
+
+```graphql
+{
+  activeTags
+}
+```
+
+## Custom mutations
+
+Volatile functions are exposed on the `Mutation` type instead of `Query`:
+
+```sql
+CREATE FUNCTION reset_user_score(user_id uuid) RETURNS void AS $$
+  UPDATE users SET score = 0 WHERE id = user_id;
+$$ LANGUAGE sql VOLATILE;
+```
+
+```graphql
+mutation {
+  resetUserScore(userId: "user-123")
+}
+```
+
+Function arguments use camelCase in the GraphQL schema, matching the snake_case-to-camelCase convention used elsewhere.

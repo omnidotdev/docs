@@ -1,0 +1,44 @@
+---
+title: Performance
+description: What makes Taproot fast, and how to benchmark it against your current stack
+---
+
+## Why Taproot is fast
+
+Taproot is a single native binary with no JavaScript runtime, so there is no V8 startup or JIT warmup and memory stays flat under load. Beyond that, three design choices keep the database doing the minimum work per request:
+
+- **Selection-aware execution.** A connection resolver runs only the SQL the query actually selected. Ask for `totalCount` and Taproot runs a single `COUNT`; ask for `nodes` and it fetches rows; ask for a relation and it joins that relation, and only that one. A query never pays to count, fetch, or aggregate data it did not request.
+- **One query for relations.** Has-many relationships are resolved with a lateral join in the same round trip as the parent rows, and belongs-to relationships are batched through a dataloader. Nested selections do not fan out into per-row queries (no N+1).
+- **Pushdown.** Filtering, ordering, and pagination compile to SQL and run in Postgres, not in the application layer.
+
+## Benchmark it yourself
+
+The repository ships a reproducible harness under `benchmark/`. It stands up one Postgres instance with a shared dataset, runs each contender against the identical query set with [k6](https://k6.io), and prints a throughput and latency table. The load script fails any response that is non-200 or carries GraphQL `errors`, so a mismatched field can never be mistaken for a fast result.
+
+```bash
+cd benchmark
+./run.sh                 # Taproot vs PostGraphile v5
+WITH_HASURA=1 ./run.sh   # also include Hasura
+DURATION=60s VUS=50 ./run.sh
+```
+
+The four scenarios exercise a point lookup, a filtered and paginated list, a nested query across two relationships (the N+1 path), and an aggregate.
+
+## Representative results
+
+Measured on a single commodity machine against 20,000 users, 100,000 posts, and 300,000 comments, with foreign-key indexes and connection pools matched between servers. Absolute numbers depend on hardware, dataset, and query shape; reproduce the harness in your own environment rather than treating these as fixed.
+
+| Scenario    | Taproot            | PostGraphile v5     |
+| ----------- | ------------------ | ------------------- |
+| point lookup | 8,200 req/s, p99 6 ms  | 3,000 req/s, p99 15 ms |
+| list         | 1,050 req/s, p99 31 ms | 76 req/s, p99 430 ms   |
+| aggregate    | 1,400 req/s, p99 22 ms | 1,390 req/s, p99 23 ms |
+| nested       | 1,245 req/s, p99 30 ms | 1,540 req/s, p99 26 ms |
+
+Taproot leads clearly on point lookups and lists, matches on aggregates, and trails slightly on the deepest nested case. The takeaway is not a single multiplier but the shape: low, flat latency on the common read paths, from a binary you can also embed.
+
+## Tuning
+
+- **`database.pool_size`** bounds concurrent database work. Raise it for read-heavy, high-concurrency workloads; a pool that is too small queues requests under load.
+- **Indexes** matter as much as they do for any Postgres application. Index the columns you filter and order by. An unindexed `ORDER BY` on a large table is slow regardless of the GraphQL layer in front of it.
+- **Request only what you need.** Because execution is selection-aware, trimming unused fields, relations, and aggregates from a query directly removes work from the database.

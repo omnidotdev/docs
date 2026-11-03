@@ -1,0 +1,199 @@
+---
+title: Filters & Ordering
+description: Auto-generated condition, filter, and ordering types for every table
+---
+
+## Condition vs filter
+
+List queries accept two complementary filtering arguments:
+
+- `condition` — a flat set of per-column **equality** checks (`{ field: value }`)
+- `filter` — a rich expression tree with comparison, pattern, and array operators plus `and`/`or`/`not`
+
+Both are applied together (AND-ed) and pushed down to SQL.
+
+```graphql
+{
+  users(condition: { role: viewer }, filter: { name: { startsWith: "Al" } }) {
+    nodes { name role }
+  }
+}
+```
+
+## Condition (flat equality)
+
+Every table gets a `{Type}Condition` input with one field per column, matched by equality:
+
+```graphql
+input UserContactCondition {
+  rowId: UUID
+  name: String
+  email: String
+  role: UserRole
+}
+```
+
+> A column literally named `id` is exposed as `rowId` (a common convention), in the condition, the filter, the order-by enum (`ROW_ID_ASC`), and the singular query argument.
+
+## Filter (rich operators)
+
+Every table also gets a `{Type}Filter` with a `{Scalar}Filter` per column and `and`/`or`/`not` combinators:
+
+```graphql
+input UserFilter {
+  name: StringFilter
+  email: StringFilter
+  createdAt: DatetimeFilter
+  and: [UserFilter!]
+  or: [UserFilter!]
+  not: UserFilter
+}
+```
+
+### Scalar operators
+
+```graphql
+input StringFilter {
+  isNull: Boolean
+  equalTo: String
+  notEqualTo: String
+  in: [String!]
+  notIn: [String!]
+  lessThan: String
+  lessThanOrEqualTo: String
+  greaterThan: String
+  greaterThanOrEqualTo: String
+  # string-only pattern operators
+  includes: String             # contains (case-sensitive)
+  includesInsensitive: String  # contains (case-insensitive)
+  startsWith: String
+  endsWith: String
+  like: String                 # raw SQL LIKE pattern
+  likeInsensitive: String      # raw SQL ILIKE pattern
+}
+```
+
+Numeric, date/time, UUID, and boolean scalars expose the same comparison and `in`/`notIn` operators (the ordering operators only appear on orderable types; the string pattern operators only on `String`).
+
+### Array columns
+
+An array column (e.g. `tags text[]`) gets a `{Scalar}ListFilter` with membership operators that match if any element satisfies the comparison:
+
+```graphql
+input StringListFilter {
+  isNull: Boolean
+  anyEqualTo: String
+  anyNotEqualTo: String
+  anyLessThan: String
+  anyLessThanOrEqualTo: String
+  anyGreaterThan: String
+  anyGreaterThanOrEqualTo: String
+}
+```
+
+```graphql
+{
+  posts(filter: { tags: { anyEqualTo: "rust" } }) { nodes { title } }
+}
+```
+
+### Combinators
+
+```graphql
+{
+  users(filter: {
+    or: [
+      { name: { equalTo: "Alice" } },
+      { email: { includesInsensitive: "@example.com" } }
+    ]
+  }) {
+    nodes { name email }
+  }
+}
+```
+
+## Ordering
+
+Every table gets a `{Type}OrderBy` enum with six variants per column:
+
+```graphql
+enum UserOrderBy {
+  NAME_ASC
+  NAME_DESC
+  NAME_ASC_NULLS_FIRST
+  NAME_ASC_NULLS_LAST
+  NAME_DESC_NULLS_FIRST
+  NAME_DESC_NULLS_LAST
+  # ... for each column (the `id` column sorts as ROW_ID_ASC, etc.)
+}
+```
+
+```graphql
+{
+  users(orderBy: [NAME_ASC, CREATED_AT_DESC]) {
+    nodes { name createdAt }
+  }
+}
+```
+
+## Pagination
+
+List queries use Relay cursor pagination in both directions, plus `offset`:
+
+```graphql
+{
+  users(first: 10, after: "cursor123") {
+    edges { cursor node { name } }
+    pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
+    totalCount
+  }
+}
+```
+
+- Forward: `first` + `after`
+- Backward: `last` + `before`
+- Skip: `offset`
+
+Filtering, ordering, and pagination are all pushed down to SQL — Postgres does the work, not the application layer.
+
+## Global object identification
+
+Every type backed by a primary key implements the Relay `Node` interface and exposes an opaque `id: ID!`. The `node(id:)` root field refetches any object by that id, which is what Relay-style clients use to refetch a single record:
+
+```graphql
+{
+  node(id: "WyJVc2VyIiwiMDAwMC4uLiJd") {
+    ... on User {
+      name
+      email
+    }
+  }
+}
+```
+
+The `id` encodes the type name and primary-key values, so it is stable across requests. A well-formed id for a type that is not exposed resolves to `null`; a malformed id is a request error.
+
+## Aggregations
+
+Every connection includes an `aggregates` field with `count`, `sum`, `avg`, `min`, and `max`, applied to the full filtered set (ignoring pagination):
+
+```graphql
+{
+  users(filter: { role: { equalTo: "admin" } }, first: 5) {
+    aggregates {
+      count
+      sum { score }
+      avg { score }
+      min { createdAt }
+      max { createdAt }
+    }
+    nodes { name score }
+  }
+}
+```
+
+- `count` is always available
+- `sum` and `avg` are generated for numeric columns
+- `min` and `max` are generated for orderable columns (numeric plus string, date/time, and network types)
+
+Each aggregate group is its own type (e.g. `UserSumAggregates`) with one camelCase field per eligible column.

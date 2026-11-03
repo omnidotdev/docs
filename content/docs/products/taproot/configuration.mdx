@@ -1,0 +1,91 @@
+---
+title: Configuration
+description: Complete configuration reference for Taproot
+---
+
+## Configuration file
+
+Taproot reads configuration from a YAML file (default: `taproot.yaml`):
+
+```bash
+taproot --config taproot.yaml
+```
+
+## Full reference
+
+```yaml
+# Database connection
+database:
+  url: "postgres://user:pass@localhost:5432/mydb"  # Required
+  pool_size: 20                    # Max connections (default: 20)
+  schemas: ["public"]              # Schemas to introspect (default: ["public"])
+  exclude_tables: ["_migrations"]  # Tables to skip
+
+# HTTP server
+server:
+  listen: "0.0.0.0:4001"  # Bind address (default: "0.0.0.0:4001")
+  playground: true         # Enable GraphiQL at GET / (default: true)
+
+# Schema generation
+schema:
+  default_page_size: 25   # Default rows per page (default: 25)
+  max_page_size: 100      # Max rows per page (default: 100)
+  relay_pagination: true  # Enable Relay cursor pagination (default: true)
+  max_depth: 15           # Max query nesting depth, 0 = unlimited (default: 15)
+  max_complexity: 1000    # Max query complexity score, 0 = unlimited (default: 1000)
+  federation: false       # Enable Apollo Federation v2 (default: false)
+  subscriptions: false    # Enable GraphQL subscriptions (default: false)
+
+# Authentication / RLS
+auth:
+  rls: false                              # Enable RLS passthrough (default: false)
+  role_claim: "pg_role"                   # JWT claim for Postgres role
+  claims_setting: "request.jwt.claims"    # Postgres setting name for claims
+  default_role: "anonymous"               # Role when no JWT present
+  jwt_secret: null                        # HS256 secret for JWT verification (optional)
+
+# Subscriptions (requires schema.subscriptions: true)
+subscriptions:
+  enabled: false                          # Enable LISTEN/NOTIFY listener
+  notify_channel: "graphql_subscriptions" # Postgres NOTIFY channel name
+```
+
+## Environment variables
+
+The database URL can be provided via environment variable:
+
+```bash
+DATABASE_URL="postgres://..." taproot --config taproot.yaml
+```
+
+## Minimal configuration
+
+The smallest valid config:
+
+```yaml
+database:
+  url: "postgres://localhost:5432/mydb"
+```
+
+Everything else uses defaults: listens on `0.0.0.0:4001`, introspects the `public` schema, playground enabled, no federation, no auth.
+
+## CLI flags
+
+```
+taproot [OPTIONS]
+
+Options:
+  -c, --config <PATH>  Path to config file [default: taproot.yaml]
+  -V, --version        Print version
+  -h, --help           Print help
+```
+
+## Logging
+
+Taproot uses `tracing` with `RUST_LOG` environment variable:
+
+```bash
+RUST_LOG=info taproot --config taproot.yaml        # Default
+RUST_LOG=debug taproot --config taproot.yaml       # Verbose
+RUST_LOG=taproot_core=debug taproot --config taproot.yaml  # Core only
+```

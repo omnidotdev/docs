@@ -1,0 +1,24 @@
+{
+  "title": "🫚 Taproot",
+  "pages": [
+    "getting-started",
+    "---Schema---",
+    "type-mapping",
+    "relationships",
+    "filters-ordering",
+    "mutations",
+    "computed-fields",
+    "custom-queries",
+    "---Features---",
+    "federation",
+    "rls-auth",
+    "subscriptions",
+    "plugins",
+    "---Integration---",
+    "embedding",
+    "---Reference---",
+    "configuration",
+    "architecture",
+    "performance"
+  ]
+}
