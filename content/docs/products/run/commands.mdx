@@ -166,22 +166,34 @@ time.
 ## deploy
 
 ```bash
-run deploy <target> [--to fractal]
+run deploy <target> [--to fractal] [--format yaml|json]
 ```
 
 Translates a stack into a `fractal.yaml` and prints it, so the same stack can be
-deployed to Fractal cloud. The command makes no network calls: it only emits the
-manifest, along with warnings about anything that does not map cleanly from a
-local stack to the cloud (for example proxy and TLS settings, which Fractal
-supplies itself). Copy the output into a repository and import it from the
-Fractal dashboard.
+deployed to [Fractal](https://fractal.omni.dev) cloud. The command makes no
+network calls: it only emits the manifest, along with warnings about anything
+that does not map cleanly from a local stack to the cloud (for example proxy and
+TLS settings, which Fractal supplies itself). Review the output, then import it
+from the Fractal dashboard (New Project -> Import -> Fractal).
+
+`--format` controls the output:
+
+- `yaml` (the default) prints the `fractal.yaml` manifest, with warnings on stderr
+- `json` prints the manifest plus recipe metadata and a deploy spec (generated
+  secrets, URL bindings, hooks, and the local proxy to skip) for programmatic
+  consumers such as the run.omni.dev review page
 
 ### Deploy button
 
-Any repository that ships a `run.yaml` can carry a one-click deploy button.
-Visitors land on a review page that reads the recipe and shows the stack, then
-hand it off to Fractal:
+Any repository that ships a `run.yaml` can carry a one-click deploy button:
 
 ```markdown
 [![Deploy to Fractal](https://run.omni.dev/button.svg)](https://run.omni.dev/deploy?repo=https://github.com/you/your-repo)
 ```
+
+Visitors land on a review page that reads the recipe and shows the stack, then
+hand it off to Fractal. Fractal is a cloud platform, and the workspace you deploy
+into may need a paid plan. Sign in and choose (or create) a workspace, which
+defaults to your personal one. The choice is not lock-in: Fractal supports
+transferring a project between workspaces later, and the project URL stays stable
+across the move.
