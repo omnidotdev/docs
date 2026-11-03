@@ -10,7 +10,7 @@ Manifold is a private [Cargo](https://doc.rust-lang.org/cargo/) registry impleme
 Cargo endpoints are served per namespace under `/cargo/<namespace>`:
 
 ```
-https://manifold.omni.dev/cargo/acme
+https://api.manifold.omni.dev/cargo/acme
 ```
 
 The sparse index lives at `/cargo/<namespace>/index/`, and `index/config.json` advertises the download and API endpoints Cargo uses.
@@ -21,7 +21,7 @@ Register the index in `.cargo/config.toml` (project-local or `~/.cargo/config.to
 
 ```toml
 [registries.manifold]
-index = "sparse+https://manifold.omni.dev/cargo/acme/index/"
+index = "sparse+https://api.manifold.omni.dev/cargo/acme/index/"
 ```
 
 Put an API token in `~/.cargo/credentials.toml` (a Manifold `mf_…` token with `write` scope on the namespace; see [Authentication](./authentication)):
