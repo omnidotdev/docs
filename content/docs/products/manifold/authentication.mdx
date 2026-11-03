@@ -24,7 +24,7 @@ JWTs are validated for:
 
 ```bash
 curl -H "Authorization: Bearer eyJhbG..." \
-  https://manifold.omni.dev/graphql
+  https://api.manifold.omni.dev/graphql
 ```
 
 ## API Tokens
@@ -88,16 +88,16 @@ Include the token in the `Authorization` header:
 ```bash
 # OCI API
 curl -H "Authorization: Bearer mf_..." \
-  https://manifold.omni.dev/v2/myorg/myapp/tags/list
+  https://api.manifold.omni.dev/v2/myorg/myapp/tags/list
 
 # GraphQL API
-curl -X POST https://manifold.omni.dev/graphql \
+curl -X POST https://api.manifold.omni.dev/graphql \
   -H "Authorization: Bearer mf_..." \
   -H "Content-Type: application/json" \
   -d '{"query": "{ namespaces { nodes { name } } }"}'
 
 # Docker login
-echo "mf_..." | docker login manifold.omni.dev --username token --password-stdin
+echo "mf_..." | docker login api.manifold.omni.dev --username token --password-stdin
 ```
 
 ### Token Lifecycle

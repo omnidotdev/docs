@@ -10,7 +10,7 @@ Manifold implements the [OCI Distribution Spec v2](https://github.com/opencontai
 All OCI endpoints are prefixed with `/v2/`. The version check endpoint confirms compatibility:
 
 ```bash
-curl https://manifold.omni.dev/v2/
+curl https://api.manifold.omni.dev/v2/
 
 # Response headers include:
 # Docker-Distribution-API-Version: registry/2.0
@@ -39,7 +39,7 @@ GET /v2/:name/manifests/:reference
 
 ```bash
 curl -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-  https://manifold.omni.dev/v2/myorg/myapp/manifests/latest
+  https://api.manifold.omni.dev/v2/myorg/myapp/manifests/latest
 ```
 
 #### Push a manifest
@@ -52,7 +52,7 @@ PUT /v2/:name/manifests/:reference
 curl -X PUT \
   -H "Content-Type: application/vnd.oci.image.manifest.v1+json" \
   -d @manifest.json \
-  https://manifold.omni.dev/v2/myorg/myapp/manifests/v1.0.0
+  https://api.manifold.omni.dev/v2/myorg/myapp/manifests/v1.0.0
 ```
 
 #### Check manifest existence
@@ -72,7 +72,7 @@ GET /v2/:name/blobs/:digest
 ```
 
 ```bash
-curl https://manifold.omni.dev/v2/myorg/myapp/blobs/sha256:abc123...
+curl https://api.manifold.omni.dev/v2/myorg/myapp/blobs/sha256:abc123...
 ```
 
 #### Check blob existence
@@ -98,7 +98,7 @@ Returns `202 Accepted` with a `Location` header containing the upload URL.
 ```bash
 # Start upload
 UPLOAD_URL=$(curl -s -D- -X POST \
-  https://manifold.omni.dev/v2/myorg/myapp/blobs/uploads/ \
+  https://api.manifold.omni.dev/v2/myorg/myapp/blobs/uploads/ \
   | grep -i location | cut -d' ' -f2 | tr -d '\r')
 ```
 
@@ -143,10 +143,10 @@ Supports pagination with `n` (page size) and `last` (cursor) query parameters.
 
 ```bash
 # List first 10 tags
-curl "https://manifold.omni.dev/v2/myorg/myapp/tags/list?n=10"
+curl "https://api.manifold.omni.dev/v2/myorg/myapp/tags/list?n=10"
 
 # Next page
-curl "https://manifold.omni.dev/v2/myorg/myapp/tags/list?n=10&last=v1.5.0"
+curl "https://api.manifold.omni.dev/v2/myorg/myapp/tags/list?n=10&last=v1.5.0"
 ```
 
 Response:
@@ -169,16 +169,16 @@ Repositories follow the format `namespace/name`:
 
 ```bash
 # Log in (uses API token or OIDC credentials)
-docker login manifold.omni.dev
+docker login api.manifold.omni.dev
 
 # Tag a local image
-docker tag myapp:latest manifold.omni.dev/myorg/myapp:v1.0.0
+docker tag myapp:latest api.manifold.omni.dev/myorg/myapp:v1.0.0
 
 # Push
-docker push manifold.omni.dev/myorg/myapp:v1.0.0
+docker push api.manifold.omni.dev/myorg/myapp:v1.0.0
 
 # Pull
-docker pull manifold.omni.dev/myorg/myapp:v1.0.0
+docker pull api.manifold.omni.dev/myorg/myapp:v1.0.0
 ```
 
 ## Error Codes

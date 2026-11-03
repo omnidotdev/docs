@@ -10,7 +10,7 @@ Manifold is a private [npm](https://docs.npmjs.com/cli/v10/using-npm/registry) r
 The npm endpoints are served under `/npm`:
 
 ```
-https://manifold.omni.dev/npm
+https://api.manifold.omni.dev/npm
 ```
 
 ## Configuration
@@ -18,8 +18,8 @@ https://manifold.omni.dev/npm
 Point your scope at Manifold and attach an API token in `.npmrc` (project-local or `~/.npmrc`). The scope must match the namespace you publish to:
 
 ```ini
-@acme:registry=https://manifold.omni.dev/npm
-//manifold.omni.dev/npm/:_authToken=mf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+@acme:registry=https://api.manifold.omni.dev/npm
+//api.manifold.omni.dev/npm/:_authToken=mf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 The token is a Manifold API token (`mf_…`); see [Authentication](./authentication). Publishing requires a token with `write` scope on the namespace. Anonymous installs work for public packages.
