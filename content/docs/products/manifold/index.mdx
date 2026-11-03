@@ -1,6 +1,6 @@
 ---
 title: Manifold
-description: OCI-compatible artifact registry for schemas, containers, and WASM modules
+description: The universal artifact registry for containers, npm, Cargo, schemas, and WASM
 ---
 
 import { ProductOverview } from "@/components/docs";
@@ -42,11 +42,23 @@ import { FaDatabase } from "react-icons/fa";
   <Card title="Cargo Registry" href="/armory/manifold/cargo">
     Publish and depend on Rust crates
   </Card>
+  <Card title="Schema Registry" href="/armory/manifold/schema">
+    Publish and fetch OpenAPI, GraphQL, and JSON Schema documents
+  </Card>
+  <Card title="WASM Registry" href="/armory/manifold/wasm">
+    Publish and fetch WebAssembly modules
+  </Card>
   <Card title="GraphQL API" href="/armory/manifold/graphql-api">
     Query namespaces, repositories, artifacts, and tags
   </Card>
   <Card title="Authentication" href="/armory/manifold/authentication">
     JWT and API token authentication
+  </Card>
+  <Card title="Trusted Publishing" href="/armory/manifold/oidc">
+    Keyless publishing from CI with short-lived OIDC tokens
+  </Card>
+  <Card title="Webhooks" href="/armory/manifold/webhooks">
+    Receive signed event notifications for registry activity
   </Card>
   <Card title="Storage" href="/armory/manifold/storage">
     Configure blob storage backends (filesystem or S3-compatible)

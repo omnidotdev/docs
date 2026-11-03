@@ -1,0 +1,36 @@
+---
+title: Trusted Publishing (OIDC)
+description: Keyless publishing from CI with short-lived tokens
+---
+
+Manifold supports **keyless, OIDC-based trusted publishing**: a CI job exchanges its OIDC identity token for a short-lived Manifold token, so you never store a long-lived `mf_…` secret in CI.
+
+## How it works
+
+1. An administrator registers a **trusted-publisher binding** for a namespace (the OIDC issuer, subject claim, and granted scope). Bindings are declarative and seeded through IaC.
+2. In CI, the runner requests its OIDC identity token (e.g. GitHub Actions' `id-token`).
+3. CI exchanges that token at Manifold's token endpoint for an **ephemeral** `mf_…` token (15-minute TTL).
+4. CI uses the ephemeral token for the publish, then discards it.
+
+## Exchanging a token
+
+```bash
+curl -X POST https://api.manifold.omni.dev/api/oidc/token \
+  -H "Authorization: Bearer $OIDC_ID_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{"namespace":"acme","scope":"write"}'
+```
+
+Manifold verifies the identity token against the issuer's JWKS, matches it to a trusted-publisher binding, and returns an ephemeral token:
+
+```json
+{ "plaintextToken": "mf_...", "warning": "Ephemeral token. Use it for this run only; it expires shortly." }
+```
+
+Use `plaintextToken` for the subsequent OCI / npm / Cargo / schema / WASM publish in the same job. It is returned once and never stored.
+
+## Why
+
+- No long-lived registry secrets in CI
+- Tokens are scoped to a single namespace and expire in minutes
+- Revocation is automatic (the token simply expires)

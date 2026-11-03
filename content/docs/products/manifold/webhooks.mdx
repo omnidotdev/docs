@@ -1,0 +1,56 @@
+---
+title: Webhooks
+description: Receive signed event notifications for registry activity
+---
+
+Manifold can deliver **signed webhooks** to your endpoints when events occur in your organization (for example, an artifact being published), so you can drive CI/CD and automation.
+
+## Base URL
+
+Webhook management is served per namespace under `/webhook/<namespace>` and is scoped to the namespace's organization. All calls use a Manifold `mf_…` token (see [Authentication](./authentication)).
+
+## Creating a webhook
+
+```bash
+curl -X POST https://api.manifold.omni.dev/webhook/acme \
+  -H "Authorization: Bearer mf_xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  --data '{"url":"https://example.com/hook","events":["*"]}'
+```
+
+`events` is a list of event types to deliver, or `["*"]` for all. The response returns a signing **secret once** (store it; it is never shown again):
+
+```json
+{ "id": "...", "url": "https://example.com/hook", "events": ["*"], "secret": "whsec_..." }
+```
+
+## Listing and deleting
+
+```bash
+curl -H "Authorization: Bearer mf_xxxxxxxx" https://api.manifold.omni.dev/webhook/acme
+curl -X DELETE -H "Authorization: Bearer mf_xxxxxxxx" https://api.manifold.omni.dev/webhook/acme/<id>
+```
+
+Listing never returns the secret.
+
+## Receiving and verifying deliveries
+
+Deliveries are `POST`ed as JSON with these headers:
+
+- `X-Manifold-Event` — the event type
+- `X-Manifold-Signature` — `sha256=<hex>`, an HMAC-SHA256 of the raw request body using your webhook secret
+
+Verify the signature before trusting the payload. For example, in Node:
+
+```js
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+const expected = "sha256=" + createHmac("sha256", secret).update(rawBody).digest("hex");
+const ok = timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers["x-manifold-signature"]));
+```
+
+The body is `{ "type": "<event>", "data": { … }, "timestamp": "<iso8601>" }`.
+
+## Limits
+
+The number of webhooks per organization is capped by your plan (Free 2, Pro 25, Team unlimited). Creating beyond the cap returns `402`.
