@@ -40,3 +40,23 @@ Every broadcast carries the pieces that keep marketing mail compliant:
 - **CAN-SPAM compliant footers** included automatically.
 
 Unsubscribes and complaints feed Herald's suppression list, so a contact who opts out or reports a message is not sent to again. See [Deliverability](/products/herald/deliverability) for how suppression protects your sending reputation.
+
+### Set your sender identity first
+
+Marketing compliance needs a sender name and a physical postal address. Set both in the dashboard under Settings before sending; a marketing send is refused until they are present, so bulk mail never goes out without them. These values only apply to marketing mail, so transactional sends are unaffected.
+
+## One-off marketing sends
+
+Broadcasts are the usual way to reach an audience, but a single send can opt into the same compliance treatment. Pass `marketing: true` and Herald adds the one-click `List-Unsubscribe` header and the CAN-SPAM footer (unsubscribe link, sender name, and postal address), exactly as it does for a broadcast:
+
+```ts
+await herald.emails.send({
+  from: "news@yourdomain.com",
+  to: "subscriber@example.com",
+  subject: "October product update",
+  html: "<p>What's new this month</p>",
+  marketing: true,
+});
+```
+
+The same flag works on `sendBatch` and on the REST `/messages` endpoint. A marketing send is refused with a clear error until the sender identity above is set, so a one-off campaign never ships without an opt-out. Omit the flag for transactional mail, which stays byte-for-byte unchanged.

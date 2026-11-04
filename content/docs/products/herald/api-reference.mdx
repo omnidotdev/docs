@@ -57,3 +57,5 @@ Content-Type: application/json
 
 { "from": "...", "to": "...", "subject": "...", "html": "..." }
 ```
+
+To send a one-off marketing email over REST, add `"marketing": true`; Herald then applies the one-click unsubscribe and CAN-SPAM footer, and refuses the send until the tenant's sender name and postal address are set. See [one-off marketing sends](/products/herald/marketing-email#one-off-marketing-sends).

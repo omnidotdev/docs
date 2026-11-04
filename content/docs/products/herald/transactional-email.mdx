@@ -23,6 +23,10 @@ await herald.emails.send({
 
 Use `{{variable}}` placeholders in the subject and body and pass their values in `variables`; Herald substitutes them at send time.
 
+<Callout type="info">
+  Sending a one-off marketing email rather than a receipt or notification? Pass `marketing: true` so Herald adds a one-click unsubscribe and a CAN-SPAM footer. See [one-off marketing sends](/products/herald/marketing-email#one-off-marketing-sends).
+</Callout>
+
 ## Send a batch
 
 Send up to 100 distinct emails in one call. Each message succeeds or fails on its own:
