@@ -91,6 +91,14 @@ Set `auth.rls: true` and include the `pg_role` claim in your JWT:
 
 If `auth.jwt_secret` is set, Taproot verifies JWT signatures using HS256. If not set, tokens are decoded without verification (useful when a gateway handles verification upstream).
 
+## Connection pooling
+
+The role and claims are applied with `SET LOCAL`, which is scoped to the current transaction rather than the session. When the transaction ends, on commit or rollback (including the implicit rollback when a request fails), Postgres discards both settings automatically.
+
+This is what keeps the identity boundary intact behind a connection pooler. Each request opens its own transaction, applies its `SET LOCAL ROLE` and claims, runs its queries, and ends the transaction before the connection is returned to the pool. The next request to borrow that connection sees no residual role or claims, so there is nothing to reset and no way for one user's context to leak into another's. A session-level `SET` would not have this property, which is why Taproot never uses one.
+
+Because the guarantee comes from transaction scoping, it holds regardless of how connections are managed, including an external pooler running in transaction mode.
+
 ## RLS with subscriptions
 
 Subscription queries also respect RLS. The `SET LOCAL` statements are applied before fetching the changed row, so users only receive notifications for rows they can access.
