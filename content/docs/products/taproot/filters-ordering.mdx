@@ -7,8 +7,8 @@ description: Auto-generated condition, filter, and ordering types for every tabl
 
 List queries accept two complementary filtering arguments:
 
-- `condition` — a flat set of per-column **equality** checks (`{ field: value }`)
-- `filter` — a rich expression tree with comparison, pattern, and array operators plus `and`/`or`/`not`
+- `condition`: a flat set of per-column **equality** checks (`{ field: value }`)
+- `filter`: a rich expression tree with comparison, pattern, and array operators plus `and`/`or`/`not`
 
 Both are applied together (AND-ed) and pushed down to SQL.
 
@@ -154,7 +154,7 @@ List queries use Relay cursor pagination in both directions, plus `offset`:
 - Backward: `last` + `before`
 - Skip: `offset`
 
-Filtering, ordering, and pagination are all pushed down to SQL — Postgres does the work, not the application layer.
+Filtering, ordering, and pagination are all pushed down to SQL, Postgres does the work, not the application layer.
 
 ## Global object identification
 

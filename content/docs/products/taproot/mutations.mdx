@@ -60,7 +60,7 @@ mutation {
 }
 ```
 
-The base `deleteUser` keys on the primary key, with `deleteUserById` (by global `id`) and `deleteUserBy<Column>` (by unique constraint) variants. The payload wraps the deleted entity, the `clientMutationId`, and `deletedUserId` — the global `id` of the removed row.
+The base `deleteUser` keys on the primary key, with `deleteUserById` (by global `id`) and `deleteUserBy<Column>` (by unique constraint) variants. The payload wraps the deleted entity, the `clientMutationId`, and `deletedUserId`: the global `id` of the removed row.
 
 ## Enum handling
 
@@ -95,8 +95,8 @@ mutation {
 
 The `onConflict` input contains:
 
-- `constraint` — the name of a unique constraint or primary key constraint
-- `updateColumns` — array of column names to SET from the excluded row on conflict
+- `constraint`: the name of a unique constraint or primary key constraint
+- `updateColumns`: array of column names to SET from the excluded row on conflict
 
 This generates `INSERT ... ON CONFLICT ON CONSTRAINT ... DO UPDATE SET`. Invalid column names in `updateColumns` are silently ignored.
 
@@ -157,4 +157,4 @@ Bulk mutation field names use the pluralized type name (e.g. `createUsers`, `upd
 
 ## Views
 
-Views are read-only — Taproot does not generate mutations for views.
+Views are read-only, Taproot does not generate mutations for views.

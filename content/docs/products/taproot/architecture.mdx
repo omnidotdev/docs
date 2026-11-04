@@ -44,49 +44,49 @@ Queries `pg_catalog` and `information_schema` to discover:
 ### Registry (`registry/`)
 
 Builds the executable `async_graphql::dynamic::Schema`:
-- **builder.rs** — main schema construction, type generation, resolver wiring
-- **filters.rs** — auto-generated per-scalar condition input types
-- **ordering.rs** — per-table order-by enum types
-- **connection.rs** — Relay cursor pagination (Connection, Edge, PageInfo)
-- **mutations.rs** — create/update/delete SQL generation
-- **loader.rs** — DataLoader for belongs-to N+1 elimination
-- **federation.rs** — EntityMap for `_entities` resolver
-- **scalars.rs** — Postgres → GraphQL scalar type mapping
+- **builder.rs**: main schema construction, type generation, resolver wiring
+- **filters.rs**: auto-generated per-scalar condition input types
+- **ordering.rs**: per-table order-by enum types
+- **connection.rs**: Relay cursor pagination (Connection, Edge, PageInfo)
+- **mutations.rs**: create/update/delete SQL generation
+- **loader.rs**: DataLoader for belongs-to N+1 elimination
+- **federation.rs**: EntityMap for `_entities` resolver
+- **scalars.rs**: Postgres → GraphQL scalar type mapping
 
 ### Planner (`planner/`)
 
 Translates GraphQL operations into optimized SQL:
 
-- **plan.rs** — `PlanNode` enum (`Scan`, `BatchLookup`, `LateralJoin`, `Column`, `Mutation`)
-- **compile.rs** — compile `PlanNode` trees into parameterized SQL
-- **executor.rs** — execute compiled SQL against the database
-- **bridge.rs** — convert GraphQL filter/order inputs to planner types
+- **plan.rs**: `PlanNode` enum (`Scan`, `BatchLookup`, `LateralJoin`, `Column`, `Mutation`)
+- **compile.rs**: compile `PlanNode` trees into parameterized SQL
+- **executor.rs**: execute compiled SQL against the database
+- **bridge.rs**: convert GraphQL filter/order inputs to planner types
 
 ### Plugin (`plugin/`)
 
 Trait-based extension system:
-- **mod.rs** — `Plugin` trait definition
-- **smart_comments.rs** — `SmartCommentsPlugin` (reads `@omit`, `@name`, `@deprecated`)
-- **tags.rs** — comment tag parser
+- **mod.rs**: `Plugin` trait definition
+- **smart_comments.rs**: `SmartCommentsPlugin` (reads `@omit`, `@name`, `@deprecated`)
+- **tags.rs**: comment tag parser
 
 ### Subscription (`subscription.rs`)
 
 Change notification broadcasting:
-- `ChangeNotification` — parsed NOTIFY payload
-- `ChangeBroadcaster` — `tokio::sync::broadcast` fan-out
+- `ChangeNotification`: parsed NOTIFY payload
+- `ChangeBroadcaster`: `tokio::sync::broadcast` fan-out
 
 ### Embed (`embed.rs`)
 
 Library embedding API:
-- `TaprootSubgraph` — builder pattern for creating federation-ready schemas
-- `TaprootSubgraphOptions` — configuration for embedding
+- `TaprootSubgraph`: builder pattern for creating federation-ready schemas
+- `TaprootSubgraphOptions`: configuration for embedding
 
 ### Database (`db.rs`)
 
 Database abstraction:
-- `Database` trait — `query`, `execute`, `query_raw`, `query_with_rls`
-- `SqlxBackend` — implementation using `sqlx::PgPool`
-- `RlsContext` — per-request role and claims for RLS transactions
+- `Database` trait, `query`, `execute`, `query_raw`, `query_with_rls`
+- `SqlxBackend`: implementation using `sqlx::PgPool`
+- `RlsContext`: per-request role and claims for RLS transactions
 
 ## Query execution flow
 
