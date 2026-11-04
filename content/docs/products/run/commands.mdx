@@ -202,14 +202,22 @@ across the move.
 ## serve
 
 ```bash
-run serve [--host 127.0.0.1] [--port 7878]
+run serve [--host 127.0.0.1] [--port 7878] [--open]
 ```
 
 Serve a local web dashboard for managing stacks from a browser, so self-hosting
 does not require the terminal. The dashboard lists the [catalog](/products/run/catalog)
-and your known stacks, and starts or stops them with a click, driving the same
-engine as the CLI. It is compiled into the binary, so nothing else needs to be
+and your known stacks, and starts, stops, or updates them with a click, driving
+the same engine as the CLI (an update runs the same safe path as
+[`run update`](#update): a pre-update backup, pull, recreate, and automatic
+rollback on failure). It is compiled into the binary, so nothing else needs to be
 installed to run it.
+
+Pass `--open` to open the dashboard in your browser once it is ready:
+
+```bash
+run serve --open
+```
 
 The server binds to `127.0.0.1` by default, reachable only from the same machine.
 To manage a stack from another device (for example running Run on a home server
