@@ -32,6 +32,15 @@ import { FaDatabase } from "react-icons/fa";
 
 **Manifold** is a multi-format artifact registry for containers (OCI), npm and Cargo packages, schemas, and WASM modules. This section covers the APIs, authentication, and deployment in detail.
 
+## Why Manifold
+
+- **One registry for everything you ship.** Containers, npm packages, Cargo crates, schemas, and WASM modules live together, so you stop running a separate registry for each format.
+- **Schema-aware.** JSON Schema, OpenAPI, and GraphQL documents are validated on publish, stored next to the artifacts that implement them.
+- **Keyless CI publishing.** Publish from CI with short-lived OIDC tokens, including Kubernetes service-account tokens, so there are no long-lived registry credentials to leak.
+- **Private by default.** Every repository stays private until you choose to publish it.
+- **Self-host or cloud.** Run your own instance with a single Docker Compose command, or use the managed service.
+- **No per-seat tax.** Plans are metered by storage and bandwidth, not by the number of developers.
+
 <Cards>
   <Card title="OCI API" href="/armory/manifold/oci-api">
     OCI Distribution v2 endpoints for push, pull, and tag operations
