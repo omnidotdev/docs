@@ -5,7 +5,7 @@ description: Trait-based extension system for customizing schema and query behav
 
 ## Overview
 
-Taproot uses a trait-based plugin system. Plugins are compiled Rust traits — no WASM, no runtime overhead.
+Taproot uses a trait-based plugin system. Plugins are compiled Rust traits, no WASM, no runtime overhead.
 
 ```rust
 pub trait Plugin: Send + Sync {

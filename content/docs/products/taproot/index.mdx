@@ -50,11 +50,11 @@ import { SiRust, SiPostgresql, SiGraphql } from "react-icons/si";
 
 ## Why Taproot
 
-- **No V8 runtime** — pure Rust, compiles to a single static binary
-- **Embeddable** — use as a library crate in any Rust application, or run as a standalone server
-- **Federation-ready** — every instance is a valid Apollo Federation v2 subgraph
-- **N+1 eliminated** — the query planner collapses nested relationships into lateral joins
-- **RLS-native** — authorization via Postgres Row-Level Security, not application code
+- **No V8 runtime**: pure Rust, compiles to a single static binary
+- **Embeddable**: use as a library crate in any Rust application, or run as a standalone server
+- **Federation-ready**: every instance is a valid Apollo Federation v2 subgraph
+- **N+1 eliminated**: the query planner collapses nested relationships into lateral joins
+- **RLS-native**: authorization via Postgres Row-Level Security, not application code
 
 ## How it works
 
@@ -62,10 +62,10 @@ import { SiRust, SiPostgresql, SiGraphql } from "react-icons/si";
 PostgreSQL → Introspect → Build Schema → Serve
 ```
 
-1. **Introspect** — reads `pg_catalog` to discover tables, columns, types, foreign keys, enums, and constraints
-2. **Build** — generates GraphQL types, queries, mutations, filters, connections, and relationship fields
-3. **Plan** — translates GraphQL operations into optimized SQL using lateral joins and batched lookups
-4. **Execute** — runs SQL against Postgres and streams results as JSON
+1. **Introspect**: reads `pg_catalog` to discover tables, columns, types, foreign keys, enums, and constraints
+2. **Build**: generates GraphQL types, queries, mutations, filters, connections, and relationship fields
+3. **Plan**: translates GraphQL operations into optimized SQL using lateral joins and batched lookups
+4. **Execute**: runs SQL against Postgres and streams results as JSON
 
 ## Quick example
 
@@ -114,4 +114,4 @@ Then query your database:
 }
 ```
 
-This produces a single SQL query with nested lateral joins — no N+1.
+This produces a single SQL query with nested lateral joins, no N+1.

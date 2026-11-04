@@ -108,4 +108,4 @@ const subscription = client.subscribe(
 
 ## DELETE handling
 
-For `DELETE` operations, the row no longer exists in the database. The subscription resolver will attempt to fetch it but find nothing — the client receives no data for that notification. To include deleted row data, include it in the NOTIFY payload and handle it in the trigger.
+For `DELETE` operations, the row no longer exists in the database. The subscription resolver will attempt to fetch it but find nothing, the client receives no data for that notification. To include deleted row data, include it in the NOTIFY payload and handle it in the trigger.
