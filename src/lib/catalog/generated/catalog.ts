@@ -505,20 +505,6 @@ export const products: CatalogProduct[] = [
     "license": "Proprietary",
     "plans": [
       {
-        "tier": "free",
-        "name": "Herald Free",
-        "description": "Transactional email for small projects and testing",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "1 sending domain",
-          "3,000 emails/month (100/day)",
-          "Community support",
-          "Shared IP pool",
-          "Suppression list with bounce and complaint handling"
-        ]
-      },
-      {
         "tier": "enterprise",
         "name": "Herald Enterprise",
         "description": "Unlimited volume with SSO, SLA, and dedicated support",
@@ -531,6 +517,20 @@ export const products: CatalogProduct[] = [
           "SSO and audit logs",
           "Unlimited sending domains",
           "Unlimited volume"
+        ]
+      },
+      {
+        "tier": "free",
+        "name": "Herald Free",
+        "description": "Transactional email for small projects and testing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 sending domain",
+          "3,000 emails/month (100/day)",
+          "Community support",
+          "Shared IP pool",
+          "Suppression list with bounce and complaint handling"
         ]
       },
       {
@@ -595,7 +595,8 @@ export const products: CatalogProduct[] = [
     "id": "manifold",
     "name": "Manifold",
     "realm": "armory",
-    "status": "coming_soon",
+    "status": "active",
+    "releaseDate": "2026-11-04",
     "license": "Apache-2.0",
     "plans": [
       {
@@ -818,6 +819,14 @@ export const products: CatalogProduct[] = [
         ]
       }
     ]
+  },
+  {
+    "id": "taproot",
+    "name": "Taproot",
+    "realm": "armory",
+    "status": "active",
+    "releaseDate": "2026-11-03",
+    "license": "Apache-2.0"
   },
   {
     "id": "thornberry",
