@@ -23,6 +23,7 @@ directory containing one), or a bare image reference. See
 | `run status [target]` | Show a stack's services, or list every known stack |
 | `run update <target>` | Pull the latest images and recreate, rolling back on failure |
 | `run deploy <target>` | Emit a `fractal.yaml` to deploy the stack to Fractal cloud |
+| `run serve` | Serve a local web dashboard to manage stacks in a browser |
 
 ## up
 
@@ -197,3 +198,27 @@ into may need a paid plan. Sign in and choose (or create) a workspace, which
 defaults to your personal one. The choice is not lock-in: Fractal supports
 transferring a project between workspaces later, and the project URL stays stable
 across the move.
+
+## serve
+
+```bash
+run serve [--host 127.0.0.1] [--port 7878]
+```
+
+Serve a local web dashboard for managing stacks from a browser, so self-hosting
+does not require the terminal. The dashboard lists the [catalog](/products/run/catalog)
+and your known stacks, and starts or stops them with a click, driving the same
+engine as the CLI. It is compiled into the binary, so nothing else needs to be
+installed to run it.
+
+The server binds to `127.0.0.1` by default, reachable only from the same machine.
+To manage a stack from another device (for example running Run on a home server
+and opening the dashboard from a laptop or phone), bind a reachable address:
+
+```bash
+run serve --host 0.0.0.0
+```
+
+Exposing the dashboard to a network makes everything it can do (starting and
+stopping stacks) available to anyone who can reach it, so keep it on a trusted
+network or behind your own access control.
