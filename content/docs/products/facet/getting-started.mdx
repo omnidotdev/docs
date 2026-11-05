@@ -13,7 +13,7 @@ Go to [facet.omni.dev](https://facet.omni.dev). The Studio has three parts:
 - a **3D viewport** on the right, where the solid is drawn
 - a **status line** under the editor, showing triangle count, evaluation time, and the active kernel (or an error if the model fails)
 
-The header carries an examples dropdown, a kernel selector, a theme toggle, and export controls (a format selector and an **Export** button).
+The header carries an examples dropdown, a kernel selector, a theme toggle, and export controls (a format selector and an **Export** button). Below the header, a **tab bar** holds your open models, so you can keep several going at once (see [Work on several models](#work-on-several-models-with-tabs)).
 
 ## 2. Load or write a model
 
@@ -36,7 +36,7 @@ return plate;
 Your model must `return` a shape. If it returns something else, or throws, the status line shows the error and the viewport keeps the last good result. Edits re-run automatically a moment after you stop typing.
 
 <Callout type="info">
-The functions available to a model (`cube`, `box`, `sphere`, `cylinder`, `union`, `difference`, `intersection`, and `param`) are provided for you. Do not import anything; just call them.
+The functions available to a model (`cube`, `box`, `sphere`, `cylinder`, `grid`, `rectTube`, `union`, `difference`, `intersection`, and `param`) are provided for you. Do not import anything; just call them. Parameters come in three kinds: `param.number` (a slider), `param.boolean` (a checkbox), and `param.enum` (a dropdown).
 </Callout>
 
 ## 3. Drag the parameter sliders
@@ -65,9 +65,19 @@ The 3D preview uses WebGPU, so it needs a current version of Chrome, Edge, Safar
 
 Choose a format (**STL**, **3MF**, or **STEP**) next to the **Export** button and click it to download the current model (`facet-model.stl`, `facet-model.3mf`, or `facet-model.step`). STL and 3MF are triangle meshes ready to drop into a slicer for 3D printing; **STEP** (ISO-10303 AP242) is exact B-rep geometry for CAD and manufacturing interchange, and comes from the B-rep kernel. Export uses the active kernel. If the model is currently in an error state there is nothing to export, and the status line says so; fix the model first.
 
+## Work on several models with tabs
+
+Each model lives in its own **tab** in the bar below the header, so you can keep several open at once. The active tab is the model in the editor and viewport.
+
+- **New model**: click **+** to open a fresh tab with a starter model.
+- **Switch**: click a tab to bring that model back; each tab keeps its own code, parameters, and camera framing.
+- **Close**: click the tab's **✕**. Closing a model cannot be undone, so Facet asks you to confirm first.
+
+Loading an example opens it in a **new tab** rather than replacing your current work, and [AI generation](/products/facet/ai-generation) does the same, so nothing you are working on is ever overwritten.
+
 ## Your work is saved
 
-Facet automatically saves your current model, along with your kernel and export-format choices, in your browser, so it is restored when you return. It stays on your device; nothing is uploaded. Loading an example or editing replaces the saved model.
+Facet automatically saves your whole workspace, every open tab along with your kernel and export-format choices, in your browser, so it is all restored when you return. It stays on your device; nothing is uploaded.
 
 ## Keyboard and theme
 

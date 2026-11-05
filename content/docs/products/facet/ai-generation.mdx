@@ -4,8 +4,8 @@ description: Describe a part in plain English and let Facet write the model
 ---
 
 Facet can turn a plain-English description into a working model. Open the
-**Describe a part** panel in the Studio, type what you want, and Facet writes
-the Facet code, loads it into the editor, and runs it. The result is ordinary
+**Describe a part** panel in the Studio, type what you want, and Facet opens a
+new tab, writes the Facet code there, and runs it. The result is ordinary
 code: read it, edit it, add parameters, and iterate like any other model.
 
 <Callout type="info">
@@ -20,12 +20,13 @@ output as a starting point you refine, not a finished part.
 2. In the **Describe a part** panel, enter a prompt. Be specific about
    dimensions and units (Facet works in millimeters), for example:
    `a 60 by 40 by 20 mm enclosure with 2 mm walls and four 3 mm mounting holes`.
-3. Select **Generate**. Facet writes the model into the editor, runs it, and
-   shows the result in the viewport.
+3. Select **Generate**. Facet opens a new tab, writes the model there, runs it,
+   and shows the result in the viewport.
 
 If the generated model fails to build, Facet automatically sends the error back
-and tries to repair it a couple of times before showing you a message. Your
-previous model is kept if generation does not produce a working result.
+and tries to repair it a couple of times before showing you a message. Because
+generation opens its own tab, the model you were working on is always left
+untouched, whether or not generation produces a working result.
 
 ## Access and credits
 

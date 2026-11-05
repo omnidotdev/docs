@@ -52,6 +52,30 @@ A cylinder of radius `r` and height `h` along the Z axis. Centered on the origin
 cylinder(3.2, 20, { segments: 48 });
 ```
 
+### `grid`
+
+```ts
+grid(shape: Shape, nx: number, ny: number, spacing: number | [number, number]): Shape
+```
+
+Tile a shape into an `nx` by `ny` array, `spacing` apart (a single number for equal X and Y, or `[sx, sy]`), centered on the origin, and return their union. Counts are floored and clamped to at least one. Useful for baseplates, tessellations, and arrays of features.
+
+```ts
+grid(cylinder(2, 6), 5, 3, 10); // 5 x 3 pegs, 10 apart
+```
+
+### `rectTube`
+
+```ts
+rectTube(outer: [number, number], wall: number, h: number): Shape
+```
+
+A hollow rectangular tube (frame): an `[width, depth]` outer footprint with `wall`-thick walls, `h` tall, centered on the origin. If the walls would meet (too thick for the footprint) it returns a solid block instead of inverting.
+
+```ts
+rectTube([40, 20], 2, 30); // 40 x 20 tube, 2 mm walls, 30 tall
+```
+
 ## Transforms
 
 Transforms are methods on a `Shape`. Each returns a new `Shape`, so they chain. All accept either separate `x, y, z` numbers or a single `[x, y, z]` vector.
@@ -193,6 +217,28 @@ return plate;
 ```
 
 Values persist as you edit the code, so refining a model does not reset your sliders.
+
+### Boolean and enum parameters
+
+Beyond numbers, a model can declare a **boolean** (a checkbox) or an **enum** (a dropdown):
+
+```ts
+param.boolean(name: string, opts?: { default?: boolean }): boolean
+param.enum(name: string, opts: { options: string[]; default?: string }): string
+```
+
+`param.boolean` returns `true`/`false` and renders a checkbox. `param.enum` returns the chosen string from `options` and renders a dropdown (`param.select` is an alias). Use them to toggle a feature or switch between discrete variants:
+
+```ts
+const hollow = param.boolean("hollow", { default: true });
+const profile = param.enum("profile", { options: ["round", "square"], default: "round" });
+
+let part = profile === "round" ? cylinder(10, 20) : cube([20, 20, 20]);
+if (hollow) part = part.subtract(cylinder(6, 24));
+return part;
+```
+
+Like number parameters, their values persist across code edits.
 
 ## Composing with code
 
