@@ -27,6 +27,27 @@ Add these records at your DNS host:
 
 Click **Verify** in the dashboard once the records have propagated. Herald checks the DKIM record live and flips the domain to **verified**. Sending from an unverified domain is rejected.
 
+## Branded tracking subdomain
+
+By default, open, click, and one-click unsubscribe links are served from Herald's shared tracking host. Pointing them at a subdomain of your own brand (for example `track.yourbrand.com`) improves deliverability and keeps every link on your domain.
+
+Set it on a verified domain in the dashboard under **Domains**, or via the SDK:
+
+```ts
+await herald.domains.setTrackingSubdomain({
+  domainId,
+  trackingSubdomain: "track.yourbrand.com",
+});
+```
+
+Then add a `CNAME` record at your DNS host pointing the subdomain at Herald's tracking ingress:
+
+- `track.yourbrand.com` **CNAME** `herald-track.fractal.omni.dev`
+
+Once the record has propagated, click **Verify** next to the subdomain (or call `herald.domains.verifyTrackingSubdomain({ id })`). Herald checks that the host serves over valid HTTPS end to end before activating it.
+
+Until the subdomain is verified **active**, Herald keeps minting links on the shared host, so a half-configured subdomain never breaks your one-click unsubscribe. Remove a branded subdomain at any time to revert to the shared host.
+
 ## Ramping DMARC
 
 Start at `p=none` (monitor). Once your DMARC reports are clean, ramp to `p=quarantine` and eventually `p=reject` to protect your domain from spoofing. Herald's deliverability recommendations surface when a domain is ready to ramp.
