@@ -1,0 +1,347 @@
+---
+title: Extensions
+description: Decorators, raw blocks, and escape hatches
+---
+
+
+ODK provides several mechanisms for handling features that don't map directly to TypeSpec or require custom processing.
+
+## Overview
+
+| Mechanism | Use Case |
+|-----------|----------|
+| **Decorators** | Attach TypeSpec decorators to models/fields |
+| **Raw Blocks** | Insert verbatim TypeSpec code |
+| **Extensions** | Store custom metadata for downstream processing |
+| **Constraints** | Standard validation rules (min/max, pattern, etc.) |
+
+## Decorators
+
+Decorators are TypeSpec annotations applied to models, fields, and unions.
+
+### YAML
+
+```yaml
+models:
+  User:
+    decorators: ["@table", "@doc('User account')"]
+    fields:
+      id:
+        type: string
+        decorators: ["@id", "@key"]
+      email:
+        type: string
+        decorators: ["@unique"]
+```
+
+### TypeScript
+
+```typescript
+// Currently, decorators are added via raw blocks
+// Future API:
+// odk.model("User", { ... }).decorators(["@table"])
+```
+
+### Rust
+
+```rust
+let mut model = CompiledModel::new("User");
+model.with_decorator("@table");
+model.with_decorator("@doc('User account')");
+
+let field = CompiledField::new("id", CompiledType::string())
+    .with_decorator("@id")
+    .with_decorator("@key");
+```
+
+### Common Decorators
+
+| Decorator | Description |
+|-----------|-------------|
+| `@doc("...")` | Documentation comment |
+| `@deprecated("...")` | Mark as deprecated |
+| `@key` | Unique key field |
+| `@visibility("read")` | Field visibility |
+| `@table` | Database table (Drizzle) |
+| `@id` | Primary key (Drizzle) |
+| `@manyToOne(Model)` | Foreign key relation |
+| `@oneToMany` | Inverse relation |
+| `@createdAt` | Auto-set timestamp on create |
+| `@updatedAt` | Auto-set timestamp on update |
+| `@minLength(n)` | String minimum length |
+| `@maxLength(n)` | String maximum length |
+| `@pattern("regex")` | Regex pattern |
+| `@minValue(n)` | Numeric minimum |
+| `@maxValue(n)` | Numeric maximum |
+
+## Raw Blocks
+
+Raw blocks insert verbatim TypeSpec code that ODK doesn't parse or validate.
+
+### YAML
+
+```yaml
+raw: |
+  @route("/api")
+  interface MyApi {
+    @get list(): User[];
+    @post create(@body user: User): User;
+  }
+  
+  // Custom type alias
+  alias UserId = string;
+```
+
+### TypeScript
+
+```typescript
+const schema = odk.schema("MyAPI", { User });
+
+odk.raw(schema, `
+  @route("/api")
+  interface MyApi {
+    @get list(): User[];
+    @post create(@body user: User): User;
+  }
+`, "API route definitions");
+```
+
+### Rust
+
+```rust
+schema.add_raw(r#"
+    @route("/api")
+    interface MyApi {
+        @get list(): User[];
+        @post create(@body user: User): User;
+    }
+"#);
+```
+
+### Use Cases for Raw Blocks
+
+1. **API Routes**: TypeSpec interfaces with HTTP operations
+2. **Custom Types**: Type aliases, intersections, complex generics
+3. **Namespaces**: Organizing types into namespaces
+4. **Emitter-Specific**: Decorators for specific emitters
+
+```yaml
+raw: |
+  // API routes
+  @route("/v1")
+  namespace V1 {
+    interface Users {
+      @get list(): User[];
+    }
+  }
+  
+  // Type alias
+  alias Timestamp = utcDateTime;
+  
+  // Intersection type
+  model AdminUser is User & { adminLevel: int32; };
+  
+  // Emitter-specific
+  @@Protobuf.package("com.example.api")
+```
+
+## Extensions
+
+Extensions store custom metadata that doesn't map to TypeSpec but may be useful for downstream processing.
+
+### Known Extensions
+
+ODK recognizes these extension types:
+
+```rust
+pub enum KnownExtension {
+    // Pass arbitrary decorator to TypeSpec
+    Decorator { value: String },
+    
+    // Zod transform (for documentation/codegen)
+    ZodTransform { code: String },
+    
+    // Zod refinement (for documentation/codegen)
+    ZodRefinement { code: String, message: Option<String> },
+    
+    // OpenAPI extension
+    OpenApi { key: String, value: serde_json::Value },
+    
+    // Drizzle-specific
+    Drizzle { decorator: String, args: Option<Vec<String>> },
+}
+```
+
+### YAML
+
+```yaml
+fields:
+  email:
+    type: string
+    extensions:
+      # Known extensions (structured)
+      zodTransform: "x => x.toLowerCase()"
+      openapi:
+        x-custom: "value"
+      
+      # Unknown extensions (passthrough)
+      myCustomProcessor:
+        setting1: true
+        setting2: "value"
+```
+
+### Rust
+
+```rust
+use odk_pdk::extensions::*;
+
+let mut extensions = Extensions::default();
+
+// Known extension
+extensions.add_known(KnownExtension::ZodTransform {
+    code: "x => x.toLowerCase()".into(),
+});
+
+// OpenAPI extension
+extensions.add_known(KnownExtension::OpenApi {
+    key: "x-custom".into(),
+    value: serde_json::json!("value"),
+});
+
+// Unknown/custom extension
+extensions.add_unknown("myCustomProcessor", serde_json::json!({
+    "setting1": true,
+    "setting2": "value",
+}));
+
+field.extensions = extensions;
+```
+
+### Processing Extensions
+
+Extensions are preserved in the CompiledSchema JSON:
+
+```json
+{
+  "fields": [{
+    "name": "email",
+    "type": { "kind": "scalar", "name": "string" },
+    "extensions": {
+      "known": [
+        { "kind": "zodTransform", "code": "x => x.toLowerCase()" }
+      ],
+      "myCustomProcessor": {
+        "setting1": true,
+        "setting2": "value"
+      }
+    }
+  }]
+}
+```
+
+Custom tooling can read these extensions and generate additional code.
+
+## Constraints
+
+Standard validation constraints that map to TypeSpec decorators.
+
+### YAML
+
+```yaml
+fields:
+  username:
+    type: string
+    constraints:
+      minLength: 3
+      maxLength: 32
+      pattern: "^[a-zA-Z0-9_]+$"
+  
+  age:
+    type: int32
+    constraints:
+      minValue: 0
+      maxValue: 150
+  
+  price:
+    type: float64
+    constraints:
+      minValue: 0.01
+      multipleOf: 0.01
+```
+
+### TypeScript (Zod)
+
+```typescript
+const User = z.object({
+  username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_]+$/),
+  age: z.number().int().min(0).max(150),
+  price: z.number().min(0.01).multipleOf(0.01),
+});
+```
+
+### Rust
+
+```rust
+let field = CompiledField::new("username", CompiledType::string())
+    .with_constraints(FieldConstraints {
+        min_length: Some(3),
+        max_length: Some(32),
+        pattern: Some("^[a-zA-Z0-9_]+$".into()),
+        ..Default::default()
+    });
+```
+
+### Constraint to TypeSpec Mapping
+
+| Constraint | TypeSpec Decorator |
+|------------|-------------------|
+| `minLength` | `@minLength(n)` |
+| `maxLength` | `@maxLength(n)` |
+| `pattern` | `@pattern("...")` |
+| `minValue` | `@minValue(n)` |
+| `maxValue` | `@maxValue(n)` |
+| `multipleOf` | (emitted as comment) |
+| `format` | (used for type selection) |
+
+## Combining Mechanisms
+
+Use multiple escape hatches together:
+
+```yaml
+models:
+  User:
+    decorators: ["@table"]
+    fields:
+      email:
+        type: string
+        format: email
+        decorators: ["@unique"]
+        constraints:
+          maxLength: 255
+        extensions:
+          zodTransform: "x => x.toLowerCase()"
+
+raw: |
+  @route("/users")
+  interface UsersApi {
+    @get list(): User[];
+  }
+```
+
+This generates:
+
+```typespec
+@table
+model User {
+  @unique
+  @maxLength(255)
+  email: string;
+}
+
+@route("/users")
+interface UsersApi {
+  @get list(): User[];
+}
+```
+
+With extensions preserved in the source map for custom processing.

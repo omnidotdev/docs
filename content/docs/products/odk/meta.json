@@ -1,0 +1,13 @@
+{
+  "title": "🇴 ODK",
+  "pages": [
+    "getting-started",
+    "yaml-format",
+    "typescript-sdk",
+    "python-pdk",
+    "graphql-input",
+    "client-generation",
+    "rust-plugins",
+    "extensions"
+  ]
+}

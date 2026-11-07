@@ -1,0 +1,272 @@
+---
+title: Python PDK
+description: Define ODK schemas in Python
+---
+
+
+Define schemas in Python, generate OpenAPI/Protobuf/Drizzle and more.
+
+## Installation
+
+```sh
+pip install odk-pdk
+```
+
+## Quick Start
+
+```python
+from odk_pdk import Schema, Model, Field, Union
+
+# Create schema
+schema = Schema("MyAPI")
+
+# Define a model
+User = Model(
+    "User",
+    fields=[
+        Field("id", type="string", format="uuid"),
+        Field("email", type="string", format="email"),
+        Field("name", type="string", optional=True),
+    ],
+)
+
+schema.add_model(User)
+
+# Output JSON
+print(schema.to_json())
+```
+
+## API Reference
+
+### Schema
+
+The root container for your API definition.
+
+```python
+schema = Schema("MyAPI")
+
+# Add imports
+schema.add_import("@typespec/http")
+
+# Add models and unions
+schema.add_model(User)
+schema.add_models([Post, Comment])
+schema.add_union(UserRole)
+schema.add_unions([PostStatus, Priority])
+
+# Add raw TypeSpec (escape hatch)
+schema.add_raw("""
+    @route("/api")
+    interface Api { ... }
+""")
+
+# Export
+json_str = schema.to_json()
+```
+
+### Model
+
+Defines a structured type with fields.
+
+```python
+User = Model(
+    "User",
+    description="A user account",
+    decorators=["@table"],
+    fields=[
+        Field("id", type="string", format="uuid", decorators=["@id"]),
+        Field("email", type="string", format="email"),
+    ],
+)
+```
+
+### Field
+
+Defines a field within a model.
+
+```python
+# Basic field
+Field("name", type="string")
+
+# With format constraint
+Field("id", type="string", format="uuid")
+Field("email", type="string", format="email")
+
+# Optional field
+Field("bio", type="string", optional=True)
+
+# With constraints
+Field("title", type="string", min_length=1, max_length=200)
+Field("age", type="int32", min_value=0, max_value=150)
+Field("slug", type="string", pattern="^[a-z0-9-]+$")
+
+# Reference to another type
+Field("status", ref="PostStatus")
+
+# Array field
+Field("tags", type="string", array=True)
+Field("posts", ref="Post", array=True)
+
+# With decorators
+Field("id", type="string", decorators=["@id", "@key"])
+Field("authorId", type="string", decorators=["@manyToOne(User)"])
+```
+
+**Field Parameters:**
+
+| Parameter     | Type      | Description                                                                  |
+| ------------- | --------- | ---------------------------------------------------------------------------- |
+| `name`        | str       | Field name (required)                                                        |
+| `type`        | str       | Scalar type: string, int32, int64, float32, float64, boolean, datetime, etc. |
+| `ref`         | str       | Reference to another type (instead of `type`)                                |
+| `array`       | bool      | Whether this is an array field                                               |
+| `optional`    | bool      | Whether the field is optional                                                |
+| `description` | str       | Documentation                                                                |
+| `decorators`  | list[str] | TypeSpec decorators                                                          |
+| `format`      | str       | Format hint: uuid, email, uri, etc.                                          |
+| `min_length`  | int       | Minimum string length                                                        |
+| `max_length`  | int       | Maximum string length                                                        |
+| `min_value`   | float     | Minimum numeric value                                                        |
+| `max_value`   | float     | Maximum numeric value                                                        |
+| `pattern`     | str       | Regex pattern                                                                |
+
+### Union
+
+Defines an enum or discriminated union.
+
+```python
+# String enum
+UserRole = Union(
+    "UserRole",
+    variants=["admin", "author", "reader"],
+    description="User permission levels",
+)
+
+# With decorators
+Priority = Union(
+    "Priority",
+    variants=["low", "medium", "high"],
+    decorators=["@doc('Task priority')"],
+)
+```
+
+## Scalar Types
+
+| Type          | Description             |
+| ------------- | ----------------------- |
+| `string`      | UTF-8 string            |
+| `int32`       | 32-bit signed integer   |
+| `int64`       | 64-bit signed integer   |
+| `float32`     | 32-bit float            |
+| `float64`     | 64-bit float            |
+| `boolean`     | Boolean                 |
+| `datetime`    | UTC datetime            |
+| `date`        | Date without time       |
+| `bytes`       | Binary data             |
+| `utcDateTime` | UTC datetime (TypeSpec) |
+
+## Decorators
+
+Common TypeSpec decorators:
+
+| Decorator           | Description              |
+| ------------------- | ------------------------ |
+| `@table`            | Database table (Drizzle) |
+| `@id`               | Primary key              |
+| `@key`              | Unique key               |
+| `@doc("...")`       | Documentation            |
+| `@manyToOne(Model)` | Foreign key relation     |
+| `@oneToMany`        | Inverse relation         |
+| `@createdAt`        | Auto-set on create       |
+| `@updatedAt`        | Auto-set on update       |
+| `@minLength(n)`     | String min length        |
+| `@maxLength(n)`     | String max length        |
+
+## Complete Example
+
+```python
+from odk_pdk import Schema, Model, Field, Union
+
+schema = Schema("BlogAPI")
+schema.add_import("@typespec/http")
+schema.add_import("@omnidotdev/typespec-drizzle")
+
+# Enums
+UserRole = Union("UserRole", variants=["admin", "author", "reader"])
+PostStatus = Union("PostStatus", variants=["draft", "published", "archived"])
+
+# Models
+User = Model(
+    "User",
+    decorators=["@table"],
+    fields=[
+        Field("id", type="string", format="uuid", decorators=["@id"]),
+        Field("email", type="string", format="email"),
+        Field("username", type="string", min_length=3, max_length=32),
+        Field("role", ref="UserRole"),
+        Field("createdAt", type="utcDateTime", decorators=["@createdAt"]),
+    ],
+)
+
+Post = Model(
+    "Post",
+    decorators=["@table"],
+    fields=[
+        Field("id", type="string", format="uuid", decorators=["@id"]),
+        Field("title", type="string", min_length=1, max_length=200),
+        Field("content", type="string"),
+        Field("authorId", type="string", decorators=["@manyToOne(User)"]),
+        Field("status", ref="PostStatus"),
+    ],
+)
+
+schema.add_unions([UserRole, PostStatus])
+schema.add_models([User, Post])
+
+# API routes (raw TypeSpec)
+schema.add_raw("""
+    @route("/posts")
+    interface Posts {
+        @get list(): Post[];
+        @post create(@body post: Post): Post;
+    }
+""")
+
+# Export
+print(schema.to_json())
+```
+
+## WASM Compilation (Future)
+
+When WASM support is available:
+
+```sh
+# Install componentize-py
+pip install componentize-py
+
+# Compile to WASM
+componentize-py schema.py -o schema.wasm
+
+# Run with ODK CLI
+odk compile schema.wasm -o generated/
+```
+
+## Using with ODK CLI
+
+Run your schema and save to JSON, then compile:
+
+```sh
+# Save schema to JSON
+python schema.py > schema.json
+
+# Compile with defaults (OpenAPI + JSON Schema)
+odk compile schema.json
+
+# Specify output directory
+odk compile schema.json -o generated/
+
+# Specify emitters
+odk compile schema.json -e @typespec/openapi3,@typespec/protobuf -o generated/
+```
+
+Default emitters (no `-e` flag): `@typespec/json-schema` + `@typespec/openapi3`

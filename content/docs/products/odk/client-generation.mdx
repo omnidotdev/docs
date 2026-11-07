@@ -1,0 +1,212 @@
+---
+title: Client Generation
+description: Generate typed SDK clients, React Query hooks, and MSW mocks from any schema
+---
+
+
+ODK generates typed client artifacts directly from your schema — no `@graphql-codegen` needed. Define your schema in any supported format (GraphQL SDL, TypeScript, YAML, Rust, Python) and get framework-ready client code.
+
+## Quick Start
+
+```bash
+# From GraphQL SDL + operations
+odk generate schema.graphql --operations "src/**/*.graphql" -o src/generated/
+
+# From a running endpoint
+odk generate --introspect http://localhost:4000/graphql \
+  --operations "src/**/*.graphql" -o src/generated/
+
+# With config file (just run `odk generate`)
+odk generate
+```
+
+## Generated Files
+
+| File | Target | Description |
+|------|--------|-------------|
+| `client.ts` | `sdk` | gql.tada operation documents, type exports, typed client factory |
+| `hooks.ts` | `react-query` | Per-operation React Query hooks |
+| `provider.tsx` | `react-query` | React context provider for the client instance |
+| `mocks.ts` | `msw` | MSW handlers, mock data factories, error helpers |
+
+## Targets
+
+### SDK (`sdk`)
+
+The foundation target. Always generated when any other target is requested.
+
+```typescript
+// client.ts
+import { graphql, type ResultOf, type VariablesOf } from "gql.tada";
+import { GraphQLClient } from "graphql-request";
+
+export const GetUserDocument = graphql(`
+  query GetUser($id: ID!) {
+    user(id: $id) { id name email }
+  }
+`);
+
+export type GetUserResult = ResultOf<typeof GetUserDocument>;
+export type GetUserVariables = VariablesOf<typeof GetUserDocument>;
+
+export const createClient = (url: string, options?: RequestInit) => {
+  const gql = new GraphQLClient(url, options);
+  return {
+    getUser: (variables: GetUserVariables) =>
+      gql.request(GetUserDocument, variables),
+  };
+};
+
+export type Client = ReturnType<typeof createClient>;
+```
+
+**Dependencies:** `gql.tada`, `graphql-request`
+
+Types are inferred by gql.tada at the TypeScript level — no generated type files, no stale types.
+
+### React Query (`react-query`)
+
+Per-operation hooks that wrap the SDK client with React Query.
+
+```typescript
+// hooks.ts
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useODKClient } from "./provider";
+
+export const useGetUser = (variables: GetUserVariables, options?) => {
+  const client = useODKClient();
+  return useQuery({
+    queryKey: ["GetUser", variables],
+    queryFn: ({ signal }) => client.getUser(variables, { signal }),
+    ...options,
+  });
+};
+
+export const useCreatePost = (options?) => {
+  const client = useODKClient();
+  return useMutation({
+    mutationFn: (variables: CreatePostVariables) =>
+      client.createPost(variables),
+    ...options,
+  });
+};
+```
+
+```typescript
+// provider.tsx
+import { createClient } from "./client";
+
+const client = createClient("http://localhost:4000/graphql");
+
+// Wrap your app
+<ODKProvider client={client}>
+  <App />
+</ODKProvider>
+```
+
+**Dependencies:** `@tanstack/react-query`
+
+- Query operations → `useQuery` with automatic query keys
+- Mutation operations → `useMutation`
+- AbortSignal forwarded for automatic request cancellation
+
+### MSW (`msw`)
+
+Framework-agnostic mock handlers for testing.
+
+```typescript
+// mocks.ts
+import { graphql, HttpResponse } from "msw";
+
+// Handler factory — returns an MSW handler
+export const mockGetUser = (resolver?) =>
+  graphql.query("GetUser", () =>
+    HttpResponse.json({
+      data: { user: resolver?.() ?? mockGetUserData() },
+    }),
+  );
+
+// Mock data factory — sensible defaults with overrides
+export const mockGetUserData = (overrides?) => ({
+  id: "mock-id",
+  name: "Mock Value",
+  email: "mock@example.com",
+  ...overrides,
+});
+
+// Error helper
+export const mockGetUserError = (message = "An error occurred") =>
+  graphql.query("GetUser", () =>
+    HttpResponse.json({ errors: [{ message }] }),
+  );
+
+// Quick start — all operations with default data
+export const allHandlers = [mockGetUser(), mockCreatePost()];
+```
+
+**Dependencies:** `msw`
+
+Usage in tests:
+
+```typescript
+import { setupServer } from "msw/node";
+import { allHandlers, mockGetUserError } from "./generated/mocks";
+
+const server = setupServer(...allHandlers);
+
+// Override for error cases
+server.use(mockGetUserError("Not found"));
+```
+
+### Model targets (`typescript`, `rust`, `python`)
+
+Beyond the client targets above, ODK emits plain language models from the schema's types, with no GraphQL operations required:
+
+```bash
+odk generate schema.odk.yaml -t typescript,rust,python -o generated/
+```
+
+This writes `models.ts`, `models.rs`, and `models.py` with idiomatic types, including recursive, data-carrying discriminated unions (see [YAML format](./yaml-format#discriminated-unions)). Pass `--out-file <stem>` to rename the `models` stem, e.g. `--out-file opgraph` writes `opgraph.ts` / `opgraph.rs`.
+
+## Configuration
+
+### CLI Flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `input` | Schema file (.graphql, .yaml, .ts, .json, .wasm) | From config |
+| `--operations <glob>` | Operation document files | From config |
+| `--introspect <url>` | Fetch schema from endpoint | — |
+| `-o, --out <dir>` | Output directory | `./generated` |
+| `-t, --targets <list>` | Comma-separated targets | `sdk,react-query,msw` |
+| `--out-file <stem>` | Rename the model output stem (e.g. `opgraph.rs`/`opgraph.ts`) | `models` |
+| `-c, --config <path>` | Config file path | Auto-detect |
+
+### Config File
+
+Add a `generate` section to `odk.config.yaml`:
+
+```yaml
+schema: schema.graphql
+generate:
+  targets: [react-query, msw]
+  output: src/generated/
+  operations: "src/**/*.graphql"
+```
+
+Then just run `odk generate`.
+
+## How It Works
+
+```
+Input (any format)          Operations (.graphql files)
+        │                            │
+        ▼                            ▼
+   CompiledSchema IR ◄── operations + fragments merged
+        │
+        ├── sdk.rs      → client.ts
+        ├── react_query.rs → hooks.ts + provider.tsx
+        └── msw.rs      → mocks.ts
+```
+
+Generation happens entirely in Rust — no TypeSpec, no npm, no temp files. The output is ready to use immediately.

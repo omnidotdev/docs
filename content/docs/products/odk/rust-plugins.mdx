@@ -1,0 +1,392 @@
+---
+title: Rust Plugins
+description: Author schemas and custom emitters as Rust WASM plugins
+---
+
+
+ODK supports defining schemas as Extism WASM plugins written in Rust. This allows you to use Rust's type system and programmatically generate schemas.
+
+## Setup
+
+Create a new Rust library:
+
+```sh
+cargo new --lib my-schema
+cd my-schema
+```
+
+Add dependencies to `Cargo.toml`:
+
+```toml
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+odk-pdk = { git = "https://github.com/omnidotdev/odk" }
+extism-pdk = "1.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+```
+
+## Basic Usage
+
+```rust
+use extism_pdk::*;
+use odk_pdk::*;
+
+#[plugin_fn]
+pub fn get_schema() -> FnResult<String> {
+    let mut schema = CompiledSchema::new("MyAPI");
+    
+    // Add a model
+    let mut user = CompiledModel::new("User");
+    user.add_field(
+        CompiledField::new("id", CompiledType::string())
+            .with_format("uuid")
+    );
+    user.add_field(
+        CompiledField::new("email", CompiledType::string())
+            .with_format("email")
+    );
+    schema.add_model(user);
+    
+    Ok(schema.to_json()?)
+}
+```
+
+## Building
+
+```sh
+# Install the WASM target
+rustup target add wasm32-unknown-unknown
+
+# Build
+cargo build --target wasm32-unknown-unknown --release
+
+# The plugin is at:
+# target/wasm32-unknown-unknown/release/my_schema.wasm
+```
+
+## Running
+
+```sh
+odk compile target/wasm32-unknown-unknown/release/my_schema.wasm -o generated/
+```
+
+## API Reference
+
+### CompiledSchema
+
+The root schema container.
+
+```rust
+let mut schema = CompiledSchema::new("MyAPI");
+
+// Add imports
+schema.add_import("@typespec/http");
+
+// Add models
+schema.add_model(user);
+
+// Add unions
+schema.add_union(status);
+
+// Add operations
+schema.add_operation(operation);
+
+// Add fragments (for GraphQL)
+schema.add_fragment(fragment);
+
+// Add raw TypeSpec
+schema.add_raw("@route(\"/api\") interface Api {}");
+
+// Serialize to JSON
+let json = schema.to_json()?;
+```
+
+### CompiledModel
+
+Defines a structured type with fields.
+
+```rust
+let mut model = CompiledModel::new("User");
+model.description = Some("A user account".into());
+model.with_decorator("@table");
+
+model.add_field(
+    CompiledField::new("id", CompiledType::string())
+        .with_decorator("@id")
+);
+
+schema.add_model(model);
+```
+
+### CompiledField
+
+Defines a field within a model.
+
+```rust
+// Basic field
+let field = CompiledField::new("name", CompiledType::string());
+
+// With all options
+let field = CompiledField::new("email", CompiledType::string())
+    .with_format("email")
+    .with_description("User's email address")
+    .with_decorator("@unique")
+    .with_constraints(FieldConstraints {
+        min_length: Some(5),
+        max_length: Some(255),
+        pattern: Some("^.+@.+$".into()),
+        ..Default::default()
+    })
+    .optional();
+```
+
+### CompiledType
+
+Type constructors for fields.
+
+```rust
+// Scalar types
+CompiledType::string()
+CompiledType::boolean()
+CompiledType::scalar("int32")
+CompiledType::scalar("float64")
+CompiledType::scalar("utcDateTime")
+
+// References to other types
+CompiledType::reference("User")
+CompiledType::reference("PostStatus")
+
+// Arrays
+CompiledType::array(CompiledType::string())
+CompiledType::array(CompiledType::reference("Post"))
+
+// Literals
+CompiledType::literal_string("active")
+CompiledType::literal_int(42)
+CompiledType::literal_bool(true)
+```
+
+### CompiledUnion
+
+Defines a union type (enum or discriminated union).
+
+```rust
+// String literal union (enum)
+let status = CompiledUnion {
+    name: "Status".into(),
+    variants: vec![
+        UnionVariant::literal_string("pending"),
+        UnionVariant::literal_string("active"),
+        UnionVariant::literal_string("inactive"),
+    ],
+    description: Some("Account status".into()),
+    ..Default::default()
+};
+
+// Type union
+let result = CompiledUnion {
+    name: "SearchResult".into(),
+    variants: vec![
+        UnionVariant::typed("UserResult", CompiledType::reference("User")),
+        UnionVariant::typed("PostResult", CompiledType::reference("Post")),
+    ],
+    ..Default::default()
+};
+
+schema.add_union(status);
+```
+
+### FieldConstraints
+
+Validation constraints for fields.
+
+```rust
+let constraints = FieldConstraints {
+    min_length: Some(1),
+    max_length: Some(200),
+    pattern: Some("^[a-z]+$".into()),
+    min_value: None,
+    max_value: None,
+    multiple_of: None,
+    format: Some("email".into()),
+};
+
+let field = CompiledField::new("email", CompiledType::string())
+    .with_constraints(constraints);
+```
+
+### Extensions
+
+Store custom metadata.
+
+```rust
+use odk_pdk::extensions::*;
+
+let mut extensions = Extensions::default();
+
+// Known extension types
+extensions.add_known(KnownExtension::Decorator {
+    value: "@customDecorator".into(),
+});
+
+extensions.add_known(KnownExtension::ZodTransform {
+    code: "x => x.toUpperCase()".into(),
+});
+
+// Unknown/custom extensions
+extensions.add_unknown("myCustomKey", serde_json::json!({
+    "foo": "bar"
+}));
+
+model.extensions = extensions;
+```
+
+## Complete Example
+
+```rust
+use extism_pdk::*;
+use odk_pdk::*;
+
+#[plugin_fn]
+pub fn get_schema() -> FnResult<String> {
+    let mut schema = CompiledSchema::new("BlogAPI");
+    
+    // Imports
+    schema.add_import("@typespec/http");
+    schema.add_import("@omnidotdev/typespec-drizzle");
+    
+    // PostStatus enum
+    schema.add_union(CompiledUnion {
+        name: "PostStatus".into(),
+        variants: vec![
+            UnionVariant::literal_string("draft"),
+            UnionVariant::literal_string("published"),
+            UnionVariant::literal_string("archived"),
+        ],
+        description: Some("Publication status".into()),
+        ..Default::default()
+    });
+    
+    // User model
+    let mut user = CompiledModel::new("User");
+    user.description = Some("A blog user".into());
+    user.with_decorator("@table");
+    
+    user.add_field(
+        CompiledField::new("id", CompiledType::string())
+            .with_format("uuid")
+            .with_decorator("@id")
+    );
+    user.add_field(
+        CompiledField::new("email", CompiledType::string())
+            .with_format("email")
+    );
+    user.add_field(
+        CompiledField::new("name", CompiledType::string())
+            .optional()
+    );
+    
+    schema.add_model(user);
+    
+    // Post model
+    let mut post = CompiledModel::new("Post");
+    post.description = Some("A blog post".into());
+    post.with_decorator("@table");
+    
+    post.add_field(
+        CompiledField::new("id", CompiledType::string())
+            .with_format("uuid")
+            .with_decorator("@id")
+    );
+    post.add_field(
+        CompiledField::new("title", CompiledType::string())
+            .with_constraints(FieldConstraints {
+                min_length: Some(1),
+                max_length: Some(200),
+                ..Default::default()
+            })
+    );
+    post.add_field(
+        CompiledField::new("content", CompiledType::string())
+    );
+    post.add_field(
+        CompiledField::new("authorId", CompiledType::string())
+            .with_format("uuid")
+            .with_decorator("@manyToOne(User)")
+    );
+    post.add_field(
+        CompiledField::new("status", CompiledType::reference("PostStatus"))
+    );
+    
+    schema.add_model(post);
+    
+    // API routes (raw TypeSpec)
+    schema.add_raw(r#"
+        @route("/api/posts")
+        interface Posts {
+            @get list(): Post[];
+            @post create(@body post: Post): Post;
+        }
+    "#);
+    
+    Ok(schema.to_json()?)
+}
+```
+
+## Testing Locally
+
+Test your plugin without the CLI:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_schema_generation() {
+        let json = get_schema_impl().unwrap();
+        let schema: CompiledSchema = serde_json::from_str(&json).unwrap();
+        
+        assert_eq!(schema.name, "BlogAPI");
+        assert_eq!(schema.models.len(), 2);
+    }
+}
+
+// Extract logic for testing
+fn get_schema_impl() -> Result<String, Box<dyn std::error::Error>> {
+    let mut schema = CompiledSchema::new("BlogAPI");
+    // ... build schema ...
+    Ok(serde_json::to_string(&schema)?)
+}
+
+#[plugin_fn]
+pub fn get_schema() -> FnResult<String> {
+    get_schema_impl().map_err(|e| e.into())
+}
+```
+
+## Debugging
+
+Enable debug output:
+
+```sh
+RUST_LOG=debug odk compile my_plugin.wasm -o output/
+```
+
+Print schema JSON during development:
+
+```rust
+#[plugin_fn]
+pub fn get_schema() -> FnResult<String> {
+    let schema = build_schema();
+    let json = schema.to_json()?;
+    
+    // Debug: print to stderr (visible in CLI output)
+    eprintln!("Generated schema:\n{}", json);
+    
+    Ok(json)
+}
+```

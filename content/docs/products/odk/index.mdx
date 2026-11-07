@@ -1,0 +1,91 @@
+---
+title: 🇴 ODK
+description: Model once, emit everywhere - one schema to specs, schemas, and typed SDKs
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiOpenapiinitiative, SiTypescript, SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "OpenAPI",
+      icon: <SiOpenapiinitiative />,
+      className:
+        "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+    },
+    {
+      label: "TypeScript",
+      icon: <SiTypescript />,
+      className:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className:
+        "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://odk.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/odk`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "💡 Big Idea",
+      description:
+        "Define your data model once, then generate every artifact from it instead of hand-maintaining them in parallel.",
+    },
+  ]}
+/>
+
+The **Omni Development Kit (ODK)** turns a single schema into the specs, database schemas, and typed SDKs your stack needs. Define your models once in YAML, TypeScript, Rust, or Python; a Rust CLI compiles them through a shared intermediate representation (TypeSpec) to any emitter, and a WASM plugin SDK lets you add emitters of your own.
+
+## Key features
+
+- **Define once, in your language**: author schemas in YAML, TypeScript (with Zod, ArkType, or Valibot), Rust, or Python, or load them from GraphQL SDL.
+- **Compile to specs and schemas**: emit OpenAPI and JSON Schema by default, plus Protocol Buffers and Drizzle ORM, through TypeSpec emitters.
+- **Generate typed clients**: from a GraphQL schema and operations, produce a typed SDK, React Query hooks, and MSW mock handlers.
+- **Types in every language**: emit idiomatic TypeScript, Rust, and Python models, including recursive, data-carrying discriminated unions.
+- **Extend with WASM plugins**: write custom emitters in Rust or Python with the plugin development kit (PDK), hosted via Extism.
+- **One Rust binary, open source**: a single CLI with no runtime to manage, licensed Apache 2.0.
+
+## How it works
+
+ODK is a one-to-many transformation pipeline built around a shared IR:
+
+```
+Your schema (YAML, TypeScript, Rust, Python, or GraphQL)
+            |
+            v
+     CompiledSchema IR
+            |
+            v
+        TypeSpec  ──────────────► OpenAPI, JSON Schema, Protobuf, Drizzle, ...
+            |
+            └─ generate ────────► typed SDK, React Query hooks, MSW mocks,
+                                   TypeScript / Rust / Python models
+```
+
+`odk compile` runs the schema through TypeSpec to spec and schema emitters; `odk generate` produces typed client artifacts and language models directly. Both read the same IR, so every output stays consistent with the source.
+
+## Next steps
+
+- [Getting Started](./getting-started) - install the CLI and emit your first targets.
+- [YAML format](./yaml-format) - the schema reference.
+- [TypeScript SDK](./typescript-sdk) - define schemas with Zod, ArkType, or Valibot.
+- [Python PDK](./python-pdk) - define schemas in Python.
+- [GraphQL input](./graphql-input) - parse GraphQL SDL and operations.
+- [Client generation](./client-generation) - typed SDKs, hooks, and mocks.
+- [Rust plugins](./rust-plugins) - author schemas and emitters as WASM plugins.
+- [Extensions](./extensions) - decorators, raw blocks, and escape hatches.

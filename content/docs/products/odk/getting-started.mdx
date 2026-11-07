@@ -1,0 +1,141 @@
+---
+title: Getting Started
+description: Install the ODK CLI and emit your first targets from a schema
+---
+
+# Getting Started
+
+Define a schema once, then generate OpenAPI, Protobuf, Drizzle, JSON Schema, and typed SDKs from it.
+
+## Install
+
+The CLI is a single Rust binary. The language SDKs are optional, for authoring schemas in TypeScript or Python.
+
+```sh
+# CLI (Rust)
+cargo install odk-cli
+
+# TypeScript SDK (optional)
+bun add @omnidotdev/odk zod
+
+# Python PDK (optional)
+pip install odk-pdk
+```
+
+## Define a schema
+
+Pick the authoring format you prefer. All of them compile to the same intermediate representation.
+
+### YAML
+
+Create `schema.odk.yaml`:
+
+```yaml
+version: "1.0"
+name: BlogAPI
+
+models:
+  User:
+    fields:
+      id: { type: string, format: uuid }
+      email: { type: string, format: email }
+      name: { type: string, optional: true }
+  Post:
+    fields:
+      id: { type: string, format: uuid }
+      title: string
+      authorId: { type: string, format: uuid }
+      published: boolean
+```
+
+### TypeScript
+
+```typescript
+import { odk } from "@omnidotdev/odk";
+import { z } from "zod";
+
+const User = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string().optional(),
+});
+
+const schema = odk.schema("BlogAPI", { User });
+
+await odk.emit(schema, {
+  targets: ["@typespec/openapi3"],
+  outDir: "./generated",
+});
+```
+
+### Python
+
+```python
+from odk_pdk import Schema, Model, Field
+
+schema = Schema("BlogAPI")
+
+schema.add_model(Model("User", fields=[
+    Field("id", type="string", format="uuid"),
+    Field("email", type="string", format="email"),
+    Field("name", type="string", optional=True),
+]))
+
+print(schema.to_json())
+```
+
+## Compile to specs and schemas
+
+`odk compile` runs your schema through TypeSpec to spec and schema emitters. The default emitters are OpenAPI and JSON Schema.
+
+```sh
+# OpenAPI + JSON Schema (default)
+odk compile schema.odk.yaml -o generated/
+
+# choose emitters explicitly
+odk compile schema.odk.yaml -e @typespec/openapi3,@typespec/protobuf -o generated/
+```
+
+### Available emitters
+
+| Emitter                        | Output             | Flag                              |
+| ------------------------------ | ------------------ | --------------------------------- |
+| `@typespec/openapi3`           | OpenAPI 3.x spec   | `-e @typespec/openapi3`           |
+| `@typespec/json-schema`        | JSON Schema        | `-e @typespec/json-schema`        |
+| `@typespec/protobuf`           | Protocol Buffers   | `-e @typespec/protobuf`           |
+| `@omnidotdev/typespec-drizzle` | Drizzle ORM schema | `-e @omnidotdev/typespec-drizzle` |
+
+Protobuf output requires protobuf-specific annotations: mark models with the `@Protobuf.message` decorator, every field with `@Protobuf.field(n)`, and declare a package for the namespace. OpenAPI, JSON Schema, and Drizzle need no extra annotations.
+
+## Generate typed clients and models
+
+`odk generate` produces client artifacts and language models directly from the schema, without a TypeSpec round trip.
+
+```sh
+# typed SDK, React Query hooks, and MSW mocks from a GraphQL schema
+odk generate schema.graphql --operations "src/**/*.graphql" -o src/generated/
+
+# plain model types for TypeScript and Rust
+odk generate schema.odk.yaml -t typescript,rust -o generated/
+```
+
+Model-only targets (`typescript`, `rust`, `python`) build from the schema's types and need no GraphQL operations. See [Client generation](./client-generation) for the full target list.
+
+## Publish to a registry
+
+`odk publish` packages a schema's compiled IR as an OCI artifact and pushes it to any registry that speaks the OCI Distribution v2 protocol, so it can be stored, versioned, and shared.
+
+```sh
+odk publish schema.odk.yaml \
+  --registry https://manifold.omni.dev \
+  --repository myteam/blog-api \
+  --tag v1
+```
+
+The schema is pushed under the artifact type `application/vnd.omni.odk.schema.v1+json`. Authenticate with `--token` or the `ODK_REGISTRY_TOKEN` environment variable.
+
+## Next steps
+
+- [YAML format](./yaml-format) - the full schema reference.
+- [Client generation](./client-generation) - SDK, React Query, and MSW targets.
+- [Rust plugins](./rust-plugins) and [Python PDK](./python-pdk) - author schemas and custom emitters in code.

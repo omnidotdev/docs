@@ -1,0 +1,172 @@
+---
+title: GraphQL Input
+description: Parse GraphQL SDL schemas and operation documents as ODK input
+---
+
+
+ODK can parse GraphQL SDL schemas (`.graphql` files) and operation documents as input, converting them to the CompiledSchema IR for emission to any target.
+
+## Quick Start
+
+```bash
+# Compile a GraphQL SDL schema
+odk compile schema.graphql
+
+# Compile with operation documents
+odk compile schema.graphql --operations "src/**/*.graphql"
+
+# Introspect a running endpoint
+odk compile --introspect http://localhost:4000/graphql
+
+# Validate a schema
+odk check schema.graphql --operations "src/**/*.graphql"
+```
+
+## SDL Schema Parsing
+
+ODK parses standard GraphQL SDL and maps types to the IR:
+
+| GraphQL | ODK IR |
+|---------|--------|
+| `type` | `CompiledModel` |
+| `input` | `CompiledModel` with `graphql_input` extension |
+| `interface` | `CompiledModel` with `graphql_interface` extension |
+| `enum` | `CompiledUnion` with literal string variants |
+| `union` | `CompiledUnion` with ref variants |
+| `scalar` (custom) | `CompiledModel` with `graphql_custom_scalar` extension |
+
+### Type Mapping
+
+| GraphQL Scalar | ODK Scalar |
+|----------------|------------|
+| `String` | `string` |
+| `Int` | `int32` |
+| `Float` | `float64` |
+| `Boolean` | `boolean` |
+| `ID` | `string` |
+
+Nullability: GraphQL `Type` (nullable) maps to `optional: true`. GraphQL `Type!` (non-null) maps to required (default).
+
+List types (`[Type]`, `[Type!]!`) map to `Array` with the appropriate inner type and nullability.
+
+### Example
+
+```graphql
+type User {
+  id: ID!
+  name: String!
+  email: String
+  posts: [Post!]!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+}
+
+enum Role {
+  ADMIN
+  USER
+  MODERATOR
+}
+
+union SearchResult = User | Post
+```
+
+This produces 2 models (`User`, `CreateUserInput`), 1 enum union (`Role`), and 1 type union (`SearchResult`).
+
+### Extensions
+
+GraphQL-specific metadata is stored in extensions on the compiled types:
+
+- `graphql_input: true` on input types
+- `graphql_interface: true` on interfaces
+- `graphql_custom_scalar: true` on custom scalar types
+- `graphql_implements: ["Node", "Timestamped"]` on object types that implement interfaces
+- `graphql_arguments: [{"name": "id", "type": "ID!"}]` on fields with arguments
+
+## Operation Documents
+
+Operation documents (queries, mutations, subscriptions) are parsed via `--operations`:
+
+```bash
+odk compile schema.graphql --operations "src/operations/**/*.graphql"
+```
+
+The glob pattern matches `.graphql` files containing operations and fragments.
+
+### Supported Features
+
+- Named queries, mutations, and subscriptions
+- Variable declarations with types and defaults
+- Selection sets with nested fields
+- Fragment spreads (`...FragmentName`)
+- Inline fragments (`... on TypeName { ... }`)
+- Field aliases
+- Directives on operations, fields, and fragments
+
+### Example
+
+```graphql
+fragment UserFields on User {
+  id
+  name
+  email
+}
+
+query GetUser($id: ID!) {
+  user(id: $id) {
+    ...UserFields
+    posts {
+      id
+      title
+    }
+  }
+}
+
+mutation CreateUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    ...UserFields
+  }
+}
+```
+
+## Introspection
+
+The `--introspect` flag fetches a schema from a running GraphQL endpoint using the standard introspection query:
+
+```bash
+odk compile --introspect http://localhost:4000/graphql
+```
+
+This sends the full introspection query, converts the JSON response to SDL, then parses it through the SDL parser. Built-in types (`__Schema`, `__Type`, etc.) and standard scalars are filtered out.
+
+Introspection can be combined with `--operations`:
+
+```bash
+odk compile --introspect http://localhost:4000/graphql --operations "src/**/*.graphql"
+```
+
+## TypeSpec Output
+
+When operations exist in the schema, the TypeSpec bridge emits them as `op` declarations:
+
+```typespec
+op GetUser(id: string): unknown;
+op CreateUser(input: CreateUserInput): unknown;
+```
+
+Variables become parameters, with required/optional preserved. Operation directives are emitted as TypeSpec decorators.
+
+## CLI Reference
+
+| Flag | Description |
+|------|-------------|
+| `--operations <glob>` | Glob pattern for operation document files |
+| `--introspect <url>` | Fetch schema from a GraphQL endpoint |
+
+Both flags work with the `compile` and `generate` commands. The `check` command supports `--operations`.
+
+## Client Generation
+
+Use `odk generate` to produce typed SDK clients, React Query hooks, and MSW mocks from your GraphQL schema and operations. See the [Client Generation](./client-generation) docs for details.

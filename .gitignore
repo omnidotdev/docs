@@ -52,7 +52,6 @@ content/docs/products/moment.mdx
 content/docs/products/mosaic.mdx
 content/docs/products/myfi.mdx
 content/docs/products/nano.mdx
-content/docs/products/odk.mdx
 content/docs/products/omni-api.mdx
 content/docs/products/quilt/
 content/docs/products/resense.mdx
@@ -91,7 +90,6 @@ vitest.config.ts
 
 # Local scratch (Obsidian vault, generated notes, in-repo plan drafts)
 vault/
-odk/
 plans/
 
 # Local editor/agent settings
