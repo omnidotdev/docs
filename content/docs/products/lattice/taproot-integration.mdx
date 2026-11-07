@@ -1,0 +1,109 @@
+---
+title: Lattice Integration
+description: Run Taproot as an in-process Lattice subgraph, single binary, no HTTP hop
+---
+
+## Overview
+
+Taproot can run as an in-process subgraph inside Lattice, Omni's federation gateway. Instead of Lattice making HTTP requests to a separate Taproot server, both run in the same binary. Queries to the Taproot subgraph execute in-process with zero network overhead.
+
+This is the "single binary" architecture: one binary serves the federation gateway and the Postgres subgraph.
+
+## Setup
+
+### 1. Enable the `lattice` feature
+
+```toml
+[dependencies]
+taproot-core = { git = "https://github.com/omnidotdev/taproot", features = ["lattice"] }
+lattice-execution = { git = "https://github.com/omnidotdev/lattice" }
+```
+
+### 2. Build the subgraph and executor
+
+```rust
+use std::sync::Arc;
+use taproot_core::db::SqlxBackend;
+use taproot_core::embed::{TaprootSubgraph, TaprootSubgraphOptions};
+use taproot_core::TaprootExecutor;
+
+// Connect to Postgres
+let backend = SqlxBackend::connect("postgres://localhost/mydb").await?;
+let db: Arc<dyn taproot_core::db::Database> = Arc::new(backend);
+
+// Build the federation subgraph
+let subgraph = TaprootSubgraph::build(db, TaprootSubgraphOptions {
+    schemas: vec!["public".into()],
+    ..Default::default()
+}).await?;
+
+// Wrap in a Lattice-compatible executor
+let executor = TaprootExecutor::new(subgraph);
+```
+
+### 3. Register with Lattice
+
+```rust
+// In your Lattice server setup
+state.register_executor("db".into(), Arc::new(executor));
+```
+
+Now when Lattice's query plan includes a fetch to the `"db"` subgraph, it executes in-process via Taproot instead of making an HTTP request.
+
+## How it works
+
+Lattice's `PlanExecutor` checks for in-process executors before falling back to HTTP:
+
+1. Query plan says "fetch from subgraph `db`"
+2. `PlanExecutor` finds `TaprootExecutor` in the in-process registry
+3. The executor runs the GraphQL query against the `async_graphql::dynamic::Schema`
+4. Results are returned directly, no serialization to HTTP, no network round-trip
+
+The `SubgraphExecutor` trait bridges the two systems:
+
+```rust
+#[async_trait]
+pub trait SubgraphExecutor: Send + Sync {
+    async fn execute_graphql(
+        &self,
+        request: SubgraphRequest,
+    ) -> Result<SubgraphResponse, ExecutionError>;
+}
+```
+
+`TaprootExecutor` implements this by delegating to `TaprootSubgraph::execute()`.
+
+## Federation composition
+
+The Taproot subgraph still needs to be included in the supergraph composition. You can either:
+
+1. **Run Taproot as a temporary HTTP server** during composition, then switch to in-process at runtime
+2. **Export the SDL** from `TaprootSubgraph::sdl()` and provide it as a local schema file during composition
+
+Option 2 is simpler:
+
+```bash
+# Export SDL
+taproot --config taproot.yaml --sdl > taproot.graphql
+
+# Compose supergraph
+lattice compose --config lattice.yaml
+```
+
+With the Lattice config pointing to the local file:
+
+```yaml
+subgraphs:
+  db:
+    schema: ./taproot.graphql
+```
+
+## Performance
+
+In-process execution eliminates:
+- HTTP connection overhead
+- Request/response serialization
+- Network latency
+- Connection pool management for the subgraph server
+
+For database-heavy workloads, this can reduce query latency significantly.

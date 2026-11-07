@@ -1,0 +1,13 @@
+{
+  "title": "🔲 Lattice",
+  "pages": [
+    "configuration",
+    "---Features---",
+    "authentication",
+    "plugins",
+    "---Integration---",
+    "taproot-integration",
+    "---Reference---",
+    "cli-reference"
+  ]
+}

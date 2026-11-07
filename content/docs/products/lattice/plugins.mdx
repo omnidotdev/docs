@@ -1,0 +1,156 @@
+---
+title: Plugins
+description: WASI plugin system and hook reference for Lattice
+---
+
+## Overview
+
+Lattice supports WASI plugins via [Extism](https://extism.org). Plugins are `.wasm` files that register for specific hooks in the request pipeline. Each hook receives JSON input and returns a `HookResult`:
+
+- **Continue**: pass through unchanged
+- **Modify**: alter the request or response data
+- **Reject**: reject the request with an error message (request-phase hooks only)
+
+Plugins are fail-open: if a plugin errors, the request continues and the error is logged.
+
+## Configuration
+
+```yaml
+plugins:
+  - name: my-auth
+    path: ./plugins/auth.wasm
+    hooks:
+      - on_gateway_request
+      - on_subgraph_request
+    config:
+      allowed_roles: admin,user
+
+  - name: analytics
+    path: ./plugins/analytics.wasm
+    hooks:
+      - on_operation_response
+      - on_http_response
+```
+
+Each plugin specifies:
+- **name**: identifier for logging
+- **path**: path to the `.wasm` file
+- **hooks**: which pipeline hooks to register for
+- **config**: key-value config passed to the plugin at load time
+
+## Hook Reference
+
+Hooks are called in pipeline order. Multiple plugins can register for the same hook: the first `Reject` or `Modify` result wins.
+
+| Hook | When | Can reject? |
+|------|------|-------------|
+| `on_gateway_request` | Incoming request received | Yes |
+| `on_graphql_parse` | After parsing, before validation | Yes |
+| `on_graphql_validation` | After validation, before planning | Yes |
+| `on_query_plan` | After planning, before execution | Yes |
+| `on_subgraph_request` | Before each subgraph fetch | Yes |
+| `on_subgraph_response` | After each subgraph response | Modify only |
+| `on_operation_response` | After execution, before caching | Modify only |
+| `on_gateway_response` | Before sending response | Modify only |
+| `on_http_response` | Final hook before HTTP send | Modify only |
+
+## Hook Inputs
+
+### `on_gateway_request`
+
+```json
+{
+  "query": "{ me { id } }",
+  "operation_name": "GetMe",
+  "variables": { "id": "1" },
+  "client_ip": "1.2.3.4"
+}
+```
+
+### `on_graphql_parse`
+
+```json
+{
+  "query": "{ me { id } }",
+  "operation_name": "GetMe"
+}
+```
+
+### `on_graphql_validation`
+
+```json
+{
+  "query": "{ me { id } }",
+  "operation_name": "GetMe",
+  "is_valid": true,
+  "validation_errors": []
+}
+```
+
+### `on_query_plan`
+
+```json
+{
+  "query": "{ me { id } }",
+  "operation_name": "GetMe",
+  "plan_json": { "kind": "QueryPlan", "node": { ... } }
+}
+```
+
+### `on_subgraph_request`
+
+```json
+{
+  "subgraph_name": "users",
+  "url": "http://users:3000/graphql",
+  "query": "{ me { id } }",
+  "variables": null,
+  "headers": []
+}
+```
+
+### `on_subgraph_response`
+
+```json
+{
+  "subgraph_name": "users",
+  "data": { "me": { "id": "1" } },
+  "errors": []
+}
+```
+
+### `on_operation_response`
+
+```json
+{
+  "query": "{ me { id } }",
+  "operation_name": "GetMe",
+  "data": { "me": { "id": "1" } },
+  "errors": []
+}
+```
+
+### `on_http_response`
+
+```json
+{
+  "status_code": 200,
+  "body": { "data": { "me": { "id": "1" } } }
+}
+```
+
+## Hook Result
+
+Plugins return one of:
+
+```json
+{ "action": "continue" }
+```
+
+```json
+{ "action": "modify", "data": { "query": "{ me { id name } }" } }
+```
+
+```json
+{ "action": "reject", "message": "unauthorized" }
+```

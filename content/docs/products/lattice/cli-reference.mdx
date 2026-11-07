@@ -1,0 +1,42 @@
+---
+title: CLI Reference
+description: Lattice command-line interface reference
+---
+
+## `lattice compose`
+
+Compose subgraph schemas into a federated supergraph.
+
+```bash
+lattice compose --config <CONFIG> --output <FILE>
+```
+
+| Flag | Description |
+|------|-------------|
+| `-c, --config <CONFIG>` | Path to `lattice.yaml` config (default: `lattice.yaml`) |
+| `-o, --output <FILE>` | Output file for supergraph SDL (default: `supergraph.graphql`) |
+
+## `lattice serve`
+
+Start the federation gateway server.
+
+```bash
+lattice serve --config <CONFIG>
+```
+
+| Flag | Description |
+|------|-------------|
+| `-c, --config <CONFIG>` | Path to `lattice.yaml` config (default: `lattice.yaml`) |
+| `--hot-reload` | Watch the config file for changes and reload without restarting |
+
+## `lattice check`
+
+Validate a configuration file and its referenced resources.
+
+```bash
+lattice check --config <CONFIG>
+```
+
+| Flag | Description |
+|------|-------------|
+| `-c, --config <CONFIG>` | Path to `lattice.yaml` config (default: `lattice.yaml`) |

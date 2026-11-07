@@ -1,0 +1,98 @@
+---
+title: Authentication & Authorization
+description: JWT, API key, and directive-based authorization for Lattice
+---
+
+## JWT Authentication
+
+JWT-based authentication with JWKS (multi-provider):
+
+```yaml
+auth:
+  default: deny  # "deny" or "anonymous"
+  providers:
+    - jwks_url: https://auth.example.com/.well-known/jwks.json
+      issuer: https://auth.example.com
+      audience: my-app
+      poll_interval: 60  # JWKS refresh interval in seconds
+    - jwks_url: https://other-idp.example.com/.well-known/jwks.json
+      header_name: X-Auth-Token
+      header_prefix: "Token "
+```
+
+Providers are evaluated in order. The first provider that successfully validates the token wins. If no provider succeeds, the `default` behavior applies:
+
+- **deny**: reject the request with a 401
+- **anonymous**: allow the request through without claims
+
+### Legacy Single-Provider
+
+```yaml
+auth:
+  jwt:
+    jwks_url: https://auth.example.com/.well-known/jwks.json
+    issuer: https://auth.example.com  # optional
+    audience: my-app  # optional
+```
+
+## API Key Authentication
+
+Static API key authentication for service-to-service calls:
+
+```yaml
+auth:
+  api_keys:
+    header_name: X-API-Key
+    keys:
+      - name: mobile-app
+        value: ${MOBILE_API_KEY}
+        claims:
+          role: client
+      - name: admin-service
+        value: ${ADMIN_API_KEY}
+        claims:
+          role: admin
+```
+
+Each key can inject custom claims that are available to authorization and plugin hooks.
+
+## Directive-Based Authorization
+
+Enforce `@requiresAuthentication` and `@requiresScopes` directives from the supergraph SDL:
+
+```yaml
+authorization:
+  mode: reject  # "filter" (default) or "reject"
+  directives:
+    requires_scopes: true
+    requires_authentication: true
+```
+
+### Enforcement Modes
+
+- **filter** (default): null out unauthorized fields silently
+- **reject**: return errors listing the unauthorized fields
+
+### Schema Directives
+
+Apply directives at the type or field level in the supergraph schema:
+
+```graphql
+type User @requiresAuthentication {
+  id: ID!
+  email: String @requiresScopes(scopes: [["read:email"]])
+  secrets: String @requiresScopes(scopes: [["admin"]])
+}
+```
+
+### Scope Logic
+
+Scopes use OR-groups of AND-scopes:
+
+```
+[["read:users", "read:org"], ["admin"]]
+```
+
+This means the caller needs either (`read:users` AND `read:org`) OR `admin`.
+
+Field-level directives override type-level directives. If a field has its own `@requiresScopes`, the type-level requirement is not checked for that field.

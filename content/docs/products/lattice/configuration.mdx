@@ -1,0 +1,148 @@
+---
+title: Configuration
+description: Lattice gateway configuration reference
+---
+
+## Server
+
+```yaml
+server:
+  listen: "0.0.0.0:4000"
+  playground: true  # Enable GraphiQL at GET /
+```
+
+## Subgraphs
+
+Fetch schemas from running subgraphs at compose time:
+
+```yaml
+subgraphs:
+  aether:
+    url: http://aether:4001/graphql
+  warden:
+    url: http://warden:4002/graphql
+```
+
+Use local schema files (useful for CI/CD or when subgraphs aren't running):
+
+```yaml
+subgraphs:
+  aether:
+    url: http://aether:4001/graphql
+    schema: ./schemas/aether.graphql
+  warden:
+    url: http://warden:4002/graphql
+    schema: ./schemas/warden.graphql
+```
+
+### Headers
+
+Add headers for authenticated subgraph introspection during `lattice compose`:
+
+```yaml
+subgraphs:
+  aether:
+    url: http://aether:4001/graphql
+    headers:
+      Authorization: "Bearer ${SUBGRAPH_TOKEN}"
+```
+
+## Caching
+
+Response caching via Valkey/Redis:
+
+```yaml
+cache:
+  entity:
+    enabled: true
+    valkey_url: redis://localhost:6379
+    default_ttl: 300
+```
+
+## Rate Limiting
+
+Request rate limiting via Valkey/Redis:
+
+```yaml
+rate_limit:
+  enabled: true
+  valkey_url: redis://localhost:6379
+  default:
+    requests: 100
+    window: 60s
+```
+
+## Telemetry
+
+OpenTelemetry tracing:
+
+```yaml
+telemetry:
+  service_name: lattice
+  otlp_endpoint: http://localhost:4317
+```
+
+## Traffic Shaping
+
+Coalesce identical in-flight subgraph requests to reduce backend load:
+
+```yaml
+traffic_shaping:
+  dedupe_enabled: true
+```
+
+When enabled, if multiple concurrent queries trigger the same subgraph fetch (same URL, query, variables, and operation name), only one HTTP request is sent. Other callers wait for the result of the first request.
+
+## `@defer` Support
+
+Lattice supports `@defer` in query plans. When a query contains deferred fragments, the response is returned as `multipart/mixed` with the initial data followed by deferred patches:
+
+```
+Content-Type: multipart/mixed; boundary=---
+```
+
+Deferred nodes are currently executed eagerly and merged into the response. The multipart transport encoding enables clients that support incremental delivery.
+
+## Query Limits
+
+Reject abusive operations before planning or execution:
+
+```yaml
+limits:
+  max_depth: 15
+  max_complexity: 1000
+  max_aliases: 30
+  max_body_size: 2mb
+```
+
+`max_depth` caps selection-set nesting, `max_complexity` the total field count, and `max_aliases` the number of aliased fields (a common amplification vector). `max_body_size` rejects oversized request bodies early (`kb`, `mb`, `gb` suffixes, or a plain byte count).
+
+## Automatic Persisted Queries
+
+Let clients send an operation's SHA-256 hash in place of the full query to save bandwidth:
+
+```yaml
+persisted_queries:
+  enabled: true
+  cache_size: 1000
+```
+
+On the first request for an unknown hash the gateway responds with `PersistedQueryNotFound`; the client retries with the query body and matching hash, the gateway verifies that the body hashes to the claimed value, stores it, and executes. Subsequent requests send only the hash. The store is bounded by `cache_size` (oldest entries evicted first), so untrusted clients cannot grow it without limit.
+
+## Health
+
+The gateway serves a `/health` liveness endpoint that returns `200 OK` with `{"status":"ok"}`. It is mounted outside the authentication and rate-limit stack, so orchestrator probes need no credentials.
+
+## Environment Variables
+
+Use `${VAR_NAME}` syntax for environment variable substitution in any config value:
+
+```yaml
+subgraphs:
+  aether:
+    url: ${BILLING_GRAPHQL_URL}
+
+auth:
+  jwt:
+    jwks_url: ${JWKS_URL}
+```
