@@ -47,6 +47,42 @@ subgraphs:
       Authorization: "Bearer ${SUBGRAPH_TOKEN}"
 ```
 
+## REST Connectors
+
+Federate a REST API as a subgraph. Declare the subgraph's GraphQL shape with a `schema` (used by `lattice compose`) and map its root fields to HTTP requests under `rest`. A REST subgraph needs no `url`:
+
+```yaml
+subgraphs:
+  petstore:
+    schema: ./schemas/petstore.graphql
+    rest:
+      base_url: https://petstore.example.com
+      headers:
+        Authorization: "Bearer ${PETSTORE_TOKEN}"
+      fields:
+        pet:
+          path: /pets/{id}       # {id} is filled from the field arguments
+          select: /data          # optional JSON Pointer into the response body
+        pets:
+          method: GET            # defaults to GET
+          path: /pets
+          query:
+            status: state        # ?status=<value of the `state` argument>
+```
+
+At runtime the planner routes fetches to `petstore` like any subgraph. The connector interpolates arguments into `path`, adds the mapped `query` parameters, attaches `headers`, calls the upstream, and returns the JSON (optionally narrowed by `select`) as the field result.
+
+| Field | Purpose |
+| --- | --- |
+| `base_url` | Prepended to every field `path`. |
+| `headers` | Static headers sent on every request. |
+| `fields.<name>.method` | HTTP method (defaults to `GET`). |
+| `fields.<name>.path` | Path template; `{arg}` placeholders come from the field arguments. |
+| `fields.<name>.query` | Query parameters, mapping a parameter name to an argument name. |
+| `fields.<name>.select` | Optional JSON Pointer selecting a sub-value of the response body. |
+
+Current scope is root query fields. Entity resolution (`@key` / `_entities`) into REST and OpenAPI schema generation are on the roadmap.
+
 ## Caching
 
 Response caching via Valkey/Redis:

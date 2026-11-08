@@ -1,0 +1,98 @@
+---
+title: REST Connectors
+description: Federate REST APIs as subgraphs in a Lattice supergraph
+---
+
+Lattice federates more than GraphQL. A **REST connector** exposes a REST API to the graph as a subgraph: map its fields to HTTP requests, and Lattice plans and executes queries across it alongside your GraphQL subgraphs.
+
+## How it works
+
+A subgraph is backed by REST when it carries a `rest` block instead of a GraphQL `url`:
+
+- **Composition.** `lattice compose` reads the subgraph's `schema` (its SDL) and composes it into the supergraph, so the planner knows the REST subgraph's types and fields.
+- **Execution.** At query time the planner routes fetches to the subgraph like any other. The connector translates each subquery into HTTP calls: it interpolates field arguments into the path, adds query parameters, attaches headers, and shapes the JSON response back into GraphQL.
+
+No HTTP introspection happens for a REST subgraph; its shape comes entirely from the `schema` you provide.
+
+## Example
+
+Describe the subgraph's shape in SDL:
+
+```graphql
+# schemas/petstore.graphql
+type Pet {
+  id: ID!
+  name: String!
+  status: String!
+}
+
+type Query {
+  pet(id: ID!): Pet
+  pets(status: String): [Pet!]!
+}
+```
+
+Map its fields to the REST API:
+
+```yaml
+# lattice.yaml
+supergraph:
+  path: ./supergraph.graphql
+
+subgraphs:
+  petstore:
+    schema: ./schemas/petstore.graphql
+    rest:
+      base_url: https://petstore.example.com
+      headers:
+        Authorization: "Bearer ${PETSTORE_TOKEN}"
+      fields:
+        pet:
+          path: /pets/{id}
+          select: /data
+        pets:
+          path: /pets
+          query:
+            status: status
+```
+
+Compose and run:
+
+```bash
+lattice compose --config lattice.yaml --output supergraph.graphql
+lattice serve --config lattice.yaml
+```
+
+A client query now resolves over REST:
+
+```graphql
+query {
+  pet(id: "7") {
+    name
+    status
+  }
+}
+```
+
+Lattice calls `GET https://petstore.example.com/pets/7`, reads `/data` from the response body, and returns it as `pet`.
+
+## Mapping reference
+
+| Field | Purpose |
+| --- | --- |
+| `base_url` | Base URL prepended to every field `path`. |
+| `headers` | Static headers sent on every request. |
+| `fields.<name>.method` | HTTP method. Defaults to `GET`. |
+| `fields.<name>.path` | Path template appended to `base_url`. `{arg}` placeholders are filled from the field arguments. |
+| `fields.<name>.query` | Query-string parameters, mapping a parameter name to a field argument name. A parameter is omitted when its argument is absent. |
+| `fields.<name>.select` | Optional [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) selecting a sub-value of the response body as the field result. |
+
+Arguments may be literals or GraphQL variables; variables are resolved before the request is built.
+
+## Scope
+
+REST connectors currently cover **root query fields**. On the roadmap:
+
+- Entity resolution (`@key` / `_entities`) so a REST source can resolve entities referenced by other subgraphs.
+- OpenAPI ingestion to generate the subgraph SDL and mappings from a spec.
+- Mutations and additional upstream protocols.
