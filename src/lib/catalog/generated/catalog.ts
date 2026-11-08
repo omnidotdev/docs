@@ -589,14 +589,6 @@ export const products: CatalogProduct[] = [
     "license": "Apache-2.0"
   },
   {
-    "id": "lattice",
-    "name": "Lattice",
-    "realm": "grid",
-    "status": "active",
-    "releaseDate": "2026-11-07",
-    "license": "Apache-2.0"
-  },
-  {
     "id": "life-json",
     "name": "life.json",
     "realm": "codex",
