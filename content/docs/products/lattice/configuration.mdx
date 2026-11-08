@@ -80,8 +80,10 @@ At runtime the planner routes fetches to `petstore` like any subgraph. The conne
 | `fields.<name>.path` | Path template; `{arg}` placeholders come from the field arguments. |
 | `fields.<name>.query` | Query parameters, mapping a parameter name to an argument name. |
 | `fields.<name>.select` | Optional JSON Pointer selecting a sub-value of the response body. |
+| `fields.<name>.body` | For write methods, the argument sent as the JSON request body. |
+| `entities.<Type>` | Resolver that fetches one `<Type>` by its `@key` fields, for federated `_entities` resolution. |
 
-Current scope is root query fields. Entity resolution (`@key` / `_entities`) into REST and OpenAPI schema generation are on the roadmap.
+REST connectors cover query fields, mutations, and entity resolution. See [REST Connectors](./rest-connectors) for the full guide. OpenAPI schema generation is on the roadmap.
 
 ## Caching
 

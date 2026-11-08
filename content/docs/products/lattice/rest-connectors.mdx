@@ -76,6 +76,51 @@ query {
 
 Lattice calls `GET https://petstore.example.com/pets/7`, reads `/data` from the response body, and returns it as `pet`.
 
+## Mutations
+
+Map a GraphQL mutation to a write method and send a JSON body with `body`, naming the argument whose value is the payload:
+
+```yaml
+subgraphs:
+  petstore:
+    schema: ./schemas/petstore.graphql
+    rest:
+      base_url: https://petstore.example.com
+      fields:
+        createPet:
+          method: POST
+          path: /pets
+          body: input        # the `input` argument is sent as the JSON body
+```
+
+```graphql
+mutation {
+  createPet(input: { name: "Rex" }) {
+    id
+  }
+}
+```
+
+Lattice sends `POST /pets` with `{"name":"Rex"}` and returns the response as `createPet`.
+
+## Entity resolution
+
+A REST source can resolve entities that other subgraphs reference by `@key`. Declare an `entities` resolver per type; the representation's key fields fill the resolver `path`:
+
+```yaml
+subgraphs:
+  petstore:
+    schema: ./schemas/petstore.graphql
+    rest:
+      base_url: https://petstore.example.com
+      entities:
+        Pet:
+          path: /pets/{id}       # {id} comes from the entity's @key fields
+          select: /data
+```
+
+When another subgraph yields a `Pet` by its key, Lattice calls `GET /pets/{id}` for each referenced entity and merges the result into the graph. A single `_entities` fetch resolves its representations in order, one REST call each.
+
 ## Mapping reference
 
 | Field | Purpose |
@@ -86,13 +131,15 @@ Lattice calls `GET https://petstore.example.com/pets/7`, reads `/data` from the 
 | `fields.<name>.path` | Path template appended to `base_url`. `{arg}` placeholders are filled from the field arguments. |
 | `fields.<name>.query` | Query-string parameters, mapping a parameter name to a field argument name. A parameter is omitted when its argument is absent. |
 | `fields.<name>.select` | Optional [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) selecting a sub-value of the response body as the field result. |
+| `fields.<name>.body` | For write methods, the argument whose value is sent as the JSON request body. |
+| `entities.<Type>` | An entity resolver (same shape as a field mapping) that fetches one `<Type>` by its `@key` fields. |
 
 Arguments may be literals or GraphQL variables; variables are resolved before the request is built.
 
 ## Scope
 
-REST connectors currently cover **root query fields**. On the roadmap:
+REST connectors cover query fields, mutations, and federated entity resolution. On the roadmap:
 
-- Entity resolution (`@key` / `_entities`) so a REST source can resolve entities referenced by other subgraphs.
 - OpenAPI ingestion to generate the subgraph SDL and mappings from a spec.
-- Mutations and additional upstream protocols.
+- Response field mapping for upstreams whose JSON shape differs from the schema.
+- Additional upstream protocols.
