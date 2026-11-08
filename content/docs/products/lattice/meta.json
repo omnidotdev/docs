@@ -2,6 +2,8 @@
   "title": "🔲 Lattice",
   "pages": [
     "configuration",
+    "---Sources---",
+    "rest-connectors",
     "---Features---",
     "authentication",
     "plugins",

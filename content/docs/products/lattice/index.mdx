@@ -35,12 +35,12 @@ import { FaNetworkWired, FaProjectDiagram } from "react-icons/fa";
   alerts={[
     {
       title: "💡 What is Lattice?",
-      description: "GraphQL Federation gateway for composing multiple services into a unified API",
+      description: "Federation gateway that composes GraphQL and REST services into one unified API",
     },
   ]}
 />
 
-**Omni Lattice** is a GraphQL Federation gateway that composes multiple subgraph services into a unified supergraph API. Built from the ground up in Rust with an Apache 2.0 license.
+**Omni Lattice** is a federation gateway that composes multiple services, GraphQL subgraphs and REST APIs alike, into a unified supergraph API. Built from the ground up in Rust with an Apache 2.0 license.
 
 ## Quick Start
 
@@ -104,6 +104,7 @@ docker run -p 4000:4000 \
 ## Key Features
 
 - **GraphQL Federation v2**: Query planning and execution across subgraphs
+- **REST Connectors**: Federate REST APIs as subgraphs, mapping GraphQL fields to HTTP endpoints
 - **`@defer` Support**: Incremental delivery via `multipart/mixed` responses
 - **Request Deduplication**: Coalesce identical in-flight subgraph fetches
 - **Directive-Based Authorization**: Enforce `@requiresScopes` and `@requiresAuthentication`
