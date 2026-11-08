@@ -452,6 +452,7 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 0,
         "features": [
           "1 store",
+          "10 GB bandwidth/month",
           "500 MB media storage",
           "Community support",
           "Custom domain",
@@ -468,11 +469,13 @@ export const products: CatalogProduct[] = [
         "yearlyPrice": 27800,
         "features": [
           "10 GB media storage",
+          "500 GB bandwidth/month",
           "Advanced discounts",
           "AI product descriptions",
           "Priority support",
           "Unlimited products",
-          "Up to 3 stores"
+          "Up to 3 stores",
+          "Video media (poster and MP4 transcoding)"
         ],
         "transactionFeeBps": 100
       },
@@ -483,6 +486,7 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 7900,
         "yearlyPrice": 75800,
         "features": [
+          "2 TB bandwidth/month",
           "50 GB media storage",
           "Advanced discounts",
           "AI product descriptions and custom agents",
@@ -490,7 +494,8 @@ export const products: CatalogProduct[] = [
           "Dedicated support",
           "SSO/SAML",
           "Unlimited products",
-          "Up to 10 stores"
+          "Up to 10 stores",
+          "Video media (poster and MP4 transcoding)"
         ],
         "transactionFeeBps": 50
       }
@@ -505,6 +510,20 @@ export const products: CatalogProduct[] = [
     "license": "Proprietary",
     "plans": [
       {
+        "tier": "free",
+        "name": "Herald Free",
+        "description": "Transactional email for small projects and testing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 sending domain",
+          "3,000 emails/month (100/day)",
+          "Community support",
+          "Shared IP pool",
+          "Suppression list with bounce and complaint handling"
+        ]
+      },
+      {
         "tier": "enterprise",
         "name": "Herald Enterprise",
         "description": "Unlimited volume with SSO, SLA, and dedicated support",
@@ -517,20 +536,6 @@ export const products: CatalogProduct[] = [
           "SSO and audit logs",
           "Unlimited sending domains",
           "Unlimited volume"
-        ]
-      },
-      {
-        "tier": "free",
-        "name": "Herald Free",
-        "description": "Transactional email for small projects and testing",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "1 sending domain",
-          "3,000 emails/month (100/day)",
-          "Community support",
-          "Shared IP pool",
-          "Suppression list with bounce and complaint handling"
         ]
       },
       {
@@ -581,6 +586,14 @@ export const products: CatalogProduct[] = [
     "name": "Kiln",
     "realm": "grid",
     "status": "active",
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "lattice",
+    "name": "Lattice",
+    "realm": "grid",
+    "status": "active",
+    "releaseDate": "2026-11-07",
     "license": "Apache-2.0"
   },
   {
