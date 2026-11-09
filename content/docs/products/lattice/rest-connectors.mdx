@@ -121,6 +121,23 @@ subgraphs:
 
 When another subgraph yields a `Pet` by its key, Lattice calls `GET /pets/{id}` for each referenced entity and merges the result into the graph. A single `_entities` fetch resolves its representations in order, one REST call each.
 
+## From an OpenAPI spec
+
+Rather than hand-writing the SDL and mappings, generate them from an existing OpenAPI 3.x document:
+
+```bash
+lattice openapi petstore.yaml --output schemas/petstore.graphql --name petstore
+```
+
+This writes the GraphQL SDL to `--output` and prints a `lattice.yaml` subgraph block to paste into your config. The mapping is mechanical:
+
+- `GET` operations become `Query` fields; `POST`, `PUT`, `PATCH`, and `DELETE` become `Mutation` fields.
+- Path and query parameters become field arguments; a request body becomes an `input` argument with a generated input type.
+- `operationId` names the field, or a name is synthesized from the method and path when it is absent.
+- Component schemas (referenced by `$ref`) become GraphQL types; an operation with no typed JSON response falls back to a `JSON` scalar.
+
+The spec may be JSON or YAML. Pass `--base-url` to override the server URL otherwise taken from the spec's `servers`. Review the generated SDL and config, then compose and serve as usual.
+
 ## Mapping reference
 
 | Field | Purpose |
@@ -138,8 +155,7 @@ Arguments may be literals or GraphQL variables; variables are resolved before th
 
 ## Scope
 
-REST connectors cover query fields, mutations, and federated entity resolution. On the roadmap:
+REST connectors cover query fields, mutations, federated entity resolution, and OpenAPI ingestion. On the roadmap:
 
-- OpenAPI ingestion to generate the subgraph SDL and mappings from a spec.
 - Response field mapping for upstreams whose JSON shape differs from the schema.
 - Additional upstream protocols.
