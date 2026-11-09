@@ -18,8 +18,8 @@ cargo install odk-cli
 # TypeScript SDK (optional)
 bun add @omnidotdev/odk zod
 
-# Python PDK (optional)
-pip install odk-pdk
+# Python PDK (optional, published to the Omni registry)
+pip install odk-pdk --index-url https://api.manifold.omni.dev/pypi/omnidotdev/simple/
 ```
 
 ## Define a schema
@@ -127,7 +127,7 @@ Model-only targets (`typescript`, `rust`, `python`) build from the schema's type
 
 ```sh
 odk publish schema.odk.yaml \
-  --registry https://manifold.omni.dev \
+  --registry https://api.manifold.omni.dev \
   --repository myteam/blog-api \
   --tag v1
 ```
