@@ -45,9 +45,7 @@ export const NEW_PRODUCTS = products
 // Escape hatch to badge a product "coming soon" in the docs sidebar even when
 // the catalog does not mark it so (docs-only, does not touch the SSOT or the
 // website). Add a name here only for a product the catalog does not yet reflect.
-// Lattice: docs are live but the product is not yet public in the catalog
-// (pre-release), so badge it coming soon until v0.1.0 ships.
-const DOCS_COMING_SOON_OVERRIDES: string[] = ["Lattice", "ODK"];
+const DOCS_COMING_SOON_OVERRIDES: string[] = ["ODK"];
 
 export const COMING_SOON_PRODUCTS = [
   ...products
