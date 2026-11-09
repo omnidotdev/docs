@@ -6,6 +6,7 @@
     "rest-connectors",
     "grpc-connectors",
     "odata-connectors",
+    "postgres-connectors",
     "---Features---",
     "authentication",
     "plugins",

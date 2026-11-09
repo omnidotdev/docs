@@ -1,0 +1,104 @@
+---
+title: Postgres Connectors
+description: Federate a Postgres database as a subgraph in a Lattice supergraph
+---
+
+Lattice federates more than GraphQL. A **Postgres connector** exposes a Postgres database to the graph as a subgraph: Lattice introspects the database, generates a subgraph from it, and resolves queries by running SQL alongside your GraphQL subgraphs.
+
+## How it works
+
+- **Generation.** `lattice postgres` introspects the `public` schema and emits the subgraph's GraphQL SDL plus a `postgres` config block. Each table becomes a GraphQL type with a collection query and a by-key query.
+- **Composition.** `lattice compose` reads the generated `schema` and composes it into the supergraph.
+- **Execution.** At query time the connector runs `SELECT to_jsonb(row)` so Postgres renders each row to JSON and performs every type conversion, then shapes the result back into GraphQL.
+
+## Generate the subgraph
+
+Point the generator at a connection URL:
+
+```bash
+lattice postgres "postgres://user:pass@localhost:5432/app" --output schemas/db.graphql --name db
+```
+
+This writes the GraphQL SDL to `--output` and prints a `lattice.yaml` subgraph block to paste into the config. The mapping is mechanical:
+
+- Each table becomes a GraphQL type. Columns become fields with the same name as the column (so they line up with the JSON Postgres returns); a nullable column becomes a nullable field.
+- Each table gets a collection field (`users: [Users!]`) and, when it has a single-column primary key, a by-key field (`users_by_pk(id: Int!): Users`).
+- Scalars follow the Postgres JSON output: `smallint` and `integer` are `Int`; `bigint`, `numeric`, `real`, and `double precision` are `Float`; `boolean` is `Boolean`; `json` and `jsonb` are a `JSON` scalar; array columns become lists; and everything else (text, `uuid`, timestamps, enums, ...) is a `String`.
+- Only the `public` schema is read. Foreign-key navigation is not generated yet (see the roadmap).
+
+## Example
+
+For a `users` table keyed by `id`, `lattice postgres` generates:
+
+```graphql
+# schemas/db.graphql
+type Users {
+  id: Int!
+  name: String
+  created_at: String
+}
+
+type Query {
+  users: [Users!]
+  users_by_pk(id: Int!): Users
+}
+```
+
+and a config block:
+
+```yaml
+# lattice.yaml
+subgraphs:
+  db:
+    schema: ./schemas/db.graphql
+    postgres:
+      url: "postgres://user:pass@localhost:5432/app"
+      fields:
+        users:
+          table: users
+          columns: [id, name, created_at]
+        users_by_pk:
+          table: users
+          columns: [id, name, created_at]
+          pk: id
+```
+
+Compose and run:
+
+```bash
+lattice compose --config lattice.yaml --output supergraph.graphql
+lattice serve --config lattice.yaml
+```
+
+A client query now resolves over SQL:
+
+```graphql
+query {
+  users_by_pk(id: 7) {
+    id
+    name
+  }
+}
+```
+
+Lattice runs `SELECT to_jsonb(t) FROM (SELECT id, name, created_at FROM "users" WHERE "id"::text = $1 LIMIT 1) t` and returns the row as `users_by_pk`.
+
+## Mapping reference
+
+| Field | Purpose |
+| --- | --- |
+| `url` | Postgres connection URL. |
+| `fields.<name>.table` | Table the field reads. |
+| `fields.<name>.columns` | Columns to select, in SDL order. Empty selects all. |
+| `fields.<name>.pk` | When set, the field returns one row looked up by this primary-key column, taken as a required argument. |
+
+Table and column names come from introspection and are trusted identifiers; key arguments are always passed as bound query parameters.
+
+## Scope
+
+Postgres connectors cover tables as collection and by-key queries, with column types, arrays, and `json`/`jsonb`. On the roadmap:
+
+- Foreign-key navigation (nested related rows).
+- Filtering, ordering, and pagination arguments.
+- Writes (insert, update, delete).
+- TLS connections (today the connection is made without TLS, so keep the gateway and database on a trusted network).
