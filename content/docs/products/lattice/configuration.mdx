@@ -167,6 +167,30 @@ persisted_queries:
 
 On the first request for an unknown hash the gateway responds with `PersistedQueryNotFound`; the client retries with the query body and matching hash, the gateway verifies that the body hashes to the claimed value, stores it, and executes. Subsequent requests send only the hash. The store is bounded by `cache_size` (oldest entries evicted first), so untrusted clients cannot grow it without limit.
 
+## Trusted Documents
+
+Lock the gateway to a fixed set of operations. Set `require: true` with a `manifest`, and the gateway runs only the operations in that manifest, rejecting freeform queries and any operation outside the set:
+
+```yaml
+persisted_queries:
+  enabled: true
+  require: true
+  manifest: ./operations.json
+```
+
+The manifest is a JSON object mapping each operation's lowercase hex SHA-256 to its document:
+
+```json
+{
+  "b8e5...": "query Me { me { id } }",
+  "4a1c...": "query Posts { posts { title } }"
+}
+```
+
+At boot the gateway loads the manifest and verifies that every document hashes to its key, refusing a tampered or mislabeled manifest. At request time clients send the operation hash exactly as they would for Automatic Persisted Queries; an unknown hash returns `PersistedQueryNotFound`, and a request with no hash (a freeform query) is rejected with `PERSISTED_QUERY_REQUIRED`. No operation is registered at runtime, so the allowlist is exactly the manifest.
+
+Trusted mode fails closed: if the manifest cannot be read or parsed, the gateway rejects every operation rather than falling open.
+
 ## Health
 
 The gateway serves a `/health` liveness endpoint that returns `200 OK` with `{"status":"ok"}`. It is mounted outside the authentication and rate-limit stack, so orchestrator probes need no credentials.
