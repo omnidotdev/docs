@@ -138,6 +138,26 @@ This writes the GraphQL SDL to `--output` and prints a `lattice.yaml` subgraph b
 
 The spec may be JSON or YAML. Pass `--base-url` to override the server URL otherwise taken from the spec's `servers`. Review the generated SDL and config, then compose and serve as usual.
 
+## Response mapping
+
+When an upstream's JSON field names differ from the schema, remap them with `response`, keyed by GraphQL field name. The source is a top-level key, or a [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) (leading `/`) into the response. Keys that already match pass through, and an array is remapped element by element.
+
+```yaml
+subgraphs:
+  petstore:
+    schema: ./schemas/petstore.graphql
+    rest:
+      base_url: https://petstore.example.com
+      fields:
+        pet:
+          path: /pets/{id}
+          response:
+            name: pet_name              # GraphQL `name` <- JSON `pet_name`
+            tag: /attributes/label      # from a nested JSON Pointer
+```
+
+`response` applies after `select`, so it remaps the already-selected value.
+
 ## Mapping reference
 
 | Field | Purpose |
@@ -149,13 +169,13 @@ The spec may be JSON or YAML. Pass `--base-url` to override the server URL other
 | `fields.<name>.query` | Query-string parameters, mapping a parameter name to a field argument name. A parameter is omitted when its argument is absent. |
 | `fields.<name>.select` | Optional [JSON Pointer](https://datatracker.ietf.org/doc/html/rfc6901) selecting a sub-value of the response body as the field result. |
 | `fields.<name>.body` | For write methods, the argument whose value is sent as the JSON request body. |
+| `fields.<name>.response` | Response field remapping, mapping a GraphQL field name to a source key or JSON Pointer in the (post-`select`) response. Unmapped keys pass through; arrays are remapped per element. |
 | `entities.<Type>` | An entity resolver (same shape as a field mapping) that fetches one `<Type>` by its `@key` fields. |
 
 Arguments may be literals or GraphQL variables; variables are resolved before the request is built.
 
 ## Scope
 
-REST connectors cover query fields, mutations, federated entity resolution, and OpenAPI ingestion. On the roadmap:
+REST connectors cover query fields, mutations, federated entity resolution, response field mapping, and OpenAPI ingestion. On the roadmap:
 
-- Response field mapping for upstreams whose JSON shape differs from the schema.
 - Additional upstream protocols.
