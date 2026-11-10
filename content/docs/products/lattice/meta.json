@@ -5,6 +5,7 @@
     "---Sources---",
     "rest-connectors",
     "grpc-connectors",
+    "odata-connectors",
     "---Features---",
     "authentication",
     "plugins",

@@ -1,0 +1,95 @@
+---
+title: OData Connectors
+description: Federate OData services as subgraphs in a Lattice supergraph
+---
+
+Lattice federates more than GraphQL. An **OData connector** exposes an OData service to the graph as a subgraph. An OData service is plain HTTP and JSON, so Lattice generates a REST connector from its `$metadata` document and plans and executes queries across it alongside your GraphQL subgraphs.
+
+## How it works
+
+- **Generation.** `lattice odata` reads an OData 4.0 `$metadata` (EDMX) document and emits the subgraph's GraphQL SDL plus a `rest` config block. Each entity set becomes a collection query and a by-key query, and each entity or complex type becomes a GraphQL type.
+- **Composition.** `lattice compose` reads the generated `schema` and composes it into the supergraph.
+- **Execution.** At query time the connector issues OData HTTP requests through the [REST connector](/products/lattice/rest-connectors): a collection reads `/<EntitySet>` and selects the response `value` array; a by-key read hits `/<EntitySet>(key)`.
+
+## Generate the subgraph
+
+Fetch the service's metadata document, then generate against its root URL:
+
+```bash
+curl "https://services.odata.org/TripPinRESTierService/\$metadata" -o metadata.xml
+lattice odata metadata.xml --output schemas/trippin.graphql --name trippin --base-url https://services.odata.org/TripPinRESTierService
+```
+
+This writes the GraphQL SDL to `--output` and prints a `lattice.yaml` subgraph block to paste into the config. The mapping is mechanical:
+
+- Each entity set becomes two root fields: a collection (`people: [Person!]`) and a by-key lookup (`person(UserName: String!): Person`). Single and composite keys are both supported; string-typed keys are quoted in the URL.
+- Entity and complex types become GraphQL types. Field names are kept exactly as the OData property names so they line up with the JSON the service returns.
+- Scalars follow the OData JSON format: `Edm.Int16` and `Edm.Int32` are `Int`, `Edm.Int64` / `Edm.Double` / `Edm.Decimal` are `Float`, `Edm.Boolean` is `Boolean`, and textual and temporal types are `String`. Enums become GraphQL enums, and `Collection(...)` properties become lists.
+- Navigation properties are skipped; they resolve through OData `$expand`, which is on the roadmap.
+
+## Example
+
+For an entity set `People` over a `Person` entity keyed by `UserName`, `lattice odata` generates:
+
+```graphql
+# schemas/trippin.graphql
+type Person {
+  UserName: String!
+  Age: Float
+  Emails: [String]
+}
+
+type Query {
+  people: [Person!]
+  person(UserName: String!): Person
+}
+```
+
+and a config block:
+
+```yaml
+# lattice.yaml
+subgraphs:
+  trippin:
+    schema: ./schemas/trippin.graphql
+    rest:
+      base_url: https://services.odata.org/TripPinRESTierService
+      fields:
+        people:
+          method: GET
+          path: /People
+          select: /value
+        person:
+          method: GET
+          path: /People('{UserName}')
+```
+
+Compose and run:
+
+```bash
+lattice compose --config lattice.yaml --output supergraph.graphql
+lattice serve --config lattice.yaml
+```
+
+A client query now resolves over OData:
+
+```graphql
+query {
+  person(UserName: "russellwhyte") {
+    UserName
+    Age
+  }
+}
+```
+
+Lattice calls `GET /People('russellwhyte')` at the service root and returns the entity as `person`.
+
+## Scope
+
+OData connectors cover entity sets as collection and by-key queries, with entity types, complex types, enums, collection-valued properties, and composite keys. On the roadmap:
+
+- Navigation properties via `$expand`.
+- Query options (`$filter`, `$orderby`, `$top`, `$skip`) as field arguments.
+- Writes (create, update, delete).
+
+Because the output is a REST connector, you can also hand-edit the generated config, for example to add `$filter` as a query parameter, using the [REST connector reference](/products/lattice/rest-connectors).
