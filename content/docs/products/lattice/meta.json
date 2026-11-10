@@ -4,6 +4,7 @@
     "configuration",
     "---Sources---",
     "rest-connectors",
+    "grpc-connectors",
     "---Features---",
     "authentication",
     "plugins",

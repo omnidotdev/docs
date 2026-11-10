@@ -1,0 +1,148 @@
+---
+title: gRPC Connectors
+description: Federate gRPC services as subgraphs in a Lattice supergraph
+---
+
+Lattice federates more than GraphQL. A **gRPC connector** exposes a gRPC service to the graph as a subgraph: generate its schema from a protobuf descriptor set, and Lattice plans and executes queries across it alongside your GraphQL subgraphs by making unary calls.
+
+## How it works
+
+A subgraph is backed by gRPC when it carries a `grpc` block instead of a GraphQL `url`:
+
+- **Generation.** `lattice grpc` reads a compiled protobuf descriptor set and emits the subgraph's GraphQL SDL plus a `grpc` config block. Each service's unary methods become root fields, and each message becomes a GraphQL type.
+- **Composition.** `lattice compose` reads the generated `schema` and composes it into the supergraph.
+- **Execution.** At query time the planner routes fetches to the subgraph like any other. The connector encodes each field's input argument as the request message, makes the unary gRPC call, and decodes the response back into GraphQL, using the descriptor set for protobuf coding.
+
+Only unary methods are exposed; streaming methods are skipped.
+
+## Generate the subgraph
+
+Compile the `.proto` files to a descriptor set, then generate:
+
+```bash
+protoc --descriptor_set_out=orders.pb --include_imports -I proto proto/orders.proto
+lattice grpc orders.pb --output schemas/orders.graphql --name orders --endpoint http://orders.internal:50051
+```
+
+This writes the GraphQL SDL to `--output` and prints a `lattice.yaml` subgraph block to paste into the config. Pass `--include_imports` to `protoc` so the descriptor set is self-contained; a message a method references but the descriptor omits surfaces as a `JSON` scalar.
+
+The mapping is mechanical:
+
+- Unary methods become root fields. A method with `idempotency_level = NO_SIDE_EFFECTS` becomes a `Query` field, and every other method a `Mutation`; without the option, a `Get`, `List`, `Search`, `Lookup`, `Fetch`, `Read`, or `Query` name prefix is treated as a query.
+- The request message becomes an `input` argument with a generated input type; the response message becomes the field's return type.
+- Scalars follow the proto3 JSON conventions: 32-bit integers are `Int`, 64-bit integers and `bytes` are `String`, `float` and `double` are `Float`, `bool` is `Boolean`. Enums become GraphQL enums, nested messages become types, and `repeated` fields become lists. Map fields surface as a `JSON` scalar.
+
+## Example
+
+Given this service:
+
+```proto
+syntax = "proto3";
+package orders.v1;
+
+message GetOrderRequest { string id = 1; }
+
+message Order {
+  string id = 1;
+  double total = 2;
+  repeated string tags = 3;
+}
+
+service OrderService {
+  rpc GetOrder(GetOrderRequest) returns (Order) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+```
+
+`lattice grpc` generates the SDL:
+
+```graphql
+# schemas/orders.graphql
+type Order {
+  id: String
+  tags: [String!]
+  total: Float
+}
+
+input GetOrderRequestInput {
+  id: String
+}
+
+type Query {
+  getOrder(input: GetOrderRequestInput!): Order
+}
+```
+
+and a config block:
+
+```yaml
+# lattice.yaml
+subgraphs:
+  orders:
+    schema: ./schemas/orders.graphql
+    grpc:
+      endpoint: http://orders.internal:50051
+      descriptor_set: ./orders.pb
+      fields:
+        getOrder:
+          service: orders.v1.OrderService
+          method: GetOrder
+```
+
+Compose and run:
+
+```bash
+lattice compose --config lattice.yaml --output supergraph.graphql
+lattice serve --config lattice.yaml
+```
+
+A client query now resolves over gRPC:
+
+```graphql
+query {
+  getOrder(input: { id: "7" }) {
+    id
+    total
+  }
+}
+```
+
+Lattice encodes `{ id: "7" }` as a `GetOrderRequest`, calls `orders.v1.OrderService/GetOrder` at the configured endpoint, and decodes the `Order` response as `getOrder`.
+
+## Metadata
+
+Send static gRPC metadata on every call with `metadata`. Keys are lowercase ASCII:
+
+```yaml
+subgraphs:
+  orders:
+    schema: ./schemas/orders.graphql
+    grpc:
+      endpoint: http://orders.internal:50051
+      descriptor_set: ./orders.pb
+      metadata:
+        authorization: "Bearer ${ORDERS_TOKEN}"
+      fields:
+        getOrder:
+          service: orders.v1.OrderService
+          method: GetOrder
+```
+
+## Mapping reference
+
+| Field | Purpose |
+| --- | --- |
+| `endpoint` | gRPC server address (`http://host:port`). |
+| `descriptor_set` | Path to the compiled protobuf `FileDescriptorSet` used for request and response coding. |
+| `metadata` | Static gRPC metadata (headers) sent on every call. |
+| `fields.<name>.service` | Fully-qualified service name, for example `orders.v1.OrderService`. |
+| `fields.<name>.method` | Unary method name on that service. |
+| `fields.<name>.input` | Field argument carrying the request message. Defaults to `input`. |
+
+## Scope
+
+gRPC connectors cover unary methods: queries, mutations, and request and response message mapping. On the roadmap:
+
+- Streaming methods.
+- Federated entity resolution over gRPC.
