@@ -1,0 +1,29 @@
+---
+title: Concepts
+description: How Prism counts, stores, and serves analytics
+---
+
+## Cookieless by design
+
+Prism never sets a cookie and never stores a raw IP address or a persistent identifier. A visitor is counted with a salted hash that rotates daily, so the same person on the same day is one visitor, and the link back to any individual disappears when the salt rotates. There is nothing to consent to and no cross-site profile to build.
+
+## Events
+
+Two kinds of events flow into the collector:
+
+- **Pageviews**, reported automatically on route change.
+- **Custom events**, named signals you send yourself (a sign-up, a purchase, a feature used), each carrying a small set of properties.
+
+Events are batched in the client and flushed with `navigator.sendBeacon`, so a navigation away from the page never drops the events queued on it.
+
+## The collector
+
+Instrumented apps report to a public HTTP collector at `POST https://api.prism.omni.dev/collect`. The collector validates and stores raw events; it accepts writes only and never reads back.
+
+## Daily rollups
+
+A rollup worker materializes raw events into per-product daily aggregates. Reads hit these rollups rather than the raw event stream, which keeps the dashboard fast as volume grows. Rollups are retained for the window your [tier](/products/prism/pricing) allows.
+
+## Reads are gated
+
+Writes are public (any instrumented app can report), but reads are not. The dashboard and the read-only GraphQL API both sit behind an Omni sign-in, scoped to your workspace. The API exposes queries only: mutations are denied at the schema level.

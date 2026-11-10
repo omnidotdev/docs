@@ -1,0 +1,42 @@
+---
+title: Instrumenting a Product
+description: Report pageviews and events through the shared analytics client
+---
+
+Prism ingests events over a public, cookieless HTTP collector. Any Omni app reports through the analytics client in [`@omnidotdev/providers`](https://github.com/omnidotdev/providers), so there is no Prism-specific SDK to install.
+
+## 1. Point the app at the collector
+
+Set the collector URL in the app's deploy environment:
+
+```bash
+VITE_PRISM_COLLECTOR_URL=https://api.prism.omni.dev
+```
+
+When unset, analytics degrades to a no-op, so local and preview builds never emit.
+
+## 2. Create a client and auto-report pageviews
+
+Create a client once and report pageviews on every route change:
+
+```ts
+import { createPrismClient, usePageview } from "@omnidotdev/providers/analytics";
+
+const prism = createPrismClient({
+  collectorUrl: PRISM_COLLECTOR_URL,
+  product: "<your-product>",
+});
+
+// in your root component
+usePageview(prism, pathname);
+```
+
+## 3. Track custom events
+
+Report any named event from anywhere in the app:
+
+```ts
+prism.track("app_opened", { appId });
+```
+
+Events are cookieless, batched in the client, and flushed with `navigator.sendBeacon` so a navigation never drops them. Once events arrive, read them from the [dashboard](/products/prism/dashboard).

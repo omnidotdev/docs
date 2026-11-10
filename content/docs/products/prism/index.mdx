@@ -1,0 +1,72 @@
+---
+title: 📊 Prism
+description: Privacy-first product analytics
+---
+
+import { ProductOverview, RunPaths } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import {
+    PiChartLineUpBold,
+    PiShieldCheckBold,
+    PiLightningBold,
+} from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Product Analytics",
+      icon: <PiChartLineUpBold />,
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      label: "Privacy-First",
+      icon: <PiShieldCheckBold />,
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      label: "Postgres-Native",
+      icon: <PiLightningBold />,
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://prism.omni.dev",
+      label: "Visit App",
+      type: "website",
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      href: `${app.socials.github}/prism-stack`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "🚧 Under Construction",
+      description:
+        "Prism is new! Expect this documentation to change rapidly and have rough edges.",
+    },
+    {
+      title: "💡 Big Idea",
+      description:
+        "Understand how people use your product without tracking them: cookieless by design, with the raw data in your own Postgres.",
+    },
+  ]}
+/>
+
+**Omni Prism** is first-party, privacy-first product analytics. It ingests pageviews and custom events over a public, cookieless HTTP collector and materializes them into fast daily rollups you read from a dashboard or a GraphQL API.
+
+Prism counts visitors with a daily-rotating salted hash, never a raw IP or a persistent cookie, so there is nothing to consent to and no cross-site profile to build. Every product in your workspace reports through the shared analytics client in [`@omnidotdev/providers`](https://github.com/omnidotdev/providers), so there is no Prism-specific SDK to install.
+
+## Self-Hosting
+
+Run Prism on your own machine with one command, or spin up the source with live
+reload to contribute.
+
+<RunPaths appName="Prism" slug="prism" accent="violet" />

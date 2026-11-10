@@ -1,0 +1,24 @@
+---
+title: Dashboard
+description: Read per-product rollups at prism.omni.dev
+---
+
+The dashboard at [prism.omni.dev](https://prism.omni.dev) reads per-product daily rollups for your workspace. It is gated behind an Omni sign-in.
+
+## What it shows
+
+- **Visitors and pageviews** over the selected range, with the change against the previous period.
+- **Top pages**, ranked by traffic.
+- **Custom events**, the named signals you report from your app.
+
+## Range control
+
+Pick the window you want to see. The dashboard compares it against the preceding window of the same length and surfaces the delta, so you read trends rather than raw totals.
+
+## Try it first
+
+The [public demo](https://prism.omni.dev/demo) runs the real dashboard on sample data, with no sign-in, so you can see the shape of the product before instrumenting anything.
+
+## GraphQL read API
+
+Prefer to pull the numbers yourself? Prism exposes a read-only GraphQL API behind the same Omni sign-in. It serves queries only; mutations are denied at the schema level. The read API is available on the [Pro and Team tiers](/products/prism/pricing).
