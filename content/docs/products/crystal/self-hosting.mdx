@@ -1,0 +1,97 @@
+---
+title: Self-Hosting
+description: Run the full Crystal stack on your own infrastructure with Docker Compose
+---
+
+Crystal ships a [Docker Compose](https://docs.docker.com/compose/) configuration
+that runs the full stack, Postgres database, API, and web app, on your own
+infrastructure. It builds the API and app **from source**, so you check out the
+service repositories and Compose builds the images locally.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) with Compose v2 (`docker compose`)
+- The Crystal metarepo, which holds the `compose.yaml`
+
+## Check out the services
+
+Compose builds each service from its repository under `services/`, so both must
+be present:
+
+- `services/crystal-api`, from [omnidotdev/crystal-api](https://github.com/omnidotdev/crystal-api)
+- `services/crystal-app`, from [omnidotdev/crystal-app](https://github.com/omnidotdev/crystal-app)
+
+Clone them into `services/` manually, or configure `services.yaml` and run
+`tilt up` once to have them checked out for you.
+
+## Configure
+
+Create a `.env` file in the metarepo directory. Two secrets are required;
+generate a strong random value for each with `openssl rand -base64 32`:
+
+```sh
+DB_PASSWORD=...            # required (openssl rand -base64 32)
+AUTH_SECRET=...            # required (openssl rand -base64 32)
+
+# Public URLs (defaults: http://localhost:3000 and :4000)
+APP_PUBLIC_URL=http://localhost:3000
+API_PUBLIC_URL=http://localhost:4000
+AUTH_BASE_URL=...          # your OIDC issuer, if using SSO
+BILLING_BASE_URL=...       # Aether billing service, if used
+
+# Optional OAuth providers
+# GOOGLE_CLIENT_ID= / GOOGLE_CLIENT_SECRET=
+# GITHUB_CLIENT_ID= / GITHUB_CLIENT_SECRET=
+# OIDC_ISSUER= / OIDC_CLIENT_ID= / OIDC_CLIENT_SECRET=
+```
+
+| Variable | Required | What it sets |
+|----------|----------|--------------|
+| `DB_PASSWORD` | Yes | Password for the Postgres database the stack provisions |
+| `AUTH_SECRET` | Yes | Signing secret for authentication (shared by the API and app) |
+| `APP_PUBLIC_URL` | No | Public URL of the web app (default `http://localhost:3000`) |
+| `API_PUBLIC_URL` | No | Public URL of the API (default `http://localhost:4000`) |
+| `AUTH_BASE_URL` | No | Your OIDC issuer, when using SSO |
+| `BILLING_BASE_URL` | No | Aether billing service, when used |
+
+Email and password sign-in is always enabled. To add social or enterprise
+sign-in, set the matching Google, GitHub, or OIDC credentials; leave a provider's
+variables blank to disable it.
+
+<Callout type="warn">
+  The app's public URLs (`APP_PUBLIC_URL`, `API_PUBLIC_URL`, and the auth and
+  billing base URLs) are **baked into the client bundle at build time**, not read
+  at runtime. If you change any of them, rebuild the image for the change to take
+  effect (see below).
+</Callout>
+
+The database name, user, and published ports can also be overridden
+(`DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`); they default to
+`crystal`, `postgres`, and ports `5432`, `4000`, and `3000`.
+
+## Build and run
+
+Build the images and start the stack:
+
+```sh
+docker compose up --build
+```
+
+Compose brings up Postgres first, waits for it to pass its health check, then
+builds and starts the API and the app. Once everything is running, open the app
+at `http://localhost:3000` (or your `APP_PUBLIC_URL`). The API listens on
+`http://localhost:4000`.
+
+Rebuild with `--build` whenever a public URL changes, since those values are
+compiled into the client bundle. Add `-d` to run in the background, and stop the
+stack with `docker compose down`. Database contents persist in the `db_data`
+volume between runs; `docker compose down -v` removes that volume and all data
+with it.
+
+## Payments
+
+Running your own instance does not change how money moves: payments and payouts
+still flow through Stripe Connect, so a self-hosted deployment needs its own
+Stripe configuration to accept real payments. See
+[payouts](/products/crystal/payouts) and
+[payments and fees](/products/crystal/payments-fees) for how billing works.
