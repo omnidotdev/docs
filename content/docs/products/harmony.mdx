@@ -1,0 +1,40 @@
+---
+title: 🎶 Harmony
+description: Templating and syncing engine for project files
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://harmony.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/harmony-cli`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+/>
+
+**Omni Harmony** is a templating and syncing engine for project files. It goes beyond one-time scaffolding: Harmony maintains a connection between your project and its source template, applying template updates over time while preserving local edits.
+
+## Documentation coming soon
+
+Full documentation is on the way. In the meantime:
+
+- Visit [harmony.omni.dev](https://harmony.omni.dev) for an overview
+- See the [README](https://github.com/omnidotdev/harmony-cli#readme) for installation and a quick start
+- Run `harmony --help` for the command reference
