@@ -1,0 +1,23 @@
+---
+title: High-Risk Payments
+description: Accept payments through your own Authorize.Net gateway when your business is not a fit for Stripe.
+---
+
+Some businesses are not a fit for Stripe's acceptable-use terms and need a gateway that serves high-risk merchants. For these stores, Halo supports accepting card payments through your own **Authorize.Net** account instead of Stripe Connect.
+
+## Bring your own gateway
+
+Each high-risk merchant brings their own Authorize.Net account. Connect it to your store by providing your gateway credentials, which Halo stores encrypted. Payments then route to your account rather than through Stripe.
+
+## Checkout
+
+At checkout, the buyer is handed off to Authorize.Net's hosted payment page to enter their card, then returned to your store. The redirect is locked to the fixed gateway URL and secured by a single-use token, so no card data passes through your storefront.
+
+## Refunds
+
+Refunds are issued back through Authorize.Net, in full or in part, with the same per-payment refund tracking as the rest of Halo.
+
+<Callout type="warn">
+  A gateway relationship is between you and the provider. You are responsible
+  for qualifying for and maintaining your own Authorize.Net account.
+</Callout>

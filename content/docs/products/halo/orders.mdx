@@ -1,0 +1,34 @@
+---
+title: Orders
+description: Track orders through their lifecycle, fulfill with tracking, handle returns and refunds, and notify buyers.
+---
+
+Every purchase becomes an **order** you manage from **Orders** in the dashboard. An order records the buyer, line items, totals (subtotal, discount, shipping, tax, and total), shipping and billing addresses, and its status.
+
+## Order lifecycle
+
+An order moves through a defined set of states:
+
+- **Pending**: Created but not yet paid. A pending order can be confirmed or cancelled.
+- **Confirmed**: Payment captured and inventory reserved.
+- **Partially fulfilled** and **Fulfilled**: Some or all lines have shipped.
+- **Completed**: The order is finished.
+- **Cancelled**: Stopped before fulfillment, releasing any reserved stock.
+
+Returns run alongside this: a fulfilled or completed order can move to **return requested** and then **returned**.
+
+## Fulfillment
+
+Fulfill an order by its lines, then mark each fulfillment **shipped** (with an optional tracking number and URL) and later **delivered**. You can connect a supplier so orders are fulfilled through a print-on-demand or dropship provider, with at most one active supplier per store.
+
+## Returns and refunds
+
+Create a **return request** for some or all of an order's lines with a reason, then approve it to restock the items. Refund a captured payment in full or in part; Halo tracks the cumulative refunded amount so successive refunds can never exceed what was captured.
+
+## Order emails
+
+When payment succeeds, Halo sends an order confirmation to the buyer, including download links for any digital items. Set a notification email for your store to be alerted on new orders.
+
+## Customers
+
+Orders are linked to **customers**, so you can see everyone who has bought from your store and each person's order history under **Customers**.

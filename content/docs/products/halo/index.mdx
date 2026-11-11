@@ -1,10 +1,9 @@
 ---
 title: 😇 Halo
-description: Modular ecommerce and CMS platform for creators. Sell physical and digital products, model your own content, publish pages and posts, and bring your own Stripe.
+description: Illuminated commerce for creators. Sell physical and digital products, model your own content, and bring your own Stripe.
 ---
 
 import { ProductOverview } from "@/components/docs";
-import app from "@/lib/config/app.config";
 import { PiShoppingCart, PiCreditCard, PiShieldCheck } from "react-icons/pi";
 
 <ProductOverview
@@ -20,7 +19,7 @@ import { PiShoppingCart, PiCreditCard, PiShieldCheck } from "react-icons/pi";
       className: "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300",
     },
     {
-      label: "Security",
+      label: "Content",
       icon: <PiShieldCheck />,
       className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
     },
@@ -31,48 +30,42 @@ import { PiShoppingCart, PiCreditCard, PiShieldCheck } from "react-icons/pi";
       label: "Visit Website",
       type: "website",
     },
-    {
-      href: `${app.socials.github}/halo`,
-      label: "Visit Repository",
-      type: "repository",
-    },
   ]}
   alerts={[
     {
-      title: "🚧 Under Construction",
+      title: "🚧 Early access",
       description:
-        "Halo is in early development. Expect this documentation to change rapidly.",
-    },
-    {
-      title: "💡 Big Idea",
-      description:
-        "Modular ecommerce and CMS for creators, with your own Stripe account and a self-hostable open-source core",
-    },
-    {
-      title: "🚩 Problem Solved",
-      description:
-        "Halo gives creators a flexible, modular commerce and content platform they can adapt to their business and self-host, while keeping full control of payments through their own Stripe account.",
+        "Halo is in early access. The documentation reflects how the product works today and may change as it opens up further.",
     },
   ]}
 />
 
-**Omni Halo** is a modular ecommerce and CMS platform for creators. Sign up and get a store, sell physical and digital products, model your own content types, and publish pages and posts, all while bringing your own Stripe account so you stay in control of your payments and payouts.
+**Omni Halo** is a commerce and content platform for creators. Sign up and get a store, sell physical and digital products, model your own content, and publish pages and articles, all while connecting your own Stripe account so you stay in control of your payments and payouts.
 
 ## Key Features
 
-- **Storefront and merchant dashboard**: A customer-facing store plus a dashboard to manage your catalog, content, and settings
-- **Physical and digital products**: Sell both physical goods and digital products from the same catalog
-- **Content management**: Model your own content types and publish pages and posts alongside your store
-- **Bring your own Stripe**: Connect your own Stripe account and start accepting cards in a few clicks
-- **Modular architecture**: Build your store with the components you need
-- **Self-hostable core**: An open-source core you can run yourself, or use the hosted multi-tenant platform
-- **Multi-vendor marketplaces**: Stores can host multiple vendors and sellers
-- **Plugin system**: Extend your store with plugins
+- **Storefront and merchant dashboard**: A customer-facing store plus a dashboard to manage your catalog, content, orders, and settings
+- **Physical and digital products**: Sell physical goods and digital products (file downloads, license keys, and external links) from the same catalog
+- **Content model**: Define your own content types and fields, then publish entries, pages, and articles alongside your store
+- **Bring your own Stripe**: Connect your own Stripe account with Stripe Connect and accept cards in a few steps
+- **Shipping and tax**: Set shipping zones and rates, and collect sales tax automatically with Stripe Tax
+- **Orders and fulfillment**: Track orders through their lifecycle, fulfill with tracking, and handle returns and refunds
+- **Test mode**: Place real end-to-end orders with no money before you go live
+- **AI agents**: Run store operations through an agent action API and an MCP server (Team tier)
 
 ## Documentation
 
-- [Getting Started](/products/halo/getting-started): Create your store and take it live
-- [Storefront](/products/halo/storefront): Stores, products, content types, and publishing
-- [Payments](/products/halo/payments): Connect Stripe and test end to end
-- [Tax](/products/halo/tax): Automatic sales tax at checkout
-- [Pricing](/products/halo/pricing): Plans and the platform fee
+- [Getting Started](/products/halo/getting-started): Create your store, connect Stripe, and take it live
+- [Stores](/products/halo/stores): Branding, policies, social links, and custom domains
+- [Products](/products/halo/products): Variants, options, inventory, collections, and subscriptions
+- [Digital Products](/products/halo/digital-products): File downloads, license keys, and entitlements
+- [Content](/products/halo/content): Content types, entries, singletons, and comments
+- [Payments](/products/halo/payments): Stripe Connect onboarding and built-in test mode
+- [Shipping](/products/halo/shipping): Zones and flat, price-based, and weight-based rates
+- [Discounts](/products/halo/discounts): Discount codes, automatic discounts, and stacking
+- [Tax](/products/halo/tax): Automatic sales tax at checkout via Stripe Tax
+- [Orders](/products/halo/orders): Order lifecycle, fulfillment, returns, and emails
+- [Agents](/products/halo/agent): The agent action API and MCP server (Team tier)
+- [Sales Channels](/products/halo/sales-channels): Sync orders from the Amazon sales channel
+- [High-Risk Payments](/products/halo/high-risk-payments): Bring your own Authorize.Net gateway
+- [Pricing](/products/halo/pricing): Plans and the per-sale platform fee

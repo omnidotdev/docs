@@ -1,15 +1,20 @@
 ---
 title: Tax
-description: Automatic sales tax calculation and collection at checkout via Stripe Tax.
+description: Calculate and collect sales tax automatically at checkout with Stripe Tax and your own registrations.
 ---
 
-Halo calculates and collects sales tax automatically at checkout via Stripe Tax.
+Halo calculates and collects sales tax automatically at checkout through Stripe Tax, running on your own connected Stripe account.
 
 ## Registrations
 
-Manage your own tax registrations (the regions where you are required to collect) from **Settings → Tax**. Tax is then computed per order based on where you are registered.
+Add the jurisdictions where you are required to collect tax from **Settings → Tax**. Each registration lives on your connected Stripe account. Once you have at least one active registration, Stripe Tax computes and collects tax on every order for the regions you are registered in.
+
+## Tax origin
+
+Stripe Tax calculates from your **tax origin** (your head-office address). Halo derives this from your connected account's business address when it first verifies, and you can override it later if your tax origin differs.
 
 <Callout type="warn">
   You remain responsible for registering with the relevant tax authorities and
-  remitting what you collect.
+  remitting what you collect. Halo calculates and collects tax, but does not
+  file or remit it on your behalf.
 </Callout>

@@ -3,12 +3,22 @@ title: Payments
 description: Connect your own Stripe account with Stripe Connect and validate your store end to end with built-in test mode.
 ---
 
-Halo uses Stripe Connect: connect your own Stripe account from **Settings → Payments** in a few clicks and start accepting cards. Because you bring your own Stripe, you stay in control of your payments and payouts.
+Halo uses Stripe Connect, so you bring your own Stripe account and stay in control of your payments and payouts. Halo never holds your funds; card payments settle to your connected account.
+
+## Connect Stripe
+
+From **Settings → Payments**, start Stripe onboarding. Halo creates a connected Stripe account for your store and sends you to Stripe's hosted onboarding to verify your business details. When onboarding completes, your connection flips to verified and you can accept cards. Re-running onboarding reuses your existing account and just issues a fresh link.
+
+## The platform fee
+
+Each storefront sale carries a small platform fee, collected automatically through Stripe as the Connect application fee at checkout. The fee is a percentage that drops as you move up plans, and it is separate from Stripe's own card-processing fees. See [Pricing](/products/halo/pricing) for the per-plan rate.
 
 ## Test mode
 
-A built-in **test mode** lets you place real end-to-end orders with no money and no real processor, so you can validate your full store before going live.
+A built-in **test mode** lets you place real end-to-end orders with no money and no real processor, so you can validate your full store before going live. Turn it on from **Settings → Payments**. Orders placed in test mode are flagged and excluded from your payouts and analytics, so test traffic never pollutes your real numbers.
 
 <Callout type="info">
-  Switch out of test mode when you are ready to accept real orders.
+  Switch test mode off when you are ready to accept real orders.
 </Callout>
+
+High-risk merchants can bring their own dedicated gateway instead of Stripe. See [High-Risk Payments](/products/halo/high-risk-payments).

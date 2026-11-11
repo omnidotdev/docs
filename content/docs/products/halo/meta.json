@@ -1,4 +1,19 @@
 {
   "title": "😇 Halo",
-  "pages": ["getting-started", "storefront", "payments", "tax", "pricing"]
+  "pages": [
+    "getting-started",
+    "stores",
+    "products",
+    "digital-products",
+    "content",
+    "payments",
+    "shipping",
+    "discounts",
+    "tax",
+    "orders",
+    "agent",
+    "sales-channels",
+    "high-risk-payments",
+    "pricing"
+  ]
 }
