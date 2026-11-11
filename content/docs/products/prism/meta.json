@@ -2,8 +2,8 @@
   "title": "📊 Prism",
   "pages": [
     "getting-started",
-    "concepts",
     "instrumenting",
+    "concepts",
     "dashboard",
     "pricing"
   ]
