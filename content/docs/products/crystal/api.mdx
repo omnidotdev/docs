@@ -1,29 +1,33 @@
 ---
 title: API
-description: Programmatic access to your Crystal data (paid plans)
+description: Programmatic access to your Crystal data (on the roadmap)
 ---
 
 <Callout type="info">
-  API access is included on the **Pro** and **Team** plans. See
-  [payments and fees](/products/crystal/payments-fees) for the plan comparison.
+  A public creator API is **planned, not yet available**. This page describes
+  the intended direction so you can plan ahead, not a feature you can use today.
+  Nothing here is a live contract.
 </Callout>
 
-Crystal is built API-first: the same data that powers your dashboard (your
-tiers, goals, supporters, digital products, and earnings) is available
-programmatically so you can build on top of your creator business.
+Crystal does not yet offer creator API keys or a documented public API. The
+GraphQL endpoint that powers the dashboard is an internal interface for the
+Crystal app, not a supported integration surface, so treat it as off-limits: it
+is unauthenticated for third parties, undocumented, and free to change without
+notice.
 
-Typical uses include:
+## What is planned
+
+The goal is to make the same data that powers your dashboard, your tiers, goals,
+supporters, digital products, and earnings, available programmatically so you
+can build on top of your creator business. Uses that path would open up include:
 
 - Syncing your supporters or sponsorship activity into your own tools
 - Reporting on earnings and payouts outside the dashboard
 - Automating actions when a new supporter joins or a goal is reached
 
-<Callout type="warn">
-  A published, stable public API reference is still being finalized as Crystal
-  moves toward general availability. This page describes the direction, not yet
-  a frozen contract, so treat details as subject to change.
-</Callout>
+When programmatic access ships, it will arrive with creator-scoped
+authentication and a published, versioned reference. This page will be updated
+to describe how to generate a key and which operations are supported.
 
-If you want early access or have a specific integration in mind, reach out
-through your Crystal dashboard so we can point you at the current endpoints and
-authentication details for your account.
+If you have a specific integration in mind, reach out through your Crystal
+dashboard so your use case can inform what gets built first.

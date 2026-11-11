@@ -2,14 +2,18 @@
   "title": "💎 Crystal",
   "pages": [
     "getting-started",
-    "payouts",
     "profile",
+    "payouts",
     "membership-tiers",
     "sponsorships",
     "funding-goals",
     "donations",
     "digital-sales",
+    "posts",
+    "earnings",
+    "verification",
     "payments-fees",
-    "api"
+    "api",
+    "self-hosting"
   ]
 }
