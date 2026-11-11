@@ -1,0 +1,92 @@
+---
+title: Harmony in CI
+description: Keep generated files in sync automatically in a pipeline
+---
+
+Harmony runs non-interactively, so a pipeline can use it to keep a project in
+sync with its template and fail (or open a pull request) when the two drift
+apart.
+
+## Run without prompts
+
+Two options make Harmony non-interactive:
+
+- `harmony apply --defaults` takes every question's default instead of
+  prompting, for deterministic first generation
+- `harmony update` reprompts for nothing: it reuses the answers saved in
+  `.harmony-answers.yaml`, so it is already non-interactive
+
+Because questions are answered deterministically (from defaults or from the
+saved answers file), the same inputs always produce the same output, which is
+what makes a CI diff meaningful.
+
+## Detect drift
+
+Run `harmony update` against the checked-in project, then let Git tell you
+whether anything changed:
+
+```sh
+harmony update .
+git diff --exit-code
+```
+
+`git diff --exit-code` returns non-zero when `update` changed any file, failing
+the job when the project has fallen behind its template.
+
+## Fail on conflicts
+
+`harmony update` finishes successfully even when files conflict: it leaves
+git-style conflict markers in place and reports the count, but exits zero. To
+fail a pipeline on conflicts, scan the tree for conflict markers after updating:
+
+```sh
+harmony update .
+if git grep -n '^<<<<<<<' -- . > /dev/null; then
+  echo "Harmony update produced conflicts; resolve them manually."
+  exit 1
+fi
+```
+
+## Example: GitHub Actions
+
+This workflow installs Harmony, updates the repository from its template, and
+fails if the update introduced changes or conflicts:
+
+```yaml
+name: template-sync
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Harmony
+        run: brew install omnidotdev/tap/harmony
+
+      - name: Update from template
+        run: harmony update .
+
+      - name: Fail on conflicts
+        run: |
+          if git grep -n '^<<<<<<<' -- . > /dev/null; then
+            echo "Harmony update produced conflicts."
+            exit 1
+          fi
+
+      - name: Fail on drift
+        run: git diff --exit-code
+```
+
+Swap the final `git diff --exit-code` step for a commit-and-open-pull-request
+step if you would rather have the pipeline propose the sync than block on it.
+
+<Callout type="info">
+  `harmony update` reads `.harmony-answers.yaml` and the `.harmony/` baseline
+  snapshot from the project. Both must be committed for the update to run in a
+  clean CI checkout.
+</Callout>
