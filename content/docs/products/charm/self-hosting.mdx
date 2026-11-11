@@ -1,0 +1,93 @@
+---
+title: Self-Hosting
+description: Create a Discord application and run Charm with Docker Compose
+---
+
+Charm ships a [Docker Compose](https://docs.docker.com/compose/) stack that runs
+the bot and its Postgres database together. You need Docker and a Discord bot
+token.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) with Compose v2 (`docker compose`)
+- The Charm metarepo, from
+  [omnidotdev/charm-stack](https://github.com/omnidotdev/charm-stack), which holds
+  the `compose.yaml`
+
+## 1. Create the Discord application
+
+1. Open the [Discord Developer Portal](https://discord.com/developers/applications),
+   choose **New Application**, and name it (for example, Charm).
+2. Go to **Bot** and copy the **token**. You will set it as `CHARM_DISCORD_TOKEN`.
+3. Under **Privileged Gateway Intents**, enable the **Server Members Intent**. This
+   is required for welcome and goodbye messages, auto-roles, and member logging.
+4. To log message edits and deletions and to run the content-based automod filters
+   (invite, link, and banned-word filters), also enable the **Message Content
+   Intent**, then set `CHARM_MESSAGE_CONTENT=true` (see
+   [environment variables](#environment-variables)).
+
+<Callout type="info">
+  The Message Content Intent is privileged and off by default, so Charm always
+  connects without it. Mention-spam filtering and anti-raid do not need it; only
+  message-content logging and the invite, link, and banned-word filters do.
+</Callout>
+
+## 2. Invite the bot
+
+Under **OAuth2 > URL Generator**, select the scopes `bot` and
+`applications.commands`. For bot permissions, start with **Send Messages**,
+**Embed Links**, and **Attach Files**. To let Charm carry out moderation and role
+actions, also grant the permissions those actions use: **Kick Members**, **Ban
+Members**, **Moderate Members** (timeouts), **Manage Messages** (purge and automod
+deletes), and **Manage Roles** (auto-roles, reaction roles, and level rewards).
+
+Open the generated URL and add the bot to your server.
+
+## 3. Run it
+
+From the metarepo directory:
+
+```bash
+cp .env.local.template .env.local
+# edit .env.local and paste your token into CHARM_DISCORD_TOKEN
+docker compose up -d
+```
+
+Compose starts Postgres first, waits for it to pass its health check, then builds
+and starts the bot. Charm connects, runs its database migrations automatically,
+and registers its slash commands globally. The first global registration can take
+a few minutes to propagate across Discord.
+
+The Compose file points the bot at the bundled database, so you do not need to set
+`DATABASE_URL` yourself when using Compose. Database contents persist in the
+`charm-db` volume between runs. Stop the stack with `docker compose down`, and
+remove the volume and all stored configuration with `docker compose down -v`.
+
+## Environment variables
+
+Configuration is read from the environment (Compose loads `.env.local`).
+
+| Variable | Required | What it sets |
+| --- | --- | --- |
+| `CHARM_DISCORD_TOKEN` | Yes | Discord bot token from the developer portal |
+| `DATABASE_URL` | Yes | Postgres connection string. The Compose file sets this to the bundled database, so you only set it for a standalone run |
+| `CHARM_MESSAGE_CONTENT` | No | Set to `true` (or `1`) to request the privileged Message Content intent. Off by default. Required for message-content logging and the invite, link, and banned-word automod filters |
+| `CHARM_SHARD_COUNT` | No | Number of gateway shards. Leave unset for Discord-recommended autosharding |
+| `CHARM_HEALTH_PORT` | No | Port for the health-check HTTP server (default `8080`) |
+| `RUST_LOG` | No | Log filter (default `charm=info`; for example `charm=debug`) |
+
+<Callout type="warn">
+  Setting `CHARM_MESSAGE_CONTENT=true` without also enabling the Message Content
+  Intent in the developer portal prevents the bot from connecting. Enable the
+  intent in the portal first. Conversely, with the variable left off, the content
+  filters and message-content logging silently do nothing, because the message
+  body never reaches the bot.
+</Callout>
+
+## Configure in Discord
+
+Once the bot is online, configure it with slash commands. Configuration commands
+require the **Manage Server** permission. Start with your
+[theme](/products/charm/theming) and
+[welcome messages](/products/charm/welcome-and-goodbye), then enable the features
+you want from the pages in this section.
