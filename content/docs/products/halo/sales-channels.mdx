@@ -1,0 +1,20 @@
+---
+title: Sales Channels
+description: Connect the Amazon sales channel so marketplace orders sync into Halo alongside your storefront orders.
+---
+
+A **sales channel** brings orders from another marketplace into Halo, so every order lives in one place. Halo supports the Amazon sales channel.
+
+## Connect Amazon
+
+Authorize Amazon from your store to connect the channel. Halo completes the Amazon selling-partner authorization and stores your credentials encrypted, bound to the store that started the flow.
+
+## Order import
+
+Once connected, Halo polls Amazon on a schedule and imports new orders, tracking a watermark so it only pulls what is new. Amazon orders are already paid and confirmed on the marketplace, so Halo records each as a confirmed order and skips the payment step. Imports are idempotent, so re-running never duplicates an order.
+
+Imported orders appear in **Orders** next to your storefront orders and move through the same fulfillment and returns lifecycle. See [Orders](/products/halo/orders).
+
+## Data retention
+
+Buyer contact details on imported orders are scrubbed on a retention schedule, so marketplace personal data is not kept longer than needed.

@@ -1,0 +1,33 @@
+---
+title: Agents
+description: Run store operations through the agent action API and an MCP server, with every action gated, scoped, and audited.
+---
+
+<Callout type="info">
+  AI agents are a **Team-tier** feature. See [Pricing](/products/halo/pricing).
+</Callout>
+
+Halo exposes its store operations as a catalog of agent **tools** so an AI agent can run your store through a structured, recorded interface instead of clicking through the dashboard. The same tool catalog, gating, and action logging back both surfaces below, so there is one source of truth.
+
+## What an agent can do
+
+The tool catalog covers everyday store operations, including:
+
+- Create, update, and delete products, and configure digital delivery and license keys
+- Confirm, cancel, and fulfill orders, mark fulfillments shipped and delivered
+- Request and complete returns, capture and refund payments
+- Apply and remove discounts
+- Create and update content entries
+- Read store statistics
+
+Every call is scoped to a single store, recorded in an action log with its input, output, status, and duration, and emitted as an event for the rest of your stack to react to.
+
+## Agent action API
+
+Run a tool over GraphQL with the `executeAgentAction` mutation, passing the tool name and a structured input. The response carries the tool, its output, and status. The call is gated on your plan's agent entitlement and scoped to the store in context (set with the `X-Store-Slug` header).
+
+## MCP server
+
+Halo also exposes the same tool catalog over the Model Context Protocol at `POST /mcp`, so an external agent can discover and call tools through a standard protocol. The endpoint runs over Streamable HTTP and is stateless, so it scales horizontally.
+
+Authentication mirrors the API: send a service key or a verified Omni identity token, and identify the store with the `X-Store-Slug` (or `X-Storefront-Domain`) header. A token-based caller can only reach stores it has access to.

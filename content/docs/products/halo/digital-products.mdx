@@ -1,0 +1,22 @@
+---
+title: Digital Products
+description: Sell file downloads, license keys, and external links, with per-purchase limits and buyer entitlements.
+---
+
+A product whose type is **digital** is delivered electronically instead of shipped. Each digital product has exactly one delivery type: a file download, a license key, or an external link.
+
+## Delivery types
+
+- **File download**: Upload one or more deliverable files. The bytes live in private storage and are only ever served through a token-gated download, never from the public media library.
+- **License key**: Deliver a key per purchase. Pre-load a **pool** of keys that each purchase claims, or have Halo **generate** keys from a format template (for example `XXXX-XXXX-XXXX-XXXX`).
+- **External link**: Point buyers at a URL you host, delivered after purchase.
+
+## Download limits and expiry
+
+For file and license deliveries you can cap the number of downloads per purchase and set how long access stays valid after purchase. Leave either unset for unlimited downloads or access that never expires.
+
+## Entitlements
+
+When an order's payment succeeds, Halo creates a buyer **entitlement** for each digital line and emails the buyer a download link. The link carries an unguessable access token, so buyers reach their purchase without creating an account. Each download is counted against the purchase's limit, and access stops once the limit or expiry is reached.
+
+You can revoke an entitlement at any time to cut off access, and a license key can be revoked independently.

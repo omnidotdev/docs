@@ -3,33 +3,49 @@ title: Getting Started
 description: Create your Halo store, connect Stripe, add products and content, and take your store live.
 ---
 
-<Callout type="warn">
-  Halo is in early development. These steps describe the intended flow and will
-  change as the product matures.
+<Callout type="info">
+  Halo is in early access. The steps below reflect how the product works today
+  and may change as it opens up further.
 </Callout>
 
-Halo is a hosted, multi-tenant platform: you sign up and get your own store. An open-source core is also available if you would rather self-host.
+Halo is a hosted, multi-tenant platform: you sign up and get your own store with a customer-facing storefront and a merchant dashboard. This guide takes you from a new account to a live store taking real orders.
 
 ## 1. Create your store
 
-Sign up and get a store of your own. Your store comes with a customer-facing storefront and a merchant dashboard where you manage your catalog, content, and settings.
+Sign in with your Omni account, then create a store under your workspace. Each store has its own storefront, catalog, content, and settings, and is served from its own slug (and optionally your own domain, see [Stores](/products/halo/stores)).
 
 ## 2. Connect Stripe
 
-Halo brings your own Stripe. From **Settings → Payments**, connect your Stripe account so you can start accepting cards. See [Payments](/products/halo/payments) for details, including built-in test mode.
+From **Settings → Payments**, connect your own Stripe account through Stripe Connect. Because you bring your own Stripe, you stay in control of your payments and payouts. See [Payments](/products/halo/payments) for the onboarding flow and built-in test mode.
 
 ## 3. Add products
 
-Add physical and digital products to your catalog from the merchant dashboard. See [Storefront](/products/halo/storefront) for how products and content fit together.
+Add physical and digital products from **Products**. Give each product options and variants, set prices, and track inventory. See [Products](/products/halo/products), and [Digital Products](/products/halo/digital-products) for downloads, license keys, and external links.
 
 ## 4. Model content and publish
 
-Model your own content types and publish pages and posts alongside your store. See [Storefront](/products/halo/storefront).
+Define your own content types and fields under **Settings → Content model**, then create entries, pages, and articles under **Content**. See [Content](/products/halo/content).
 
-## 5. Configure tax
+## 5. Configure shipping and tax
 
-If you collect sales tax, add your tax registrations from **Settings → Tax** so tax is calculated automatically at checkout. See [Tax](/products/halo/tax).
+Set up shipping zones and rates under **Settings → Shipping**, and add your tax registrations under **Settings → Tax** so sales tax is calculated automatically at checkout. See [Shipping](/products/halo/shipping) and [Tax](/products/halo/tax).
 
 ## 6. Go live
 
-Once your store is set up and Stripe is connected, switch out of test mode and start taking real orders. Review [Pricing](/products/halo/pricing) for plan details and the per-sale platform fee.
+Validate the full checkout with [test mode](/products/halo/payments) first. When everything looks right, switch test mode off and start taking real orders. Review [Pricing](/products/halo/pricing) for plan details and the per-sale platform fee.
+
+## Finding your way around
+
+The dashboard sidebar is your home base once a store is active:
+
+| Section | What it is for |
+|---------|----------------|
+| **Dashboard** | Revenue, order count, average order value, and top products at a glance |
+| **Products** | Your catalog: products, options, variants, prices, and inventory |
+| **Categories** | Collections that group products on your storefront |
+| **Content** | Entries, singleton pages, and the media library |
+| **Orders** | Every order, its status, fulfillments, and refunds |
+| **Customers** | The people who have bought from your store |
+| **Comments** | Reader comments on your content, with moderation |
+| **Marketing** | Discount codes and email subscribers |
+| **Settings** | Store branding, content model, navigation, payments, shipping, tax, and billing |
