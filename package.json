@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "bun run scripts/syncProductDocs.ts && bun run scripts/generateCatalog.ts && vite build",
+    "build": "bun run scripts/syncProductDocs.ts && bun run scripts/generateCatalog.ts && NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "catalog:generate": "bun run scripts/generateCatalog.ts",
     "docs:sync": "bun run scripts/syncProductDocs.ts",
     "start": "node .output/server/index.mjs",
