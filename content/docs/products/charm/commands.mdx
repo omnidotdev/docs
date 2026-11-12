@@ -1,0 +1,109 @@
+---
+title: Command Reference
+description: Every Charm slash command, its arguments, and the permission it needs
+---
+
+Every Charm command is a slash command. The permission column is the Discord
+permission a member needs to run the command. Arguments in `<angle brackets>` are
+required; arguments in `[square brackets]` are optional.
+
+## Theme
+
+See [theming and branding](/products/charm/theming).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/theme preset <name>` | Manage Server | Set the base preset (`charm`, `cobalt`, `ember`, `forest`, `mono`) |
+| `/theme color <role> <hex>` | Manage Server | Override a color (`accent`, `success`, `warning`, `error`, `info`) |
+| `/theme branding [name] [icon]` | Manage Server | Set the embed author branding |
+| `/theme footer [text] [icon]` | Manage Server | Set the embed footer |
+| `/theme show` | Manage Server | Show the current theme |
+| `/theme reset` | Manage Server | Reset to the `charm` preset |
+
+## Welcome and goodbye
+
+See [welcome and goodbye](/products/charm/welcome-and-goodbye).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/welcome channel <channel>` | Manage Server | Set the welcome channel |
+| `/welcome message <template>` | Manage Server | Set the welcome message |
+| `/welcome toggle <enabled>` | Manage Server | Enable or disable welcome messages |
+| `/welcome card <enabled>` | Manage Server | Enable or disable the welcome card image |
+| `/welcome background <value>` | Manage Server | Set the card background (`solid`, `gradient`, or an image URL) |
+| `/welcome goodbye channel <channel>` | Manage Server | Set the goodbye channel |
+| `/welcome goodbye message <template>` | Manage Server | Set the goodbye message |
+| `/welcome goodbye toggle <enabled>` | Manage Server | Enable or disable goodbye messages |
+| `/welcome test` | Manage Server | Post a welcome preview for yourself |
+
+## Moderation
+
+See [moderation](/products/charm/moderation).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/modlog [channel]` | Manage Server | Set or clear the mod-log channel |
+| `/warn <user> [reason]` | Moderate Members | Warn a member |
+| `/timeout <user> <duration> [reason]` | Moderate Members | Time a member out (up to 28 days) |
+| `/untimeout <user> [reason]` | Moderate Members | Remove a member's timeout |
+| `/kick <user> [reason]` | Kick Members | Kick a member |
+| `/ban <user> [reason] [delete_days]` | Ban Members | Ban a user and optionally delete 0 to 7 days of messages |
+| `/unban <user_id> [reason]` | Ban Members | Lift a ban by numeric user ID |
+| `/purge <count>` | Manage Messages | Bulk-delete 1 to 100 recent messages |
+| `/case <number>` | Moderate Members | Show a case by number |
+| `/cases <user>` | Moderate Members | List a member's recent cases |
+
+## Automod and anti-raid
+
+See [automod and anti-raid](/products/charm/automod-and-anti-raid).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/automod enable <enabled>` | Manage Server | Turn automod on or off |
+| `/automod invites <enabled>` | Manage Server | Block Discord invite links |
+| `/automod links <enabled>` | Manage Server | Block all links |
+| `/automod mentions <max>` | Manage Server | Set the max mentions per message (`0` disables) |
+| `/automod action <action> [duration]` | Manage Server | Set the violation response (`delete`, `delete and warn`, `delete and timeout`) |
+| `/automod addword <word>` | Manage Server | Add a filtered word |
+| `/automod removeword <word>` | Manage Server | Remove a filtered word |
+| `/automod words` | Manage Server | List filtered words |
+| `/automod status` | Manage Server | Show the automod configuration |
+| `/antiraid config <enabled> <threshold> <window> [timeout]` | Manage Server | Configure join-rate protection |
+| `/antiraid status` | Manage Server | Show the anti-raid configuration |
+
+## Roles
+
+See [roles](/products/charm/roles).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/autorole add <role>` | Manage Roles | Auto-assign a role on join |
+| `/autorole remove <role>` | Manage Roles | Stop auto-assigning a role |
+| `/autorole list` | Manage Roles | List auto-assigned roles |
+| `/reactionrole add <message_id> <emoji> <role>` | Manage Roles | Bind an emoji on a message to a role |
+| `/reactionrole remove <message_id> <emoji>` | Manage Roles | Remove a reaction-role binding |
+| `/reactionrole list` | Manage Roles | List reaction-role bindings |
+
+## Logging
+
+See [logging](/products/charm/logging).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/logs channel [channel]` | Manage Server | Set or clear the log channel |
+| `/logs toggle <category> <enabled>` | Manage Server | Toggle a category (`messages`, `members`) |
+| `/logs status` | Manage Server | Show the logging configuration |
+
+## Leveling
+
+See [leveling](/products/charm/leveling).
+
+| Command | Permission | Description |
+| --- | --- | --- |
+| `/levels enable <enabled>` | Manage Server | Turn leveling on or off |
+| `/levels channel [channel]` | Manage Server | Set or clear the level-up announcement channel |
+| `/levels role add <level> <role>` | Manage Server | Grant a role at a level |
+| `/levels role remove <level>` | Manage Server | Remove a level-reward role |
+| `/levels role list` | Manage Server | List level-reward roles |
+| `/rank [user]` | Everyone | Show your rank, or another member's |
+| `/leaderboard` | Everyone | Show the XP leaderboard |

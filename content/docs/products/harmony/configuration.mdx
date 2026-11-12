@@ -1,0 +1,217 @@
+---
+title: Configuration
+description: The Harmony config file, settings, questions, and Tera templating
+---
+
+A template is configured by a single file at its root. Harmony looks for these
+names, in order, and uses the first it finds:
+
+1. `harmony.yaml`
+2. `harmony.yml`
+3. `harmony.toml`
+4. `harmony.json`
+
+The format is interchangeable: YAML, TOML, and JSON express the same structure.
+`harmony init --format toml` (or `json`) scaffolds a config in that format.
+
+The file has two kinds of keys. Keys prefixed with an underscore are
+**settings** that control generation. Every other key is a **question**, a value
+Harmony prompts for and makes available to templates.
+
+```yaml
+# a setting
+_templates_suffix: ".tera"
+
+# a question
+project_name:
+  type: str
+  help: "What is your project name?"
+  default: "my-project"
+```
+
+## Settings
+
+All settings are optional.
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `_templates_suffix` | `.tera` | Files ending in this suffix are rendered with Tera and the suffix is stripped from the output name. Other files are copied verbatim |
+| `_answers_file` | `.harmony-answers.yaml` | Name of the file Harmony writes answers to in the output directory |
+| `_exclude` | `[]` | Gitignore-style globs, matched against the source path. Matching files are not copied |
+| `_skip_if_exists` | `[]` | Gitignore-style globs. On `apply`, a matching file that already exists in the output is left untouched |
+| `_subdirectory` | none | Generate from this subdirectory of the template, while the config stays at the template root |
+| `_min_harmony_version` | none | Minimum Harmony version the template requires. `apply` and `update` fail if the running binary is older |
+| `_message_before_apply` | none | Message printed before `apply` runs |
+| `_message_after_apply` | none | Message printed after `apply` completes |
+| `_message_before_update` | none | Message printed before `update` runs |
+| `_message_after_update` | none | Message printed after `update` completes |
+| `_tasks` | `[]` | Commands to run after generation (see [Tasks](#tasks)) |
+
+```yaml
+_templates_suffix: ".tera"
+_answers_file: ".harmony-answers.yaml"
+_exclude:
+  - ".git/**"
+  - "node_modules/**"
+_skip_if_exists:
+  - ".env"
+  - "*.local.*"
+_message_after_apply: "Done. Run 'npm install' to get started."
+```
+
+<Callout type="warn">
+  `harmony update` locates a project's answers by the default name
+  `.harmony-answers.yaml`. Keep `_answers_file` at its default unless you do not
+  rely on `update`.
+</Callout>
+
+## Questions
+
+Any key without an underscore prefix is a question. Harmony prompts for each one
+during `apply` (questions are asked in alphabetical order by key) and exposes
+the answer to templates under the key name.
+
+```yaml
+project_name:
+  type: str
+  help: "What is your project name?"
+  default: "my-project"
+```
+
+A question supports these fields:
+
+| Field | Purpose |
+|-------|---------|
+| `type` | The value type: `str`, `bool`, `int`, `float`, or `path`. Defaults to `str` |
+| `help` | Help text shown alongside the prompt |
+| `default` | Value used as the prompt default, and the value taken by `apply --defaults` |
+| `choices` | A fixed list to select from (`str` questions only) |
+| `secret` | When `true`, hide the typed input (`str` questions only) |
+
+### Types
+
+```yaml
+name:
+  type: str          # text input
+  help: "Project name"
+  default: "my-app"
+
+use_docker:
+  type: bool         # yes / no
+  help: "Include Docker support?"
+  default: true
+
+port:
+  type: int          # integer
+  help: "Server port"
+  default: 3000
+
+threshold:
+  type: float         # decimal number
+  help: "Scaling threshold"
+  default: 0.75
+
+output_dir:
+  type: path          # filesystem path (entered as text)
+  help: "Build output directory"
+  default: "dist"
+```
+
+### Choices
+
+Restrict a `str` question to a fixed set of options. The prompt becomes a
+selection list:
+
+```yaml
+license:
+  type: str
+  help: "License"
+  choices:
+    - MIT
+    - Apache-2.0
+    - GPL-3.0
+  default: MIT
+```
+
+### Secrets
+
+Set `secret: true` on a `str` question to hide the typed input:
+
+```yaml
+api_key:
+  type: str
+  help: "API key"
+  secret: true
+```
+
+<Callout type="warn">
+  Answers are written to the project's answers file in plain text, secrets
+  included, so `harmony update` can reuse them. Do not place long-lived
+  credentials in a question whose answers file you commit; prefer a placeholder
+  the user replaces after generation.
+</Callout>
+
+## Tera templating
+
+Harmony renders templates with [Tera](https://keats.github.io/tera/), a
+Jinja-like engine. Answers are the template context, keyed by question name, so
+`{{ project_name }}` interpolates the answer to the `project_name` question.
+Tera's variables, conditionals, loops, and filters are all available:
+
+```md
+# {{ project_name }}
+
+{% if use_docker %}
+This project ships a Docker setup.
+{% endif %}
+```
+
+What gets rendered:
+
+- **File contents**: a file whose name ends in `_templates_suffix` (`.tera` by
+  default) is rendered, and the suffix is removed from the output name, so
+  `Dockerfile.tera` becomes `Dockerfile`. Files without the suffix are copied
+  byte for byte
+- **Paths**: file and directory names are rendered too, so
+  `{{ project_name }}/src/{{ module }}.rs.tera` lands at the answered path
+- **Never copied**: the template's own config file and its answers file are
+  excluded from output automatically
+
+Rendering does not HTML-escape, so template output is written exactly as
+produced.
+
+## Tasks
+
+`_tasks` runs commands after generation completes, from the output directory.
+Each entry is either a bare command string or a full form with a working
+directory and a condition:
+
+```yaml
+_tasks:
+  - "git init"
+  - command: "npm install"
+    working_dir: "frontend"
+    when: "{{ use_npm }}"
+```
+
+- `command`: the shell command to run (executed through `sh -c`)
+- `working_dir`: directory to run in, relative to the output (optional)
+- `when`: a Tera expression; the task runs only when it renders to `true`, `1`,
+  or `yes` (optional)
+
+A task that exits non-zero stops generation with an error.
+
+## The answers file and baseline
+
+On `apply`, Harmony writes two things into the output directory:
+
+- **`.harmony-answers.yaml`**: your answers plus metadata (the Harmony version
+  and the template source path), so a later `update` can re-render with the same
+  answers
+- **`.harmony/`**: a baseline snapshot of exactly what was generated
+
+`harmony update` needs both. It re-renders the template with the saved answers,
+then performs a three-way merge of each file across the baseline snapshot, the
+current project file, and the freshly rendered template. That is how it tells a
+template change apart from your local edit. Commit both so updates work for
+anyone who checks out the project.

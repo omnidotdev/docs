@@ -1,0 +1,76 @@
+---
+title: 🦋 Harmony
+description: Templating and syncing engine for project files
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { SiRust } from "react-icons/si";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Rust",
+      icon: <SiRust />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://harmony.omni.dev",
+      label: "Visit Website",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/harmony-cli`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+/>
+
+**Omni Harmony** is a Rust CLI for intelligent file syncing. It points at a
+source of truth (a template directory) and keeps a local copy in sync with it,
+even after the copy has diverged from its initial generation.
+
+Most scaffolding tools generate a project once and then forget it. The moment
+the template changes, every project created from it drifts out of date, and
+pulling those changes back in by hand means copying files and re-resolving edits
+one at a time. Harmony keeps the connection alive: it remembers how a project
+was generated, re-renders the template when it evolves, and merges the result
+into your project while preserving the edits you made along the way.
+
+## What it solves
+
+- **Project scaffolding**: generate a new project from a template, with
+  interactive prompts for the values that vary between projects
+- **Template evolution**: when the template changes, apply those changes to
+  existing projects with [`harmony update`](/products/harmony/commands#update)
+- **Configuration consistency**: keep shared files (CI workflows, linter
+  configs, editor settings) in sync across many projects from one source
+- **Local edits that survive**: a three-way merge reconciles template changes
+  with your local edits, and marks the few real conflicts with git-style
+  conflict markers instead of overwriting your work
+
+## How it works
+
+Harmony renders template files with the [Tera](https://keats.github.io/tera/)
+engine, driven by answers you supply when you run `harmony apply`. It records
+those answers and a baseline snapshot of what it generated, so a later
+`harmony update` can tell three things apart: what the template changed, what
+you changed locally, and what neither side touched. Clean changes merge
+automatically; overlapping changes are flagged for you to resolve.
+
+Configuration lives in a single file (`harmony.yaml`, `harmony.toml`, or
+`harmony.json`) at the template root, declaring the questions to ask and the
+settings that control generation.
+
+## Next steps
+
+- [Install](/products/harmony/install) the CLI
+- Follow the [quickstart](/products/harmony/quickstart) to generate and then
+  update a project
+- Learn the [configuration](/products/harmony/configuration) format: settings,
+  questions, and Tera templating
+- Browse the [command reference](/products/harmony/commands)
+- Keep files in sync automatically with [Harmony in CI](/products/harmony/ci)

@@ -1,0 +1,51 @@
+---
+title: Moderation
+description: Warn, timeout, kick, ban, purge, and track cases with a mod-log
+---
+
+Charm's moderation commands cover warnings, timeouts, kicks, bans, and bulk
+message removal. Every action is recorded as a numbered **case** and, when a
+mod-log channel is set, posted there.
+
+Each command requires the Discord permission that matches the action, shown next
+to it below.
+
+## Mod-log
+
+Set the channel where moderation actions are posted:
+
+```
+/modlog #mod-log
+```
+
+Run `/modlog` with no channel to disable the mod-log. This command requires
+**Manage Server**.
+
+## Actions
+
+| Command | Permission | What it does |
+| --- | --- | --- |
+| `/warn <user> [reason]` | Moderate Members | Record a warning against a member |
+| `/timeout <user> <duration> [reason]` | Moderate Members | Time a member out for a duration (for example `10m`, `1h30m`, `7d`), up to Discord's maximum of 28 days |
+| `/untimeout <user> [reason]` | Moderate Members | Remove a member's timeout early |
+| `/kick <user> [reason]` | Kick Members | Remove a member from the server |
+| `/ban <user> [reason] [delete_days]` | Ban Members | Ban a user. `delete_days` (0 to 7) removes that many days of their recent messages |
+| `/unban <user_id> [reason]` | Ban Members | Lift a ban by numeric user ID |
+| `/purge <count>` | Manage Messages | Bulk-delete recent messages in the current channel (1 to 100, each under 14 days old, a Discord limit on bulk deletion) |
+
+Durations use a compact format: a number followed by `d` (days), `h` (hours), `m`
+(minutes), or `s` (seconds), combined as needed (for example `1h30m`).
+
+## Cases
+
+Every warn, timeout, kick, ban, and unban is stored as a numbered case with the
+action, the member, the moderator, the reason, and the time.
+
+| Command | Permission | What it does |
+| --- | --- | --- |
+| `/case <number>` | Moderate Members | Show a single case by its number |
+| `/cases <user>` | Moderate Members | List a member's recent cases (up to 15) |
+
+When a mod-log channel is configured, each action is also posted there as a themed
+embed. Charm attempts to send the member a direct-message notice for actions where
+one applies, on a best-effort basis.

@@ -23,7 +23,7 @@ Create a client once and report pageviews on every route change:
 import { createPrismClient, usePageview } from "@omnidotdev/providers/analytics";
 
 const prism = createPrismClient({
-  collectorUrl: PRISM_COLLECTOR_URL,
+  collectorUrl: import.meta.env.VITE_PRISM_COLLECTOR_URL,
   product: "<your-product>",
 });
 

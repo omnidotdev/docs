@@ -1,0 +1,122 @@
+---
+title: Commands
+description: Harmony command and flag reference
+---
+
+Harmony has four commands, plus the global `--help` and `--version` flags.
+
+```sh
+harmony --help       # show help
+harmony --version    # show the installed version
+```
+
+## init
+
+Create a starter Harmony config in a template directory.
+
+```sh
+harmony init [--format <format>] [path]
+```
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--format` | `yaml` | Config format to generate: `yaml`, `toml`, or `json` |
+| `path` | `.` | Directory to create the config in |
+
+The generated file (`harmony.<format>`) contains the default settings. Add your
+own questions to it (see [configuration](/products/harmony/configuration)).
+
+```sh
+harmony init                 # writes harmony.yaml in the current directory
+harmony init --format toml   # writes harmony.toml instead
+harmony init ./my-template   # writes into ./my-template
+```
+
+## apply
+
+Generate a project from a template.
+
+```sh
+harmony apply --input <dir> --output <dir> [--defaults] [--dry-run]
+```
+
+| Flag | Alias | Description |
+|------|-------|-------------|
+| `--input` | `-i` | Template source directory (required) |
+| `--output` | `-o` | Output directory for the generated project (required) |
+| `--defaults` | | Skip the prompts and use each question's default |
+| `--dry-run` | | Print what would be generated without writing anything |
+
+`apply` prompts for each question (unless `--defaults`), renders the template,
+writes the output, runs any `_tasks`, and saves the answers file and baseline
+snapshot. Files matched by `_skip_if_exists` that already exist are left
+untouched and reported as skipped.
+
+```sh
+harmony apply -i ./tpl -o ./out              # interactive
+harmony apply -i ./tpl -o ./out --defaults   # non-interactive, use defaults
+harmony apply -i ./tpl -o ./out --dry-run    # preview only
+```
+
+<Callout type="info">
+  `apply` overwrites existing output files unless they match `_skip_if_exists`.
+  To bring template changes into a project without discarding local edits, use
+  [`update`](#update) instead of re-running `apply`.
+</Callout>
+
+<Callout type="warn">
+  `--dry-run` still prompts for answers unless you also pass `--defaults`.
+  Combine `--dry-run --defaults` for a fully non-interactive preview.
+</Callout>
+
+## update
+
+Update a generated project with upstream template changes, preserving local
+edits via a three-way merge.
+
+```sh
+harmony update [path]
+```
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `path` | `.` | The generated project directory to update |
+
+`update` reads the project's `.harmony-answers.yaml` to find the template and
+the original answers, re-renders the template, and merges each file. It reports
+every file as created, updated, or conflicted, and refreshes the baseline
+snapshot. Conflicted files are written with git-style conflict markers for
+manual resolution.
+
+```sh
+harmony update               # update the project in the current directory
+harmony update ./my-project  # update a specific project
+```
+
+<Callout type="warn">
+  `update` finishes successfully even when files conflict (it reports the count
+  and leaves conflict markers in place). It does not exit non-zero on conflict,
+  so in automation, scan for conflict markers rather than relying on the exit
+  code. See [Harmony in CI](/products/harmony/ci).
+</Callout>
+
+## completions
+
+Generate a shell completion script and print it to standard output.
+
+```sh
+harmony completions <shell>
+```
+
+`<shell>` is one of `bash`, `zsh`, `fish`, `elvish`, or `powershell`.
+
+```sh
+# bash
+harmony completions bash > /etc/bash_completion.d/harmony
+
+# zsh (ensure the directory is on your fpath)
+harmony completions zsh > ~/.zfunc/_harmony
+
+# fish
+harmony completions fish > ~/.config/fish/completions/harmony.fish
+```

@@ -1,0 +1,66 @@
+---
+title: Theming and Branding
+description: Set a per-server theme, custom colors, and embed branding
+---
+
+Charm renders its replies, mod-log posts, and welcome cards with a per-server
+theme. You can start from a named preset, override any individual color, and set
+your own embed branding. All of it is free and never paywalled.
+
+The `/theme` commands require the **Manage Server** permission.
+
+## Presets
+
+Set a base theme with a named preset:
+
+```
+/theme preset cobalt
+```
+
+The available presets are `charm` (the default), `cobalt`, `ember`, `forest`, and
+`mono`. The preset name autocompletes as you type.
+
+## Custom colors
+
+Override a single color role with a hex value:
+
+```
+/theme color accent #1E6FEB
+```
+
+The color roles are `accent`, `success`, `warning`, `error`, and `info`. Provide a
+hex value such as `#1E6FEB`. Each role controls a part of Charm's embeds (for
+example, `success` tints confirmation replies and `error` tints failures).
+
+## Branding
+
+Set the embed author line and footer that appear on Charm's messages:
+
+```
+/theme branding "My Server"
+/theme footer "My Server"
+```
+
+Both commands optionally take an icon URL as well. Omit the text (and icon) to
+clear a value. Branding and footer are included for free.
+
+## Review and reset
+
+- `/theme show` displays the current preset, every color, and the branding and
+  footer text.
+- `/theme reset` returns the server to the `charm` preset.
+
+## Template variables
+
+Welcome and goodbye messages (see
+[welcome and goodbye](/products/charm/welcome-and-goodbye)) support these template
+variables in the message text:
+
+| Variable | Expands to |
+| --- | --- |
+| `{user.name}` | The member's username |
+| `{user.display}` | The member's display name |
+| `{user.mention}` | A mention of the member |
+| `{user.id}` | The member's user ID |
+| `{server}` | The server name |
+| `{member_count}` | The current member count |

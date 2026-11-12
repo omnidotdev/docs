@@ -1,0 +1,72 @@
+---
+title: Automod and Anti-Raid
+description: Filter message content automatically and throttle join-rate spikes
+---
+
+Charm can automatically remove messages that break your rules, and can respond to
+a flood of joins that looks like a raid. Both are configured with `/automod` and
+`/antiraid`, which require the **Manage Server** permission.
+
+## Automod
+
+Enable automod, then turn on the filters you want:
+
+```
+/automod enable true
+/automod invites true
+/automod links true
+/automod mentions 5
+```
+
+| Command | What it does |
+| --- | --- |
+| `/automod enable <true\|false>` | Turn automod on or off |
+| `/automod invites <true\|false>` | Delete messages containing Discord invite links |
+| `/automod links <true\|false>` | Delete messages containing any URL |
+| `/automod mentions <max>` | Delete messages with `max` or more mentions (`0` disables) |
+| `/automod action <action> [duration]` | Set what happens on a violation |
+| `/automod addword <word>` | Add a word to the filtered-word list |
+| `/automod removeword <word>` | Remove a word from the filtered-word list |
+| `/automod words` | List the filtered words (shown only to you) |
+| `/automod status` | Show the current automod configuration |
+
+### Violation action
+
+`/automod action` sets the response to a violation:
+
+- `delete`: remove the message only
+- `delete and warn`: remove the message and record a warning case
+- `delete and timeout`: remove the message and time the member out
+
+For `delete and timeout`, pass a `duration` (for example `10m`). When omitted, the
+timeout defaults to 5 minutes.
+
+### Exemptions
+
+Automod never acts on the server owner, members with the Administrator or Manage
+Messages permission, or other bots.
+
+<Callout type="info">
+  The invite, link, and banned-word filters read the message body, which requires
+  the privileged Message Content intent. Set `CHARM_MESSAGE_CONTENT=true` and
+  enable the intent in the Discord developer portal (see
+  [self-hosting](/products/charm/self-hosting)). The mention-spam filter does not
+  need it, because mention counts arrive as structured data.
+</Callout>
+
+## Anti-raid
+
+Anti-raid watches the join rate and times out members when a burst crosses your
+threshold. It works from member-join events alone and does not need the Message
+Content intent.
+
+```
+/antiraid config enabled:true threshold:10 window:30 timeout:1h
+```
+
+| Command | What it does |
+| --- | --- |
+| `/antiraid config <enabled> <threshold> <window> [timeout]` | Enable anti-raid: `threshold` joins within `window` seconds triggers raid mode, timing out the members involved |
+| `/antiraid status` | Show the current anti-raid configuration |
+
+The `timeout` duration defaults to 1 hour when omitted.

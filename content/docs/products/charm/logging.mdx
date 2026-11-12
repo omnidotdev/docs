@@ -1,0 +1,40 @@
+---
+title: Logging
+description: Post message edits and deletions, and member joins and leaves
+---
+
+Charm can post server events to a log channel so moderators have a record of what
+changed. Logging is split into two categories you toggle independently.
+
+The `/logs` commands require the **Manage Server** permission.
+
+## Set the log channel
+
+```
+/logs channel #audit-log
+```
+
+Run `/logs channel` with no channel to disable logging entirely.
+
+## Categories
+
+```
+/logs toggle messages true
+/logs toggle members true
+```
+
+| Category | Logs |
+| --- | --- |
+| `messages` | Message deletions and edits, with the old and new content when available |
+| `members` | Member joins and leaves |
+
+Run `/logs status` to see the current log channel and which categories are on.
+
+<Callout type="info">
+  Message-content logging (the text of deleted and edited messages) requires the
+  privileged Message Content intent, and relies on the message being in Charm's
+  cache. Enable the intent in the Discord developer portal and set
+  `CHARM_MESSAGE_CONTENT=true` (see [self-hosting](/products/charm/self-hosting)).
+  Member join and leave logging works without it. When content is not available,
+  Charm notes that in the log entry instead of showing the text.
+</Callout>

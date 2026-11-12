@@ -1,0 +1,107 @@
+---
+title: Quickstart
+description: Generate a project from a template, then keep it in sync
+---
+
+This walkthrough builds a template, generates a project from it, then updates
+the project after the template changes.
+
+## 1. Create a template
+
+A template is a directory with a Harmony config at its root plus the files to
+generate. Create the config:
+
+```sh
+harmony init
+```
+
+This writes a `harmony.yaml` containing the default settings. Add the questions
+(the values that vary between projects) yourself. A complete `harmony.yaml`
+looks like this:
+
+```yaml
+# Settings are prefixed with an underscore
+_templates_suffix: ".tera"
+_exclude:
+  - ".git/**"
+  - "node_modules/**"
+
+# Questions are prompted during apply
+project_name:
+  type: str
+  help: "What is your project name?"
+  default: "my-project"
+
+use_docker:
+  type: bool
+  help: "Include Docker support?"
+  default: true
+```
+
+Next to the config, add the files to generate. Files ending in the template
+suffix (`.tera` by default) are rendered with [Tera](https://keats.github.io/tera/);
+every other file is copied verbatim. For example, a `README.md.tera`:
+
+```md
+# {{ project_name }}
+
+{% if use_docker %}Run `docker compose up` to get started.{% endif %}
+```
+
+File and directory names are rendered too, so a path like
+`{{ project_name }}/config.toml.tera` is generated under the answered name.
+
+## 2. Generate a project
+
+Point `apply` at the template (`--input`) and the destination (`--output`):
+
+```sh
+harmony apply --input ./my-template --output ./my-project
+```
+
+Harmony prompts for each question, renders the template, and writes the result:
+
+```
+  create README.md
+  create package.json
+  skip .env (skip_if_exists)
+Saved answers to .harmony-answers.yaml
+```
+
+Harmony records your answers in `.harmony-answers.yaml` and a baseline snapshot
+under `.harmony/`, both in the output directory. These let `harmony update`
+sync the project later, so keep them (commit them with the project).
+
+To preview without writing anything, add `--dry-run`. To skip the prompts and
+take every question's default, add `--defaults`.
+
+## 3. Update after the template changes
+
+When the template evolves, re-sync the generated project from inside it:
+
+```sh
+cd ./my-project
+harmony update
+```
+
+Harmony re-renders the template with your saved answers and merges the result
+into the project. It reports what it did per file:
+
+```
+  create .github/workflows/ci.yml
+  update README.md
+  conflict src/config.toml (resolve manually)
+Update complete with 1 conflict(s) to resolve.
+```
+
+- **create**: a new file the template added
+- **update**: a template change applied cleanly, local edits preserved where
+  they do not overlap
+- **conflict**: the template and your local copy changed the same lines, so the
+  file now carries git-style conflict markers for you to resolve by hand
+
+## Next steps
+
+- Learn the full [configuration](/products/harmony/configuration) format
+- Browse the [command reference](/products/harmony/commands)
+- Automate syncing with [Harmony in CI](/products/harmony/ci)

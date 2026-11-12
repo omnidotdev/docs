@@ -1,0 +1,91 @@
+---
+title: 📿 Charm
+description: Free, open-source, self-hostable all-in-one Discord community bot
+---
+
+import { ProductOverview } from "@/components/docs";
+import { SiDiscord } from "react-icons/si";
+
+<ProductOverview
+  productId="charm"
+  tags={[
+    {
+      label: "Discord",
+      icon: <SiDiscord />,
+      className: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-300",
+    },
+    {
+      label: "Self-hosted",
+      className: "bg-purple-500/10 text-purple-500",
+    },
+    {
+      label: "Rust",
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://charm.omni.dev",
+      label: "Website",
+      type: "website",
+    },
+    {
+      href: "https://github.com/omnidotdev/charm-stack",
+      label: "Repository",
+      type: "repository",
+    },
+  ]}
+/>
+
+**Charm** is a free, open-source, self-hostable all-in-one Discord community bot.
+It brings welcome and goodbye cards, moderation, automod, anti-raid protection,
+roles, event logging, and leveling into one bot that runs on your own
+infrastructure. Every feature is free, including per-server branding and theming,
+which other community bots reserve for paid tiers.
+
+Charm is written in Rust on the [Serenity](https://github.com/serenity-rs/serenity)
+and [Poise](https://github.com/serenity-rs/poise) framework, and runs from a
+single Docker Compose stack with its own bundled database. There is no hosted
+service and no billing: you host it, you own it, and it is licensed Apache-2.0.
+
+## What Charm does
+
+- **Welcome and goodbye**: themed greeting and farewell messages with rendered
+  image cards (avatar, greeting, member count over a themed background), message
+  templates, and a live preview
+- **Theming and branding**: a per-server theme with named presets and full custom
+  hex, plus embed author and footer branding, free and never paywalled
+- **Moderation**: warn, timeout, kick, ban, unban, and bulk message purge, with
+  every action recorded as a numbered case and posted to a mod-log channel
+- **Automod**: delete messages that carry invite links, URLs, filtered words, or
+  too many mentions, with a configurable response
+- **Anti-raid**: time out members automatically when the join rate spikes
+- **Roles**: assign roles automatically on join, and grant roles when members
+  react to a message
+- **Logging**: post message edits and deletions, and member joins and leaves, to a
+  log channel
+- **Leveling**: award XP for chatting, with rank and leaderboard commands and
+  optional level-reward roles
+
+## How it is configured
+
+Charm is configured entirely with Discord slash commands. Configuration commands
+require the **Manage Server** permission, and moderation commands require the
+matching Discord permission (for example Ban Members for `/ban`). Each feature
+page below lists the exact commands and the permission each one needs.
+
+<Callout type="info">
+  Charm is self-hosted. A configuration dashboard is planned but not yet
+  available, so all setup is done through slash commands today.
+</Callout>
+
+## Next steps
+
+- [Self-host Charm](/products/charm/self-hosting) with Docker Compose
+- Set your [theme and branding](/products/charm/theming)
+- Configure [welcome and goodbye](/products/charm/welcome-and-goodbye) messages
+- Set up [moderation](/products/charm/moderation),
+  [automod and anti-raid](/products/charm/automod-and-anti-raid),
+  [roles](/products/charm/roles), [logging](/products/charm/logging), and
+  [leveling](/products/charm/leveling)
+- Browse the full [command reference](/products/charm/commands)

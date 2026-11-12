@@ -1,0 +1,59 @@
+---
+title: Welcome and Goodbye
+description: Greet new members and post farewells, with rendered image cards
+---
+
+Charm can post a themed message when a member joins and when a member leaves, each
+with an optional rendered image card showing the member's avatar, a greeting, and
+the current member count over a themed background.
+
+The `/welcome` commands require the **Manage Server** permission. Welcome and
+goodbye events need the **Server Members Intent** enabled on the Discord
+application (see [self-hosting](/products/charm/self-hosting)).
+
+## Welcome messages
+
+Set the channel, write the message, and turn it on:
+
+```
+/welcome channel #welcome
+/welcome message Welcome {user.mention} to {server}! You're member #{member_count}.
+/welcome toggle true
+```
+
+The message supports the [template variables](/products/charm/theming#template-variables)
+`{user.name}`, `{user.display}`, `{user.mention}`, `{user.id}`, `{server}`, and
+`{member_count}`.
+
+## Welcome card
+
+Enable the rendered image card and choose its background:
+
+```
+/welcome card true
+/welcome background gradient
+```
+
+The background accepts `solid`, `gradient`, or an image URL. The card uses the
+server theme (see [theming](/products/charm/theming)), so changing the theme
+restyles the card.
+
+## Goodbye messages
+
+Goodbye messages are configured the same way under `/welcome goodbye`:
+
+```
+/welcome goodbye channel #goodbye
+/welcome goodbye message {user.name} has left {server}.
+/welcome goodbye toggle true
+```
+
+## Preview
+
+Post a welcome preview for yourself in the current channel to check how it looks:
+
+```
+/welcome test
+```
+
+The preview is visible only to you.

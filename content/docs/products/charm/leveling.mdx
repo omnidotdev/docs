@@ -1,0 +1,49 @@
+---
+title: Leveling
+description: Reward activity with XP, ranks, a leaderboard, and level roles
+---
+
+Charm awards experience points to members for chatting, tracks their level and
+rank, and can grant roles when members reach a level.
+
+The `/levels` configuration commands require the **Manage Server** permission.
+`/rank` and `/leaderboard` are available to everyone.
+
+## Enable leveling
+
+```
+/levels enable true
+```
+
+By default, Charm announces a level-up in the channel where the member was
+chatting. To send every announcement to one channel instead:
+
+```
+/levels channel #level-ups
+```
+
+Run `/levels channel` with no channel to go back to announcing in the member's
+current channel.
+
+## Level-reward roles
+
+Grant a role automatically when members reach a level:
+
+```
+/levels role add level:10 role:@Regular
+```
+
+| Command | What it does |
+| --- | --- |
+| `/levels role add <level> <role>` | Grant this role when members reach the level |
+| `/levels role remove <level>` | Remove the reward at that level |
+| `/levels role list` | List the level-reward roles |
+
+Granting level roles uses the **Manage Roles** permission, so Charm's own role
+must sit above the reward roles in the role list.
+
+## Ranks and leaderboard
+
+- `/rank [user]` shows your rank, level, total XP, and progress to the next level,
+  or another member's when you name one.
+- `/leaderboard` shows the server's top members by XP.

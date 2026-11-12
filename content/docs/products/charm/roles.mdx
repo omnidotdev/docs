@@ -1,0 +1,45 @@
+---
+title: Roles
+description: Assign roles on join and grant roles from message reactions
+---
+
+Charm can give members a role automatically when they join, and can grant roles
+when members react to a message. Both sets of commands require the **Manage
+Roles** permission, and Charm's own role must be high enough in the role list to
+assign the roles you configure.
+
+## Auto-roles
+
+Auto-roles are assigned to every member when they join the server:
+
+```
+/autorole add @Member
+```
+
+| Command | What it does |
+| --- | --- |
+| `/autorole add <role>` | Assign this role to new members on join |
+| `/autorole remove <role>` | Stop auto-assigning this role |
+| `/autorole list` | List the auto-assigned roles |
+
+Auto-assignment on join needs the **Server Members Intent** enabled on the Discord
+application (see [self-hosting](/products/charm/self-hosting)).
+
+## Reaction roles
+
+Reaction roles let members grant themselves a role by reacting to a message with a
+specific emoji:
+
+```
+/reactionrole add message_id:123456789012345678 emoji:🎮 role:@Gamers
+```
+
+| Command | What it does |
+| --- | --- |
+| `/reactionrole add <message_id> <emoji> <role>` | Bind an emoji on a message to a role. The message must be in the channel where you run the command |
+| `/reactionrole remove <message_id> <emoji>` | Remove a reaction-role binding |
+| `/reactionrole list` | List this server's reaction-role bindings, with a jump link to each message |
+
+When you add a binding, Charm reacts to the target message with the emoji so
+members can click it. Reacting adds the role, and removing the reaction removes the
+role.

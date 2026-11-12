@@ -1,0 +1,54 @@
+---
+title: Install
+description: Install the Harmony CLI
+---
+
+Harmony ships as a single, self-contained binary named `harmony`. Install it
+with your preferred channel.
+
+## Homebrew (macOS and Linux)
+
+```sh
+brew install omnidotdev/tap/harmony
+```
+
+## Arch Linux (AUR)
+
+Install from source, or use the prebuilt binary package:
+
+```sh
+paru -S omnidotdev-harmony-cli        # build from source
+paru -S omnidotdev-harmony-cli-bin    # prebuilt binary
+```
+
+## GitHub releases
+
+Download the archive for your platform from the
+[releases page](https://github.com/omnidotdev/harmony-cli/releases) and place
+the extracted `harmony` binary on your `PATH`.
+
+## From source
+
+With a recent Rust toolchain:
+
+```sh
+cargo build --release
+```
+
+The binary is written to `target/release/harmony`.
+
+## Verify
+
+```sh
+harmony --version
+```
+
+Once installed, generate shell completions for your shell (bash, zsh, fish,
+elvish, or powershell):
+
+```sh
+harmony completions zsh > ~/.zfunc/_harmony
+```
+
+See the [command reference](/products/harmony/commands#completions) for how to
+load completions in each shell.
