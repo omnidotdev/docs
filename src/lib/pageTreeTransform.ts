@@ -201,4 +201,38 @@ const transformPageTree = (root: Root): Root => {
   };
 };
 
+/**
+ * Find the virtual section that contains a page. The section membership comes
+ * from the page tree (root `meta.json`), so it covers every page the sidebar
+ * renders, unlike a path-based lookup.
+ * @param root Transformed page tree.
+ * @param pathname Page pathname.
+ * @returns Section ID, if the page lives under a section.
+ */
+export const getSectionIdForPath = (
+  root: Root,
+  pathname: string,
+): string | undefined => {
+  const url = pathname.replace(/\/+$/, "") || "/";
+
+  const contains = (node: Node): boolean => {
+    if (node.type === "page") return node.url === url;
+
+    if (node.type === "folder")
+      return node.index?.url === url || node.children.some(contains);
+
+    return false;
+  };
+
+  const section = root.children.find(
+    (node) =>
+      node.type === "folder" &&
+      "virtualSection" in node &&
+      node.virtualSection &&
+      node.children.some(contains),
+  ) as VirtualFolder | undefined;
+
+  return section?.sectionId;
+};
+
 export default transformPageTree;

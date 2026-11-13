@@ -60,6 +60,7 @@ const SidebarFolder = ({ item, badges, children }: SidebarFolderProps) => {
         >
           <Link
             to={folderUrl}
+            data-active={isActive}
             className={cn(
               "flex flex-1 cursor-pointer items-center gap-2 p-2 text-start text-fd-muted-foreground transition-colors group-hover:text-fd-accent-foreground/80",
               isActive && "text-fd-primary",

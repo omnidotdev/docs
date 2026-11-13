@@ -38,7 +38,9 @@ import { app } from "@/lib/config";
 import { useSidebarEscClose } from "@/lib/hooks/useSidebarEscClose";
 import { useSidebarScrollPersistence } from "@/lib/hooks/useSidebarScrollPersistence";
 import baseLayoutOptions from "@/lib/layout.base";
-import transformPageTree from "@/lib/pageTreeTransform";
+import transformPageTree, {
+  getSectionIdForPath,
+} from "@/lib/pageTreeTransform";
 import { resolveRedirect } from "@/lib/resolveRedirect";
 import { getRealmByPath, getRealmIds } from "@/lib/sections";
 import source from "@/lib/source";
@@ -64,11 +66,11 @@ const getSectionFromPath = (pathname: string): string => {
  * Splat page.
  */
 const Page = () => {
-  const { data, activeSection, badges } = Route.useLoaderData();
+  const { data, badges } = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
   const patchedTree = useMemo(() => transformPageTree(pageTree), [pageTree]);
 
-  // Persist sidebar scroll position and scroll to active item on navigation
+  // Persist sidebar scroll position and keep the active item in view
   useSidebarScrollPersistence();
   // Close sidebar drawer on ESC key
   useSidebarEscClose();
@@ -77,22 +79,28 @@ const Page = () => {
 
   const { pathname } = useLocation();
 
-  // Track which sections are open (supports multiple)
-  const openSectionsRef = useRef<Set<string>>(
-    new Set([activeSection || "welcome"]),
+  // Resolve the section from the page tree so it matches what the sidebar
+  // renders, falling back to the path-based lookup for pages outside the tree
+  const activeSection = useMemo(
+    () =>
+      getSectionIdForPath(patchedTree, pathname) ??
+      getSectionFromPath(pathname),
+    [patchedTree, pathname],
   );
+
+  // Track which sections are open (supports multiple)
+  const openSectionsRef = useRef<Set<string>>(new Set([activeSection]));
   const [, forceUpdate] = useState({});
 
   const allSectionIds = useMemo(() => getRealmIds(), []);
 
   // Ensure the active section is open when navigating
   useEffect(() => {
-    const newActiveSection = getSectionFromPath(pathname);
-    if (!openSectionsRef.current.has(newActiveSection)) {
-      openSectionsRef.current.add(newActiveSection);
+    if (!openSectionsRef.current.has(activeSection)) {
+      openSectionsRef.current.add(activeSection);
       forceUpdate({});
     }
-  }, [pathname]);
+  }, [activeSection]);
 
   const handleSectionToggle = useCallback(
     (sectionId: string, newOpen: boolean) => {
@@ -240,7 +248,7 @@ export const Route = createFileRoute("/$")({
         reloadDocument: true,
       });
   },
-  loader: async ({ params, location }) => {
+  loader: async ({ params }) => {
     const slugs = params._splat?.split("/") ?? [];
 
     const [data, badges] = await Promise.all([
@@ -250,11 +258,7 @@ export const Route = createFileRoute("/$")({
 
     await clientLoader.preload(data.path);
 
-    // determine active section
-    const pathname = location.pathname;
-    const activeSection = getSectionFromPath(pathname);
-
-    return { data, slugs, activeSection, badges };
+    return { data, slugs, badges };
   },
   head: ({ loaderData }) => {
     const { slugs, data } = loaderData ?? {};
