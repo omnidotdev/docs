@@ -242,6 +242,13 @@ export const products: CatalogProduct[] = [
     ]
   },
   {
+    "id": "charm",
+    "name": "Charm",
+    "realm": "kindred",
+    "status": "coming_soon",
+    "license": "Apache-2.0"
+  },
+  {
     "id": "crystal",
     "name": "Crystal",
     "realm": "core",
@@ -272,7 +279,6 @@ export const products: CatalogProduct[] = [
           "10 goals",
           "10 membership tiers",
           "Analytics dashboard",
-          "API access",
           "Priority support",
           "Unlimited posts"
         ],
@@ -285,8 +291,6 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 3900,
         "yearlyPrice": 38400,
         "features": [
-          "API access",
-          "Custom branding",
           "Dedicated support",
           "Full analytics",
           "Unlimited goals",
@@ -441,7 +445,8 @@ export const products: CatalogProduct[] = [
     "id": "halo",
     "name": "Halo",
     "realm": "core",
-    "status": "coming_soon",
+    "status": "active",
+    "releaseDate": "2026-11-12",
     "license": "Proprietary",
     "plans": [
       {
@@ -471,7 +476,6 @@ export const products: CatalogProduct[] = [
           "10 GB media storage",
           "500 GB bandwidth/month",
           "Advanced discounts",
-          "AI product descriptions",
           "Priority support",
           "Unlimited products",
           "Up to 3 stores",
@@ -489,8 +493,7 @@ export const products: CatalogProduct[] = [
           "2 TB bandwidth/month",
           "50 GB media storage",
           "Advanced discounts",
-          "AI product descriptions and custom agents",
-          "Audit logs",
+          "Custom agents",
           "Dedicated support",
           "SSO/SAML",
           "Unlimited products",
@@ -502,6 +505,13 @@ export const products: CatalogProduct[] = [
     ]
   },
   {
+    "id": "harmony",
+    "name": "Harmony",
+    "realm": "armory",
+    "status": "coming_soon",
+    "license": "Apache-2.0"
+  },
+  {
     "id": "herald",
     "name": "Herald",
     "realm": "grid",
@@ -509,20 +519,6 @@ export const products: CatalogProduct[] = [
     "releaseDate": "2026-09-18",
     "license": "Proprietary",
     "plans": [
-      {
-        "tier": "free",
-        "name": "Herald Free",
-        "description": "Transactional email for small projects and testing",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "1 sending domain",
-          "3,000 emails/month (100/day)",
-          "Community support",
-          "Shared IP pool",
-          "Suppression list with bounce and complaint handling"
-        ]
-      },
       {
         "tier": "enterprise",
         "name": "Herald Enterprise",
@@ -536,6 +532,20 @@ export const products: CatalogProduct[] = [
           "SSO and audit logs",
           "Unlimited sending domains",
           "Unlimited volume"
+        ]
+      },
+      {
+        "tier": "free",
+        "name": "Herald Free",
+        "description": "Transactional email for small projects and testing",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 sending domain",
+          "3,000 emails/month (100/day)",
+          "Community support",
+          "Shared IP pool",
+          "Suppression list with bounce and complaint handling"
         ]
       },
       {
@@ -663,6 +673,14 @@ export const products: CatalogProduct[] = [
     "license": "Apache-2.0"
   },
   {
+    "id": "odk",
+    "name": "ODK",
+    "realm": "armory",
+    "status": "active",
+    "releaseDate": "2026-11-08",
+    "license": "Apache-2.0"
+  },
+  {
     "id": "omni-cli",
     "name": "Omni CLI",
     "realm": "armory",
@@ -692,6 +710,61 @@ export const products: CatalogProduct[] = [
     "status": "active",
     "releaseDate": "2026-02-06",
     "license": "Apache-2.0"
+  },
+  {
+    "id": "prism",
+    "name": "Prism",
+    "realm": "core",
+    "status": "coming_soon",
+    "releaseDate": "2026-11-09",
+    "license": "Apache-2.0",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Prism Free",
+        "description": "Start measuring",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "1 product",
+          "10,000 events/month",
+          "30-day data retention",
+          "Cookieless, privacy-first by default",
+          "Pageviews & custom events"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Prism Pro",
+        "description": "For growing products",
+        "monthlyPrice": 900,
+        "yearlyPrice": 9000,
+        "features": [
+          "1-year data retention",
+          "500,000 events/month",
+          "Everything in Free",
+          "GraphQL read API",
+          "Up to 10 products",
+          "Up to 5 members"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Prism Team",
+        "description": "For teams and scale",
+        "monthlyPrice": 2900,
+        "yearlyPrice": 29000,
+        "features": [
+          "5,000,000 events/month",
+          "Everything in Pro",
+          "GraphQL read API",
+          "Priority support",
+          "Unlimited data retention",
+          "Unlimited members",
+          "Unlimited products"
+        ]
+      }
+    ]
   },
   {
     "id": "rdk",

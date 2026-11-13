@@ -4,32 +4,29 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  COMING_SOON_PRODUCTS,
-  NEW_PRODUCTS,
-} from "@/lib/getSectionDescription";
+import { labelNamesProduct, sidebarLabel } from "@/lib/catalog/badges";
 import { cn } from "@/lib/utils";
+
+import type { ProductBadges } from "@/lib/catalog/badges";
 
 interface SidebarFolderProps {
   item: any;
+  badges: ProductBadges;
   children: React.ReactNode;
 }
 
-const SidebarFolder = ({ item, children }: SidebarFolderProps) => {
+const SidebarFolder = ({ item, badges, children }: SidebarFolderProps) => {
   const { pathname } = useLocation();
 
   // Folder URL can be on item.url or item.index.url (Fumadocs structure)
   const folderUrl = item.url || item.index?.url;
 
   // check if folder matches any product badges
-  const folderName =
-    item.name?.props?.dangerouslySetInnerHTML?.__html || item.name || "";
+  const folderName = sidebarLabel(item);
 
-  const isNew = NEW_PRODUCTS.some((product) => folderName.includes(product));
+  const isNew = labelNamesProduct(folderName, badges.newProducts);
 
-  const isComingSoon = COMING_SOON_PRODUCTS.some((product) =>
-    folderName.includes(product),
-  );
+  const isComingSoon = labelNamesProduct(folderName, badges.comingSoonProducts);
 
   // check if this folder or any of its children is active
   const isActive = folderUrl === pathname;

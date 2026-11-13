@@ -43,6 +43,7 @@ import { resolveRedirect } from "@/lib/resolveRedirect";
 import { getRealmByPath, getRealmIds } from "@/lib/sections";
 import source from "@/lib/source";
 import seo from "@/lib/util/seo";
+import getCatalogBadges from "@/server/functions/catalogBadges";
 
 const GITHUB_REPO_URL = "https://github.com/omnidotdev/docs";
 const GITHUB_BRANCH = "master";
@@ -63,7 +64,7 @@ const getSectionFromPath = (pathname: string): string => {
  * Splat page.
  */
 const Page = () => {
-  const { data, activeSection } = Route.useLoaderData();
+  const { data, activeSection, badges } = Route.useLoaderData();
   const { pageTree } = useFumadocsLoader(data);
   const patchedTree = useMemo(() => transformPageTree(pageTree), [pageTree]);
 
@@ -197,9 +198,15 @@ const Page = () => {
               }
 
               // regular folder behavior (these don't participate in accordion behavior)
-              return <SidebarFolder item={item}>{children}</SidebarFolder>;
+              return (
+                <SidebarFolder item={item} badges={badges}>
+                  {children}
+                </SidebarFolder>
+              );
             },
-            Item: ({ item }) => <SidebarItem item={item} pathname={pathname} />,
+            Item: ({ item }) => (
+              <SidebarItem item={item} pathname={pathname} badges={badges} />
+            ),
           },
         }}
       >
@@ -236,7 +243,10 @@ export const Route = createFileRoute("/$")({
   loader: async ({ params, location }) => {
     const slugs = params._splat?.split("/") ?? [];
 
-    const data = await serverLoader({ data: slugs });
+    const [data, badges] = await Promise.all([
+      serverLoader({ data: slugs }),
+      getCatalogBadges(),
+    ]);
 
     await clientLoader.preload(data.path);
 
@@ -244,7 +254,7 @@ export const Route = createFileRoute("/$")({
     const pathname = location.pathname;
     const activeSection = getSectionFromPath(pathname);
 
-    return { data, slugs, activeSection };
+    return { data, slugs, activeSection, badges };
   },
   head: ({ loaderData }) => {
     const { slugs, data } = loaderData ?? {};
