@@ -1,4 +1,12 @@
 User-agent: *
 Allow: /
 
+# LLM- and agent-readable docs:
+#   /llms.txt            curated index (table of contents)
+#   /llms-full.txt       full documentation as one markdown file
+#   /llms.mdx/docs/<path>  any single page as raw markdown
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /llms.mdx/
+
 Sitemap: https://docs.omni.dev/sitemap.xml

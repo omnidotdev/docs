@@ -1,0 +1,89 @@
+---
+title: MCP Server
+description: Drive Fractal from an AI assistant over the Model Context Protocol
+---
+
+The Fractal MCP server exposes Fractal's deploy and operations surface to AI
+assistants that speak the [Model Context Protocol](https://modelcontextprotocol.io).
+Connect it to an MCP client (for example a coding assistant or agent) and the
+assistant can deploy services, read logs, and manage configuration on your
+workspace through typed tools, using an API token for auth.
+
+<Callout type="info">
+The Fractal MCP server is in active development. The transport and
+authentication below are the intended, stable shape; the exact tool names and
+arguments may change as it ships. Fields marked as such are provisional.
+</Callout>
+
+## What it is
+
+MCP is an open protocol for giving an AI assistant structured access to an
+external system through declared tools. The Fractal MCP server runs locally as a
+subprocess of your MCP client and talks to the Fractal API on your behalf. It is
+scoped to the workspace whose API token you give it, and every action runs with
+that token's access.
+
+## Get an API token
+
+The server authenticates with a workspace API token (a bearer credential). In
+the dashboard, open your workspace, go to **API Tokens**, and create one. Copy
+the secret when it is shown (it is shown only once) and store it in your MCP
+client's secret configuration, never in a file committed to Git. See
+[API Tokens](/products/fractal/api-tokens) for the full lifecycle.
+
+## Client configuration
+
+The server runs over stdio: the MCP client launches it as a command and
+communicates over standard input and output. Add it to your client's
+`mcpServers` configuration, passing the Fractal API URL and token as
+environment variables:
+
+```json
+{
+  "mcpServers": {
+    "fractal": {
+      "command": "fractal-mcp",
+      "env": {
+        "FRACTAL_API_URL": "https://<your-fractal-api>",
+        "FRACTAL_API_TOKEN": "ftk_..."
+      }
+    }
+  }
+}
+```
+
+| Variable | Description |
+|----------|-------------|
+| `FRACTAL_API_URL` | Base URL of your Fractal API (the hosted API, or your own for self-hosting) |
+| `FRACTAL_API_TOKEN` | Workspace API token, sent as a bearer credential on every request |
+
+The exact launch command (`fractal-mcp` above) is provisional and depends on how
+the server is distributed; follow the server's own install instructions for the
+command and any arguments.
+
+## Tools
+
+The server exposes the core operations an assistant needs to deploy and operate
+services. The intended tool groups are:
+
+| Group | What it does |
+|-------|--------------|
+| **deploy** | Trigger a deploy of an existing service |
+| **services** | List services and read a service's status and configuration |
+| **logs** | Read a service's runtime and build logs |
+| **env** | Read and set environment variables and secret references |
+| **cron** | Inspect and manage [scheduled jobs](/products/fractal/scheduled-jobs) and their run history |
+
+Each tool maps to the same API the dashboard and [CLI](/products/fractal/cli-reference)
+use, so an assistant's actions are visible and auditable the same way. The
+precise tool names, arguments, and the full set exposed are still being
+finalized and will be documented here as the server ships.
+
+## Security
+
+- A token acts with your access across its workspace. Scope and expire tokens
+  for automation, and revoke any that leak (see [API Tokens](/products/fractal/api-tokens)).
+- Keep `FRACTAL_API_TOKEN` in your MCP client's secret store, not in a
+  checked-in config file.
+- Review what an assistant proposes before it runs a destructive tool; MCP
+  clients surface each tool call for approval.
