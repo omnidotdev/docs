@@ -42,7 +42,8 @@ environment variables:
 {
   "mcpServers": {
     "fractal": {
-      "command": "fractal-mcp",
+      "command": "npx",
+      "args": ["-y", "@omnidotdev/fractal-mcp"],
       "env": {
         "FRACTAL_API_URL": "https://<your-fractal-api>",
         "FRACTAL_API_TOKEN": "ftk_..."
@@ -57,9 +58,8 @@ environment variables:
 | `FRACTAL_API_URL` | Base URL of your Fractal API (the hosted API, or your own for self-hosting) |
 | `FRACTAL_API_TOKEN` | Workspace API token, sent as a bearer credential on every request |
 
-The exact launch command (`fractal-mcp` above) is provisional and depends on how
-the server is distributed; follow the server's own install instructions for the
-command and any arguments.
+The server is published to npm, so `npx` fetches and runs it with no separate
+install step. To pin a version, append it to the package: `@omnidotdev/fractal-mcp@<version>`.
 
 ## Tools
 
