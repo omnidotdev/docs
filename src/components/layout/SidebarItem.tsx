@@ -1,18 +1,19 @@
 import { Link } from "@tanstack/react-router";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  COMING_SOON_PRODUCTS,
-  NEW_PRODUCTS,
-} from "@/lib/getSectionDescription";
+import { labelNamesProduct, sidebarLabel } from "@/lib/catalog/badges";
+
+import type { ProductBadges } from "@/lib/catalog/badges";
 
 interface SidebarItemProps {
   item: any;
   pathname: string;
+  badges: ProductBadges;
 }
 
-const SidebarItem = ({ item, pathname }: SidebarItemProps) => {
+const SidebarItem = ({ item, pathname, badges }: SidebarItemProps) => {
   const isActive = item.url === pathname;
+  const label = sidebarLabel(item);
 
   return (
     <Link
@@ -32,18 +33,13 @@ const SidebarItem = ({ item, pathname }: SidebarItemProps) => {
         {item.name}
       </span>
 
-      {/* TODO convert to frontmatter (see note near top of file) */}
-      {NEW_PRODUCTS.some((product) =>
-        item.name?.props?.dangerouslySetInnerHTML?.__html?.includes(product),
-      ) && (
+      {labelNamesProduct(label, badges.newProducts) && (
         <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
           New! 🚀
         </Badge>
       )}
 
-      {COMING_SOON_PRODUCTS.some((product) =>
-        item.name?.props?.dangerouslySetInnerHTML?.__html?.includes(product),
-      ) && (
+      {labelNamesProduct(label, badges.comingSoonProducts) && (
         <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
           Coming Soon 🚧
         </Badge>
