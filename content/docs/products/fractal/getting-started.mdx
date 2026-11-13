@@ -53,13 +53,26 @@ Open the service to follow the rollout. The service tabs give you:
 
 ## 4. Manage from the CLI (optional)
 
-Install the CLI, authenticate, and connect it to your cluster:
+Install the CLI and authenticate:
 
 ```bash
 # Authenticate against fractal.omni.dev
 fractal auth login
+```
 
-# Point the CLI at a cluster (uses your current kubeconfig context)
+<Callout type="info">
+On the hosted platform you do not need `fractal cluster connect`. Deploy and
+operate your services through the dashboard, `fractal deploy`, or the API with
+an [API token](/products/fractal/api-tokens). `fractal cluster connect` is for
+self-hosting and bring-your-own-cluster (BYOC), where it points the CLI at your
+own cluster using your local kubeconfig (see [Self-Hosting](/products/fractal/self-hosting)).
+</Callout>
+
+For self-hosting, point the CLI at your cluster with your current kubeconfig
+context:
+
+```bash
+# Self-hosting / BYOC only: uses your current kubeconfig context
 fractal cluster connect --name my-cluster
 ```
 

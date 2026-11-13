@@ -24,14 +24,18 @@ export const Route = createFileRoute("/sitemap.xml")({
             .replace(/>/g, "&gt;");
 
         const locs = [
-          ...new Set(
-            source
+          ...new Set([
+            // LLM- and agent-readable docs endpoints, advertised so crawlers
+            // find them (the curated index and the full markdown dump)
+            "/llms.txt",
+            "/llms-full.txt",
+            ...source
               .getPages()
               // mirrored product docs are canonical elsewhere; list them in the
               // owning product's sitemap, not here, to avoid duplicate URLs
               .filter((page) => !page.data.canonical)
               .map((page) => page.url),
-          ),
+          ]),
         ]
           .sort()
           .map((url) => `  <url><loc>${escapeXml(`${base}${url}`)}</loc></url>`)
