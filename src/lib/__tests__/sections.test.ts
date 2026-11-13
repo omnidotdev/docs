@@ -4,7 +4,7 @@
  * After the URL restructure, product pages live at /products/<id> and realm
  * hubs/guides at /realms/<realm>, so realm can no longer be inferred from the
  * first URL segment. These pin the new resolution: products resolve via the
- * generated PRODUCT_REALMS map, realm pages via the /realms/<realm> segment,
+ * nav-derived PRODUCT_REALMS map, realm pages via the /realms/<realm> segment,
  * and everything else keeps the welcome/community/help fallback behavior.
  *
  * The concrete product assertion is derived from PRODUCT_REALMS so it stays
@@ -13,10 +13,10 @@
 
 import { describe, expect, it } from "vitest";
 
-import { PRODUCT_REALMS } from "../productRealms.generated";
+import { PRODUCT_REALMS } from "../productRealms";
 import { getRealmByPath } from "../sections";
 
-// A real public product and its realm, taken from the generated map.
+// A real public product and its realm, taken from the nav-derived map
 const [samplePublicProduct, samplePublicRealm] = Object.entries(
   PRODUCT_REALMS,
 )[0] as [string, string];

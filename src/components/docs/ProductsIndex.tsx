@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { products as catalog } from "@/lib/catalog/generated/catalog";
-import { PRODUCT_REALMS } from "@/lib/productRealms.generated";
+import { PRODUCT_REALMS } from "@/lib/productRealms";
 import { cn } from "@/lib/utils";
 import realmsData from "../../../realms.json";
 
@@ -42,9 +42,9 @@ const REALM_FILTERS = realmsData.realms.filter((realm) =>
 /**
  * Searchable, realm-filterable index of every product with documentation.
  *
- * Reads only committed public data (the generated product to realm map plus the
- * omni-api catalog), so unlaunched private products never appear and every card
- * links to a real page.
+ * Reads only committed public data (the product to realm map derived from the
+ * root docs nav, plus the omni-api catalog), so unlaunched private products
+ * never appear and every card links to a real page.
  */
 const ProductsIndex: React.FC = () => {
   const [query, setQuery] = useState("");

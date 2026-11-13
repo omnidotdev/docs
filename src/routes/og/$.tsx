@@ -4,7 +4,7 @@ import satori from "satori";
 
 import OgImage from "@/components/og/OgImage";
 import { products } from "@/lib/catalog/generated/catalog";
-import { PRODUCT_REALMS } from "@/lib/productRealms.generated";
+import { PRODUCT_REALMS } from "@/lib/productRealms";
 import source from "@/lib/source";
 import capitalizeFirstLetter from "@/lib/util/capitalizeFirstLetter";
 import stripEmojis from "@/lib/util/stripEmojis";
@@ -62,15 +62,18 @@ interface OgMetadata {
  *
  * After the URL restructure, product pages live at /products/<id>/... and realm
  * hubs at /realms/<realm>, so the realm can no longer be read from the first
- * path segment. Product pages resolve their realm through the generated public
- * product -> realm map.
+ * path segment. Product pages resolve their realm through the nav-derived
+ * product -> realm map, falling back to the catalog realm for product pages
+ * that exist but are not listed in the nav.
  */
 const resolveRealmAndProduct = (
   segments: string[],
 ): { realm: Realm | null; productName?: string } => {
   if (segments[0] === "products" && segments[1]) {
     const id = segments[1];
-    const realmId = PRODUCT_REALMS[id];
+    const realmId =
+      PRODUCT_REALMS[id] ??
+      products.find((product) => product.id === id)?.realm;
 
     return {
       realm: (realmId ? getRealmById(realmId) : undefined) ?? null,

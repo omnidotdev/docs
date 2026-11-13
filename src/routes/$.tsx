@@ -28,6 +28,7 @@ import browserCollections from "fumadocs-mdx:collections/browser";
 import { RealmTOC } from "@/components/docs";
 import {
   RotatingBanner,
+  SidebarDrawerReveal,
   SidebarFolder,
   SidebarItem,
   SidebarSection,
@@ -218,6 +219,9 @@ const Page = () => {
           },
         }}
       >
+        {/* Inside the layout so it can read the mobile drawer's open state */}
+        <SidebarDrawerReveal />
+
         {/* The MDX renderer suspends on initial load (its client preload cache
             is populated server-side, so it is empty in the browser). Without a
             boundary that suspension bubbles up and React blanks the whole tree
