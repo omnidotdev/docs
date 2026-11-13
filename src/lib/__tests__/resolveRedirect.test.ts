@@ -1,3 +1,5 @@
+import { expect, test } from "vitest";
+
 import { resolveRedirect } from "@/lib/resolveRedirect";
 
 test("legacy realm-nested -> /products", () =>

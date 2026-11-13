@@ -1,5 +1,5 @@
 import realmsData from "../../realms.json";
-import { PRODUCT_REALMS } from "./productRealms.generated";
+import { PRODUCT_REALMS } from "./productRealms";
 
 /** Realm IDs. Non-realm sections (welcome, community, help, debug) are excluded. */
 export const REALM_IDS: string[] = realmsData.realms.map((r) => r.id);
@@ -217,8 +217,8 @@ export const getRealmByPath = (pathname: string): Realm | undefined => {
   const normalizedPathname = pathname.replace(/\/+$/, "");
   const segments = normalizedPathname.split("/").filter(Boolean);
 
-  // /products/<id>... resolves via the generated public product -> realm map.
-  // Unknown ids (private products in local dev) fall back to welcome.
+  // /products/<id>... resolves via the nav-derived product -> realm map.
+  // Ids not in the nav (unlisted or private pages) fall back to welcome
   if (segments[0] === "products") {
     const id = segments[1];
     const realmId = id ? PRODUCT_REALMS[id] : undefined;

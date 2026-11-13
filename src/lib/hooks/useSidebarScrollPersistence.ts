@@ -1,4 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
+import { useSidebar } from "fumadocs-ui/components/sidebar/base";
 import { useEffect, useRef } from "react";
 
 const VIEWPORT_SELECTORS = [
@@ -122,4 +123,37 @@ export function useSidebarScrollPersistence() {
       clearTimeout(revealTimeout);
     };
   }, [pathname]);
+}
+
+// Scroll viewport of the mobile drawer, which fumadocs mounts only while open
+const DRAWER_VIEWPORT_SELECTOR =
+  "#nd-sidebar-mobile [data-radix-scroll-area-viewport]";
+
+/**
+ * Center the active item in the mobile sidebar drawer each time it opens. The
+ * drawer mounts fresh on open, scrolled to the top, so a deep active page would
+ * otherwise sit below the fold. Scrolls only the drawer's own viewport, never
+ * the window. Must be called inside `DocsLayout` (it reads the sidebar context).
+ */
+export function useDrawerActiveItemReveal() {
+  const { open, mode } = useSidebar();
+
+  useEffect(() => {
+    if (!open || mode !== "drawer") return;
+
+    const reveal = () => {
+      const el = document.querySelector(DRAWER_VIEWPORT_SELECTOR);
+      if (el) revealActiveItem(el, "center");
+    };
+
+    // Once the drawer has mounted and laid out, then again after any section or
+    // folder holding the active item has finished expanding
+    const raf = requestAnimationFrame(reveal);
+    const timeout = setTimeout(reveal, EXPAND_SETTLE_MS);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timeout);
+    };
+  }, [open, mode]);
 }
