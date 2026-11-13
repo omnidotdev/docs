@@ -29,7 +29,7 @@ Additional build settings:
 | Field | Applies to | Description |
 |-------|------------|-------------|
 | `rootDir` | all | Build subdirectory for a monorepo (for example `apps/web`). The build runs from here instead of the repository root. Default: repository root |
-| `watchPaths` | all | Paths (relative to the repo root) that scope monorepo rebuilds: a push rebuilds this service only when a changed file is under one of them. Default: rebuild on any push |
+| `watchPaths` | all | Paths (relative to the repo root) that scope monorepo rebuilds: a push or git reconcile rebuilds this service only when a changed file is under one of them. Default: rebuild on any change |
 | `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the build context (`rootDir` when set, otherwise the repository root; default `Dockerfile`) |
 | `args` | `dockerfile` | Build arguments (for example `VITE_*` values needed at build time) |
 | `resources` | all | CPU and memory for the build pod (defaults: 1 CPU, 2Gi) |
@@ -73,10 +73,14 @@ clean way to install and build just that app and its workspace dependencies.
 </Callout>
 
 By default every service on a repo rebuilds on every push to its branch. Set
-**`watchPaths`** to rebuild a service only when a push changes files under those
+**`watchPaths`** to rebuild a service only when a changed file is under those
 paths (for example its own `rootDir` plus any shared packages it depends on), so
-a change to one app does not rebuild the others. Watch paths apply to webhook
-pushes; a service still rebuilds when its branch is reconciled by other means.
+a change to one app does not rebuild the others. Watch paths scope both triggers:
+a webhook push and the periodic git reconcile both rebuild a service only when a
+changed file matches its watch paths. List every path the service depends on,
+including root-level or shared files (lockfiles, shared config, common packages),
+explicitly in each service's `watchPaths`, since a path that is not listed does
+not trigger that service's rebuild.
 
 To deploy several apps from one monorepo, create one service per app, each
 pointing at the same repository `url` and `branch` with its own `rootDir` (and

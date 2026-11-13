@@ -1,0 +1,103 @@
+---
+title: Scheduled Jobs
+description: Run a service on a cron schedule with concurrency, time zone, history, and retry controls
+---
+
+A scheduled job runs a service on a recurring cron schedule instead of serving
+traffic or running continuously. Use one for nightly data exports, periodic
+cleanups, report generation, cache warming, or any task that runs on a clock.
+
+A scheduled job is a service with **`serviceType: cronJob`** and a
+**`deploy.schedule`** cron expression. It builds from the same sources as any
+other service (a Git repository or a prebuilt image) and runs the service's
+start command on each tick.
+
+## Cron schedule syntax
+
+`deploy.schedule` takes a standard five-field cron expression:
+
+```
+┌───────────── minute        (0-59)
+│ ┌─────────── hour          (0-23)
+│ │ ┌───────── day of month  (1-31)
+│ │ │ ┌─────── month         (1-12)
+│ │ │ │ ┌───── day of week   (0-6, Sunday = 0)
+│ │ │ │ │
+* * * * *
+```
+
+| Expression | Runs |
+|------------|------|
+| `*/5 * * * *` | Every 5 minutes |
+| `0 * * * *` | Every hour, on the hour |
+| `0 2 * * *` | Every day at 02:00 |
+| `0 9 * * 1` | Every Monday at 09:00 |
+| `0 0 1 * *` | At midnight on the first of each month |
+
+Schedules are evaluated in the job's time zone (see `timeZone` below), which
+defaults to UTC.
+
+## Controls
+
+Tune scheduling behavior under **`deploy.cron`**:
+
+| Field | Values / default | Description |
+|-------|------------------|-------------|
+| `concurrencyPolicy` | `allow` (default), `forbid`, `replace` | What happens when a run is still in progress at the next tick. `allow` runs them concurrently, `forbid` skips the new run, `replace` cancels the running one and starts the new run |
+| `suspend` | `false` (default) | Pause the schedule without deleting the job. No new runs start while suspended; a run already in flight finishes |
+| `timeZone` | IANA name, default `UTC` | Time zone the schedule is evaluated in, for example `America/New_York` or `Europe/Oslo` |
+| `startingDeadlineSeconds` | integer, optional | Deadline for starting a run if it misses its scheduled time (for example because the cluster was busy). A run that cannot start within the deadline is counted as missed and skipped |
+| `successfulJobsHistoryLimit` | integer, default `3` | How many completed successful runs to keep in history |
+| `failedJobsHistoryLimit` | integer, default `1` | How many failed runs to keep in history |
+| `backoffLimit` | integer, default `6` | How many times a single run retries before it is marked failed |
+
+## fractal.yaml example
+
+A repo-committed `fractal.yaml` that runs a nightly cleanup at 02:00
+Europe/Oslo time and never overlaps runs:
+
+```yaml
+services:
+  nightly-cleanup:
+    serviceType: cronJob
+    source:
+      git:
+        url: https://github.com/acme/jobs
+        branch: main
+    build:
+      mode: auto
+      startCommand: ["bun", "run", "cleanup"]
+    deploy:
+      schedule: "0 2 * * *"
+      cron:
+        concurrencyPolicy: forbid
+        timeZone: Europe/Oslo
+        successfulJobsHistoryLimit: 7
+```
+
+The job runs the service's start command on each tick. Set it with
+`build.startCommand` for an auto-built source, or rely on the container
+entrypoint for an image source. Environment variables, secrets, and resources
+are configured exactly as they are for a web or worker service (see
+[Service Configuration](/products/fractal/configuration)).
+
+## Create one in the dashboard
+
+From a project, choose **New Service**, pick a source, and set the service type
+to **Cron Job**. Enter the cron schedule and, under the scheduling options, set
+the concurrency policy, time zone, suspend flag, and history and retry limits.
+The same fields map one-to-one to the `deploy.schedule` and `deploy.cron`
+settings above.
+
+## Run history and manual runs
+
+Open the service to see its run history: each tick's start time, duration,
+outcome (succeeded or failed), and logs, retained per the history limits above.
+Where the dashboard supports it, a **Run now** action triggers an immediate
+run outside the schedule, which is useful for testing a new job or re-running
+after a failure.
+
+<Callout type="info">
+A scheduled job's container shell is not available while no run is in progress,
+since there is no long-lived pod between ticks (see [Shell](/products/fractal/shell)).
+</Callout>
