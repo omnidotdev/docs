@@ -32,7 +32,10 @@ export interface CatalogProduct {
   releaseDate?: string;
   /** SPDX license identifier, e.g. "Apache-2.0". */
   license?: string;
-  /** Pricing plans, ordered cheapest first. Absent for products without any. */
+  /**
+   * Pricing plans, ordered cheapest first with any $0 contact-sales tier last.
+   * Absent for products without any.
+   */
   plans?: CatalogPlan[];
 }
 
@@ -122,7 +125,7 @@ export const products: CatalogProduct[] = [
           "Cloud sync across devices",
           "Custom domains",
           "Everything in Free",
-          "Higher AI and build priority",
+          "Priority builds (coming soon)",
           "Unlimited cloud projects"
         ]
       },
@@ -185,11 +188,11 @@ export const products: CatalogProduct[] = [
           "API access (coming soon)",
           "Custom branding (coming soon)",
           "Everything in Pro plan",
+          "Larger AI feedback triage allowance (coming soon)",
           "Multi-source ingestion: social, app store & chat (coming soon)",
           "Product reviews (coming soon)",
           "Team comments & collaboration tools (coming soon)",
           "Theme clustering & summaries (coming soon)",
-          "Unlimited AI feedback triage (coming soon)",
           "Unlimited projects"
         ]
       }
@@ -210,7 +213,7 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "100 messages/month",
+          "50 AI credits/month",
           "Up to 5 conversations"
         ]
       },
@@ -221,7 +224,7 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 500,
         "yearlyPrice": 4500,
         "features": [
-          "5,000 messages/month",
+          "300 AI credits/month",
           "Unlimited conversations",
           "Voice enabled"
         ]
@@ -229,11 +232,11 @@ export const products: CatalogProduct[] = [
       {
         "tier": "team",
         "name": "Beacon Team",
-        "description": "AI assistants for your organization",
+        "description": "AI assistants for your workspace",
         "monthlyPrice": 1500,
         "yearlyPrice": 13500,
         "features": [
-          "25,000 messages/month",
+          "1,000 AI credits/month",
           "Priority support",
           "Unlimited conversations",
           "Voice enabled"
@@ -520,21 +523,6 @@ export const products: CatalogProduct[] = [
     "license": "Proprietary",
     "plans": [
       {
-        "tier": "enterprise",
-        "name": "Herald Enterprise",
-        "description": "Unlimited volume with SSO, SLA, and dedicated support",
-        "monthlyPrice": 0,
-        "yearlyPrice": 0,
-        "features": [
-          "Dedicated IP available on request",
-          "Dedicated support",
-          "SLA",
-          "SSO and audit logs",
-          "Unlimited sending domains",
-          "Unlimited volume"
-        ]
-      },
-      {
         "tier": "free",
         "name": "Herald Free",
         "description": "Transactional email for small projects and testing",
@@ -587,6 +575,21 @@ export const products: CatalogProduct[] = [
           "Priority support",
           "SSO and audit logs",
           "Unlimited sending domains"
+        ]
+      },
+      {
+        "tier": "enterprise",
+        "name": "Herald Enterprise",
+        "description": "Unlimited volume with SSO, SLA, and dedicated support",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "Dedicated IP available on request",
+          "Dedicated support",
+          "SLA",
+          "SSO and audit logs",
+          "Unlimited sending domains",
+          "Unlimited volume"
         ]
       }
     ]
