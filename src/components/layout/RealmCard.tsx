@@ -10,10 +10,10 @@ import {
   HelpCircle,
   Palette,
   Server,
-  Sparkles,
   Users,
 } from "lucide-react";
 
+import OmniMark from "@/components/layout/OmniMark";
 import { cn } from "@/lib/utils";
 
 import type { Realm } from "@/lib/sections";
@@ -39,7 +39,7 @@ const REALM_HOVER_TEXT: Record<string, string> = {
 
 /** Map of icon names to Lucide components. */
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Sparkles,
+  Omni: OmniMark,
   Box,
   Heart,
   Brush,
