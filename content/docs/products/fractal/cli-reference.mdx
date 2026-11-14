@@ -18,6 +18,31 @@ the [MCP server](/products/fractal/mcp) (scheduled jobs).
 
 ## Install
 
+### Homebrew (macOS and Linux)
+
+```bash
+brew install omnidotdev/tap/fractal
+```
+
+Upgrade with `brew upgrade omnidotdev/tap/fractal`.
+
+### Arch Linux (AUR)
+
+Install the `omnidotdev-fractal-cli-bin` package with an AUR helper:
+
+```bash
+yay -S omnidotdev-fractal-cli-bin
+```
+
+The package installs `/usr/bin/fractal`, so it conflicts with the unrelated
+`fractal` Matrix client in the Arch repositories.
+
+Both packages update on every CLI release. Their version is
+`<crate version>.<build number>`, so `0.1.0.42` is the `cli-v42` release, the
+same build that `fractal --version` reports as `0.1.0 (build 42, <commit>)`.
+
+### Prebuilt binary
+
 Prebuilt binaries for Linux (glibc, amd64 and arm64) and macOS (Apple Silicon
 and Intel) are published to
 [GitHub Releases](https://github.com/omnidotdev/fractal-cli/releases), tagged
@@ -43,8 +68,7 @@ fractal --help
 
 To pin a build, replace `latest/download` with `download/cli-v<build-number>`
 (for example `download/cli-v8`). The Linux binaries link glibc, so they do not
-run on musl-based distributions such as Alpine. There are no Windows binaries or
-package-manager packages.
+run on musl-based distributions such as Alpine. There are no Windows binaries.
 
 ## Quick start (hosted)
 

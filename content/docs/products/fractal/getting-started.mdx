@@ -62,7 +62,19 @@ Open the service to follow the rollout. The service tabs give you:
 ## 4. Install the CLI
 
 The `fractal` CLI is a single binary for Linux (glibc, amd64 and arm64) and
-macOS (Apple Silicon and Intel). Download the build for your platform from the
+macOS (Apple Silicon and Intel). Install it with Homebrew on macOS or Linux:
+
+```bash
+brew install omnidotdev/tap/fractal
+```
+
+On Arch Linux, install the `omnidotdev-fractal-cli-bin` package from the AUR:
+
+```bash
+yay -S omnidotdev-fractal-cli-bin
+```
+
+Otherwise, download the build for your platform from the
 [latest release](https://github.com/omnidotdev/fractal-cli/releases/latest),
 make it executable, and put it on your `PATH`:
 
@@ -85,7 +97,7 @@ fractal --help
 ```
 
 See [Install](/products/fractal/cli-reference#install) in the CLI reference for
-pinning a specific build.
+package versions and pinning a specific build.
 
 ## 5. Log in
 
