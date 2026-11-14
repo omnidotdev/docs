@@ -53,12 +53,15 @@ Open the service to follow the rollout. The service tabs give you:
 
 ## 4. Manage from the CLI (optional)
 
-Install the CLI and authenticate:
+Install the CLI and log in:
 
 ```bash
-# Authenticate against fractal.omni.dev
-fractal auth login
+# Opens your browser to sign in with your Omni account
+fractal login
 ```
+
+For CI, set `FRACTAL_API_TOKEN` to an [API token](/products/fractal/api-tokens)
+instead of logging in.
 
 <Callout type="info">
 On the hosted platform you do not need `fractal cluster connect`. Deploy and
