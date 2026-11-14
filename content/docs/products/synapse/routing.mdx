@@ -115,6 +115,10 @@ buffer_timeout_secs = 10
   Cascade strategy buffers the initial response before streaming to the client. This adds slight latency but allows Synapse to transparently escalate to a better model if the initial response shows low confidence (hedging language, insufficient detail).
 </Callout>
 
+<Callout type="warning">
+  An escalated request is billed for both attempts: the discarded initial response at the initial model's price, plus the escalated response at the escalation model's price, since both were generated upstream. The pre-request credit check covers both. If the escalation fails, the initial response is served and billed once. Cascade applies to streaming requests only; a non-streaming request is served by the initial model (with failover).
+</Callout>
+
 ### Score (Multi-Objective)
 
 Compute a weighted score across quality, cost, and latency dimensions and select the highest-scoring model:
