@@ -13,24 +13,58 @@ tools.
 ## How it works
 
 Fractal hosts the server at `https://mcp.fractal.omni.dev/mcp` over the
-Streamable HTTP transport, so there is nothing to install. Your MCP client sends
-your workspace API token with every request, the server forwards it to the
-Fractal API, and every action runs with that token's access. The server stores
-no credentials and keeps no sessions: each request is handled on its own.
+Streamable HTTP transport, so there is nothing to install. Your MCP client
+authenticates every request in one of two ways:
 
-## Get an API token
+- **Browser sign-in (default):** the client opens your browser, you sign in
+  with your Omni account and approve access, and every action runs with your
+  own access.
+- **API token:** for CI and headless agents with no browser, the client sends a
+  workspace API token (`ftk_...`), and every action runs with that token's
+  access.
 
-The server authenticates with a workspace API token (`ftk_...`). Create one in
-the dashboard (open your workspace and select the **API Tokens** tab) or with
-`fractal tokens create --name <label>`. Copy the secret when it is shown (it is
-shown only once) and store it in your MCP client's secret configuration, never
-in a file committed to Git. To keep an assistant to specific projects, create a
-[scoped token](/products/fractal/api-tokens#restrict-a-token-to-projects).
+The server forwards the credential to the Fractal API. It stores no
+credentials and keeps no sessions: each request is handled on its own.
 
-## Client configuration
+## Connect with browser sign-in
 
 Add the server to your client's MCP configuration as a remote (HTTP) server,
-passing the token in the `Authorization` header:
+with no credentials:
+
+```json
+{
+  "mcpServers": {
+    "fractal": {
+      "type": "http",
+      "url": "https://mcp.fractal.omni.dev/mcp"
+    }
+  }
+}
+```
+
+The first time the client connects, the server answers `401` and points the
+client at Omni sign-in. The client opens your browser, you sign in, and a
+consent page names the client and what it can access. Approve it, and the
+client stores the sign-in and refreshes it on its own. Sign-in uses the
+standard [MCP authorization](https://modelcontextprotocol.io/specification/latest/basic/authorization)
+flow (OAuth 2.1 with PKCE), so any client that supports it connects without
+extra setup.
+
+An MCP client is never approved automatically: the consent page appears the
+first time each client connects. Approve only a sign-in your own client
+started.
+
+## Connect with an API token
+
+Use a token where no browser is available, such as CI jobs and headless agents.
+Create a workspace API token (`ftk_...`) in the dashboard (open your workspace
+and select the **API Tokens** tab) or with `fractal tokens create --name <label>`.
+Copy the secret when it is shown (it is shown only once) and store it in your
+MCP client's secret configuration, never in a file committed to Git. To keep an
+assistant to specific projects, create a
+[scoped token](/products/fractal/api-tokens#restrict-a-token-to-projects).
+
+Pass the token in the `Authorization` header:
 
 ```json
 {
@@ -47,17 +81,33 @@ passing the token in the `Authorization` header:
 ```
 
 Clients name these fields slightly differently (some use `transport` or
-`serverUrl`); the three values that matter are the URL, the HTTP transport, and
-the `Authorization: Bearer <token>` header. A request without a token is
-rejected with `401`.
+`serverUrl`); the values that matter are the URL, the HTTP transport, and the
+`Authorization: Bearer <token>` header.
+
+## Workspaces
+
+With browser sign-in, you can belong to several workspaces. The assistant
+calls `list_workspaces` to see them, then passes `workspace` (the workspace's
+slug or id) to the other tools to choose where to act:
+
+- With exactly one workspace, it is selected automatically and `workspace` can
+  be omitted.
+- With several, a tool called without `workspace` returns an error asking the
+  assistant to call `list_workspaces` and pick one.
+
+A token is bound to the workspaces it was created for, so `workspace` does not
+apply to it and is ignored.
 
 ## Tools
 
 Tools take the project's **name** (`project`) and the service's name
-(`service` or `name`). `list_projects` returns the project names.
+(`service` or `name`). `list_projects` returns the project names. Every tool
+except `list_workspaces` also takes an optional `workspace` (see
+[Workspaces](#workspaces)).
 
 | Tool | Access | Arguments | What it does |
 |------|--------|-----------|--------------|
+| `list_workspaces` | Read | None | List the workspaces you can act in, with each one's id, slug, name, and type |
 | `list_projects` | Read | `owner`, `limit`, `offset` (all optional) | List your projects with phase and service count |
 | `list_services` | Read | `project`, optional `limit`, `offset` | List a project's services with status, source, build settings, and cron schedule |
 | `get_service` | Read | `project`, `name` | Read one service: phase, current image, URL, conditions and last error, source, build settings (including `rootDir` and `watchPaths`), env, and schedule |
@@ -79,6 +129,9 @@ use, so an assistant's actions are visible and auditable the same way.
 
 ## Security
 
+- A browser sign-in issues an access token bound to the Fractal MCP server
+  (its audience), and the server refuses sign-in tokens issued for any other
+  service.
 - A token acts with your access across its workspace. Scope and expire tokens
   for automation, and revoke any that leak (see [API Tokens](/products/fractal/api-tokens)).
 - Keep the token in your MCP client's secret store, not in a checked-in config
