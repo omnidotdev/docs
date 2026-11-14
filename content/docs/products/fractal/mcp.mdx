@@ -1,14 +1,14 @@
 ---
 title: MCP Server
-description: Connect an AI assistant to Fractal at https://mcp.fractal.omni.dev/mcp (Streamable HTTP, ftk_ bearer token) and use its tools to list services, deploy, read logs, set env vars, and create scheduled jobs
+description: Connect an AI assistant to Fractal at https://mcp.fractal.omni.dev/mcp (Streamable HTTP, ftk_ bearer token) and use its tools to list services, deploy, read logs, set env vars, and create, run, pause, and inspect scheduled jobs
 ---
 
 The Fractal MCP server exposes Fractal's deploy and operations surface to AI
 assistants that speak the [Model Context Protocol](https://modelcontextprotocol.io).
 Connect an MCP client (for example a coding assistant or agent) and the
 assistant can list and inspect services, trigger deploys, read logs, manage
-environment variables, and create scheduled jobs on your workspace through typed
-tools.
+environment variables, and create, run, pause, and inspect scheduled jobs on
+your workspace through typed tools.
 
 ## How it works
 
@@ -61,18 +61,25 @@ Tools take the project's **name** (`project`) and the service's name
 | `list_projects` | Read | `owner`, `limit`, `offset` (all optional) | List your projects with phase and service count |
 | `list_services` | Read | `project`, optional `limit`, `offset` | List a project's services with status, source, build settings, and cron schedule |
 | `get_service` | Read | `project`, `name` | Read one service: phase, current image, URL, conditions and last error, source, build settings (including `rootDir` and `watchPaths`), env, and schedule |
-| `list_cron_services` | Read | `project` | List only the [scheduled jobs](/products/fractal/scheduled-jobs) in a project |
+| `list_cron_services` | Read | `project` | List only the [scheduled jobs](/products/fractal/scheduled-jobs) in a project, with each job's schedule and `deploy.cron` controls (including whether it is paused) |
+| `list_cron_runs` | Read | `project`, `service`, optional `limit` (1 to 100, default 20), `namespace` | List a scheduled job's recent runs, newest first: each run's name, whether it was manual or scheduled, status (`Running`, `Succeeded`, or `Failed`), start and completion times, and duration in seconds. Any project role |
 | `get_env` | Read | `project`, `service` | Read a service's environment variables. Secret-backed values are masked |
-| `get_logs` | Read | `project`, `service`, optional `tailLines` (1 to 5000, default 200), `sinceSeconds` | Read a snapshot of recent logs per pod, newest pod first. Any project role can read logs. Returns no pods when the service is asleep or scaled to zero |
+| `get_logs` | Read | `project`, `service`, optional `tailLines` (1 to 5000, default 200), `sinceSeconds`, `job` | Read a snapshot of recent logs per pod, newest pod first. Any project role can read logs. Returns no pods when the service is asleep or scaled to zero. For a scheduled job, `job` (a run's name from `run_cron_job` or `list_cron_runs`) reads that run's output |
 | `deploy_service` | Write | `project`, `service`, optional `environment`, `namespace` | Rebuild and redeploy a service (the same as `fractal deploy`). Needs the `developer` role or higher. Omit `environment` to redeploy every environment |
 | `set_env` | Write | `project`, `service`, `env` (list of `{ name, value }` or `{ name, secret }`), optional `replace` | Set or update environment variables. Merges with existing variables unless `replace` is `true`. A `secret` value is stored write-only in a managed secret. Triggers a rolling update |
-| `create_cron_service` | Write | `project`, `name`, `schedule`, `source` (`git: { url, branch }` or `image: { repository, tag }`), optional `buildMode`, `dockerfilePath`, `rootDir`, `watchPaths`, `command`, `args`, `env`, `environment` | Create a scheduled job from a Git repository or image |
+| `create_cron_service` | Write | `project`, `name`, `schedule`, `source` (`git: { url, branch }` or `image: { repository, tag }`), optional `buildMode`, `dockerfilePath`, `rootDir`, `watchPaths`, `command`, `args`, `env`, `environment`, `cron` | Create a scheduled job from a Git repository or image. `cron` sets the [scheduling controls](/products/fractal/scheduled-jobs#controls): `concurrencyPolicy` (`allow`, `forbid`, or `replace`), `timeZone`, `suspend`, `startingDeadlineSeconds`, `successfulJobsHistoryLimit`, `failedJobsHistoryLimit`, `backoffLimit` |
+| `run_cron_job` | Write | `project`, `service`, optional `namespace` | Run a scheduled job once now, outside its schedule (also while it is paused). Returns `job`, the run's name. Needs the `developer` role or higher |
+| `set_cron_suspended` | Write | `project`, `service`, `suspended`, optional `namespace` | Pause (`suspended: true`) or resume (`suspended: false`) a scheduled job's schedule. A run in progress finishes. Needs the `developer` role or higher |
 
 `get_logs` returns a snapshot, not a live stream. For a live tail, use
-`fractal logs <service> --follow`. `create_cron_service` sets the schedule but
-not the [scheduling controls](/products/fractal/scheduled-jobs#controls)
-(concurrency, time zone, history, retries); set those afterwards in the
-dashboard.
+`fractal logs <service> --follow`.
+
+To run a scheduled job and check the result, an assistant calls `run_cron_job`,
+then `list_cron_runs` until the returned run is `Succeeded` or `Failed`, then
+`get_logs` with `job` for its output. The run appears within a few seconds of
+the request. A finished run's logs stay readable while the run is within the
+job's history limits. To change an existing job's schedule or controls, use
+**Edit** on the dashboard's **Scheduled jobs** page.
 
 Each tool calls the same API the dashboard and [CLI](/products/fractal/cli-reference)
 use, so an assistant's actions are visible and auditable the same way.

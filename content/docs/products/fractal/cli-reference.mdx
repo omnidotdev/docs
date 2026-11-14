@@ -1,6 +1,6 @@
 ---
 title: CLI Reference
-description: Install the fractal CLI and use every command and flag (login, workspaces, deploy, logs, env, scale, tokens, members, cluster), with transports, hosted availability, and environment variables
+description: Install the fractal CLI and use every command and flag (login, workspaces, deploy, logs, scheduled jobs with fractal cron, env, scale, tokens, members, cluster), with transports, hosted availability, and environment variables
 ---
 
 The `fractal` CLI manages your projects and services from a terminal or CI. It
@@ -73,7 +73,7 @@ the same name, pick one with `--project <name-or-slug>` or `FRACTAL_PROJECT`.
 
 | Option | Description |
 |--------|-------------|
-| `--json` | Emit JSON instead of tables. Honored by `services`, `projects list`/`get`, `whoami`, `login`, and `logs` (one metadata line, then one JSON object per log line). Other commands keep their human output |
+| `--json` | Emit JSON instead of tables. Honored by `services`, `projects list`/`get`, `whoami`, `login`, `logs` (one metadata line, then one JSON object per log line), and `cron` (see [Scheduled jobs](#scheduled-jobs)). Other commands keep their human output |
 | `--transport api\|kube` | Pick the transport for this command (see [Transports](#transports)) |
 | `--project <name-or-slug>` | Project that owns the service, on the `api` transport. Falls back to `FRACTAL_PROJECT`; when neither is set, the service is looked up across your projects |
 | `--workspace <slug-or-id>` | Workspace to act in for this command. Overrides `FRACTAL_WORKSPACE` and the saved workspace (see [Workspaces](#workspaces)) |
@@ -101,7 +101,7 @@ from the config file.
 
 | Over the API | Not available on hosted workspaces |
 |--------------|------------------------------------|
-| `services`, `projects list`/`get`, `logs` (including `--follow`), `deploy`, `env list`/`set`/`set-secret`/`unset`, `scale`, `members list`/`add`/`remove`, `tokens list`/`create`/`revoke`, `workspace list`/`use`/`current`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
+| `services`, `projects list`/`get`, `logs` (including `--follow`), `deploy`, `cron list`/`run`/`pause`/`resume`/`runs`/`logs`, `env list`/`set`/`set-secret`/`unset`, `scale`, `members list`/`add`/`remove`, `tokens list`/`create`/`revoke`, `workspace list`/`use`/`current`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
 
 The commands in the right column exit straight away with a short message that
 says what to use instead:
@@ -295,6 +295,54 @@ every 2 seconds and stops after 5 failed polls in a row. A service that is
 sleeping or scaled to zero has no pods: `logs` says so instead of failing, and
 `--follow` waits for it to start. Any project role, `viewer` included, can read
 logs.
+
+## Scheduled jobs
+
+`fractal cron` controls existing [scheduled jobs](/products/fractal/scheduled-jobs)
+(`cronJob` services) on both transports. Address a job by its service name, like
+any other service.
+
+```bash
+fractal cron list                                         # every job; add --project to narrow it
+fractal cron run <service> [-f, --follow] [--timeout <dur>]
+fractal cron pause <service>
+fractal cron resume <service>
+fractal cron runs <service> [--limit <n>]
+fractal cron logs <service> [--job <run>] [-t, --tail <n>] [-f, --follow]
+```
+
+| Command | Notes |
+|---------|-------|
+| `list` | Each job's project, name, schedule (with its time zone when set), whether it is paused, and its last run |
+| `run` | Run the job once now, outside its schedule, and print the run's name. Works while the job is paused. `--follow` waits for the run to finish, streams its logs, and exits with status `1` unless it succeeds; `--timeout` (with `--follow`, e.g. `30m`) gives up after that long |
+| `pause` | Stop the schedule without deleting the job. A run in progress finishes, and `cron run` still works |
+| `resume` | Restart a paused schedule |
+| `runs` | Recent runs, newest first: name, status (`Running`, `Succeeded`, or `Failed`), trigger (`manual` or `scheduled`), start time, and duration. `--limit` takes 1 to 100 (default 20) |
+| `logs` | One run's output; the newest run unless `--job` names one (from `cron runs`). `--tail` limits lines per pod; `--follow` waits for a running run to finish and exits with status `1` unless it succeeds |
+
+`run`, `pause`, and `resume` need the `developer` role or higher on the project;
+`list`, `runs`, and `logs` work with any project role. A command on a service
+that is not a scheduled job fails with a message saying so.
+
+With `--json`, `cron list` prints an array of `{ project, name, schedule,
+timeZone, suspended, lastRun }` and `cron runs` an array of `{ name, manual,
+status, startTime, completionTime, durationSeconds }`. `cron run` prints
+`{ service, job, follow }`; `cron pause` and `cron resume` print
+`{ service, suspended }`. `cron logs` prints `{ service, job, follow }`, then one
+JSON object per log line. With `--follow`, `cron run` and `cron logs` also print
+the log lines and then the finished run as a final JSON object.
+
+In CI, `--follow` turns a job into a build step that fails when the job fails:
+
+```bash
+export FRACTAL_API_TOKEN="$FRACTAL_CI_TOKEN"
+fractal cron run db-backfill --project acme --follow --timeout 1h
+```
+
+On `kube`, `fractal cron` works on the jobs in the current kubeconfig namespace.
+A run is requested from the operator either way, so the run's name is known
+before it starts. A run that has not started within 10 minutes of the request
+is dropped, and `--follow` reports that.
 
 ## Scaling and lifecycle
 
