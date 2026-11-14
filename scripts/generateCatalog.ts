@@ -19,6 +19,8 @@ import { resolve } from "node:path";
 
 import { fetchPublicCatalog } from "@omnidotdev/providers/catalog";
 
+import comparePlans from "../src/lib/catalog/comparePlans";
+
 const outPath = resolve(
   import.meta.dir,
   "../src/lib/catalog/generated/catalog.ts",
@@ -114,31 +116,29 @@ const shapePlans = (slug: string) => {
 
   if (!raw?.length) return undefined;
 
-  return [...raw]
-    .sort((a, b) => a.monthlyPrice - b.monthlyPrice)
-    .map((plan) => {
-      const feePlanFeature = plan.planFeatures.nodes.find(
-        (f) => f.featureKey === "transaction_fee_bps",
-      );
+  return [...raw].sort(comparePlans).map((plan) => {
+    const feePlanFeature = plan.planFeatures.nodes.find(
+      (f) => f.featureKey === "transaction_fee_bps",
+    );
 
-      return {
-        tier: plan.tier,
-        name: plan.name,
-        description: plan.description ?? undefined,
-        monthlyPrice: plan.monthlyPrice,
-        yearlyPrice: plan.yearlyPrice,
-        // Sorted for a deterministic vendored file: syncCatalog deletes and
-        // reinserts plans on every catalog sync, so feature row order (and thus
-        // the API's default ordering) is not stable across deploys.
-        features: plan.planFeatures.nodes
-          .filter((f) => f.kind === "marketing")
-          .map((f) => f.value)
-          .sort((a, b) => a.localeCompare(b)),
-        transactionFeeBps: feePlanFeature
-          ? Number(feePlanFeature.value)
-          : undefined,
-      };
-    });
+    return {
+      tier: plan.tier,
+      name: plan.name,
+      description: plan.description ?? undefined,
+      monthlyPrice: plan.monthlyPrice,
+      yearlyPrice: plan.yearlyPrice,
+      // Sorted for a deterministic vendored file: syncCatalog deletes and
+      // reinserts plans on every catalog sync, so feature row order (and thus
+      // the API's default ordering) is not stable across deploys.
+      features: plan.planFeatures.nodes
+        .filter((f) => f.kind === "marketing")
+        .map((f) => f.value)
+        .sort((a, b) => a.localeCompare(b)),
+      transactionFeeBps: feePlanFeature
+        ? Number(feePlanFeature.value)
+        : undefined,
+    };
+  });
 };
 
 // Deterministic order so regenerations produce stable diffs.
@@ -190,7 +190,10 @@ export interface CatalogProduct {
   releaseDate?: string;
   /** SPDX license identifier, e.g. "Apache-2.0". */
   license?: string;
-  /** Pricing plans, ordered cheapest first. Absent for products without any. */
+  /**
+   * Pricing plans, ordered cheapest first with any $0 contact-sales tier last.
+   * Absent for products without any.
+   */
   plans?: CatalogPlan[];
 }
 
