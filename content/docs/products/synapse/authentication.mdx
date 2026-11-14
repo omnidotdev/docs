@@ -1,9 +1,9 @@
 ---
 title: Authentication
-description: API key auth, OAuth2/JWT, CSRF protection, and security practices
+description: API key auth, CSRF protection, and security practices
 ---
 
-Synapse supports multiple authentication methods to secure access to its API endpoints.
+Synapse authenticates every request with a Synapse API key (`synapse_...`). JWTs and other bearer tokens are not accepted: a request without a valid API key is refused with `401` before it reaches a provider.
 
 ## API Key Authentication
 
@@ -16,8 +16,8 @@ The default authentication method. Clients pass an API key in the request header
 curl -H "Authorization: Bearer your-api-key" \
   http://localhost:6000/v1/chat/completions ...
 
-# Anthropic-compatible endpoints
-curl -H "x-api-key: your-api-key" \
+# Anthropic-compatible endpoints (also pass the key as a Bearer token)
+curl -H "Authorization: Bearer your-api-key" \
   http://localhost:6000/v1/messages ...
 ```
 
@@ -88,8 +88,7 @@ When enabled, non-GET requests from browser clients must include a valid CSRF to
 Synapse tracks which client is making each request for usage analytics and rate limiting. Clients are identified by:
 
 1. **API key** -- each key maps to a client identity
-2. **JWT claims** -- `sub` or `client_id` claim
-3. **IP address** -- fallback when no other identifier is available
+2. **IP address** -- fallback when no other identifier is available
 
 ### Custom Client Identification
 
@@ -106,7 +105,7 @@ When set, Synapse uses the value of this header as the client identifier, regard
 
 1. **Use TLS in production** -- configure TLS in the [server section](/products/synapse/configuration#tls) or terminate TLS at a reverse proxy
 2. **Rotate API keys regularly** -- use the Omni dashboard or API to rotate keys without downtime
-3. **Use JWT for multi-tenant deployments** -- JWTs carry identity and scope, reducing key management overhead
+3. **Use product-scoped API keys for multi-tenant deployments** -- each key carries its product and billing entity, so usage is attributed and billed per tenant
 4. **Enable CSRF for browser access** -- protect against cross-site request forgery
 5. **Limit CORS origins** -- only allow trusted origins in [CORS configuration](/products/synapse/configuration#cors)
 6. **Monitor authentication failures** -- use [telemetry](/products/synapse/telemetry) to track and alert on auth failures

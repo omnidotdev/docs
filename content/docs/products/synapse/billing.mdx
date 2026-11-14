@@ -11,6 +11,8 @@ Synapse offers flexible billing through [Aether](https://billing.omni.dev), Omni
 
 Store your own provider API keys in Synapse's encrypted vault. Requests route directly through your provider accounts. You pay providers directly and Synapse charges only for the platform subscription.
 
+Keys are stored per vendor (`openai`, `anthropic`, `google`, ...). Your `openai` key also serves speech-to-text (Whisper), text-to-speech, embeddings, and image generation, since those run on the OpenAI API. A request to a provider you have no key for is refused with `400`.
+
 ### Managed Credits
 
 Use Synapse-provided keys with pay-as-you-go pricing. Provider costs are passed through with a 15% margin. No need to manage individual provider accounts.
@@ -25,22 +27,47 @@ Combine BYOK and managed keys. Attach provider keys to specific Synapse API keys
 |---|---|---|---|
 | **Monthly** | $0 | $29/mo | $79/mo |
 | **Yearly** | $0 | $278/yr (save 20%) | $758/yr (save 20%) |
-| **Requests/month** | 10,000 | 100,000 | Unlimited |
+| **Requests/month** | 10,000 | 100,000 | 1,000,000 |
 | **API keys** | 3 | 25 | Unlimited |
 | **Smart routing** | No | Yes | Yes |
 | **All modalities** | LLM only | LLM, STT, TTS, images, embeddings | LLM, STT, TTS, images, embeddings |
 | **Analytics retention** | 7 days | 90 days | 365 days |
 | **Team RBAC** | No | No | Yes |
-| **Overage** | Hard limit | $0.20 per 1K requests | Included |
+| **Request overage** | None (hard limit) | $0.20 per 1K requests | $0.10 per 1K requests |
 
 > All tiers include BYOK and managed credits. The Free tier is subject to a hard request limit with no overage.
+
+## Workspaces
+
+A Synapse subscription belongs to a workspace, and so does every API key. A key's requests count against the plan of the workspace it belongs to: the tier, the monthly request allowance, the API key limit, overage, and the spending limit are shared by every key in the workspace, whichever member created it.
+
+- Keys created from your own dashboard belong to your personal workspace
+- Keys created in a team workspace belong to that team. Any member can see the team's keys; creating keys and revoking another member's key require the admin role
+
+## Request Overage
+
+Pro and Team include a monthly request allowance. Requests above it keep working and are billed as overage at the end of each billing period:
+
+- Overage is the number of requests above the included allowance, at the tier's rate ($0.20 per 1K on Pro, $0.10 per 1K on Team), charged pro rata (one request over Pro costs $0.0002)
+- The charge is added to the subscription's renewal invoice. Any credit balance on the billing account is applied first, and the remainder is charged to the payment method on file
+- The request count resets at the start of each billing period
+- Overage is bounded by the hard spending limit. Paid plans start with a default limit of $100 of overage per month on Pro and $500 on Team. Once the next request would exceed the limit, requests are rejected with `429` until the next billing period, and the invoice never charges more than the limit. Workspace admins can view and change the limit (minimum $10) from the workspace's **Billing** page, and raising it above the current overage resumes requests immediately
+- The Free tier has no payment method, so requests above its allowance are rejected with `429` instead
+
+### Usage Alerts
+
+Synapse alerts the workspace as usage grows, within a few minutes of the requests:
+
+- **Included allowance:** at 75%, 90%, and 100% of the monthly request allowance, once per billing period. On Free, 100% is where requests start being rejected; on Pro and Team, it is where overage begins
+- **Spending limit (Pro and Team):** at 75% and 90% of the hard spending limit, and when the limit is reached and requests pause. These alerts are also emailed to the billing contact
 
 ## Entitlements
 
 Each tier includes a set of entitlements enforced by the gateway and API:
 
 - **`api_access`** -- whether API requests are allowed
-- **`max_requests_per_month`** -- request quota (-1 = unlimited)
+- **`max_requests_per_month`** -- included monthly requests (-1 = unlimited); a hard limit on Free, the overage threshold on Pro and Team
+- **`overage_rate_cents:requests`** -- request overage rate in cents per 1K requests (Pro and Team only)
 - **`max_api_keys`** -- API key creation limit (-1 = unlimited)
 - **`max_input_tokens_per_request`** -- per-request input token cap
 - **`max_output_tokens_per_request`** -- per-request output token cap
@@ -61,7 +88,7 @@ Every request through the gateway is metered:
 3. **Request count** -- incremented per API call
 4. **Message count** -- number of messages in conversation
 
-Usage is recorded asynchronously and never blocks request handling. Meter data flows to Aether for quota tracking and billing.
+Usage is recorded asynchronously and never blocks request handling. Meter data flows to Aether for quota tracking and billing. The request count is the meter that request overage is billed from.
 
 ## Webhooks
 
