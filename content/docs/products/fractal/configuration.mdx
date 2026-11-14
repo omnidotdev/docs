@@ -97,12 +97,11 @@ deploy:
 Release commands apply to web and worker services. A rollback reuses an
 already-released image, so it does not re-run the release command.
 
-<Callout type="info">
-On hosted workspaces, the release command is not yet settable from the
-dashboard, the API, or a fractal.yaml import. On a
-[BYOC cluster](/products/fractal/self-hosting), set `spec.deploy.release` on the
-`FractalService` resource directly.
-</Callout>
+In the dashboard, set it on the service's **Settings** tab under **Release
+command**, as a single line such as `bun db:migrate`. Leave the field empty to
+remove the release step. The command runs without a shell: quote an argument that
+contains spaces, and wrap chained commands in a shell yourself, for example
+`sh -c "bun db:migrate && bun db:seed"`.
 
 ### Environment variables
 
@@ -236,7 +235,7 @@ services:
         branch: main          # default: master
     build:
       mode: auto              # auto | dockerfile | none
-    serviceType: web          # web | worker | staticSite
+    serviceType: web          # web | worker | cronJob | staticSite
     deploy:
       replicas: 2
       env:
@@ -269,14 +268,14 @@ An import applies these fields:
 |---------|--------|
 | `source` | `git` (`url`, `branch`) or `image` (`repository`, `tag`) |
 | `build` | `mode`, `dockerfilePath`, `rootDir`, `watchPaths` |
-| `serviceType` | `web`, `worker`, `staticSite`. Defaults to `web` when `expose` is set, otherwise `worker` |
-| `deploy` | `replicas`, `env` (literal `value` or `valueFrom.secretRef`), `resources`, `healthCheck`, `volumes` |
+| `serviceType` | `web`, `worker`, `cronJob`, `staticSite`. Defaults to `web` when `expose` is set, otherwise `worker` |
+| `deploy` | `replicas`, `env` (literal `value` or `valueFrom.secretRef`), `resources`, `healthCheck`, `volumes`, `release`, `requiredEnv`, `schedule`, `cron` |
 | `expose` | `port`, `domain`, `tls`, `www` |
 
 Keep secret values out of the file: reference a secret with
-`valueFrom.secretRef` instead. Other settings, including `deploy.release`,
-`deploy.requiredEnv`, `deploy.schedule`, and `deploy.cron`, are not applied by
-an import; set them on the service afterwards (see
-[Scheduled Jobs](/products/fractal/scheduled-jobs) for cron services). An unknown
-`build.mode` or `serviceType` produces a warning in the import preview and falls
-back to the default.
+`valueFrom.secretRef` instead. A `cronJob` service needs a valid
+`deploy.schedule`; the import stops and names any scheduled job without one (see
+[Scheduled Jobs](/products/fractal/scheduled-jobs) for the schedule format and
+`cron` controls). An unknown `build.mode`, `serviceType`, or
+`cron.concurrencyPolicy` produces a warning in the import preview and falls back
+to the default.
