@@ -51,6 +51,7 @@ long_context = true
 |-------|-------------|
 | `provider` | Provider name matching a configured `[llm.providers.*]` entry |
 | `model` | Model identifier as the provider expects it |
+| `display_name` | Optional name model pickers show, as returned by `GET /v1/models` (e.g. `"Claude Sonnet 5.5"`). Derived from the model id when unset |
 | `input_per_mtok` | Cost per million input tokens (USD) |
 | `output_per_mtok` | Cost per million output tokens (USD) |
 | `quality` | Quality score from 0.0 to 1.0 |
@@ -177,6 +178,8 @@ Synapse provides built-in virtual model names that map to routing strategies:
 | `fast` | Optimizes for lowest latency |
 | `best` | Optimizes for highest quality |
 | `cheap` | Optimizes for lowest cost |
+
+A product-scoped key with a [model policy](/products/synapse/configuration#product-model-policies) can always send `auto`: it resolves to the product's default model, or routes among the product's own models when the product's plan includes `smart_routing`. Without that entitlement, `fast`, `best`, and `cheap` resolve to the default as well.
 
 Clients can use these names directly:
 
