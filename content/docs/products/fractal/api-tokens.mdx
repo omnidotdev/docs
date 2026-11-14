@@ -29,9 +29,10 @@ Send the token as a bearer credential:
 curl -H "Authorization: Bearer ftk_..." https://<your-fractal-api>/graphql
 ```
 
-The `fractal` CLI reads its token from `~/.config/fractal/config.toml` after
-`fractal auth login`; for CI, set the token in the environment your CLI or
-API client reads instead.
+The `fractal` CLI reads the token from `FRACTAL_API_TOKEN`, or from
+`~/.config/fractal/config.toml` after `fractal auth login --token <ftk_...>`.
+With a token set, the CLI works against your hosted workspace with no
+kubeconfig; see the [CLI Reference](/products/fractal/cli-reference).
 
 ## List and revoke
 
@@ -50,7 +51,7 @@ The same tokens can be managed with the CLI (see the
 [CLI Reference](/products/fractal/cli-reference)):
 
 ```bash
-fractal tokens list
-fractal tokens create --name <label> [--scope <project>]... [--expires-in-days <n>]
-fractal tokens revoke <name>
+fractal tokens list [--workspace <id>]
+fractal tokens create --name <label> [--scope <project>]... [--expires-in-days <n>] [--workspace <id>]
+fractal tokens revoke <name> [--workspace <id>]
 ```
