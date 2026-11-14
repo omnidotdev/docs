@@ -1,6 +1,6 @@
 ---
 title: CLI Reference
-description: Install the fractal CLI and use every command and flag (login, deploy, logs, env, scale, tokens, members, cluster), with transports, hosted availability, and environment variables
+description: Install the fractal CLI and use every command and flag (login, workspaces, deploy, logs, env, scale, tokens, members, cluster), with transports, hosted availability, and environment variables
 ---
 
 The `fractal` CLI manages your projects and services from a terminal or CI. It
@@ -51,12 +51,16 @@ package-manager packages.
 Log in through your browser, then run commands:
 
 ```bash
-fractal login                        # opens your browser to sign in
+fractal login                        # opens your browser to sign in, then picks a workspace
 
 fractal services                     # every service across your projects
 fractal logs <service> --follow      # follow a service's logs
 fractal deploy --service <service>   # rebuild and redeploy a service
 ```
+
+When your account belongs to several workspaces, `fractal login` asks which one
+to act in; switch later with `fractal workspace use <slug>` (see
+[Workspaces](#workspaces)).
 
 For CI and other non-interactive use, set `FRACTAL_API_TOKEN` to an
 [API token](/products/fractal/api-tokens) instead (see
@@ -72,6 +76,7 @@ the same name, pick one with `--project <name-or-slug>` or `FRACTAL_PROJECT`.
 | `--json` | Emit JSON instead of tables. Honored by `services`, `projects list`/`get`, `whoami`, `login`, and `logs` (one metadata line, then one JSON object per log line). Other commands keep their human output |
 | `--transport api\|kube` | Pick the transport for this command (see [Transports](#transports)) |
 | `--project <name-or-slug>` | Project that owns the service, on the `api` transport. Falls back to `FRACTAL_PROJECT`; when neither is set, the service is looked up across your projects |
+| `--workspace <slug-or-id>` | Workspace to act in for this command. Overrides `FRACTAL_WORKSPACE` and the saved workspace (see [Workspaces](#workspaces)) |
 
 Global options can go before or after the subcommand.
 
@@ -96,7 +101,7 @@ from the config file.
 
 | Over the API | Not available on hosted workspaces |
 |--------------|------------------------------------|
-| `services`, `projects list`/`get`, `logs` (including `--follow`), `deploy`, `env list`/`set`/`set-secret`/`unset`, `scale`, `members list`/`add`/`remove`, `tokens list`/`create`/`revoke`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
+| `services`, `projects list`/`get`, `logs` (including `--follow`), `deploy`, `env list`/`set`/`set-secret`/`unset`, `scale`, `members list`/`add`/`remove`, `tokens list`/`create`/`revoke`, `workspace list`/`use`/`current`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
 
 The commands in the right column exit straight away with a short message that
 says what to use instead:
@@ -115,6 +120,7 @@ says what to use instead:
 
 ```bash
 fractal login                      # sign in through your browser
+fractal login --switch-account     # sign in as a different account
 fractal login --no-browser         # print the sign-in URL and paste back the result
 fractal login --token <ftk_...>    # save an API token instead (use `-` to read it from stdin)
 fractal whoami                     # show who you are, your workspace, and the transport
@@ -127,12 +133,29 @@ The same commands are also available under `fractal auth` (for example,
 ### Browser login
 
 `fractal login` runs a standard OAuth sign-in (authorization code with PKCE)
-against `https://identity.omni.dev`. It opens your browser to the Omni sign-in
-page; after you approve, the CLI receives the result on a temporary
+against `https://identity.omni.dev`. It opens your browser to an **Authorize
+Fractal CLI** page that names the account you are signed in to, so you can
+confirm which account the CLI will act as (or sign in first if you are not
+signed in). After you approve, the CLI receives the result on a temporary
 `127.0.0.1` listener and saves an access token and a refresh token in the
 [config file](#config-file). The access token is refreshed silently before it
 expires, so you stay logged in. If the sign-in doesn't finish within 5 minutes,
 the login times out; run `fractal login` again.
+
+To log in as a different account than the one signed in to the browser, run
+`fractal login --switch-account`. It asks you to sign in again, then shows the
+**Authorize Fractal CLI** page for the account you signed in with.
+
+When the login finishes, the terminal prints `Logged in as <email>` and the
+selected workspace:
+
+- With one workspace, the CLI selects it automatically.
+- With several, the CLI shows a numbered list sorted by name and asks which to
+  use. The workspace you used last is preselected (press Enter to keep it).
+- With several and no terminal to ask on (for example in a script, or with
+  `--json`), the CLI does not prompt. It keeps the workspace you used last when
+  it is still yours, and otherwise prints how to pick one with
+  `fractal workspace use <slug>`.
 
 Over SSH, on Linux with no display, or with `--no-browser`, the CLI prints the
 sign-in URL instead. Open it in any browser and approve. The browser then lands
@@ -144,13 +167,43 @@ When a session can no longer be refreshed, commands report
 
 ### `fractal whoami`
 
-After a browser login, `whoami` shows your email, name, and workspace. The
-workspace is the one set in `FRACTAL_WORKSPACE`, or your only workspace when you
-belong to exactly one; with several, it lists them all. With an API token it
-reports that an API token is in use. On the `api` transport it also checks the
-credential against the API and reports how many projects it can see.
-`fractal --json whoami` prints the same fields (`authenticated`, `source`,
-`kind`, `email`, `workspace`, `workspaces`, `transport`, `apiUrl`, `projects`).
+After a browser login, `whoami` shows your email, name, and the workspace
+commands act in (for example `Workspace: Omni (omni)`). When no workspace is
+selected and you belong to several, it says how to pick one. With an API token
+it reports that an API token is in use. On the `api` transport it also checks
+the credential against the API and reports how many projects it can see in the
+selected workspace. `fractal --json whoami` prints the same fields
+(`authenticated`, `source`, `kind`, `email`, `workspace`, `workspaceSource`,
+`workspaces`, `transport`, `apiUrl`, `projects`).
+
+### Workspaces
+
+A browser login can belong to several workspaces. Commands act in one of them
+at a time: the CLI sends the selected workspace with every API request, and the
+API checks that you are a member of it.
+
+```bash
+fractal workspace list              # your workspaces; the current one is marked with *
+fractal workspace use <slug-or-id>  # act in this workspace from now on
+fractal workspace current           # show the workspace commands act in
+```
+
+`workspace use` checks that you belong to the workspace, then saves it in the
+[config file](#config-file). `workspace list` and `workspace current` accept
+`--json`.
+
+The workspace is chosen in this order, highest precedence first:
+
+1. The `--workspace <slug-or-id>` flag.
+2. The `FRACTAL_WORKSPACE` environment variable (a slug or an id).
+3. The workspace saved by `fractal login` or `fractal workspace use`.
+4. Your only workspace, when you belong to exactly one.
+
+A slug or id you do not belong to is rejected with a message pointing at
+`fractal workspace list`. Workspace selection applies to browser logins only.
+An [API token](/products/fractal/api-tokens) is bound to its workspaces when it
+is created, so the workspace setting does not change what an API token can
+access.
 
 ### `fractal logout`
 
@@ -301,9 +354,9 @@ The project owner cannot be removed.
 Tokens for automation and CI. See [API Tokens](/products/fractal/api-tokens).
 
 ```bash
-fractal tokens list [--workspace <id>]
-fractal tokens create --name <label> [--scope <project>]... [--expires-in-days <n>] [--workspace <id>]
-fractal tokens revoke <name> [--workspace <id>]
+fractal tokens list
+fractal tokens create --name <label> [--scope <project>]... [--expires-in-days <n>]
+fractal tokens revoke <name>
 fractal tokens delete <name>   # kube transport only; prefer revoke
 ```
 
@@ -312,15 +365,14 @@ fractal tokens delete <name>   # kube transport only; prefer revoke
 | `--name <label>` | Label for the token (for example `github-actions-ci`) |
 | `--scope <project>` | Restrict the token to a project, by its name from `fractal projects list` (not its slug). Repeat for several projects. Omit (or pass `*`) for every project you can access |
 | `--expires-in-days <n>` | Lifetime in days. Omit for a non-expiring token |
-| `--workspace <id>` | Workspace the token belongs to |
 
 `tokens create` prints the secret once; copy it then. `tokens revoke` revokes
 the newest active token with that label. On hosted workspaces, a token always
-acts as the person who creates it. The workspace defaults to `FRACTAL_WORKSPACE`,
-then your only workspace when you belong to exactly one, then the workspace
-that owns your projects. Pass `--workspace <id>` if you belong to more than one
-(`fractal --json whoami` lists their ids). `--subject` and `tokens delete` need
-the `kube` transport.
+acts as the person who creates it. Tokens belong to the workspace commands act
+in (see [Workspaces](#workspaces)): the global `--workspace` flag,
+`FRACTAL_WORKSPACE`, or the saved workspace. With none of those set, it falls
+back to the workspace that owns your projects. With an API token, pass the
+workspace id. `--subject` and `tokens delete` need the `kube` transport.
 
 ## Cluster (BYOC)
 
@@ -370,7 +422,7 @@ kubectl -n fractal-system create secret docker-registry fractal-registry-credent
 | `FRACTAL_API_URL` | Fractal API base URL. Overrides `api_url` in the config file | `https://api.fractal.omni.dev` |
 | `FRACTAL_TRANSPORT` | `api` or `kube`; the `--transport` flag overrides it | automatic |
 | `FRACTAL_PROJECT` | Default project for service commands; the `--project` flag overrides it | unset |
-| `FRACTAL_WORKSPACE` | Workspace id for `tokens` commands and the workspace `whoami` shows; the `--workspace` flag overrides it | inferred |
+| `FRACTAL_WORKSPACE` | Workspace to act in (slug or id). Overrides the saved workspace; the `--workspace` flag overrides it (see [Workspaces](#workspaces)) | saved workspace |
 | `FRACTAL_AUTH_URL` | Identity provider base URL for `fractal login` | `https://identity.omni.dev` |
 | `KUBECONFIG` | Kubeconfig for the `kube` transport and `cluster` commands | `~/.kube/config` |
 
@@ -381,7 +433,8 @@ your user config directory: `$XDG_CONFIG_HOME/fractal/config.toml` (usually
 `~/.config/fractal/config.toml`) on Linux, and
 `~/Library/Application Support/fractal/config.toml` on macOS. It is readable
 only by you. Besides the saved credential, it can hold `transport = "api"` or
-`"kube"` and `api_url = "..."` at the top level.
+`"kube"` and `api_url = "..."` at the top level, and a `[workspace]` table with
+the workspace selected by `fractal login` or `fractal workspace use`.
 
 ## Shell completions
 
