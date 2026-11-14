@@ -1,6 +1,6 @@
 ---
 title: API Tokens
-description: Create, scope, use, and revoke ftk_ workspace API tokens for CI, the fractal CLI, the MCP server, and direct calls to the Fractal API (GraphQL, rebuild, and logs endpoints)
+description: Create, scope, use, and revoke ftk_ workspace API tokens for CI, the fractal CLI, the MCP server, and direct calls to the Fractal API (GraphQL, rebuild, logs, and scheduled-job endpoints)
 ---
 
 API tokens are bearer credentials that let automation act on your workspace
@@ -67,14 +67,17 @@ curl https://api.fractal.omni.dev/graphql \
   -d '{"query":"{ fractalProjects { metadata { name namespace } spec { slug } } }"}'
 ```
 
-Two REST endpoints cover deploys and logs. Both take the service's
+REST endpoints cover deploys, logs, and scheduled jobs. Each takes the service's
 `namespace`, which `fractalService(project: "...", name: "...") { metadata { namespace } }`
 returns:
 
 | Endpoint | Access | Parameters |
 |----------|--------|------------|
 | `POST /v1/services/rebuild` | `developer` role or higher | JSON body: `namespace`, `project`, `service`, and optional `env` (rebuild one environment; omit to rebuild all) |
-| `GET /v1/services/logs` | Any project role | Query: `namespace`, `project`, `service`, and optional `tailLines` (1 to 5000, default 200), `sinceSeconds`, `timestamps` (`true`/`false`), `previous` (`true`/`false`) |
+| `GET /v1/services/logs` | Any project role | Query: `namespace`, `project`, `service`, and optional `tailLines` (1 to 5000, default 200), `sinceSeconds`, `timestamps` (`true`/`false`), `previous` (`true`/`false`), `job` (one scheduled-job run) |
+| `POST /v1/services/cron/run` | `developer` role or higher | JSON body: `namespace`, `project`, `service`. Runs a scheduled job now and returns the run's name as `job` |
+| `POST /v1/services/cron/suspend` | `developer` role or higher | JSON body: `namespace`, `project`, `service`, `suspend` (`true` pauses, `false` resumes) |
+| `GET /v1/services/cron/runs` | Any project role | Query: `namespace`, `project`, `service`, optional `limit` (default 20, max 100). Lists a scheduled job's runs, newest first |
 
 ```bash
 curl -X POST https://api.fractal.omni.dev/v1/services/rebuild \
@@ -89,7 +92,8 @@ curl -G https://api.fractal.omni.dev/v1/services/logs \
 
 The logs endpoint returns `{ service, namespace, pods: [{ name, container, log }] }`
 for up to 10 pods, newest first. `pods` is empty when the service is asleep or
-scaled to zero.
+scaled to zero. See [Scheduled Jobs](/products/fractal/scheduled-jobs#manage-jobs-through-the-api)
+for the scheduled-job endpoints' responses.
 
 ## List and revoke
 
