@@ -6,29 +6,27 @@ description: fractal command reference
 The `fractal` CLI manages your projects and services from a terminal. It works
 two ways, called transports:
 
-- **`api`** for hosted Fractal: every command goes through the Fractal API with
-  an [API token](/products/fractal/api-tokens). No kubeconfig is needed.
+- **`api`** for hosted Fractal: every command goes through the Fractal API,
+  authenticated by `fractal login` or an [API token](/products/fractal/api-tokens).
+  No kubeconfig is needed.
 - **`kube`** for a cluster you bring yourself (BYOC) and for platform admins:
   commands talk to your cluster directly through your kubeconfig.
 
 ## Quick start (hosted)
 
-Create an API token in the dashboard (see
-[API Tokens](/products/fractal/api-tokens)), export it, and run commands:
+Log in through your browser, then run commands:
 
 ```bash
-export FRACTAL_API_TOKEN=ftk_...
+fractal login                        # opens your browser to sign in
 
 fractal services                     # every service across your projects
 fractal logs <service> --follow      # follow a service's logs
 fractal deploy --service <service>   # rebuild and redeploy a service
 ```
 
-To keep the token on this machine instead of in the environment, save it once:
-
-```bash
-fractal auth login --token -   # paste the token on stdin; it stays out of shell history
-```
+For CI and other non-interactive use, set `FRACTAL_API_TOKEN` to an
+[API token](/products/fractal/api-tokens) instead (see
+[CI and automation](#ci-and-automation)).
 
 Services are addressed by name. When two of your projects have a service with
 the same name, pick one with `--project <name-or-slug>` or `FRACTAL_PROJECT`.
@@ -45,13 +43,13 @@ The CLI picks a transport for each command, highest precedence first:
 4. Otherwise `api` when a credential is configured, and `kube` when none is.
 
 `fractal deploy` always goes through the API, and the `cluster` commands always
-use your kubeconfig. Run `fractal auth whoami` to see which transport is active.
+use your kubeconfig. Run `fractal whoami` to see which transport is active.
 
 ### Availability on hosted workspaces
 
 | Over the API | Not available yet on hosted workspaces |
 |--------------|----------------------------------------|
-| `services`, `projects`, `logs`, `deploy`, `env`, `scale`, `members`, `tokens list`/`create`/`revoke`, `auth` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
+| `services`, `projects`, `logs`, `deploy`, `env`, `scale`, `members`, `tokens list`/`create`/`revoke`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
 
 The commands in the right column exit straight away with a short message that
 says what to use instead: for example, the Shell tab in the dashboard for
@@ -60,23 +58,60 @@ says what to use instead: for example, the Shell tab in the dashboard for
 ## Authentication
 
 ```bash
-fractal auth login --token <ftk_...>   # save an API token (use `-` to read it from stdin)
-fractal auth login                      # or sign in with your email and password
-fractal auth whoami                     # show the active credential and transport
-fractal auth logout                     # clear the saved token
+fractal login                      # sign in through your browser
+fractal login --no-browser         # print the sign-in URL and paste back the result
+fractal login --token <ftk_...>    # save an API token instead (use `-` to read it from stdin)
+fractal whoami                     # show who you are, your workspace, and the transport
+fractal logout                     # revoke the session and clear saved credentials
 ```
+
+The same commands are also available under `fractal auth` (for example,
+`fractal auth login`).
+
+### Browser login
+
+`fractal login` runs the standard browser login flow. It opens your browser to
+the Omni sign-in page; after you approve, the CLI receives the result on a
+temporary `127.0.0.1` listener and saves an access token and a refresh token in
+`~/.config/fractal/config.toml` (readable only by you). The access token is
+refreshed silently before it expires, so you stay logged in. If the sign-in
+doesn't finish within 5 minutes, the login times out; run `fractal login` again.
+
+Over SSH, on Linux with no display, or with `--no-browser`, the CLI prints the
+sign-in URL instead. Open it in any browser and approve. The browser then lands
+on a `127.0.0.1` address that may fail to load: copy the full URL from the
+address bar and paste it into the terminal.
+
+When a session can no longer be refreshed, commands report
+`Session expired, run fractal login`.
+
+`fractal whoami` shows your email, name, and workspace. The workspace is the one
+set in `FRACTAL_WORKSPACE`, or your only workspace when you belong to exactly
+one. On the `api` transport it also checks the credential against the API and
+reports how many projects it can see. Pass `--json` for the same fields as JSON.
+
+### Credential precedence
 
 The CLI resolves its credential in this order:
 
 1. `FRACTAL_API_TOKEN`
 2. `FRACTAL_AUTH_TOKEN` (the older name, still honored)
-3. The token saved in `~/.config/fractal/config.toml` by `fractal auth login`
+3. The login saved in `~/.config/fractal/config.toml` by `fractal login`
 
-`fractal auth login --token` checks the token against the API before saving it.
-On the `api` transport, `fractal auth whoami` also checks the credential and
-reports how many projects it can see. When a token is set in the environment,
-`fractal auth login` returns straight away without prompting, so it is safe to
-call from CI.
+`fractal login --token` checks the token against the API before saving it.
+
+### CI and automation
+
+Set `FRACTAL_API_TOKEN` to an [API token](/products/fractal/api-tokens) instead
+of logging in interactively. It takes precedence over any saved login. When it
+is set, `fractal login` returns straight away without opening a browser, so it
+is safe to call from CI:
+
+```bash
+export FRACTAL_API_TOKEN="$FRACTAL_CI_TOKEN"
+fractal --json whoami   # check the token is accepted
+fractal deploy --project <project> --service <service>
+```
 
 ## Projects and services
 
@@ -192,8 +227,9 @@ fractal tokens revoke <name> [--workspace <id>]
 fractal tokens delete <name>   # kube transport only; prefer revoke
 ```
 
-On hosted workspaces, a token always acts as the person who creates it, and the
-workspace is inferred from your projects. Pass `--workspace <id>` (or set
+On hosted workspaces, a token always acts as the person who creates it. After
+`fractal login`, the workspace is your only workspace when you belong to exactly
+one; otherwise it is inferred from your projects. Pass `--workspace <id>` (or set
 `FRACTAL_WORKSPACE`) if you belong to more than one. `--subject` and
 `tokens delete` need the `kube` transport.
 
@@ -242,7 +278,8 @@ kubectl -n fractal-system create secret docker-registry fractal-registry-credent
 | `FRACTAL_API_URL` | Fractal API base URL | `https://api.fractal.omni.dev` |
 | `FRACTAL_TRANSPORT` | `api` or `kube`; the `--transport` flag overrides it | automatic |
 | `FRACTAL_PROJECT` | Default project for service commands; the `--project` flag overrides it | unset |
-| `FRACTAL_WORKSPACE` | Workspace id for `tokens` commands; the `--workspace` flag overrides it | inferred |
+| `FRACTAL_WORKSPACE` | Workspace id for `tokens` commands and the workspace `whoami` shows; the `--workspace` flag overrides it | inferred |
+| `FRACTAL_AUTH_URL` | Identity provider base URL for `fractal login` | `https://identity.omni.dev` |
 | `KUBECONFIG` | Kubeconfig for the `kube` transport and `cluster` commands | `~/.kube/config` |
 
 ## Shell completions
