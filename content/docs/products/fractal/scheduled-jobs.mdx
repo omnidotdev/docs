@@ -1,6 +1,6 @@
 ---
 title: Scheduled Jobs
-description: Run a container on a cron schedule (serviceType cronJob) and manage it from the dashboard or MCP, with concurrency, time zone, suspend, history, retry, run-now, and run history
+description: Run a container on a cron schedule (serviceType cronJob) and manage it from the dashboard, the fractal CLI (fractal cron), the MCP server, or the REST API, with concurrency, time zone, suspend, history, retry, run-now, run history, and per-run logs
 ---
 
 A scheduled job runs a container on a recurring cron schedule instead of serving
@@ -49,16 +49,100 @@ time zone, concurrency policy, status, and last run. For each job you can:
 Expand a job to see its run history: each run's trigger (scheduled or manual),
 status, and start and completion times, retained per the history limits below.
 
-## Create one with the MCP server
+Run now, pause, resume, run history, and each run's logs are also available
+from the [CLI](#manage-jobs-from-the-cli), the [MCP server](#manage-jobs-with-the-mcp-server),
+and the [API](#manage-jobs-through-the-api). All of them request a run the same
+way: the platform starts the run from the job's own definition, with the same
+image, command, and environment as a scheduled run, within a few seconds. A
+manual run works while the schedule is paused.
 
-The [MCP server](/products/fractal/mcp)'s `create_cron_service` tool creates a
-scheduled job from a Git repository or image, including a monorepo `rootDir` and
-`watchPaths`, a `command` override, and environment variables. It sets the
-schedule only; adjust the controls afterwards with **Edit** in the dashboard.
-`list_cron_services` lists a project's jobs.
+A run reports one of three statuses: `Running` (pending, running, or retrying
+after a failed attempt), `Succeeded`, or `Failed`. A run and its logs stay
+available while it is within the job's history limits
+(`successfulJobsHistoryLimit` and `failedJobsHistoryLimit`, see
+[Controls](#controls)); older runs are removed.
 
-From the CLI, `fractal services` shows scheduled jobs with type `cronJob` and,
-with `--json`, their `schedule`.
+## Manage jobs from the CLI
+
+The [fractal CLI](/products/fractal/cli-reference#scheduled-jobs) controls
+existing scheduled jobs with `fractal cron`, on both the `api` and `kube`
+transports:
+
+```bash
+fractal cron list [--project <project>]         # every job: schedule, paused or active, last run
+fractal cron run <service>                      # run once now; prints the run's name
+fractal cron run <service> --follow             # run, stream its logs, exit non-zero unless it succeeds
+fractal cron pause <service>                    # stop the schedule
+fractal cron resume <service>                   # restart the schedule
+fractal cron runs <service> [--limit <n>]       # recent runs, newest first
+fractal cron logs <service> [--job <run>]       # a run's logs, the newest run by default
+```
+
+`fractal cron run --follow` waits for the run to finish and exits with status
+`1` when it fails, so a CI pipeline can run a job (for example a migration or a
+backfill) and fail the build if the job fails:
+
+```bash
+export FRACTAL_API_TOKEN="$FRACTAL_CI_TOKEN"
+fractal cron run nightly-report --project acme --follow --timeout 30m
+```
+
+Running, pausing, and resuming need the `developer` role or higher on the
+project; listing runs and reading logs work with any project role. The CLI does
+not create jobs: create them in the dashboard or with the MCP server.
+
+## Manage jobs with the MCP server
+
+The [MCP server](/products/fractal/mcp) gives an AI assistant the same control:
+
+| Tool | What it does |
+|------|--------------|
+| `create_cron_service` | Create a job from a Git repository or image, with a monorepo `rootDir` and `watchPaths`, a `command` override, environment variables, and optional `cron` [controls](#controls) |
+| `list_cron_services` | List a project's jobs with their schedule and controls, including whether each is paused |
+| `run_cron_job` | Run a job once now; returns the run's name as `job` |
+| `set_cron_suspended` | Pause (`suspended: true`) or resume (`suspended: false`) the schedule |
+| `list_cron_runs` | Recent runs, newest first, with status, trigger, times, and duration |
+| `get_logs` | With `job`, read one run's output |
+
+A typical assistant loop runs a job with `run_cron_job`, checks `list_cron_runs`
+until that run is `Succeeded` or `Failed`, then reads its output with
+`get_logs`. To change the schedule or controls of an existing job, use **Edit**
+in the dashboard.
+
+## Manage jobs through the API
+
+Four REST endpoints on `https://api.fractal.omni.dev` cover scheduled jobs,
+authenticated with an [API token](/products/fractal/api-tokens) in an
+`Authorization: Bearer ftk_...` header. Each takes the job's `namespace`
+(returned by the GraphQL `fractalService(project: "...", name: "...") { metadata { namespace } }`),
+`project`, and `service`:
+
+| Endpoint | Access | Parameters and response |
+|----------|--------|-------------------------|
+| `POST /v1/services/cron/run` | `developer` role or higher | JSON body: `namespace`, `project`, `service`. Returns `202` with `{ ok, requestedAt, job }`, where `job` is the name of the run that starts within a few seconds |
+| `POST /v1/services/cron/suspend` | `developer` role or higher | JSON body: `namespace`, `project`, `service`, `suspend` (`true` pauses, `false` resumes). Returns `{ ok, suspended }` |
+| `GET /v1/services/cron/runs` | Any project role | Query: `namespace`, `project`, `service`, optional `limit` (default 20, max 100). Returns `{ service, runs: [{ name, manual, status, startTime, completionTime, durationSeconds }] }`, newest first |
+| `GET /v1/services/logs` | Any project role | Query: `namespace`, `project`, `service`, and `job` (a run's `name`) to read that run's output; also `tailLines`, `sinceSeconds`, `timestamps`, `previous`. Returns `{ service, namespace, pods: [{ name, container, log }] }` |
+
+```bash
+curl -X POST https://api.fractal.omni.dev/v1/services/cron/run \
+  -H "Authorization: Bearer $FRACTAL_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"namespace":"<namespace>","project":"<project>","service":"<service>"}'
+
+curl -G https://api.fractal.omni.dev/v1/services/cron/runs \
+  -H "Authorization: Bearer $FRACTAL_API_TOKEN" \
+  -d namespace=<namespace> -d project=<project> -d service=<service> -d limit=5
+
+curl -G https://api.fractal.omni.dev/v1/services/logs \
+  -H "Authorization: Bearer $FRACTAL_API_TOKEN" \
+  -d namespace=<namespace> -d project=<project> -d service=<service> -d job=<run name>
+```
+
+The cron endpoints return `400` for a service that is not a scheduled job, `404`
+for a service (or run) that is not in the project, and `403` without access.
+Create a job through the API with the GraphQL `createFractalService` mutation,
+setting `serviceType: cronJob`, `deploy.schedule`, and optionally `deploy.cron`.
 
 ## Cron schedule syntax
 
@@ -128,7 +212,7 @@ variables, secrets, and resources work as they do for a web or worker service
 <Callout type="info">
 Importing a [fractal.yaml](/products/fractal/configuration#fractalyaml) does not
 yet carry `deploy.schedule` or `deploy.cron`. Create scheduled jobs from the
-dashboard or the MCP server.
+dashboard, the MCP server, or the GraphQL API.
 </Callout>
 
 ## Shell access
