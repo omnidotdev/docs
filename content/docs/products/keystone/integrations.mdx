@@ -1,0 +1,70 @@
+---
+title: Integrations
+description: Wire live Halo products and posts, Crystal support, and Arbor repos into a site
+---
+
+Keystone sites can include working pieces of the Omni ecosystem instead of
+placeholder HTML. You add them in chat: give Keystone the identifier it needs (a
+store domain, a creator handle, a repo), and it places a block styled to match
+your design. Blocks are wired up when you publish, so they show live data on both
+preview links and hosted sites.
+
+Keystone only adds a block when you supply the matching identifier. Without one,
+it builds tasteful placeholder content and tells you what to connect.
+
+| Block | Product | Status |
+|-------|---------|--------|
+| Product grid and buy buttons | [Halo](/products/halo) | Available |
+| Blog post list | [Halo](/products/halo) | Available |
+| Support button | [Crystal](/products/crystal) | Available (opens your Crystal page) |
+| Repo showcase | [Arbor](/products/arbor) | Available (link card) |
+| Email capture | [Herald](/products/herald) | Coming soon |
+
+## Halo store blocks
+
+Connect a [Halo](/products/halo) store by giving Keystone your store's domain,
+the address your storefront is served from, for example:
+
+> Add a shop section that shows my products from shop.example.com
+
+### Product grid
+
+A product grid lists the store's live products, each with its image, title,
+description, price (including a crossed-out compare-at price on sale items), and
+a **Buy now** button. Products and prices come straight from Halo, so the grid
+stays current as you edit your catalog, with no republish needed. If the store
+has no products yet, the grid says new products are on the way.
+
+### Buy buttons
+
+Selecting **Buy now** (or a single buy button for one product) starts a checkout
+for that product. After checkout, the buyer returns to your store's own domain. If
+a checkout cannot be started, the button sends the buyer to your store instead.
+
+### Blog post list
+
+A post list shows the latest published posts from your Halo store, each with its
+title, date, excerpt, and a **Read more** toggle with the full text. Ask for it in
+chat, for example "add a blog section with my latest three posts from
+shop.example.com".
+
+## Crystal support button
+
+Give Keystone your [Crystal](/products/crystal) creator handle to add a support
+button, for example "add a Support me button for my Crystal handle janedoe".
+Selecting it opens your Crystal page, where visitors can back you.
+
+## Arbor repo showcase
+
+For developer, open-source, and portfolio sites, give Keystone an
+[Arbor](/products/arbor) repository as `owner/repo` and it adds a styled card that
+links to the repository on Arbor.
+
+## Herald email capture
+
+<Callout type="warn">
+  Email capture with [Herald](/products/herald) is **coming soon**. Keystone can
+  already place a signup form, but submissions are not connected to Herald yet, so
+  the form does not collect addresses. Do not rely on it for a mailing list until
+  this note is gone.
+</Callout>

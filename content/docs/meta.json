@@ -23,6 +23,7 @@
     "---Fabric---",
     "realms/fabric/index",
     "products/facet",
+    "products/keystone",
     "---Grid---",
     "realms/grid/index",
     "products/beacon",
