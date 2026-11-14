@@ -1,10 +1,13 @@
 ---
 title: Service Configuration
-description: Every setting a Fractal service supports
+description: Reference for every FractalService setting (source, build, rootDir, watchPaths, deploy, env, release command, volumes, autoscaling, expose, service types, databases) and the fractal.yaml import format
 ---
 
-A service is configured through the dashboard (**Settings** tab) or the Fractal
-API. The fields below are the same in both; keys use `camelCase`.
+A service is configured through the dashboard (the create form and the
+**Settings** tab), a [fractal.yaml import](#fractalyaml), or the Fractal
+[API](/products/fractal/api-tokens#http-api). The fields below are the service
+spec; keys use `camelCase`. `fractal --json services` and the MCP `get_service`
+tool read them back.
 
 ## Source
 
@@ -29,7 +32,7 @@ Additional build settings:
 | Field | Applies to | Description |
 |-------|------------|-------------|
 | `rootDir` | all | Build subdirectory for a monorepo (for example `apps/web`). The build runs from here instead of the repository root. Default: repository root |
-| `watchPaths` | all | Paths (relative to the repo root) that scope monorepo rebuilds: a push or git reconcile rebuilds this service only when a changed file is under one of them. Default: rebuild on any change |
+| `watchPaths` | all | Path prefixes (relative to the repo root) that scope monorepo rebuilds: a push rebuilds this service only when a changed file is under one of them. Default: rebuild on any change. See [Watch paths](/products/fractal/monorepos#watch-paths) |
 | `dockerfilePath` | `dockerfile` | Path to the `Dockerfile`, relative to the build context (`rootDir` when set, otherwise the repository root; default `Dockerfile`) |
 | `args` | `dockerfile` | Build arguments (for example `VITE_*` values needed at build time) |
 | `resources` | all | CPU and memory for the build pod (defaults: 1 CPU, 2Gi) |
@@ -37,86 +40,23 @@ Additional build settings:
 | `packageManager` | `auto` | Override the detected package manager (`npm`, `pnpm`, `yarn`, `bun`) |
 | `installCommand` | `auto` | Override the dependency install command |
 | `buildCommand` | `auto` | Override the build command |
-| `startCommand` | `auto` | Override the runtime start command |
+| `startCommand` | `auto` | Override the runtime start command (a single string, for example `"bun run start"`) |
 
 ### Monorepos
 
-One repository can hold several independently deployable apps (packages,
-workspaces). Point a service at the app it should build with **`rootDir`** (the
-"Root directory" field in the create-service form).
-
-Fractal clones the **whole** repository, then builds from `rootDir`. Cloning the
-whole repo means a sub-app can still reference sibling packages and the workspace
-lockfile; building from `rootDir` means auto-detection and `dockerfilePath`
-resolve there:
-
-- **Auto mode.** Set `rootDir` to the app's directory (for example
-  `apps/web`) and Fractal detects and builds that package. Use the command
-  overrides (`installCommand`, `buildCommand`, `startCommand`, `packageManager`)
-  only if your workspace needs to steer the install/build further.
-- **Dockerfile mode.** Set `rootDir` to the app's directory and `dockerfilePath`
-  to the `Dockerfile` **relative to `rootDir`** (so just `Dockerfile` for
-  `apps/web/Dockerfile`).
-
-`rootDir` must be a relative path inside the repo (no absolute paths or `..`).
-Leave it blank to build from the repository root.
-
-<Callout type="warn">
-`rootDir` suits a **self-contained** subdirectory (its own dependencies, no
-cross-package imports). A **workspace** monorepo whose app imports sibling
-packages via `workspace:*` (a bun, pnpm, or yarn workspace) can't be built from
-the subdirectory alone -- the buildpack installs only that folder and can't
-resolve the siblings. For those, build with a **Dockerfile** whose context is
-the repo root (set `build.mode: dockerfile` and `dockerfilePath` to the app's
-`Dockerfile`, and leave `rootDir` blank). `turbo prune <app> --docker` is the
-clean way to install and build just that app and its workspace dependencies.
-</Callout>
-
-By default every service on a repo rebuilds on every push to its branch. Set
-**`watchPaths`** to rebuild a service only when a changed file is under those
-paths (for example its own `rootDir` plus any shared packages it depends on), so
-a change to one app does not rebuild the others. Watch paths scope both triggers:
-a webhook push and the periodic git reconcile both rebuild a service only when a
-changed file matches its watch paths. List every path the service depends on,
-including root-level or shared files (lockfiles, shared config, common packages),
-explicitly in each service's `watchPaths`, since a path that is not listed does
-not trigger that service's rebuild.
-
-To deploy several apps from one monorepo, create one service per app, each
-pointing at the same repository `url` and `branch` with its own `rootDir` (and
-optionally `watchPaths`). In a repo-committed `fractal.yaml`:
-
-```yaml
-services:
-  - name: web
-    source:
-      git:
-        url: https://github.com/acme/monorepo
-        branch: main
-    build:
-      mode: auto
-      rootDir: apps/web
-      watchPaths:
-        - apps/web
-        - packages/ui
-  - name: worker
-    source:
-      git:
-        url: https://github.com/acme/monorepo
-        branch: main
-    build:
-      mode: auto
-      rootDir: apps/worker
-      watchPaths:
-        - apps/worker
-    serviceType: worker
-```
+Several apps in one repository deploy as separate services on the same
+repository and branch. Set `rootDir` to the app's directory and, optionally,
+`watchPaths` to the paths whose changes should rebuild it. See
+[Monorepos](/products/fractal/monorepos) for the build behavior, the matching
+rules, and when Fractal rebuilds anyway.
 
 ## Deploy
 
 | Field | Description |
 |-------|-------------|
 | `replicas` | Desired replica count |
+| `command` | Container command as a list, overriding the image's entrypoint |
+| `args` | Container arguments as a list, overriding the image's default arguments |
 | `env` | Environment variables (literal values or Secret references) |
 | `resources` | CPU and memory requests/limits |
 | `volumes` | Persistent volumes (see below) |
@@ -125,6 +65,7 @@ services:
 | `autoscale` | Autoscaling policy (see below) |
 | `release` | Pre-deploy command run before a new version takes traffic (see below) |
 | `requiredEnv` | Names of env vars the service must have (see below) |
+| `schedule`, `cron` | Cron schedule and scheduling controls for a `cronJob` service (see [Scheduled Jobs](/products/fractal/scheduled-jobs)) |
 
 ### Release command
 
@@ -146,20 +87,22 @@ instances.
 | `command` | The command to run, as a list (for example `["bun", "db:migrate"]`) |
 | `timeoutSeconds` | Max run time before the release is failed (default 600) |
 
-In a repo-committed `fractal.yaml`:
-
 ```yaml
-services:
-  api:
-    # ...
-    deploy:
-      release:
-        command: ["bun", "db:migrate"]
-        timeoutSeconds: 300
+deploy:
+  release:
+    command: ["bun", "db:migrate"]
+    timeoutSeconds: 300
 ```
 
 Release commands apply to web and worker services. A rollback reuses an
 already-released image, so it does not re-run the release command.
+
+<Callout type="info">
+On hosted workspaces, the release command is not yet settable from the
+dashboard, the API, or a fractal.yaml import. On a
+[BYOC cluster](/products/fractal/self-hosting), set `spec.deploy.release` on the
+`FractalService` resource directly.
+</Callout>
 
 ### Environment variables
 
@@ -173,21 +116,21 @@ fractal env set-secret my-api DATABASE_URL --secret main-db-app --key uri
 
 #### Required environment variables
 
-List the env vars your service cannot run without in `requiredEnv`. When any are
-missing from `env`, the service surfaces a **`RequiredEnv`** condition naming the
-absent variables, so a deploy that would crash on missing config is flagged with
-the specific cause up front.
+List the env vars your service cannot run without in `requiredEnv`, from the
+**Required environment** field in the service's **Settings** tab (one name per
+line). When any are missing from `env`, the service surfaces a **`RequiredEnv`**
+condition naming the absent variables, so a deploy that would crash on missing
+config is flagged with the specific cause up front. The check is advisory: it
+does not block the deploy.
 
 ```yaml
-services:
-  api:
-    deploy:
-      requiredEnv:
-        - DATABASE_URL
-        - BETTER_AUTH_SECRET
+deploy:
+  requiredEnv:
+    - DATABASE_URL
+    - BETTER_AUTH_SECRET
 ```
 
-If a service does crash anyway, its status now shows the failure reason (for
+If a service does crash anyway, its status shows the failure reason (for
 example `CrashLoopBackOff` or the exit code) and a recent slice of the container
 logs, so you can see why without digging through the cluster.
 
@@ -252,13 +195,88 @@ service and provisions TLS automatically.
 ## Databases
 
 A database is a service with `serviceType: database`. Fractal provisions a managed
-Postgres database with a connection pooler and stores the
-connection credentials as a secret. Reference that secret from another service:
+Postgres database with a connection pooler and stores the connection
+credentials in a secret named `<database>-app`. Reference that secret from
+another service (here for a database named `main-db`):
 
 ```bash
 fractal env set-secret api DATABASE_URL --secret main-db-app --key uri
 ```
 
+The dashboard's **Database** option also offers Valkey, Redis, MySQL, and
+MongoDB. These run as image-based worker services on a persistent volume,
+reachable inside the project at `<name>:<port>`. They are not managed: no
+connection pooler, automatic backups, or high availability.
+
 Backups are enabled by default and managed from the **Backups** tab. See
 [Backups](/products/fractal/backups) for scheduled backups, on-demand backups, and
 restores.
+
+## fractal.yaml
+
+A `fractal.yaml` describes a project's services in one file. To use one, open
+the project, choose **Import**, and pick **Fractal Config**. Paste or upload the
+file, or load it from the root of a connected GitHub repository
+(`fractal.yaml`, then `fractal.yml`). Review the parsed services and import
+them. The project's **Export** action writes the current services back out as a
+`fractal.yaml`.
+
+Import is a one-time create: it adds the listed services to the project.
+Later commits to the file in the repository are not synced to the services.
+
+`services` is a map keyed by service name:
+
+```yaml
+version: "1"
+services:
+  api:
+    source:
+      git:
+        url: https://github.com/acme/api
+        branch: main          # default: master
+    build:
+      mode: auto              # auto | dockerfile | none
+    serviceType: web          # web | worker | staticSite
+    deploy:
+      replicas: 2
+      env:
+        - name: NODE_ENV
+          value: production
+        - name: DATABASE_URL
+          valueFrom:
+            secretRef:
+              name: main-db-app
+              key: uri
+      resources:
+        cpu: 500m
+        memory: 512Mi
+      healthCheck:
+        path: /health
+    expose:
+      port: 3000
+      domain: api.example.com
+      www: "off"              # "off" | redirect
+  cache:
+    source:
+      image:
+        repository: valkey/valkey
+        tag: 8-alpine         # default: latest
+```
+
+An import applies these fields:
+
+| Section | Fields |
+|---------|--------|
+| `source` | `git` (`url`, `branch`) or `image` (`repository`, `tag`) |
+| `build` | `mode`, `dockerfilePath`, `rootDir`, `watchPaths` |
+| `serviceType` | `web`, `worker`, `staticSite`. Defaults to `web` when `expose` is set, otherwise `worker` |
+| `deploy` | `replicas`, `env` (literal `value` or `valueFrom.secretRef`), `resources`, `healthCheck`, `volumes` |
+| `expose` | `port`, `domain`, `tls`, `www` |
+
+Keep secret values out of the file: reference a secret with
+`valueFrom.secretRef` instead. Other settings, including `deploy.release`,
+`deploy.requiredEnv`, `deploy.schedule`, and `deploy.cron`, are not applied by
+an import; set them on the service afterwards (see
+[Scheduled Jobs](/products/fractal/scheduled-jobs) for cron services). An unknown
+`build.mode` or `serviceType` produces a warning in the import preview and falls
+back to the default.

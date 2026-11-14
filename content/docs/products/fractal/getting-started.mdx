@@ -1,11 +1,12 @@
 ---
 title: Getting Started
-description: Create a project and deploy your first service
+description: Deploy a first service on hosted Fractal, then install the fractal CLI, log in, redeploy, read logs, and connect an AI assistant over MCP
 ---
 
-Get up and running with Fractal in a few minutes. The fastest path is the hosted
-dashboard at [fractal.omni.dev](https://fractal.omni.dev); the `fractal` CLI covers
-the same operations for scripting and CI.
+This guide takes a hosted workspace from nothing to a running service, then sets
+up the `fractal` CLI for deploys and logs from a terminal or CI. The dashboard
+at [fractal.omni.dev](https://fractal.omni.dev) creates services; the CLI and
+the [MCP server](/products/fractal/mcp) operate them.
 
 ## 1. Create a project
 
@@ -17,27 +18,34 @@ resource limits) that holds one or more services.
 
 From the project, choose **New Service** and pick a source:
 
-- **GitHub repository** &mdash; connect the Fractal GitHub App and select a repo.
+- **GitHub repository**: connect the Fractal GitHub App and select a repo.
   Fractal builds the image in-cluster (automatic language detection, or your own
   `Dockerfile`) and deploys it. Every push to the tracked branch redeploys
-  automatically (push-to-deploy). Deploying one app from a monorepo is supported;
-  see [Monorepos](/products/fractal/configuration#monorepos).
-- **Container image** &mdash; point at any image reference (for example
-  `nginx:latest` or a private registry image) to run it directly.
-- **Template** &mdash; one-click deploy a prebuilt app (WordPress, n8n, Metabase,
-  Ghost, and more). A template comes up as a working app at a public URL; apps
-  that need a database (like WordPress) get a companion database provisioned and
-  wired in automatically, and you can review or edit the template's environment
-  variables before deploying.
+  automatically (push-to-deploy). For one app inside a monorepo, fill in
+  **Root directory** and **Watch paths**; see [Monorepos](/products/fractal/monorepos).
+- **Docker image**: point at any image reference (for example `nginx:latest`
+  or a private registry image) to run it directly.
+- **Database**: a managed Postgres database, or an image-based Valkey, Redis,
+  MySQL, or MongoDB datastore (see [Databases](/products/fractal/configuration#databases)).
 
-By default a web service comes up reachable over HTTPS at a generated
-`*.fractaldeploy.app` URL (toggle this off to keep it internal, or add your own
+A repository or image service is either **Web** (accepts HTTP traffic) or
+**Worker** (background process, no port). To run a service on a cron schedule
+instead, create a [scheduled job](/products/fractal/scheduled-jobs).
+
+One-click templates deploy a prebuilt app (WordPress, n8n, Metabase, Ghost, and
+more) from the template's **Deploy** link into the workspace you pick. Apps that
+need a database get a companion database provisioned and wired in
+automatically, and you can review the template's environment variables before
+deploying.
+
+By default a web service comes up over HTTPS at a generated
+`*.fractaldeploy.app` URL (turn this off to keep it internal, or add your own
 domain later; see [Custom Domains](/products/fractal/custom-domains)).
 
 ### Private networking
 
-Services in the same project reach each other privately at `<service>:<port>`
-&mdash; no public exposure needed. The service's **Networking** panel shows its
+Services in the same project reach each other privately at `<service>:<port>`,
+with no public exposure needed. The service's **Networking** panel shows its
 private address (with click-to-copy) alongside its public URL. This is how, for
 example, an app connects to its database.
 
@@ -45,55 +53,107 @@ example, an app connects to its database.
 
 Open the service to follow the rollout. The service tabs give you:
 
-- **Overview** &mdash; status, current image, and live CPU/memory
-- **Activity** &mdash; deploy and pod events as they happen
-- **Logs** &mdash; runtime, HTTP, and network logs
-- **Deployments** &mdash; build and deploy history, with one-click rollback
-- **Variables**, **Volumes**, **Backups** (databases), and **Settings**
+- **Overview**: status, current image, and live CPU and memory
+- **Activity**: deploy and pod events as they happen
+- **Logs**: runtime, HTTP, and network logs
+- **Deployments**: build and deploy history, with one-click rollback
+- **Variables**, **Volumes**, **Backups** (databases), **Shell**, and **Settings**
 
-## 4. Manage from the CLI (optional)
+## 4. Install the CLI
 
-Install the CLI and log in:
+The `fractal` CLI is a single binary for Linux (glibc, amd64 and arm64) and
+macOS (Apple Silicon and Intel). Download the build for your platform from the
+[latest release](https://github.com/omnidotdev/fractal-cli/releases/latest),
+make it executable, and put it on your `PATH`:
 
 ```bash
-# Opens your browser to sign in with your Omni account
+# Linux (amd64)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-linux-amd64 -o fractal
+
+# Linux (arm64)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-linux-arm64 -o fractal
+
+# macOS (Apple Silicon)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-darwin-arm64 -o fractal
+
+# macOS (Intel)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-darwin-amd64 -o fractal
+
+chmod +x fractal
+sudo mv fractal /usr/local/bin/fractal
+fractal --help
+```
+
+See [Install](/products/fractal/cli-reference#install) in the CLI reference for
+pinning a specific build.
+
+## 5. Log in
+
+```bash
 fractal login
 ```
 
-For CI, set `FRACTAL_API_TOKEN` to an [API token](/products/fractal/api-tokens)
-instead of logging in.
-
-<Callout type="info">
-On the hosted platform you do not need `fractal cluster connect`. Deploy and
-operate your services through the dashboard, `fractal deploy`, or the API with
-an [API token](/products/fractal/api-tokens). `fractal cluster connect` is for
-self-hosting and bring-your-own-cluster (BYOC), where it points the CLI at your
-own cluster using your local kubeconfig (see [Self-Hosting](/products/fractal/self-hosting)).
-</Callout>
-
-For self-hosting, point the CLI at your cluster with your current kubeconfig
-context:
+The CLI opens your browser to the Omni sign-in page. Approve, and the CLI saves
+a session that refreshes itself, so you stay logged in. Then check it:
 
 ```bash
-# Self-hosting / BYOC only: uses your current kubeconfig context
-fractal cluster connect --name my-cluster
+fractal whoami   # your email, workspace, and the active transport (api)
 ```
 
-Then operate your services:
+- **Over SSH or with no display**, run `fractal login --no-browser`. The CLI
+  prints a sign-in URL; open it in any browser, approve, then copy the full
+  `127.0.0.1` URL the browser lands on (the page itself may fail to load) and
+  paste it into the terminal.
+- **In CI**, skip the login and set `FRACTAL_API_TOKEN` to an
+  [API token](/products/fractal/api-tokens) (`ftk_...`). To save a token on a
+  machine instead of a browser session, run `fractal login --token -` and paste
+  the token on stdin.
+
+On hosted Fractal the CLI talks to `https://api.fractal.omni.dev` with your
+login. No kubeconfig is involved, and `fractal cluster connect` is not needed
+(it is only for [bring-your-own-cluster](/products/fractal/self-hosting)
+setups).
+
+## 6. Deploy and read logs from the CLI
 
 ```bash
-# List services and projects
+# Every service across your projects
 fractal services
-fractal projects list
 
-# Stream logs
+# Rebuild and redeploy a service from its tracked branch
+fractal deploy --service my-api
+
+# Recent logs, then follow new lines
+fractal logs my-api --tail 100
 fractal logs my-api --follow
-
-# Scale and restart
-fractal scale my-api --replicas 3
-fractal restart my-api
 ```
 
-See the [CLI Reference](/products/fractal/cli-reference) for the full command set and
-the [Service Configuration](/products/fractal/configuration) reference for every
-setting a service supports.
+Services are addressed by name. If two projects have a service with the same
+name, add `--project <name-or-slug>` (or set `FRACTAL_PROJECT`). Environment
+variables and scaling work the same way:
+
+```bash
+fractal env set my-api NODE_ENV=production
+fractal env set my-api API_KEY=... --secret   # stored write-only as a managed secret
+fractal scale my-api --replicas 3
+```
+
+A few commands need direct cluster access and are not available on hosted
+workspaces (for example `exec`, `restart`, and `rollback`); each one says what
+to use instead. See [Availability on hosted workspaces](/products/fractal/cli-reference#availability-on-hosted-workspaces).
+
+## 7. Connect an AI assistant (optional)
+
+Point any MCP client at `https://mcp.fractal.omni.dev/mcp` with an API token to
+let an assistant list services, deploy, read logs, and manage environment
+variables and scheduled jobs. See [MCP Server](/products/fractal/mcp).
+
+## Next steps
+
+- [Monorepos](/products/fractal/monorepos): deploy several apps from one
+  repository and rebuild only what changed
+- [Scheduled Jobs](/products/fractal/scheduled-jobs): run a container on a cron
+  schedule
+- [CLI Reference](/products/fractal/cli-reference): every command and flag
+- [Service Configuration](/products/fractal/configuration): every setting a
+  service supports

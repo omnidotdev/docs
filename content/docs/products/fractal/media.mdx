@@ -22,6 +22,12 @@ object-storage and bandwidth meters.
 
 ## The `FractalMedia` resource
 
+<Callout type="info">
+Media assets are Kubernetes resources: create a `FractalMedia` with `kubectl`
+against the cluster. The dashboard, the `fractal` CLI, and the public API do not
+create media assets yet.
+</Callout>
+
 One `FractalMedia` represents a single uploaded video to transcode and serve. The
 output bucket is shared across a tenant's assets (the same model as
 [object storage](./object-storage)), so each asset owns only its input key and
@@ -32,7 +38,7 @@ rendition set.
 - **`project`** (required): the project (tenant) the asset belongs to.
 - **`bucket`** (required): the output bucket the transcoded renditions are written
   to and served from. Shared across a tenant's assets. It becomes the
-  `<bucket>.<media-domain>` host, so it must be a single DNS label (3 to 63
+  `<bucket>.fractalusercontent.com` host, so it must be a single DNS label (3 to 63
   characters, lowercase letters, digits, and hyphens, with no leading or trailing
   hyphen), the same constraint as an object-storage bucket.
 - **`inputKey`** (required): the object key of the raw uploaded video inside the
@@ -73,9 +79,9 @@ rendition set.
    `<video>` tag:
 
    ```html
-   <video controls poster="https://my-media.media.omni.dev/assets/demo/poster.jpg">
+   <video controls poster="https://my-media.fractalusercontent.com/assets/demo/poster.jpg">
      <source
-       src="https://my-media.media.omni.dev/assets/demo/video.mp4"
+       src="https://my-media.fractalusercontent.com/assets/demo/video.mp4"
        type="video/mp4"
      />
    </video>
@@ -91,9 +97,9 @@ Upload the source (`uploads/demo.mov`) into the `my-media` bucket, then apply:
 ```yaml
 apiVersion: fractal.omni.dev/v1alpha1
 kind: FractalMedia
-metadata: { name: demo, namespace: fractal-prj-<id> }
+metadata: { name: demo, namespace: <project-namespace> }
 spec:
-  project: <id>
+  project: <project>
   bucket: my-media
   inputKey: uploads/demo.mov
   renditions: [mp4]
@@ -104,12 +110,12 @@ spec:
 Once `status.phase` is `ready`, the playback URL follows the shape:
 
 ```
-https://<bucket>.<media-domain>/assets/<name>/video.mp4
+https://<bucket>.fractalusercontent.com/assets/<name>/video.mp4
 ```
 
 so this asset is served at
-`https://my-media.media.omni.dev/assets/demo/video.mp4`, with its poster at
-`https://my-media.media.omni.dev/assets/demo/poster.jpg`.
+`https://my-media.fractalusercontent.com/assets/demo/video.mp4`, with its poster at
+`https://my-media.fractalusercontent.com/assets/demo/poster.jpg`.
 
 ## Billing and entitlements
 

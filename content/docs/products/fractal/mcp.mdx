@@ -1,6 +1,6 @@
 ---
 title: MCP Server
-description: Drive Fractal from an AI assistant over the Model Context Protocol
+description: Connect an AI assistant to Fractal at https://mcp.fractal.omni.dev/mcp (Streamable HTTP, ftk_ bearer token) and use its tools to list services, deploy, read logs, set env vars, and create scheduled jobs
 ---
 
 The Fractal MCP server exposes Fractal's deploy and operations surface to AI
@@ -14,16 +14,18 @@ tools.
 
 Fractal hosts the server at `https://mcp.fractal.omni.dev/mcp` over the
 Streamable HTTP transport, so there is nothing to install. Your MCP client sends
-your workspace API token with every request, and every action runs with that
-token's access. The server stores no credentials.
+your workspace API token with every request, the server forwards it to the
+Fractal API, and every action runs with that token's access. The server stores
+no credentials and keeps no sessions: each request is handled on its own.
 
 ## Get an API token
 
-The server authenticates with a workspace API token (a bearer credential). In
-the dashboard, open your workspace, go to **API Tokens**, and create one. Copy
-the secret when it is shown (it is shown only once) and store it in your MCP
-client's secret configuration, never in a file committed to Git. See
-[API Tokens](/products/fractal/api-tokens) for the full lifecycle.
+The server authenticates with a workspace API token (`ftk_...`). Create one in
+the dashboard (open your workspace and select the **API Tokens** tab) or with
+`fractal tokens create --name <label>`. Copy the secret when it is shown (it is
+shown only once) and store it in your MCP client's secret configuration, never
+in a file committed to Git. To keep an assistant to specific projects, create a
+[scoped token](/products/fractal/api-tokens#restrict-a-token-to-projects).
 
 ## Client configuration
 
@@ -51,17 +53,26 @@ rejected with `401`.
 
 ## Tools
 
-| Tool | Access | What it does |
-|------|--------|--------------|
-| `list_projects` | Read | List the projects in your workspace |
-| `list_services` | Read | List a project's services with type and status |
-| `get_service` | Read | Read a service's status and configuration |
-| `list_cron_services` | Read | List [scheduled jobs](/products/fractal/scheduled-jobs) and their schedules |
-| `get_env` | Read | Read a service's environment variables (secret values masked) |
-| `get_logs` | Read | Read a service's recent logs |
-| `deploy_service` | Write | Trigger a deploy of an existing service |
-| `set_env` | Write | Set or update environment variables on a service |
-| `create_cron_service` | Write | Create a scheduled job from a Git repository or image |
+Tools take the project's **name** (`project`) and the service's name
+(`service` or `name`). `list_projects` returns the project names.
+
+| Tool | Access | Arguments | What it does |
+|------|--------|-----------|--------------|
+| `list_projects` | Read | `owner`, `limit`, `offset` (all optional) | List your projects with phase and service count |
+| `list_services` | Read | `project`, optional `limit`, `offset` | List a project's services with status, source, build settings, and cron schedule |
+| `get_service` | Read | `project`, `name` | Read one service: phase, current image, URL, conditions and last error, source, build settings (including `rootDir` and `watchPaths`), env, and schedule |
+| `list_cron_services` | Read | `project` | List only the [scheduled jobs](/products/fractal/scheduled-jobs) in a project |
+| `get_env` | Read | `project`, `service` | Read a service's environment variables. Secret-backed values are masked |
+| `get_logs` | Read | `project`, `service`, optional `tailLines` (1 to 5000, default 200), `sinceSeconds` | Read a snapshot of recent logs per pod, newest pod first. Any project role can read logs. Returns no pods when the service is asleep or scaled to zero |
+| `deploy_service` | Write | `project`, `service`, optional `environment`, `namespace` | Rebuild and redeploy a service (the same as `fractal deploy`). Needs the `developer` role or higher. Omit `environment` to redeploy every environment |
+| `set_env` | Write | `project`, `service`, `env` (list of `{ name, value }` or `{ name, secret }`), optional `replace` | Set or update environment variables. Merges with existing variables unless `replace` is `true`. A `secret` value is stored write-only in a managed secret. Triggers a rolling update |
+| `create_cron_service` | Write | `project`, `name`, `schedule`, `source` (`git: { url, branch }` or `image: { repository, tag }`), optional `buildMode`, `dockerfilePath`, `rootDir`, `watchPaths`, `command`, `args`, `env`, `environment` | Create a scheduled job from a Git repository or image |
+
+`get_logs` returns a snapshot, not a live stream. For a live tail, use
+`fractal logs <service> --follow`. `create_cron_service` sets the schedule but
+not the [scheduling controls](/products/fractal/scheduled-jobs#controls)
+(concurrency, time zone, history, retries); set those afterwards in the
+dashboard.
 
 Each tool calls the same API the dashboard and [CLI](/products/fractal/cli-reference)
 use, so an assistant's actions are visible and auditable the same way.

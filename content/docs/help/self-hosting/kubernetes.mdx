@@ -1,112 +1,24 @@
 ---
 title: Kubernetes
-description: Deploy Omni products on Kubernetes
+description: Run Fractal on your own Kubernetes cluster (BYOC) and deploy Omni products with Helm charts
 ---
 
-This page covers Kubernetes-based deployments: Fractal for full platform provisioning and Helm charts for individual products.
+This page covers Kubernetes-based deployments: running Fractal on your own cluster and Helm charts for individual products.
 
 ## Fractal
 
-[Fractal](/products/fractal) is Omni's self-hostable application deployment platform built on Kubernetes. It can provision a cluster from scratch or install on an existing one.
+[Fractal](/products/fractal) can run on a Kubernetes cluster you own through **Bring Your Own Cloud (BYOC)**, which is rolling out with design partners first ([apply for early access](https://fractal.omni.dev/early-access)).
 
-### Installation Modes
-
-#### Quick Start (k3s)
-
-Provision a k3s cluster and install Fractal in one command:
+Onboard a cluster with the `fractal` CLI. `fractal cluster connect` validates your kubeconfig, mints a single-use install token, and prints the `kubectl apply` command that installs the Fractal operator (its CRDs, RBAC, and Deployment) into the `fractal-system` namespace:
 
 ```bash
-fractal install \
-  --provider hetzner \
-  --distribution k3s \
-  --nodes 1 \
-  --domain example.com
+fractal login
+fractal cluster connect --name my-cluster
+# apply the printed manifest, then:
+fractal cluster status
 ```
 
-Best for development and testing. k3s runs on a single node, supports SSH for debugging, and has a low barrier to entry.
-
-#### Production (Talos)
-
-Provision a hardened Talos Linux cluster:
-
-```bash
-fractal install \
-  --provider hetzner \
-  --distribution talos \
-  --nodes 3 \
-  --node-type cpx31 \
-  --region ash \
-  --domain example.com \
-  --cloudflare-token $CF_TOKEN
-```
-
-Best for production. Talos is an immutable, API-managed OS with no SSH and no shell. Minimizes attack surface and eliminates configuration drift.
-
-#### Existing Cluster (BYOC)
-
-Install Fractal on any conformant Kubernetes cluster:
-
-```bash
-fractal install --existing-cluster --domain example.com
-```
-
-Installs the Fractal operator and its dependencies (CloudNativePG, cert-manager, Infisical). Detects existing components and skips them.
-
-### Platform Components
-
-A full Fractal installation includes:
-
-| Component | Purpose |
-|-----------|---------|
-| **Fractal operator** | Reconciles `FractalProject`, `FractalService`, and `FractalDatabase` CRDs into K8s resources |
-| **Cilium** | eBPF-based CNI with network policies and Hubble observability (provisioned installs only) |
-| **Gateway API** | Ingress routing via Cilium's native Gateway API implementation |
-| **cert-manager** | Automatic TLS certificate provisioning via Let's Encrypt |
-| **CloudNativePG** | Production-grade Postgres operator with HA, automated failover, and PITR backups |
-| **Infisical** | Secret management with UI, versioning, and environment scoping |
-| **External Secrets Operator** | Syncs secrets from Infisical into K8s Secret objects |
-
-### Supported Providers
-
-| Provider | Flag | Notes |
-|----------|------|-------|
-| **Hetzner Cloud** | `--provider hetzner` | Recommended. Best price/performance |
-| **AWS** | `--provider aws` | EC2 instances with EBS storage |
-| **Custom** | `--existing-cluster` | Any K8s cluster |
-
-### Minimum Requirements
-
-| Mode | Nodes | CPU | RAM | Storage |
-|------|-------|-----|-----|---------|
-| Quick start (k3s) | 1 | 2 vCPU | 4 GB | 40 GB |
-| Production (Talos) | 3 | 4 vCPU each | 8 GB each | 80 GB each |
-| Existing cluster | — | 2 vCPU available | 4 GB available | 20 GB |
-
-### Networking
-
-#### DNS
-
-Fractal creates Gateway API `HTTPRoute` resources for each exposed service. Point a wildcard DNS record at your cluster's load balancer IP:
-
-```
-*.example.com  →  A  →  <load-balancer-ip>
-```
-
-For Cloudflare users, `fractal install` configures this automatically when a `--cloudflare-token` is provided.
-
-#### TLS
-
-cert-manager provisions Let's Encrypt certificates automatically. With Cloudflare DNS, Fractal uses DNS-01 challenges to support wildcard certificates. Otherwise, HTTP-01 challenges are used per-hostname.
-
-#### Network Policies
-
-Fractal applies default-deny Cilium network policies per project namespace. Each service gets explicit allowlists for:
-- Ingress from the Gateway
-- Egress to its database
-- DNS resolution
-- OTEL collector (observability)
-
-See the [Fractal documentation](/products/fractal) for configuration and CLI reference.
+Add `--registry <host/namespace>` to build to and pull from your own container registry. See [Self-hosting (BYOC)](/products/fractal/self-hosting) for the full setup and the [CLI Reference](/products/fractal/cli-reference) for every command.
 
 ## Vortex Helm Chart
 

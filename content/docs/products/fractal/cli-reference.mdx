@@ -1,16 +1,50 @@
 ---
 title: CLI Reference
-description: fractal command reference
+description: Install the fractal CLI and use every command and flag (login, deploy, logs, env, scale, tokens, members, cluster), with transports, hosted availability, and environment variables
 ---
 
-The `fractal` CLI manages your projects and services from a terminal. It works
-two ways, called transports:
+The `fractal` CLI manages your projects and services from a terminal or CI. It
+works two ways, called transports:
 
-- **`api`** for hosted Fractal: every command goes through the Fractal API,
-  authenticated by `fractal login` or an [API token](/products/fractal/api-tokens).
-  No kubeconfig is needed.
+- **`api`** for hosted Fractal: every command goes through the Fractal API at
+  `https://api.fractal.omni.dev`, authenticated by `fractal login` or an
+  [API token](/products/fractal/api-tokens). No kubeconfig is needed.
 - **`kube`** for a cluster you bring yourself (BYOC) and for platform admins:
   commands talk to your cluster directly through your kubeconfig.
+
+The CLI operates existing services; create new ones in the dashboard, with a
+[fractal.yaml import](/products/fractal/configuration#fractalyaml), or through
+the [MCP server](/products/fractal/mcp) (scheduled jobs).
+
+## Install
+
+Prebuilt binaries for Linux (glibc, amd64 and arm64) and macOS (Apple Silicon
+and Intel) are published to
+[GitHub Releases](https://github.com/omnidotdev/fractal-cli/releases), tagged
+`cli-v<build-number>`. Download the one for your platform:
+
+```bash
+# Linux (amd64)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-linux-amd64 -o fractal
+
+# Linux (arm64)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-linux-arm64 -o fractal
+
+# macOS (Apple Silicon)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-darwin-arm64 -o fractal
+
+# macOS (Intel)
+curl -sSfL https://github.com/omnidotdev/fractal-cli/releases/latest/download/fractal-darwin-amd64 -o fractal
+
+chmod +x fractal
+sudo mv fractal /usr/local/bin/fractal
+fractal --help
+```
+
+To pin a build, replace `latest/download` with `download/cli-v<build-number>`
+(for example `download/cli-v8`). The Linux binaries link glibc, so they do not
+run on musl-based distributions such as Alpine. There are no Windows binaries or
+package-manager packages.
 
 ## Quick start (hosted)
 
@@ -31,29 +65,51 @@ For CI and other non-interactive use, set `FRACTAL_API_TOKEN` to an
 Services are addressed by name. When two of your projects have a service with
 the same name, pick one with `--project <name-or-slug>` or `FRACTAL_PROJECT`.
 
+## Global options
+
+| Option | Description |
+|--------|-------------|
+| `--json` | Emit JSON instead of tables. Honored by `services`, `projects list`/`get`, `whoami`, `login`, and `logs` (one metadata line, then one JSON object per log line). Other commands keep their human output |
+| `--transport api\|kube` | Pick the transport for this command (see [Transports](#transports)) |
+| `--project <name-or-slug>` | Project that owns the service, on the `api` transport. Falls back to `FRACTAL_PROJECT`; when neither is set, the service is looked up across your projects |
+
+Global options can go before or after the subcommand.
+
 ## Transports
 
 The CLI picks a transport for each command, highest precedence first:
 
 1. The `--transport api|kube` flag.
 2. The `FRACTAL_TRANSPORT` environment variable (`api` or `kube`).
-3. `transport` in `~/.config/fractal/config.toml`. `fractal cluster connect`
-   writes `transport = "kube"`, so a BYOC machine keeps using its own cluster
-   even after an API login.
+3. `transport` in the CLI config file. `fractal cluster connect` writes
+   `transport = "kube"`, so a BYOC machine keeps using its own cluster even
+   after an API login.
 4. Otherwise `api` when a credential is configured, and `kube` when none is.
 
 `fractal deploy` always goes through the API, and the `cluster` commands always
-use your kubeconfig. Run `fractal whoami` to see which transport is active.
+use your kubeconfig. Run `fractal whoami` to see which transport is active. To
+switch a machine back to the API after `fractal cluster connect`, pass
+`--transport api`, set `FRACTAL_TRANSPORT=api`, or remove the `transport` line
+from the config file.
 
 ### Availability on hosted workspaces
 
-| Over the API | Not available yet on hosted workspaces |
-|--------------|----------------------------------------|
-| `services`, `projects`, `logs`, `deploy`, `env`, `scale`, `members`, `tokens list`/`create`/`revoke`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
+| Over the API | Not available on hosted workspaces |
+|--------------|------------------------------------|
+| `services`, `projects list`/`get`, `logs` (including `--follow`), `deploy`, `env list`/`set`/`set-secret`/`unset`, `scale`, `members list`/`add`/`remove`, `tokens list`/`create`/`revoke`, `login`, `whoami`, `logout` | `exec`, `port-forward`, `db-connect`, `secrets-sync`, `restart`, `rollback`, `destroy`, `restore`, `canary`, `tokens delete` |
 
 The commands in the right column exit straight away with a short message that
-says what to use instead: for example, the Shell tab in the dashboard for
-`exec`, or `fractal deploy` for `restart`.
+says what to use instead:
+
+| Command | Use instead |
+|---------|-------------|
+| `exec` | The **Shell** tab in the dashboard |
+| `restart` | `fractal deploy --service <name>` |
+| `rollback`, `destroy`, `restore`, `canary` | The service's page in the dashboard |
+| `db-connect` | Copy the connection string from the database's page in the dashboard |
+| `secrets-sync` | `fractal env list <service>` |
+| `tokens delete` | `fractal tokens revoke` (keeps an audit trail) |
+| `port-forward` | No hosted equivalent; it needs direct cluster access |
 
 ## Authentication
 
@@ -62,7 +118,7 @@ fractal login                      # sign in through your browser
 fractal login --no-browser         # print the sign-in URL and paste back the result
 fractal login --token <ftk_...>    # save an API token instead (use `-` to read it from stdin)
 fractal whoami                     # show who you are, your workspace, and the transport
-fractal logout                     # revoke the session and clear saved credentials
+fractal logout                     # clear saved credentials (and revoke a browser session)
 ```
 
 The same commands are also available under `fractal auth` (for example,
@@ -70,12 +126,13 @@ The same commands are also available under `fractal auth` (for example,
 
 ### Browser login
 
-`fractal login` runs the standard browser login flow. It opens your browser to
-the Omni sign-in page; after you approve, the CLI receives the result on a
-temporary `127.0.0.1` listener and saves an access token and a refresh token in
-`~/.config/fractal/config.toml` (readable only by you). The access token is
-refreshed silently before it expires, so you stay logged in. If the sign-in
-doesn't finish within 5 minutes, the login times out; run `fractal login` again.
+`fractal login` runs a standard OAuth sign-in (authorization code with PKCE)
+against `https://identity.omni.dev`. It opens your browser to the Omni sign-in
+page; after you approve, the CLI receives the result on a temporary
+`127.0.0.1` listener and saves an access token and a refresh token in the
+[config file](#config-file). The access token is refreshed silently before it
+expires, so you stay logged in. If the sign-in doesn't finish within 5 minutes,
+the login times out; run `fractal login` again.
 
 Over SSH, on Linux with no display, or with `--no-browser`, the CLI prints the
 sign-in URL instead. Open it in any browser and approve. The browser then lands
@@ -85,10 +142,23 @@ address bar and paste it into the terminal.
 When a session can no longer be refreshed, commands report
 `Session expired, run fractal login`.
 
-`fractal whoami` shows your email, name, and workspace. The workspace is the one
-set in `FRACTAL_WORKSPACE`, or your only workspace when you belong to exactly
-one. On the `api` transport it also checks the credential against the API and
-reports how many projects it can see. Pass `--json` for the same fields as JSON.
+### `fractal whoami`
+
+After a browser login, `whoami` shows your email, name, and workspace. The
+workspace is the one set in `FRACTAL_WORKSPACE`, or your only workspace when you
+belong to exactly one; with several, it lists them all. With an API token it
+reports that an API token is in use. On the `api` transport it also checks the
+credential against the API and reports how many projects it can see.
+`fractal --json whoami` prints the same fields (`authenticated`, `source`,
+`kind`, `email`, `workspace`, `workspaces`, `transport`, `apiUrl`, `projects`).
+
+### `fractal logout`
+
+`logout` clears the saved credential from the config file. For a browser login
+it also revokes the session with the identity provider. A saved API token is
+only removed from the machine, not revoked: revoke it with
+`fractal tokens revoke` or in the dashboard. A `FRACTAL_API_TOKEN` in the
+environment keeps authenticating commands after a logout.
 
 ### Credential precedence
 
@@ -96,7 +166,7 @@ The CLI resolves its credential in this order:
 
 1. `FRACTAL_API_TOKEN`
 2. `FRACTAL_AUTH_TOKEN` (the older name, still honored)
-3. The login saved in `~/.config/fractal/config.toml` by `fractal login`
+3. The login saved in the config file by `fractal login`
 
 `fractal login --token` checks the token against the API before saving it.
 
@@ -124,12 +194,14 @@ fractal services [-n, --namespace <ns>]   # list services
 
 On the `api` transport, `fractal services` lists every service across your
 projects; add `--project <name>` to narrow it to one. On `kube`, it lists the
-services in the current kubeconfig namespace. Add `--json` for machine-readable
-output with the same row shape on both transports.
+services in the current kubeconfig namespace (or `--namespace`). With `--json`,
+each row has `name`, `serviceType` (`web`, `worker`, `cronJob`, `staticSite`,
+`database`), `phase`, `readyReplicas`, `desiredReplicas`, and `image`, plus
+`rootDir`, `watchPaths`, and `schedule` when set.
 
 ### `fractal deploy`
 
-Rebuild and redeploy an existing service (used in CI and automation).
+Rebuild and redeploy an existing service from its tracked branch (or its image).
 
 ```bash
 fractal deploy --service <service> [--project <project>] [--env <environment>] [--namespace <ns>]
@@ -137,39 +209,44 @@ fractal deploy --service <service> [--project <project>] [--env <environment>] [
 
 | Flag | Description |
 |------|-------------|
-| `--service <service>` | Service name |
+| `--service <service>` | Service name (required) |
 | `--project <project>` | Project that owns the service. Looked up from the service name when omitted |
-| `--env <environment>` | Rebuild only this environment (optional) |
+| `--env <environment>` | Rebuild only this environment (optional). Without it, every environment of the service redeploys |
 | `--namespace <ns>` | Namespace the service lives in. Read from the API when omitted |
 
 Passing both `--project` and `--namespace` skips every lookup, which suits CI.
+Deploying needs the `developer` role or higher on the project.
 
 ## Logs and shell access
 
 ```bash
-fractal logs <service> [--follow] [--since <dur>] [--tail <n>] [--grep <text>] \
+fractal logs <service> [-f, --follow] [--since <dur>] [-t, --tail <n>] [-g, --grep <text>] \
   [--timestamps] [--previous]
 fractal exec <service> [-t, --tty] [-- <command>...]
 fractal port-forward <service> <local:remote>
 fractal db-connect <service> [--print-only]
+fractal secrets-sync <service> [-o, --output <path>] [--overwrite]
 ```
 
 | Command | Notes |
 |---------|-------|
-| `logs` | `--follow` keeps tailing; `--since`, `--tail`, `--grep` filter output; `--timestamps` keeps each line's timestamp; `--previous` reads the previous (crashed) container |
-| `exec` | Run a command in a service pod; `--tty` for an interactive shell. On hosted workspaces, use the Shell tab in the dashboard |
-| `port-forward` | Forward a local port to the service (`8080:80` or just `8080`). Needs direct cluster access |
-| `db-connect` | Open a psql session to a database service; `--print-only` prints the URL. On hosted workspaces, copy the connection string from the dashboard |
+| `logs` | `--follow` keeps tailing; `--since` takes `30s`, `5m`, `1h`, or `2d`; `--tail` limits lines per pod; `--grep` keeps lines containing the text; `--timestamps` keeps each line's timestamp; `--previous` reads the previous (crashed) container |
+| `exec` | Run a command in a service pod (default `/bin/sh`); `--tty` for an interactive shell. `kube` only |
+| `port-forward` | Forward a local port to the service (`8080:80` or just `8080`). `kube` only |
+| `db-connect` | Open a `psql` session to a database service; `--print-only` prints the connection details. `kube` only |
+| `secrets-sync` | Write a service's env vars into a local `.env` file (default `./.env`). `kube` only |
 
-On hosted workspaces, `logs` covers up to 10 pods, newest first, and
-`--follow` polls for new lines every couple of seconds. A service that is
+On hosted workspaces, `logs` reads up to 10 pods, newest first, with 200 lines
+per pod by default (`--tail` accepts up to 5000). `--follow` polls for new lines
+every 2 seconds and stops after 5 failed polls in a row. A service that is
 sleeping or scaled to zero has no pods: `logs` says so instead of failing, and
-`--follow` waits for it to start.
+`--follow` waits for it to start. Any project role, `viewer` included, can read
+logs.
 
 ## Scaling and lifecycle
 
 ```bash
-fractal scale <service> --replicas <n>
+fractal scale <service> -r, --replicas <n>
 fractal restart <service>       # rolling restart
 fractal rollback <service>      # roll back to the previous revision
 fractal destroy <service>       # mark a service for deletion (a grace period applies)
@@ -192,8 +269,8 @@ fractal env unset <service> KEY
 | Subcommand | Description |
 |------------|-------------|
 | `list` | List env vars with their source. Secret values are masked |
-| `set` | Set a literal value. With `--secret` (hosted), the value is stored as a managed secret: it is sent write-only and never shown again |
-| `set-secret` | Set a value from an existing secret |
+| `set` | Set a literal value. With `--secret` (hosted only), the value is stored as a managed secret: it is sent write-only and never shown again |
+| `set-secret` | Set a value from an existing secret, such as a database's `<name>-app` secret |
 | `unset` | Remove a variable |
 
 ## Canary deployments
@@ -216,9 +293,12 @@ fractal members add <project> <user> [-r, --role <role>]   # default role: devel
 fractal members remove <project> <user>
 ```
 
+`<user>` is a user id or email. Roles are `admin`, `developer`, and `viewer`.
+The project owner cannot be removed.
+
 ## API tokens
 
-Scoped tokens for automation and CI. See [API Tokens](/products/fractal/api-tokens).
+Tokens for automation and CI. See [API Tokens](/products/fractal/api-tokens).
 
 ```bash
 fractal tokens list [--workspace <id>]
@@ -227,22 +307,32 @@ fractal tokens revoke <name> [--workspace <id>]
 fractal tokens delete <name>   # kube transport only; prefer revoke
 ```
 
-On hosted workspaces, a token always acts as the person who creates it. After
-`fractal login`, the workspace is your only workspace when you belong to exactly
-one; otherwise it is inferred from your projects. Pass `--workspace <id>` (or set
-`FRACTAL_WORKSPACE`) if you belong to more than one. `--subject` and
-`tokens delete` need the `kube` transport.
+| Flag | Description |
+|------|-------------|
+| `--name <label>` | Label for the token (for example `github-actions-ci`) |
+| `--scope <project>` | Restrict the token to a project, by its name from `fractal projects list` (not its slug). Repeat for several projects. Omit (or pass `*`) for every project you can access |
+| `--expires-in-days <n>` | Lifetime in days. Omit for a non-expiring token |
+| `--workspace <id>` | Workspace the token belongs to |
+
+`tokens create` prints the secret once; copy it then. `tokens revoke` revokes
+the newest active token with that label. On hosted workspaces, a token always
+acts as the person who creates it. The workspace defaults to `FRACTAL_WORKSPACE`,
+then your only workspace when you belong to exactly one, then the workspace
+that owns your projects. Pass `--workspace <id>` if you belong to more than one
+(`fractal --json whoami` lists their ids). `--subject` and `tokens delete` need
+the `kube` transport.
 
 ## Cluster (BYOC)
 
-Connect the CLI to your own cluster and manage its install tokens.
+Connect the CLI to your own cluster and manage its install tokens. See
+[Self-hosting (BYOC)](/products/fractal/self-hosting).
 
 ```bash
 fractal cluster connect [--kubeconfig <path>] [--context <ctx>] [--name <label>] \
   [--registry <host/namespace>] [--registry-insecure]
-fractal cluster status        # show the connected cluster
-fractal cluster disconnect
-fractal cluster list-tokens
+fractal cluster status        # check the operator is installed and ready
+fractal cluster disconnect    # print how to stop the operator
+fractal cluster list-tokens   # install tokens you have issued
 fractal cluster revoke-token <id>
 ```
 
@@ -251,7 +341,7 @@ fractal cluster revoke-token <id>
 | `--kubeconfig <path>` | Kubeconfig to use (defaults to `$KUBECONFIG` or `~/.kube/config`) |
 | `--context <ctx>` | Kubeconfig context (defaults to the current context) |
 | `--name <label>` | Human-readable cluster label shown in the dashboard |
-| `--registry <host/namespace>` | Bring your own registry (e.g. `registry.example.com/myorg`) for builds and runtime images. Omit to deploy onto Omni's hosted cluster |
+| `--registry <host/namespace>` | Bring your own registry (for example `registry.example.com/myorg`) for builds and runtime images. Omit to use Omni's registry |
 | `--registry-insecure` | Treat the registry as plaintext HTTP (default is HTTPS) |
 
 `fractal cluster connect` also saves `transport = "kube"` in the CLI config, so
@@ -262,7 +352,7 @@ later commands on that machine use your kubeconfig.
 When you pass `--registry`, the operator pushes builds to and pulls runtime
 images from your registry instead of Omni's. Your registry credential never
 transits Omni: create the pull Secret yourself before applying the bundle. The
-`connect` command prints the exact command, e.g.
+`connect` command prints the exact command, for example:
 
 ```bash
 kubectl -n fractal-system create secret docker-registry fractal-registry-credentials \
@@ -271,19 +361,32 @@ kubectl -n fractal-system create secret docker-registry fractal-registry-credent
 
 ## Configuration
 
+### Environment variables
+
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `FRACTAL_API_TOKEN` | API token. Takes precedence over a saved login | unset |
+| `FRACTAL_API_TOKEN` | API token (`ftk_...`). Takes precedence over a saved login | unset |
 | `FRACTAL_AUTH_TOKEN` | Older name for the token override | unset |
-| `FRACTAL_API_URL` | Fractal API base URL | `https://api.fractal.omni.dev` |
+| `FRACTAL_API_URL` | Fractal API base URL. Overrides `api_url` in the config file | `https://api.fractal.omni.dev` |
 | `FRACTAL_TRANSPORT` | `api` or `kube`; the `--transport` flag overrides it | automatic |
 | `FRACTAL_PROJECT` | Default project for service commands; the `--project` flag overrides it | unset |
 | `FRACTAL_WORKSPACE` | Workspace id for `tokens` commands and the workspace `whoami` shows; the `--workspace` flag overrides it | inferred |
 | `FRACTAL_AUTH_URL` | Identity provider base URL for `fractal login` | `https://identity.omni.dev` |
 | `KUBECONFIG` | Kubeconfig for the `kube` transport and `cluster` commands | `~/.kube/config` |
 
+### Config file
+
+`fractal login` and `fractal cluster connect` write `fractal/config.toml` in
+your user config directory: `$XDG_CONFIG_HOME/fractal/config.toml` (usually
+`~/.config/fractal/config.toml`) on Linux, and
+`~/Library/Application Support/fractal/config.toml` on macOS. It is readable
+only by you. Besides the saved credential, it can hold `transport = "api"` or
+`"kube"` and `api_url = "..."` at the top level.
+
 ## Shell completions
 
 ```bash
-fractal completions <shell>   # bash, zsh, fish, ...
+fractal completions <shell>   # bash, zsh, fish, elvish, powershell
 ```
+
+For example, `fractal completions zsh > ~/.zfunc/_fractal`.
