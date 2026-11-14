@@ -28,7 +28,7 @@ Synapse exposes OpenAI-compatible and Anthropic-compatible endpoints. All endpoi
 
 ## POST /v1/chat/completions
 
-OpenAI-compatible chat completions endpoint. Supports streaming via `stream: true`.
+OpenAI-compatible chat completions endpoint. Supports streaming via `stream: true`. Request bodies (including inline base64 images) can be up to 32 MiB.
 
 ```bash
 curl http://localhost:6000/v1/chat/completions \
@@ -70,9 +70,13 @@ Response:
 }
 ```
 
+### Reasoning effort
+
+Set `reasoning_effort` (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`) to control how much a reasoning model thinks. It is sent to OpenAI-compatible upstreams as `reasoning_effort` (`max` becomes `xhigh`) and to Anthropic models as `output_config.effort` (`none` and `minimal` become `low`). Omit it to use the model's default.
+
 ## POST /v1/messages
 
-Anthropic-compatible messages endpoint. Supports streaming via `stream: true`.
+Anthropic-compatible messages endpoint. Supports streaming via `stream: true`. Request bodies (including inline base64 images) can be up to 32 MiB.
 
 ```bash
 curl http://localhost:6000/v1/messages \
@@ -109,6 +113,22 @@ Response:
   }
 }
 ```
+
+### Thinking and effort
+
+`thinking` and `output_config` are passed through to Anthropic models unchanged, so you can set adaptive thinking, the thinking display, the effort level, or structured output:
+
+```json
+{
+  "model": "anthropic/claude-opus-5-5",
+  "max_tokens": 16000,
+  "thinking": { "type": "adaptive", "display": "summarized" },
+  "output_config": { "effort": "high" },
+  "messages": [{ "role": "user", "content": "Prove it" }]
+}
+```
+
+`output_config.effort` reaches OpenAI-compatible models as `reasoning_effort` (`max` becomes `xhigh`). Thinking tokens count as output tokens and are billed as output, whether or not a thinking block is returned. Thinking blocks are not included in gateway responses. Google and Bedrock upstreams ignore both fields.
 
 ## GET /v1/models
 
@@ -251,7 +271,7 @@ With a managed key, the request is checked against your credits before it runs a
 
 ## POST /v1/audio/transcriptions
 
-Speech-to-text transcription. Requires an [STT provider](/products/synapse/providers#stt-providers) configured. Accepts multipart form data.
+Speech-to-text transcription. Requires an [STT provider](/products/synapse/providers#stt-providers) configured. Accepts multipart form data (up to 32 MiB).
 
 ```bash
 curl http://localhost:6000/v1/audio/transcriptions \
@@ -395,6 +415,29 @@ Response (plain text):
 ```
 ok
 ```
+
+## Per-call cost
+
+Every billed LLM request reports what it cost. Non-streamed `/v1/chat/completions` and `/v1/messages` responses carry three headers:
+
+| Header | Meaning |
+|--------|---------|
+| `x-synapse-cost-usd` | Retail amount charged in US dollars, after the product margin, rounded up to $0.0001 exactly as it is deducted |
+| `x-synapse-credits` | The same amount in credits ($0.01 each) |
+| `x-synapse-provider-cost-usd` | Upstream provider cost in US dollars, before the margin |
+
+The same figures appear as a `synapse_cost` object on the response `usage`. Streamed requests carry it on the final usage: the usage chunk of an OpenAI-format stream (`choices: []`, `usage.synapse_cost`) and the `message_delta` event's `usage` in an Anthropic-format stream:
+
+```json
+"usage": {
+  "prompt_tokens": 1000,
+  "completion_tokens": 500,
+  "total_tokens": 1500,
+  "synapse_cost": { "cost_usd": 0.0142, "credits": 1.42, "provider_cost_usd": 0.0071 }
+}
+```
+
+The cost covers every billed attempt of the request: a cached response is costed like a served one, a failed-over request reports the model that served it, and an escalated cascade reports both attempts. BYOK requests report zero (you pay your provider directly). Requests without a billing identity report no cost.
 
 ## SDK Compatibility
 
