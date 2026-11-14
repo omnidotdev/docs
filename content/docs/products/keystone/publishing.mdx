@@ -1,0 +1,66 @@
+---
+title: Publishing
+description: Share a free preview link, or deploy a live hosted site with your own domain
+---
+
+Select **Publish** in the builder to put your site on the web. What you get
+depends on the plan of the workspace you publish under:
+
+| | Preview link | Hosted site |
+|---|---|---|
+| **Plans** | Free (and any workspace without hosted publishing) | Pro and Team |
+| **Address** | A read-only link served by Keystone | Its own isolated address on Fractal |
+| **Pages** | The home page | Every page, with clean URLs (`/about`) |
+| **Custom domain** | No | Yes |
+| **Keystone badge** | Shown | Removed |
+| **Integration blocks** | Live | Live |
+
+Publishing never fails for lack of a plan: a workspace without hosted publishing
+always gets a preview link.
+
+## Preview link
+
+A preview link is a free, read-only copy of your site's home page that anyone with
+the link can open. It carries a small Keystone badge in the corner. Publish again
+after more changes to update what the link shows.
+
+## Hosted site
+
+On Pro and Team, publishing deploys your site as its own live service on
+[Fractal](/products/fractal), Omni's deploy platform. Each site runs in isolation
+on its own address under `fractal.dev`, separate from Keystone itself, and every
+page is served (the home page at `/`, other pages at `/<page>`).
+
+Hosted sites **scale to zero** when idle, so an unvisited site costs nothing to
+keep running. The first visit after a quiet spell can take a moment while the
+site wakes up.
+
+Select **Republish** after further changes to update the same site at the same
+address. Republishing keeps any custom domain you attached.
+
+If a hosted deploy cannot run for any reason, Keystone falls back to a preview
+link so you always leave with a working URL. Try publishing again later for the
+hosted site.
+
+## Choose a workspace
+
+If you belong to more than one workspace, the publish dialog asks which one to
+publish under. The site moves into that workspace, and that workspace's plan
+decides whether you get a hosted site or a preview link. Upgrade the workspace to
+Pro or Team on the [pricing page](https://keystone.omni.dev/pricing) for hosted
+publishing.
+
+## Custom domains
+
+On plans that include custom domains (Pro and Team), enter a domain such as
+`www.example.com` in the **Custom domain** field before you publish.
+
+1. Enter the domain and select **Publish** (or **Republish**).
+2. Keystone shows the DNS records to add, as a table of **Type**, **Name**, and
+   **Value**.
+3. Add those records at your domain registrar or DNS provider.
+4. Once DNS has propagated, your site is served on your domain, with HTTPS handled
+   for you.
+
+A custom domain entered on a plan without custom domains is ignored, and the site
+publishes without it.

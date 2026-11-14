@@ -122,7 +122,7 @@ const SECTION_GRADIENTS: Record<
  * Icon mapping for each realm.
  */
 export const SECTION_ICONS: Record<string, string> = {
-  welcome: "Sparkles",
+  welcome: "Omni",
   core: "Box",
   kindred: "Heart",
   fabric: "Brush",

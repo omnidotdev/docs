@@ -10,13 +10,13 @@ import {
   HelpCircle,
   Palette,
   Server,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useCallback } from "react";
 import { SiX } from "react-icons/si";
 
+import OmniMark from "@/components/layout/OmniMark";
 import getSectionDescription from "@/lib/getSectionDescription";
 import getSectionGradient from "@/lib/getSectionGradient";
 import { REALM_IDS, SECTION_ICONS } from "@/lib/sections";
@@ -30,7 +30,7 @@ const ICON_COMPONENTS: Record<
   string,
   React.ComponentType<{ className?: string }>
 > = {
-  Sparkles,
+  Omni: OmniMark,
   Box,
   Heart,
   Brush,
