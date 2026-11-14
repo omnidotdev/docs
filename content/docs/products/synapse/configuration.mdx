@@ -228,10 +228,13 @@ team = 1.15
 
 [billing.product_margins]
 facet = 2.0
-keystone = 2.0
 
 [billing.included_allowance_products]
 myfi = "ai_credits"
+
+[billing.products.facet]
+models = ["anthropic/claude-sonnet-5-5", "anthropic/claude-haiku-5-5"]
+default_model = "anthropic/claude-sonnet-5-5"
 
 [billing.managed_providers.openai]
 api_key = "{{ env.OPENAI_API_KEY }}"
@@ -258,9 +261,28 @@ margin = 1.0
 | `product_margins` | Per-product markup multiplier for product-scoped keys (keyed by the product's app id). Product-scoped usage never uses `tier_margins` or provider margins | -- |
 | `default_product_margin` | Markup for product-scoped keys whose product is not in `product_margins` | `2.0` |
 | `included_allowance_products` | Products that include AI in their tier, mapped to the Aether usage meter holding the monthly allowance in credits (e.g. `myfi = "ai_credits"`). Their AI is checked against and charged to that meter, never the credit balance, and is refused with `402` once the period's allowance is used | -- |
+| `products` | Per-product chat model policies for product-scoped keys, keyed by the product's app id. See [Product model policies](#product-model-policies) | -- |
 | `managed_providers` | Provider keys and margins for managed (non-BYOK) usage | -- |
 
 Every margin must be at least `1.0`; the gateway refuses to start with a margin that would sell managed usage below upstream cost.
+
+### Product model policies
+
+A `[billing.products.<app_id>]` table limits a product-scoped key to the chat models its product offers and sets its default:
+
+| Field | Description |
+|-------|-------------|
+| `models` | Models the product may use, as `provider/model`, in the order `GET /v1/models` lists them |
+| `default_model` | Model that `"model": "auto"` resolves to. Must be one of `models` |
+
+With a policy in place:
+
+- `GET /v1/models` lists exactly the product's models, with display names, the default flag, and retail prices (see [GET /v1/models](/products/synapse/api#get-v1models))
+- `auto` resolves to the default model. When the product's plan includes the `smart_routing` entitlement, `auto` routes among the product's own models instead. `fast`, `best`, and `cheap` also resolve to the default without the entitlement
+- A request for any other model is refused with `400` before a provider is called or anything is charged
+- Failover and cascade escalation only move between the product's models, and the request is billed on the model that served it
+
+Every listed model must be priced in `[[llm.routing.models]]` and served by a configured provider; the gateway refuses to start otherwise. Products without a policy are not restricted, and the gateway's own keys always see every model. Policies govern chat completions (`/v1/chat/completions` and `/v1/messages`); embeddings, images, and speech are not restricted by them.
 
 <Callout type="info">
   Billing is optional for self-hosted deployments. When disabled, all requests are treated as BYOK with no usage metering.

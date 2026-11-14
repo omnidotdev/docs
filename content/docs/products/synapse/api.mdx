@@ -15,7 +15,7 @@ Synapse exposes OpenAI-compatible and Anthropic-compatible endpoints. All endpoi
 |----------|--------|-------------|
 | `/v1/chat/completions` | POST | LLM chat (OpenAI-compatible, streaming) |
 | `/v1/messages` | POST | LLM chat (Anthropic-compatible, streaming) |
-| `/v1/models` | GET | List models from all configured providers |
+| `/v1/models` | GET | List the models the calling key can use, with display names, the default, and prices |
 | `/v1/embeddings` | POST | Generate text embeddings |
 | `/v1/images/generations` | POST | Generate images |
 | `/v1/images/edits` | POST | Generate images from reference images |
@@ -132,30 +132,69 @@ Response:
 
 ## GET /v1/models
 
-List all models available across configured providers.
+List the models the calling API key can use. The response is OpenAI-compatible, and each entry adds a `synapse` object so a model picker never hardcodes names, defaults, or prices.
 
 ```bash
 curl http://localhost:6000/v1/models \
   -H "Authorization: Bearer your-api-key"
 ```
 
-Response:
+- A **product-scoped key** (issued for another Omni product) lists exactly that product's models, in the order the product's [model policy](/products/synapse/configuration#product-model-policies) declares them, with its default flagged
+- **Any other key** lists every model the gateway serves
+
+Response for a product-scoped key:
 
 ```json
 {
   "object": "list",
   "data": [
     {
-      "id": "claude-sonnet-4-20250514",
+      "id": "anthropic/claude-sonnet-5-5",
       "object": "model",
-      "owned_by": "anthropic"
+      "created": 1763164800,
+      "owned_by": "synapse",
+      "synapse": {
+        "display_name": "Claude Sonnet 5.5",
+        "default": true,
+        "context_window": 1000000,
+        "credits_per_mtok": { "input": 400, "output": 2000 }
+      }
     },
     {
-      "id": "gpt-4o",
+      "id": "anthropic/claude-haiku-5-5",
       "object": "model",
-      "owned_by": "openai"
+      "created": 1763164800,
+      "owned_by": "synapse",
+      "synapse": {
+        "display_name": "Claude Haiku 5.5",
+        "default": false,
+        "context_window": 1000000,
+        "credits_per_mtok": { "input": 20, "output": 100 }
+      }
     }
   ]
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `id` | The value to send as `model` |
+| `synapse.display_name` | Human-readable name for model pickers |
+| `synapse.default` | Whether the model is the key's default, which `"model": "auto"` resolves to |
+| `synapse.context_window` | Context window in tokens, or `null` when unknown |
+| `synapse.credits_per_mtok` | Retail price per million input and output tokens in credits ($0.01 each), including the margin the key is billed at. `null` when the key is not billed for the model (bring-your-own-key, or a model with no managed price) |
+
+Prices come from the same table the gateway bills with, so the listed price is what a request is charged per token. A prompt above a model's long-context threshold is billed at that model's higher long-context rate.
+
+A product-scoped key that requests a model outside its list receives `400` with an `invalid_request_error` in the endpoint's own error format, before any provider call or charge:
+
+```json
+{
+  "error": {
+    "message": "model openai/gpt-4o is not available for this API key; GET /v1/models lists the models it can use",
+    "type": "invalid_request_error",
+    "code": null
+  }
 }
 ```
 
