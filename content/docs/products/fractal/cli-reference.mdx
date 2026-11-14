@@ -113,7 +113,10 @@ The CLI picks a transport for each command, highest precedence first:
 3. `transport` in the CLI config file. `fractal cluster connect` writes
    `transport = "kube"`, so a BYOC machine keeps using its own cluster even
    after an API login.
-4. Otherwise `api` when a credential is configured, and `kube` when none is.
+4. Otherwise `api`. Direct cluster access is always an explicit choice
+   (`fractal cluster connect`, `FRACTAL_TRANSPORT=kube`, or `--transport kube`),
+   so a signed-out command tells you to run `fractal login` rather than acting
+   on whatever cluster your kubeconfig points at.
 
 `fractal deploy` always goes through the API, and the `cluster` commands always
 use your kubeconfig. Run `fractal whoami` to see which transport is active. To
@@ -154,6 +157,12 @@ fractal logout                     # clear saved credentials (and revoke a brows
 The same commands are also available under `fractal auth` (for example,
 `fractal auth login`).
 
+Commands never open a browser on their own; only `fractal login` does. When you
+are not logged in, your session has expired, or your token was revoked, a
+command prints what to do (for example, `You're not logged in to Fractal. Run
+fractal login to sign in`) and exits with status `4`, so scripts can tell "sign
+in first" apart from other failures (status `1`).
+
 ### Browser login
 
 `fractal login` runs a standard OAuth sign-in (authorization code with PKCE)
@@ -165,6 +174,9 @@ signed in). After you approve, the CLI receives the result on a temporary
 [config file](#config-file). The access token is refreshed silently before it
 expires, so you stay logged in. If the sign-in doesn't finish within 5 minutes,
 the login times out; run `fractal login` again.
+
+Choosing **Deny** on that page cancels the login: the tab shows "Login
+canceled" and the terminal prints `login canceled`.
 
 To log in as a different account than the one signed in to the browser, run
 `fractal login --switch-account`. It asks you to sign in again, then shows the
@@ -492,7 +504,7 @@ kubectl -n fractal-system create secret docker-registry fractal-registry-credent
 | `FRACTAL_API_TOKEN` | API token (`ftk_...`). Takes precedence over a saved login | unset |
 | `FRACTAL_AUTH_TOKEN` | Older name for the token override | unset |
 | `FRACTAL_API_URL` | Fractal API base URL. Overrides `api_url` in the config file | `https://api.fractal.omni.dev` |
-| `FRACTAL_TRANSPORT` | `api` or `kube`; the `--transport` flag overrides it | automatic |
+| `FRACTAL_TRANSPORT` | `api` or `kube`; the `--transport` flag overrides it | `api` |
 | `FRACTAL_PROJECT` | Default project for service commands; the `--project` flag overrides it | unset |
 | `FRACTAL_WORKSPACE` | Workspace to act in (slug or id). Overrides the saved workspace; the `--workspace` flag overrides it (see [Workspaces](#workspaces)) | saved workspace |
 | `FRACTAL_AUTH_URL` | Identity provider base URL for `fractal login` | `https://identity.omni.dev` |
