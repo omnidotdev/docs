@@ -181,7 +181,7 @@ recovery_seconds = 30
 
 ## Response Cache
 
-Synapse can cache LLM responses in Valkey to reduce latency and cost for repeated queries:
+Synapse can cache non-streaming chat completion responses in Valkey to cut latency for repeated requests:
 
 ```toml
 [cache]
@@ -196,8 +196,16 @@ ttl_seconds = 3600
 | `url` | Valkey/Redis connection URL | -- (required) |
 | `ttl_seconds` | Time-to-live for cached responses in seconds | 3600 |
 
+Caching is opt-in per request. Send the `x-synapse-cache: true` header to allow a cached answer; without it every request reaches the model, whatever its `temperature`, so "regenerate" always produces a fresh response.
+
+A cached response is only returned to the same caller that produced it: entries are scoped to the product, billing entity, billing mode (managed or BYOK), and API key, so one tenant never receives another's response.
+
 <Callout type="info">
-  Response caching uses the same Valkey instance as rate limiting. Identical requests (same model, messages, and parameters) return cached responses within the TTL window.
+  A cached response is billed like a served one. The request still passes every entitlement, credit, and allowance check, and is metered and charged at the cached response's token usage. Caching reduces latency, not cost.
+</Callout>
+
+<Callout type="info">
+  Response caching uses the same Valkey instance as rate limiting.
 </Callout>
 
 ## Billing
@@ -217,6 +225,13 @@ fail_mode = "open"
 free = 1.15
 pro = 1.15
 team = 1.15
+
+[billing.product_margins]
+facet = 2.0
+keystone = 2.0
+
+[billing.included_allowance_products]
+myfi = "ai_credits"
 
 [billing.managed_providers.openai]
 api_key = "{{ env.OPENAI_API_KEY }}"
@@ -239,8 +254,13 @@ margin = 1.0
 | `app_id` | Application identifier in Aether | `"synapse"` |
 | `mode` | Billing mode: `"hybrid"` (BYOK + managed), `"managed"`, or `"byok"` | `"hybrid"` |
 | `fail_mode` | Behavior when billing is unreachable: `"open"` (allow) or `"closed"` (deny) | `"open"` |
-| `tier_margins` | Per-tier markup multiplier for managed provider usage | -- |
+| `tier_margins` | Per-tier markup multiplier for managed provider usage under this gateway's own `app_id` | -- |
+| `product_margins` | Per-product markup multiplier for product-scoped keys (keyed by the product's app id). Product-scoped usage never uses `tier_margins` or provider margins | -- |
+| `default_product_margin` | Markup for product-scoped keys whose product is not in `product_margins` | `2.0` |
+| `included_allowance_products` | Products that include AI in their tier, mapped to the Aether usage meter holding the monthly allowance in credits (e.g. `myfi = "ai_credits"`). Their AI is checked against and charged to that meter, never the credit balance, and is refused with `402` once the period's allowance is used | -- |
 | `managed_providers` | Provider keys and margins for managed (non-BYOK) usage | -- |
+
+Every margin must be at least `1.0`; the gateway refuses to start with a margin that would sell managed usage below upstream cost.
 
 <Callout type="info">
   Billing is optional for self-hosted deployments. When disabled, all requests are treated as BYOK with no usage metering.
