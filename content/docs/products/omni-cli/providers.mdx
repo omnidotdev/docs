@@ -227,6 +227,8 @@ max_tokens = 16384  # Higher limit for Anthropic
 
 ## Cost Considerations
 
+The TUI status bar and the `/cost` command show an estimated session cost, computed from token counts and list prices. It is a display-only estimate, not your bill: with Omni credits, the Synapse gateway meters and charges the real usage, and the CLI never records or reports usage itself.
+
 Different providers have different pricing. For cost-sensitive work:
 
 - Use **Groq** for fast, cheap inference
