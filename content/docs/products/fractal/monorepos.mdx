@@ -1,0 +1,142 @@
+---
+title: Monorepos
+description: Deploy several apps from one Git repository with build.rootDir, and rebuild a service only when its files change with build.watchPaths (segment-prefix matching, fail-open rules)
+---
+
+One repository can hold several independently deployable apps. Fractal deploys
+each app as its own service, all pointing at the same repository and branch:
+
+- **`build.rootDir`** picks the directory a service builds from.
+- **`build.watchPaths`** limits which pushes rebuild a service, so a change to
+  one app does not rebuild the others.
+
+## Set up a monorepo service
+
+From the project, choose **New Service**, pick the GitHub repository, and fill
+in:
+
+- **Root directory**: the app's directory relative to the repository root, for
+  example `apps/web`. Leave it blank to build from the root.
+- **Watch paths**: comma-separated paths relative to the repository root, for
+  example `apps/web, packages/ui`. Leave it blank to rebuild on every push.
+
+Repeat for each app, using the same repository and branch with a different root
+directory. To declare several services at once, import a
+[fractal.yaml](#fractalyaml-example).
+
+Both fields are set when the service is created; the dashboard's **Settings**
+tab does not edit them. To change them later, call `updateFractalService` with a
+`build` input on the [API](/products/fractal/api-tokens#http-api):
+
+```graphql
+mutation {
+  updateFractalService(
+    input: {
+      project: "<project>"
+      name: "web"
+      build: { mode: "auto", rootDir: "apps/web", watchPaths: ["apps/web", "packages/ui"] }
+    }
+  ) {
+    metadata { name }
+  }
+}
+```
+
+## Root directory
+
+Fractal clones the **whole** repository, then builds from `rootDir`, so
+automatic detection and `dockerfilePath` resolve there:
+
+- **Auto mode.** Set `rootDir` to the app's directory and Fractal detects and
+  builds that package. Use the command overrides (`installCommand`,
+  `buildCommand`, `startCommand`, `packageManager`) only if the build needs
+  steering.
+- **Dockerfile mode.** Set `rootDir` to the app's directory and
+  `dockerfilePath` to the `Dockerfile` **relative to `rootDir`** (so just
+  `Dockerfile` for `apps/web/Dockerfile`).
+
+`rootDir` must be a relative path inside the repository. An absolute path, a
+`..` segment, or shell metacharacters are ignored and the build runs from the
+repository root.
+
+<Callout type="warn">
+`rootDir` suits a **self-contained** subdirectory (its own dependencies, no
+cross-package imports). A **workspace** monorepo whose app imports sibling
+packages via `workspace:*` (a bun, pnpm, or yarn workspace) can't be built from
+the subdirectory alone: the build context is the subdirectory, so the siblings
+are out of reach. For those, build with a **Dockerfile** whose context is the
+repository root (set `build.mode: dockerfile`, point `dockerfilePath` at the
+app's `Dockerfile`, and leave `rootDir` blank). `turbo prune <app> --docker` is
+a clean way to install and build just that app and its workspace dependencies.
+</Callout>
+
+## Watch paths
+
+With `watchPaths` set, a push rebuilds the service only when at least one
+changed file is under one of the paths:
+
+- Paths are prefixes from the repository root, matched on whole path segments:
+  `apps/web` matches `apps/web/src/index.ts` but not `apps/website/index.ts`.
+- Leading and trailing slashes are ignored. Globs are not supported.
+- List every path the service depends on, including shared packages and
+  root-level files such as the lockfile. A path that is not listed does not
+  trigger a rebuild.
+
+Both automatic triggers honor watch paths: a GitHub push webhook (using the
+files changed by every commit in the push) and the periodic check for new
+commits (using the GitHub compare API). When a push touches no watched path, the
+service keeps running its current version and no build starts.
+
+Fractal **fails open**: when it cannot tell which files changed, it rebuilds
+rather than risk skipping a deploy. That happens when:
+
+- the push carries no changed-file list;
+- the repository is not hosted on github.com (for the periodic check);
+- there is no previous commit to compare against, for example the first deploy;
+- the compare request fails, or the diff is too large to list (300 files or
+  more).
+
+A deploy you start yourself, with `fractal deploy`, the dashboard, or the MCP
+`deploy_service` tool, always rebuilds regardless of watch paths.
+
+## fractal.yaml example
+
+Import a manifest from the project's **Import** action (see
+[fractal.yaml](/products/fractal/configuration#fractalyaml)). `services` is a map
+keyed by service name:
+
+```yaml
+version: "1"
+services:
+  web:
+    source:
+      git:
+        url: https://github.com/acme/monorepo
+        branch: main
+    build:
+      mode: auto
+      rootDir: apps/web
+      watchPaths:
+        - apps/web
+        - packages/ui
+        - bun.lock
+    expose:
+      port: 3000
+  worker:
+    serviceType: worker
+    source:
+      git:
+        url: https://github.com/acme/monorepo
+        branch: main
+    build:
+      mode: auto
+      rootDir: apps/worker
+      watchPaths:
+        - apps/worker
+        - bun.lock
+```
+
+## Check the settings
+
+`fractal --json services` and the MCP `get_service` tool both report a
+service's `rootDir` and `watchPaths`.

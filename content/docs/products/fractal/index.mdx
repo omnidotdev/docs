@@ -1,6 +1,6 @@
 ---
 title: 🔷 Fractal
-description: Deploy apps, databases, and services straight from Git or a container image
+description: Fractal, the managed platform for deploying apps, databases, scheduled jobs, and services from Git or a container image, operated from the dashboard, the fractal CLI, the API, or MCP
 ---
 
 import { ProductOverview } from "@/components/docs";
@@ -53,28 +53,39 @@ managed database, autoscaling, and push-to-deploy built in. Work visually in the
 - **Deploy from anywhere**: deploy from a Git repository or a prebuilt container
   image
 - **One-click templates**: deploy WordPress, n8n, Metabase, Ghost, and more in a
-  click &mdash; any companion database is provisioned and wired in for you
+  click, with any companion database provisioned and wired in for you
 - **Managed databases**: managed Postgres with automatic scheduled
   backups (configurable schedule and retention) and one-click restore, no
   database to run yourself
 - **Private networking**: services in a project reach each other privately at
   `<service>:<port>`, no public exposure required
-- **Automatic HTTPS**: certificates are provisioned and renewed for every exposed
-  service, including your custom domains
-- **Custom domains**: bring your own domain with copy-paste DNS records and
-  automatic, zero-downtime certificate issuance
+- **Environments**: isolated staging and production copies of every service in
+  one project, with per-environment overrides
+- **Custom domains and automatic HTTPS**: bring your own domain with copy-paste
+  DNS records; certificates are provisioned and renewed for every exposed
+  service
+- **Monorepos**: deploy several apps from one repository, each rebuilding only
+  when its own files change
+- **Scheduled jobs**: run a container on a cron schedule, with concurrency,
+  time zone, history, retry, and run-now controls
 - **Autoscaling and scale-to-zero**: scale on demand, or let idle services sleep
-  and wake instantly on the next request
-- **Scheduled jobs**: run a service on a cron schedule, with concurrency,
-  time zone, history, and retry controls
-- **Preview environments and canaries**: an ephemeral environment for every pull
-  request, plus weighted canary rollouts for safe releases
+  and wake on the next request
 - **Container shell**: open an interactive terminal in a running container from
   the dashboard to inspect a live service, role-gated and audited
+- **Preview environments and canaries**: an ephemeral environment for every pull
+  request, plus weighted canary rollouts for safe releases
+- **CLI, API, and MCP**: deploy, read logs, and manage env vars from the
+  `fractal` CLI, CI with an API token, or an AI assistant over MCP
 
 ## Get started
 
-Deploy your first service in a few minutes with the
-[quickstart](/products/fractal/getting-started), or explore
-[configuration](/products/fractal/configuration), [environments](/products/fractal/environments),
-[custom domains](/products/fractal/custom-domains), and [backups](/products/fractal/backups).
+Deploy your first service, install the CLI, and log in with the
+[Getting Started](/products/fractal/getting-started) guide. Then set up
+[environments](/products/fractal/environments),
+[custom domains](/products/fractal/custom-domains),
+[monorepos](/products/fractal/monorepos), and
+[scheduled jobs](/products/fractal/scheduled-jobs), or connect an AI assistant
+with the [MCP server](/products/fractal/mcp). The
+[CLI Reference](/products/fractal/cli-reference) and
+[Service Configuration](/products/fractal/configuration) cover every command and
+setting.

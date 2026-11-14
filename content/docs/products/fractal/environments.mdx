@@ -1,6 +1,6 @@
 ---
 title: Environments
-description: Run staging and production from one project
+description: Run isolated staging and production environments in one project, with per-environment overrides, branch mapping, and per-environment deploys
 ---
 
 A project can have multiple **environments** (for example `production` and
@@ -35,11 +35,15 @@ There are two ways to ship to a specific environment:
 - **Branch mapping (push-to-deploy):** map git branches to environments on the
   service's webhook, e.g. `main → production` and `develop → staging`. A push to
   that branch deploys the matching environment automatically.
-- **CLI:** target an environment explicitly:
+- **CLI:** rebuild one environment explicitly (without `--env`, every
+  environment redeploys):
 
   ```bash
-  fractal deploy --namespace <ns> --project <project> --service <service> --env staging
+  fractal deploy --service <service> --env staging
   ```
+
+  Pass `--project <project>` when two projects have a service with that name.
+  The same option is `environment` on the MCP `deploy_service` tool.
 
 <Callout>
 Because environments are separate namespaces, promote changes by deploying the

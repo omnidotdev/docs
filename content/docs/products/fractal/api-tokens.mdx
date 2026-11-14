@@ -1,43 +1,99 @@
 ---
 title: API Tokens
-description: Create and manage workspace API tokens for CI, IaC, and the CLI
+description: Create, scope, use, and revoke ftk_ workspace API tokens for CI, the fractal CLI, the MCP server, and direct calls to the Fractal API (GraphQL, rebuild, and logs endpoints)
 ---
 
 API tokens are bearer credentials that let automation act on your workspace
 without a browser login: continuous integration, infrastructure-as-code, the
-`fractal` CLI, and agent-driven deploys. A token acts with your access across
-the workspace it belongs to.
+`fractal` CLI, the [MCP server](/products/fractal/mcp), and agent-driven
+deploys. Every token starts with `ftk_`. A token acts with your own access
+across the workspace it belongs to, optionally narrowed to specific projects.
 
 ## Create a token
 
-In the dashboard, open your workspace and go to **API Tokens** (under the
-workspace admin area). Create one with:
+In the dashboard, open your workspace and select the **API Tokens** tab. Create
+one with:
 
-- **Name** a label so you can recognize it later (e.g. `github-actions-ci`).
-- **Expiry** an optional lifetime. Omit it for a non-expiring token.
+- **Name**: a label so you can recognize it later (for example
+  `github-actions-ci`).
+- **Expiry**: no expiry, 30 days, 90 days, or 1 year.
+
+Or create one from the CLI after `fractal login`:
+
+```bash
+fractal tokens create --name github-actions-ci --expires-in-days 90
+```
 
 The token's secret is shown **once**, at creation. Copy it then and store it
 somewhere safe (your CI provider's secret store, a password manager). It is
 stored only as a hash, so it can never be shown again; if you lose it, revoke
 it and create a new one.
 
-## Use a token
+### Restrict a token to projects
 
-Send the token as a bearer credential:
+By default a token can act on every project you can access in the workspace.
+To limit it, create it from the CLI with one `--scope` per project. Pass the
+project's **name** as shown in the `NAME` column of `fractal projects list`
+(the name can differ from the slug in the dashboard URL, and only the name
+matches):
 
 ```bash
-curl -H "Authorization: Bearer ftk_..." https://<your-fractal-api>/graphql
+fractal tokens create --name deploy-web --scope acme-web --scope acme-marketing
 ```
 
-The `fractal` CLI reads the token from `FRACTAL_API_TOKEN`, or from
-`~/.config/fractal/config.toml` after `fractal login --token <ftk_...>`.
-With a token set, the CLI works against your hosted workspace with no
-kubeconfig; see the [CLI Reference](/products/fractal/cli-reference).
+A scoped token is refused on any other project. Scopes can only be set at
+creation, from the CLI.
+
+## Use a token
+
+- **CLI**: set `FRACTAL_API_TOKEN=ftk_...` (recommended for CI), or save it on a
+  machine with `fractal login --token -` and paste the token on stdin. See the
+  [CLI Reference](/products/fractal/cli-reference#ci-and-automation).
+- **MCP**: send it as `Authorization: Bearer ftk_...` to
+  `https://mcp.fractal.omni.dev/mcp`. See [MCP Server](/products/fractal/mcp).
+- **HTTP**: send it as a bearer credential to the Fractal API at
+  `https://api.fractal.omni.dev`.
+
+### HTTP API
+
+The GraphQL endpoint lists and reads projects and services:
+
+```bash
+curl https://api.fractal.omni.dev/graphql \
+  -H "Authorization: Bearer $FRACTAL_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"{ fractalProjects { metadata { name namespace } spec { slug } } }"}'
+```
+
+Two REST endpoints cover deploys and logs. Both take the service's
+`namespace`, which `fractalService(project: "...", name: "...") { metadata { namespace } }`
+returns:
+
+| Endpoint | Access | Parameters |
+|----------|--------|------------|
+| `POST /v1/services/rebuild` | `developer` role or higher | JSON body: `namespace`, `project`, `service`, and optional `env` (rebuild one environment; omit to rebuild all) |
+| `GET /v1/services/logs` | Any project role | Query: `namespace`, `project`, `service`, and optional `tailLines` (1 to 5000, default 200), `sinceSeconds`, `timestamps` (`true`/`false`), `previous` (`true`/`false`) |
+
+```bash
+curl -X POST https://api.fractal.omni.dev/v1/services/rebuild \
+  -H "Authorization: Bearer $FRACTAL_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"namespace":"<namespace>","project":"<project>","service":"<service>"}'
+
+curl -G https://api.fractal.omni.dev/v1/services/logs \
+  -H "Authorization: Bearer $FRACTAL_API_TOKEN" \
+  -d namespace=<namespace> -d project=<project> -d service=<service> -d tailLines=100
+```
+
+The logs endpoint returns `{ service, namespace, pods: [{ name, container, log }] }`
+for up to 10 pods, newest first. `pods` is empty when the service is asleep or
+scaled to zero.
 
 ## List and revoke
 
-The **API Tokens** page lists every token in the workspace with its status
+The **API Tokens** tab lists every token in the workspace with its status
 (active, expired, or revoked), when it was last used, and when it expires.
+`fractal tokens list` shows the same.
 
 **Revoke** a token to stop it working immediately, for example when a secret
 leaks or a pipeline is retired. Revocation cannot be undone: anything using
@@ -45,13 +101,9 @@ that token stops working at once, so issue a replacement first if the workload
 still needs access. A revoked token is kept (not deleted) so it stays in the
 audit trail.
 
-## From the CLI
-
-The same tokens can be managed with the CLI (see the
-[CLI Reference](/products/fractal/cli-reference)):
-
 ```bash
 fractal tokens list [--workspace <id>]
-fractal tokens create --name <label> [--scope <project>]... [--expires-in-days <n>] [--workspace <id>]
 fractal tokens revoke <name> [--workspace <id>]
 ```
+
+`fractal logout` removes a saved token from the machine but does not revoke it.
