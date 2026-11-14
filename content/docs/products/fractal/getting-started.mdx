@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Deploy a first service on hosted Fractal, then install the fractal CLI, log in, redeploy, read logs, and connect an AI assistant over MCP
+description: Deploy a first service on hosted Fractal, then install the fractal CLI, log in, pick a workspace, redeploy, read logs, and connect an AI assistant over MCP
 ---
 
 This guide takes a hosted workspace from nothing to a running service, then sets
@@ -93,12 +93,30 @@ pinning a specific build.
 fractal login
 ```
 
-The CLI opens your browser to the Omni sign-in page. Approve, and the CLI saves
-a session that refreshes itself, so you stay logged in. Then check it:
+The CLI opens your browser to an **Authorize Fractal CLI** page showing the
+account you are signed in to. Approve, and the CLI saves a session that
+refreshes itself, so you stay logged in. To use a different account, run
+`fractal login --switch-account`, sign in again, and approve the new account.
+
+The CLI then selects the workspace to act in. With one workspace it is picked
+automatically; with several, the CLI lists them by name and asks which one to
+use. The terminal confirms the result:
+
+```text
+✓ Logged in as you@example.com
+  Workspace: Omni (omni)
+```
+
+Commands act in that workspace until you switch:
 
 ```bash
-fractal whoami   # your email, workspace, and the active transport (api)
+fractal workspace list        # your workspaces; the current one is marked with *
+fractal workspace use acme    # switch to another workspace (slug or id)
+fractal whoami                # your email, workspace, and the active transport (api)
 ```
+
+For a single command, pass `--workspace <slug>` or set `FRACTAL_WORKSPACE`. See
+[Workspaces](/products/fractal/cli-reference#workspaces) in the CLI reference.
 
 - **Over SSH or with no display**, run `fractal login --no-browser`. The CLI
   prints a sign-in URL; open it in any browser, approve, then copy the full
