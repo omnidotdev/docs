@@ -18,6 +18,7 @@ Synapse exposes OpenAI-compatible and Anthropic-compatible endpoints. All endpoi
 | `/v1/models` | GET | List models from all configured providers |
 | `/v1/embeddings` | POST | Generate text embeddings |
 | `/v1/images/generations` | POST | Generate images |
+| `/v1/images/edits` | POST | Generate images from reference images |
 | `/v1/audio/transcriptions` | POST | Speech-to-text |
 | `/v1/audio/speech` | POST | Text-to-speech |
 | `/mcp/tools/list` | POST | List available MCP tools |
@@ -200,6 +201,53 @@ Response:
   ]
 }
 ```
+
+## POST /v1/images/edits
+
+Generate images from 1 to 16 reference images and a prompt. Requires an [image generation provider](/products/synapse/providers#image-generation-providers) configured. Accepts multipart form data (up to 64 MiB); every field is forwarded to the provider unchanged.
+
+```bash
+curl http://localhost:6000/v1/images/edits \
+  -H "Authorization: Bearer your-api-key" \
+  -F "model=openai/gpt-image-1.5" \
+  -F "prompt=A sticker of a fox in the style of the references" \
+  -F "image[]=@style-one.png" \
+  -F "image[]=@style-two.png" \
+  -F "quality=medium" \
+  -F "size=1024x1024" \
+  -F "input_fidelity=high"
+```
+
+| Field | Description |
+|-------|-------------|
+| `model` | Required. Managed keys support `gpt-image-1.5` and `gpt-image-1-mini` |
+| `prompt` | Required |
+| `image[]` | Required, 1 to 16 files |
+| `mask` | Optional mask image |
+| `quality` | `low`, `medium`, `high`, or `auto` |
+| `size` | `1024x1024`, `1024x1536`, `1536x1024`, or `auto` |
+| `n` | 1 to 10 (default 1) |
+| `input_fidelity` | `high` or `low` |
+
+Response:
+
+```json
+{
+  "created": 1700000000,
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgo..."
+    }
+  ],
+  "usage": {
+    "input_tokens": 10050,
+    "output_tokens": 1056,
+    "total_tokens": 11106
+  }
+}
+```
+
+With a managed key, the request is checked against your credits before it runs and charged from the reported token usage, so reference images are billed as image input. A request your credits cannot cover returns `402`. With a BYOK key, the request uses your own provider key and is not charged.
 
 ## POST /v1/audio/transcriptions
 
