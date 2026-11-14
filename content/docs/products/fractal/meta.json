@@ -2,22 +2,23 @@
   "title": "🔷 Fractal",
   "pages": [
     "getting-started",
+    "architecture",
     "---Guides---",
     "environments",
-    "pr-previews",
     "custom-domains",
+    "monorepos",
     "scheduled-jobs",
-    "object-storage",
-    "media",
     "backups",
     "shell",
+    "pr-previews",
+    "object-storage",
+    "media",
     "api-tokens",
     "mcp",
-    "cli-reference",
     "self-hosting",
     "billing",
-    "architecture",
     "---Reference---",
-    "configuration"
+    "configuration",
+    "cli-reference"
   ]
 }

@@ -1,16 +1,64 @@
 ---
 title: Scheduled Jobs
-description: Run a service on a cron schedule with concurrency, time zone, history, and retry controls
+description: Run a container on a cron schedule (serviceType cronJob) and manage it from the dashboard or MCP, with concurrency, time zone, suspend, history, retry, run-now, and run history
 ---
 
-A scheduled job runs a service on a recurring cron schedule instead of serving
+A scheduled job runs a container on a recurring cron schedule instead of serving
 traffic or running continuously. Use one for nightly data exports, periodic
 cleanups, report generation, cache warming, or any task that runs on a clock.
 
 A scheduled job is a service with **`serviceType: cronJob`** and a
 **`deploy.schedule`** cron expression. It builds from the same sources as any
-other service (a Git repository or a prebuilt image) and runs the service's
-start command on each tick.
+other service (a Git repository or a prebuilt image). On each tick it starts a
+fresh container that runs the image's default command, or the job's command
+override, and exits.
+
+## Create one in the dashboard
+
+1. Open your project and choose **Scheduled jobs** in the project header (on a
+   narrow screen it is in the overflow menu).
+2. Click **New scheduled job**.
+3. Fill in:
+   - **Name**
+   - **Schedule**: a preset (every hour, every 6 hours, every day at midnight,
+     every Monday) or a custom cron expression
+   - **Source**: a Git repository and branch (built automatically), or a
+     container image and tag
+   - **Command** (optional): overrides the image's default command, for example
+     `bun run cleanup`
+   - **Time zone**, **Concurrency**, **Starting deadline**, **Backoff limit**,
+     **Keep successful runs**, **Keep failed runs**, and a **suspend** toggle
+     (see [Controls](#controls))
+4. Create the job.
+
+The form validates the schedule and time zone before the job is created.
+
+## Manage jobs
+
+The **Scheduled jobs** page lists every job in the project with its schedule,
+time zone, concurrency policy, status, and last run. For each job you can:
+
+- **Run now**: start a run immediately, outside the schedule. Useful for testing
+  a new job or re-running after a failure.
+- **Pause** and **Resume**: stop and restart the schedule without deleting the
+  job. A run already in flight finishes.
+- **Edit**: change the schedule, command, and controls.
+- **Delete**: permanently remove the job and stop all future runs, after a
+  confirmation.
+
+Expand a job to see its run history: each run's trigger (scheduled or manual),
+status, and start and completion times, retained per the history limits below.
+
+## Create one with the MCP server
+
+The [MCP server](/products/fractal/mcp)'s `create_cron_service` tool creates a
+scheduled job from a Git repository or image, including a monorepo `rootDir` and
+`watchPaths`, a `command` override, and environment variables. It sets the
+schedule only; adjust the controls afterwards with **Edit** in the dashboard.
+`list_cron_services` lists a project's jobs.
+
+From the CLI, `fractal services` shows scheduled jobs with type `cronJob` and,
+with `--json`, their `schedule`.
 
 ## Cron schedule syntax
 
@@ -20,8 +68,8 @@ start command on each tick.
 ┌───────────── minute        (0-59)
 │ ┌─────────── hour          (0-23)
 │ │ ┌───────── day of month  (1-31)
-│ │ │ ┌─────── month         (1-12)
-│ │ │ │ ┌───── day of week   (0-6, Sunday = 0)
+│ │ │ ┌─────── month         (1-12 or JAN-DEC)
+│ │ │ │ ┌───── day of week   (0-6 or SUN-SAT, Sunday = 0)
 │ │ │ │ │
 * * * * *
 ```
@@ -34,12 +82,13 @@ start command on each tick.
 | `0 9 * * 1` | Every Monday at 09:00 |
 | `0 0 1 * *` | At midnight on the first of each month |
 
-Schedules are evaluated in the job's time zone (see `timeZone` below), which
-defaults to UTC.
+Macros such as `@daily` are not accepted; use the five-field form. Schedules are
+evaluated in the job's time zone (see `timeZone` below), which defaults to UTC.
 
 ## Controls
 
-Tune scheduling behavior under **`deploy.cron`**:
+Scheduling behavior lives under **`deploy.cron`** in the service spec. Every
+field is optional:
 
 | Field | Values / default | Description |
 |-------|------------------|-------------|
@@ -51,53 +100,38 @@ Tune scheduling behavior under **`deploy.cron`**:
 | `failedJobsHistoryLimit` | integer, default `1` | How many failed runs to keep in history |
 | `backoffLimit` | integer, default `6` | How many times a single run retries before it is marked failed |
 
-## fractal.yaml example
-
-A repo-committed `fractal.yaml` that runs a nightly cleanup at 02:00
-Europe/Oslo time and never overlaps runs:
+As the service spec (what `get_service` returns), a nightly cleanup at 02:00
+Europe/Oslo time that never overlaps runs looks like:
 
 ```yaml
-services:
-  nightly-cleanup:
-    serviceType: cronJob
-    source:
-      git:
-        url: https://github.com/acme/jobs
-        branch: main
-    build:
-      mode: auto
-      startCommand: ["bun", "run", "cleanup"]
-    deploy:
-      schedule: "0 2 * * *"
-      cron:
-        concurrencyPolicy: forbid
-        timeZone: Europe/Oslo
-        successfulJobsHistoryLimit: 7
+serviceType: cronJob
+source:
+  git:
+    url: https://github.com/acme/jobs
+    branch: main
+build:
+  mode: auto
+deploy:
+  schedule: "0 2 * * *"
+  command: ["bun", "run", "cleanup"]
+  cron:
+    concurrencyPolicy: forbid
+    timeZone: Europe/Oslo
+    successfulJobsHistoryLimit: 7
 ```
 
-The job runs the service's start command on each tick. Set it with
-`build.startCommand` for an auto-built source, or rely on the container
-entrypoint for an image source. Environment variables, secrets, and resources
-are configured exactly as they are for a web or worker service (see
-[Service Configuration](/products/fractal/configuration)).
-
-## Create one in the dashboard
-
-From a project, choose **New Service**, pick a source, and set the service type
-to **Cron Job**. Enter the cron schedule and, under the scheduling options, set
-the concurrency policy, time zone, suspend flag, and history and retry limits.
-The same fields map one-to-one to the `deploy.schedule` and `deploy.cron`
-settings above.
-
-## Run history and manual runs
-
-Open the service to see its run history: each tick's start time, duration,
-outcome (succeeded or failed), and logs, retained per the history limits above.
-Where the dashboard supports it, a **Run now** action triggers an immediate
-run outside the schedule, which is useful for testing a new job or re-running
-after a failure.
+`deploy.command` is optional: without it, each run starts the image's default
+command (for an auto-built Git source, the detected start command). Environment
+variables, secrets, and resources work as they do for a web or worker service
+(see [Service Configuration](/products/fractal/configuration)).
 
 <Callout type="info">
-A scheduled job's container shell is not available while no run is in progress,
-since there is no long-lived pod between ticks (see [Shell](/products/fractal/shell)).
+Importing a [fractal.yaml](/products/fractal/configuration#fractalyaml) does not
+yet carry `deploy.schedule` or `deploy.cron`. Create scheduled jobs from the
+dashboard or the MCP server.
 </Callout>
+
+## Shell access
+
+Scheduled jobs have no **Shell** tab: there is no long-lived container to attach
+to between runs (see [Shell](/products/fractal/shell)).

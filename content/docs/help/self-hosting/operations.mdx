@@ -102,8 +102,6 @@ OTEL_EXPORTER_OTLP_HEADERS="authorization=Bearer <token>"
 OTEL_SERVICE_NAME=vortex-api
 ```
 
-Fractal includes OTEL collector integration as part of its platform stack, with Cilium/Hubble providing network-level observability.
-
 ## Multi-Instance Safety
 
 When running multiple API instances (e.g. behind a load balancer), Vortex's cron scheduler uses a Valkey distributed lock with a 90-second TTL. Only one API instance runs the scheduler at a time. Requires `CACHE_URL` to be configured.

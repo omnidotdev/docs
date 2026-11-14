@@ -1,6 +1,6 @@
 ---
 title: Self-hosting (BYOC)
-description: Run Fractal on a Kubernetes cluster you own with Bring Your Own Cloud
+description: Run the Fractal operator on a Kubernetes cluster you own (Bring Your Own Cloud) with fractal cluster connect, an optional own registry, and the kube transport
 ---
 
 Most teams deploy to Fractal's fully managed platform and never touch
@@ -9,21 +9,20 @@ infrastructure. If you need Fractal to run on your own cluster or cloud account,
 with a flat per-cluster price and no per-app compute markup.
 
 BYOC is rolling out with design partners first.
-[Apply for early access](https://fractal.omni.dev/early-access) and we will help you
-get set up.
+[Apply for early access](https://fractal.omni.dev/early-access) to get set up.
 
 ## What you need
 
 - A Kubernetes cluster you administer, and a kubeconfig with access to it.
-- The [`fractal` CLI](/products/fractal/cli-reference), authenticated with
-  `fractal login`.
+- The [`fractal` CLI](/products/fractal/cli-reference#install), authenticated
+  with `fractal login`.
 
 ## Connect a cluster
 
 `fractal cluster connect` onboards your cluster. It validates your kubeconfig and
 apiserver connectivity, mints a single-use install token, and prints the
-`kubectl apply` command that installs the Fractal operator into the
-`fractal-system` namespace.
+`kubectl apply` command that installs the Fractal operator (its CRDs, RBAC, and
+Deployment) into the `fractal-system` namespace.
 
 ```bash
 # onboard the current kubeconfig context
@@ -35,8 +34,9 @@ fractal cluster connect --name my-cluster --registry registry.example.com/myorg
 
 With `--registry`, the operator builds to and pulls runtime images from your
 registry instead of Omni's, so image data and credentials never leave your
-environment. See [Bring your own registry](/products/fractal/cli-reference) in the CLI
-reference for details.
+environment. See
+[Bring your own registry](/products/fractal/cli-reference#bring-your-own-registry-byoc)
+in the CLI reference for details.
 
 After applying the printed manifest, confirm the operator is running:
 
@@ -44,6 +44,25 @@ After applying the printed manifest, confirm the operator is running:
 fractal cluster status
 ```
 
-Once connected, you deploy, scale, and manage services exactly as on the hosted
-platform, using the same dashboard and CLI. To remove the operator, run
-`fractal cluster disconnect`.
+`fractal cluster list-tokens` lists the install tokens you have issued, and
+`fractal cluster revoke-token <id>` revokes one.
+
+## Operate the cluster
+
+`fractal cluster connect` sets the CLI on that machine to the `kube` transport,
+so commands talk to your cluster through your kubeconfig. Every command works
+there, including the ones that need direct cluster access on hosted workspaces
+(`exec`, `port-forward`, `db-connect`, `restart`, `rollback`, `canary`, and
+more); see [Transports](/products/fractal/cli-reference#transports).
+
+## Remove the operator
+
+To stop the operator, delete its Deployment. Workloads it already deployed keep
+running:
+
+```bash
+kubectl -n fractal-system delete deploy fractal-operator
+```
+
+`fractal cluster disconnect` prints this command; it does not remove anything
+itself.
