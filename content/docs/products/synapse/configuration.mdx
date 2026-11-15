@@ -150,7 +150,7 @@ window = "1h"
 
 ### Equivalence Groups
 
-Group providers that can substitute for each other. If the primary provider fails, Synapse automatically falls back to the next in the group:
+Group models that can substitute for each other. If a model fails, Synapse retries on the other members of the first group that lists it, in order, up to `max_attempts` (which counts the first attempt). With `max_attempts = 2` only the first other member is tried, so order each group for that fallback to be another vendor: an outage at one provider then never fails over into the same outage. A model can sit in more than one group to give each tier its own fallback. Requests that name an explicit `provider/model`, and product-scoped keys outside their model list, never fail over. List only current, priced models: a retired model fails upstream, and an unpriced one is refused:
 
 ```toml
 [[llm.failover.equivalence_groups]]
@@ -354,7 +354,11 @@ recovery_seconds = 30
 
 [[llm.failover.equivalence_groups]]
 name = "frontier"
-models = ["anthropic/claude-opus-5-5", "anthropic/claude-sonnet-5-5", "openai/gpt-4o", "nvidia/moonshotai/kimi-k2.5"]
+models = ["anthropic/claude-sonnet-5-5", "openai/gpt-4o", "nvidia/moonshotai/kimi-k2.5"]
+
+[[llm.failover.equivalence_groups]]
+name = "premium"
+models = ["anthropic/claude-opus-5-5", "openai/gpt-4o"]
 
 [[llm.failover.equivalence_groups]]
 name = "fast"
