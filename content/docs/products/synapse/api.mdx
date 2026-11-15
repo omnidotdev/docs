@@ -35,7 +35,7 @@ curl http://localhost:6000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-api-key" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5-5",
     "messages": [
       {"role": "system", "content": "You are a helpful assistant"},
       {"role": "user", "content": "Hello!"}
@@ -51,7 +51,7 @@ Response:
 {
   "id": "chatcmpl-...",
   "object": "chat.completion",
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-5-5",
   "choices": [
     {
       "index": 0,
@@ -84,7 +84,7 @@ curl http://localhost:6000/v1/messages \
   -H "Authorization: Bearer your-api-key" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5-5",
     "max_tokens": 1024,
     "messages": [
       {"role": "user", "content": "Hello!"}
@@ -105,7 +105,7 @@ Response:
       "text": "Hello! How can I help you today?"
     }
   ],
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-5-5",
   "stop_reason": "end_turn",
   "usage": {
     "input_tokens": 10,
@@ -493,7 +493,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-5-5",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 ```
@@ -509,7 +509,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-5-5",
   messages: [{ role: "user", content: "Hello!" }],
 });
 ```
@@ -525,7 +525,7 @@ client = Anthropic(
 )
 
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-5-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Hello!"}],
 )

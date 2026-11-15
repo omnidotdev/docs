@@ -15,7 +15,7 @@ Get up and running with Synapse in a few minutes. You can use the hosted service
 curl https://gateway.synapse.omni.dev/v1/chat/completions \
   -H "Authorization: Bearer synapse_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"model": "claude-sonnet-4-20250514", "messages": [{"role": "user", "content": "Hello!"}]}'
+  -d '{"model": "claude-sonnet-5-5", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
 
 ## Self-Hosted
@@ -72,7 +72,7 @@ curl http://localhost:3000/v1/chat/completions \
   -H "Authorization: Bearer synapse_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5-5",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
@@ -85,7 +85,7 @@ curl http://localhost:3000/v1/messages \
   -H "Content-Type: application/json" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5-5",
     "max_tokens": 1024,
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
@@ -100,7 +100,7 @@ curl http://localhost:3000/v1/chat/completions \
   -H "Authorization: Bearer synapse_YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5-5",
     "messages": [{"role": "user", "content": "Hello!"}],
     "stream": true
   }'
