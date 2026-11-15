@@ -59,3 +59,7 @@ Content-Type: application/json
 ```
 
 To send a one-off marketing email over REST, add `"marketing": true`; Herald then applies the one-click unsubscribe and CAN-SPAM footer, and refuses the send until the tenant's sender name and postal address are set. See [one-off marketing sends](/products/herald/marketing-email#one-off-marketing-sends).
+
+## Public sign-up endpoint
+
+Website sign-up forms post to `POST https://api.herald.omni.dev/public/signup` with a publishable sign-up key instead of an API key. It accepts JSON or a plain HTML form post and allows any origin. See [sign-up forms](/products/herald/signup-forms) for the request, responses, and limits.
