@@ -3,8 +3,8 @@ title: Live Preview
 description: Check your site at every size, move between pages, and download the code
 ---
 
-The preview panel shows your site exactly as it stands after the latest turn. It
-runs in an isolated frame, so nothing in the preview can affect the builder.
+The preview panel shows your site as it stands after the latest turn. It runs in
+an isolated frame, so nothing in the preview can affect the builder.
 
 On phones, the builder shows one panel at a time: use the **Chat** and
 **Preview** toggle in the header to switch. Sending a prompt switches to the
@@ -35,19 +35,21 @@ navigation link and the preview moves to that page.
 |---------|--------------|
 | **Reload preview** | Re-renders the current page |
 | **Open preview in a new tab** | Opens the current page full size in a new browser tab |
-| **Download** | Downloads the whole site as a `.zip` of HTML files |
+| **Download as HTML (.zip)** | Downloads the whole site as a `.zip` of HTML files |
 
 ## Download your code
 
-**Download** saves every page as a standalone HTML file, laid out the way a
-static host serves it: the home page at `index.html` and every other page at
-`<page>/index.html`. The download is yours to keep, edit, or host anywhere, and
-it never spends credits.
+**Download as HTML (.zip)** saves the whole site as `site.zip`, with every page
+as a standalone HTML file laid out the way a static host serves it: the home
+page at `index.html` and every other page at `<page>/index.html`. The download
+is yours to keep, edit, or host anywhere, and it never spends credits.
 
 <Callout type="info">
   [Integration blocks](/products/keystone/integrations) (live products, posts,
-  and buy buttons) come alive when you publish. The preview and the download show
-  their layout and styling, but not live data.
+  and buy buttons) load live data in the preview and in the download too.
+  Published sites run without the page scripts the preview allows: Keystone
+  strips custom scripts on publish and wires integration blocks itself, so
+  check interactive behavior on the published site.
 </Callout>
 
 ## Follow-up suggestions

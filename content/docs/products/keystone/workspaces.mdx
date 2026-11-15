@@ -1,0 +1,67 @@
+---
+title: Workspaces and Sites
+description: Where your sites live, how many you can keep, and how workspace members and billing work
+---
+
+Keystone uses your Omni workspaces, the same ones you use across every Omni
+product. A workspace has a plan, an Omni credit balance, and members.
+
+## Your building workspace
+
+Keystone builds in your **personal workspace**:
+
+- New sites are created in it
+- Generation spends its [Omni credits](/products/keystone/credits)
+- Its plan sets how many sites you can keep (see [Sites](#sites))
+
+When you publish, you can choose another workspace you belong to. The site then
+moves into that workspace, and that workspace's plan decides whether it gets a
+hosted site and a custom domain. See
+[Publishing](/products/keystone/publishing#choose-a-workspace).
+
+If your account has no workspace at all, generation stops with **Generation
+needs a workspace**. Create or join one from your Omni account, then try again.
+
+## Sites
+
+Your site, its pages, and the chat transcript are saved as you go. Each plan
+has a site limit:
+
+| Plan | Sites |
+|------|-------|
+| Free | 1 |
+| Pro | 10 |
+| Team | Unlimited |
+
+Opening [keystone.omni.dev/build](https://keystone.omni.dev/build) starts a new
+site until you reach the limit. An unused blank site is reused rather than
+counted again. At the limit, the builder shows **Picking up where you left off**
+and reopens your most recent site, with its conversation and preview, instead
+of starting a blank one.
+
+<Callout type="info">
+  The builder does not have a list of saved sites yet, so it cannot switch back
+  to an earlier site. Publish a site or [download its code](/products/keystone/preview#download-your-code)
+  before starting the next one.
+</Callout>
+
+## Members
+
+Workspace members and their roles are managed in your Omni account, so they stay
+the same across every Omni product. A workspace's **Members** page in Keystone
+links to **Manage members in Omni**.
+
+## Workspace billing
+
+Each workspace has a **Billing** page in Keystone. Open it by selecting the
+credit balance in the builder header (on wider screens), or from the workspace's
+page under **Workspaces** in the command palette (**⌘ K** / **Ctrl K**).
+
+- **Omni credits** shows the workspace's balance. **Buy credits** opens billing
+  in your Omni account with the workspace selected.
+- **Plan** shows the workspace's current plan. **Upgrade plan** opens the
+  [pricing page](https://keystone.omni.dev/pricing), and **Manage subscription**
+  opens the billing portal for an existing subscription.
+
+Only workspace owners and admins can buy credits or change the plan. Other
+members see the balance and the plan.

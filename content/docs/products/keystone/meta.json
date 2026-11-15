@@ -2,13 +2,18 @@
   "title": "🗝️ Keystone",
   "pages": [
     "getting-started",
+    "workspaces",
     "starters",
     "building",
+    "models",
     "preview",
     "publishing",
+    "github-sync",
     "integrations",
     "coming-soon",
+    "credits",
     "plans",
+    "faq",
     "troubleshooting"
   ]
 }
