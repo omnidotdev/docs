@@ -27,6 +27,7 @@ While the sequence is active, every new contact added to that audience is automa
 
 - Each enrolled contact moves step by step until the sequence completes.
 - If a contact **unsubscribes** or is **suppressed**, their enrollment exits immediately and no further steps are sent.
+- A contact awaiting [sign-up confirmation](/products/herald/signup-forms#email-confirmation-double-opt-in) is not enrolled until they confirm.
 - If a contact **converts** (see below), their enrollment exits with reason `converted`, so a lead who has already booked or bought stops receiving the nurture.
 - Pausing a sequence holds existing enrollments; reactivating resumes them.
 
@@ -52,4 +53,4 @@ mutation {
 
 ## Getting contacts in
 
-Point your capture form (or CSV import, or the contacts API) at the attached audience. Anything that adds a contact to that audience starts the drip.
+Point your capture form (a [sign-up form](/products/herald/signup-forms), CSV import, or the contacts API) at the attached audience. Anything that adds a contact to that audience starts the drip.

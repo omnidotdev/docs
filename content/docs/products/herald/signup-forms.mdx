@@ -1,0 +1,91 @@
+---
+title: Sign-up Forms
+description: Let visitors subscribe to an audience from a form on any website with a publishable sign-up key.
+---
+
+A **sign-up key** lets a website add subscribers to one [audience](/products/herald/audiences-and-segments) from a plain HTML form, without the site holding an [API key](/products/herald/api-keys). The key can do exactly one thing: add an email address to its own audience. That makes it safe to publish in a page's HTML.
+
+## Create a sign-up key
+
+In the dashboard, open **Audiences**, select an audience, and go to **Public sign-up**. Give the key an optional name (for example "Homepage form") and select **Create key**. Each key shows:
+
+- The key value (`hpk_...`), with a **Copy** button
+- **Embed code**: a ready-made HTML form that already contains the key
+- **Require email confirmation** (double opt-in), on by default
+- An optional **redirect after sign-up** URL
+
+A workspace can hold up to 25 sign-up keys.
+
+## Add the form to your site
+
+Paste the embed code into your site:
+
+```html
+<form method="post" action="https://api.herald.omni.dev/public/signup">
+  <input type="hidden" name="key" value="hpk_..." />
+  <label for="herald-signup-email">Email</label>
+  <input id="herald-signup-email" type="email" name="email" autocomplete="email" required />
+  <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+  <button type="submit">Subscribe</button>
+</form>
+```
+
+The form works without JavaScript. After a successful sign-up the visitor is sent to your redirect URL, or shown a short hosted confirmation page when no redirect is set. Style the form however you like; keep the `key`, `email`, and `website` fields.
+
+The hidden `website` field is a honeypot. People never fill it in, automated sign-up bots usually do, and a submission with it filled in is accepted silently without adding anyone.
+
+## Email confirmation (double opt-in)
+
+With **Require email confirmation** on (the default), a new subscriber is added as **Awaiting confirmation** and receives an email with a confirmation link. They are subscribed only after they open the link, which proves they own the inbox and keeps typos and fake addresses off your list. Links expire after 7 days.
+
+- Contacts awaiting confirmation never receive broadcasts or sequence steps. When they confirm, they join any [sequence](/products/herald/sequences) attached to the audience, like any new contact.
+- The confirmation email comes from your workspace: your default from address when it is on a verified [sending domain](/products/herald/domains), otherwise `noreply@` on your first verified domain. A workspace with no verified domain sends it from Herald's shared sender, named "*Your workspace* via Herald".
+- At most one confirmation email goes to an address per day, however many times it is submitted.
+
+Turning confirmation off subscribes new addresses immediately. Keep it on unless you already verify addresses another way.
+
+## What is recorded
+
+Each sign-up stores how the contact joined, so you can show when and how an address opted in: the source (`public_signup`), the sign-up key, when the sign-up was requested and confirmed, the confirmation method, the visitor's browser user agent, and a one-way hash of their network address (never the address itself).
+
+## Unsubscribed and suppressed addresses
+
+An address that unsubscribed from the audience, or that is on your [suppression list](/products/herald/suppressions), is never added back by a sign-up form. The form still shows the visitor a normal success response, so the form never reveals who is or is not on your list.
+
+## Manage keys
+
+- **Rotate** replaces the key with a new value. The old value stops working immediately, so update every form that uses it.
+- **Disable** stops a key from accepting sign-ups without deleting it; **Enable** turns it back on.
+- **Delete** removes the key permanently. Existing contacts stay in the audience.
+
+Rotate a key if it ends up on a site you no longer control. Keys are managed by workspace owners and admins (or a full-access API key).
+
+## Use the endpoint from JavaScript
+
+The sign-up endpoint accepts any origin, so a site can also submit with `fetch`:
+
+```js
+const res = await fetch("https://api.herald.omni.dev/public/signup", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    key: "hpk_...",
+    email: "reader@example.com",
+    // optional contact attributes (string, number, or boolean values)
+    attributes: { first_name: "Ada" },
+  }),
+});
+const result = await res.json();
+```
+
+| Response | Meaning |
+| --- | --- |
+| `200 { "ok": true, "status": "pending" }` | Accepted; a confirmation email is on its way (double opt-in key) |
+| `200 { "ok": true, "status": "subscribed" }` | Accepted and subscribed (confirmation turned off) |
+| `400 { "ok": false, "error": "invalid_email" }` | The email address is not valid |
+| `400 { "ok": false, "error": "invalid_key" }` | The key is unknown, rotated, or disabled |
+| `429 { "ok": false, "error": "rate_limited" }` | Too many sign-ups; try again shortly |
+
+The status depends only on the key's confirmation setting, never on whether the address was already on the list. Sign-ups are rate limited per visitor network address (10 per minute) and per key (300 per hour). Up to 25 attributes are kept; attribute names start with a letter, and values longer than 500 characters are dropped.
+
+To manage keys programmatically, use the `createSignupKey`, `updateSignupKey`, `rotateSignupKey`, `disableSignupKey`, `enableSignupKey`, and `deleteSignupKey` mutations on the [GraphQL API](/products/herald/api-reference#graphql-api).
