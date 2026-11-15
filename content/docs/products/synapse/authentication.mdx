@@ -12,14 +12,27 @@ The default authentication method. Clients pass an API key in the request header
 ### Header Format
 
 ```bash
-# OpenAI-compatible endpoints
+# Every endpoint accepts the key as a Bearer token
 curl -H "Authorization: Bearer your-api-key" \
   http://localhost:6000/v1/chat/completions ...
 
-# Anthropic-compatible endpoints (also pass the key as a Bearer token)
-curl -H "Authorization: Bearer your-api-key" \
+# The Anthropic-compatible endpoint also accepts the x-api-key header
+curl -H "x-api-key: your-api-key" \
   http://localhost:6000/v1/messages ...
 ```
+
+`POST /v1/messages` reads the key from `x-api-key` when no `Authorization: Bearer` header is sent, which is how the Anthropic SDKs send their key by default. Point an Anthropic SDK client at Synapse with your Synapse key as its API key and it authenticates unchanged:
+
+```ts
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: "synapse_YOUR_KEY",
+  baseURL: "https://gateway.synapse.omni.dev",
+});
+```
+
+The `x-api-key` value gets the same checks as a Bearer key (the `synapse_` prefix, then key resolution) and is never forwarded to a provider. When both headers are sent, the Bearer key is used. Every other endpoint, including `/v1/chat/completions` and `/v1/models`, requires `Authorization: Bearer`.
 
 ### Configuration
 
