@@ -18,7 +18,7 @@ it builds tasteful placeholder content and tells you what to connect.
 | Blog post list | [Halo](/products/halo) | Available |
 | Support button | [Crystal](/products/crystal) | Available (opens your Crystal page) |
 | Repo showcase | [Arbor](/products/arbor) | Available (link card) |
-| Email capture | [Herald](/products/herald) | Coming soon |
+| Email capture | [Herald](/products/herald) | Available |
 
 ## Halo store blocks
 
@@ -62,9 +62,17 @@ links to the repository on Arbor.
 
 ## Herald email capture
 
-<Callout type="warn">
-  Email capture with [Herald](/products/herald) is **coming soon**. Keystone can
-  already place a signup form, but submissions are not connected to Herald yet, so
-  the form does not collect addresses. Do not rely on it for a mailing list until
-  this note is gone.
-</Callout>
+Add a newsletter sign-up that sends subscribers straight to an audience in
+[Herald](/products/herald):
+
+1. In Herald, open the audience and create a key under **Public sign-up**. It
+   starts with `hpk_`. A sign-up key can only add email addresses to that one
+   audience, so it is safe to publish in your site's HTML.
+2. In the Keystone chat, ask for a sign-up form and include the key, for example
+   "Add a newsletter sign-up to the footer using my Herald sign-up key hpk_...".
+3. Publish. Visitors who sign up are added to the audience.
+
+By default Herald sends each new subscriber a confirmation email, and the form
+tells them to check their inbox. Addresses that have unsubscribed are never
+added back. To change confirmation, the redirect after signing up, or to rotate
+the key, see [Sign-up forms](/products/herald/signup-forms) in the Herald docs.

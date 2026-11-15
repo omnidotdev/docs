@@ -64,3 +64,29 @@ On plans that include custom domains (Pro and Team), enter a domain such as
 
 A custom domain entered on a plan without custom domains is ignored, and the site
 publishes without it.
+
+## Sync to GitHub
+
+Keep your site's code in your own GitHub repository. Keystone pushes the site to
+it every time you publish, so the repository always matches what you published.
+Your site stays hosted by Keystone either way.
+
+1. Select **Publish**, then **Connect GitHub** under **Sync to GitHub**, and
+   install the Keystone GitHub app on your account or organization.
+2. Choose **New repository** (Keystone creates it; private by default) or
+   **Existing repository**.
+3. Select **Create and link** or **Link repository**. Keystone pushes the
+   current site right away.
+
+Keystone commits to a new repository's default branch. In a repository you
+already had, it commits to a separate `keystone` branch, so your main branch is
+never touched, and it only changes the files it manages. It never force-pushes.
+Use **Push now** to push without republishing.
+
+GitHub only lets you create repositories on a personal account yourself. When
+you pick a personal account, Keystone opens GitHub's new-repository page with
+the name filled in; create it there, then return and select **I've created it,
+link it**.
+
+**Disconnect** stops the syncing. The repository and its history stay on GitHub.
+
