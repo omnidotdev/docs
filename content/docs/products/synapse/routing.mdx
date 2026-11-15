@@ -16,7 +16,7 @@ strategy = "threshold"
 
 [llm.routing.threshold]
 low_complexity_model = "openai/gpt-4o-mini"
-high_complexity_model = "anthropic/claude-sonnet-4-20250514"
+high_complexity_model = "anthropic/claude-sonnet-5-5"
 quality_floor = 0.7
 
 [[llm.routing.models]]
@@ -33,11 +33,11 @@ vision = true
 
 [[llm.routing.models]]
 provider = "anthropic"
-model = "claude-sonnet-4-20250514"
-input_per_mtok = 3.00
-output_per_mtok = 15.00
-quality = 0.92
-context_window = 200000
+model = "claude-sonnet-5-5"
+input_per_mtok = 2.00
+output_per_mtok = 10.00
+quality = 0.95
+context_window = 1000000
 
 [llm.routing.models.capabilities]
 tool_calling = true
@@ -71,7 +71,7 @@ strategy = "threshold"
 
 [llm.routing.threshold]
 low_complexity_model = "openai/gpt-4o-mini"
-high_complexity_model = "anthropic/claude-sonnet-4-20250514"
+high_complexity_model = "anthropic/claude-sonnet-5-5"
 quality_floor = 0.7
 ```
 
@@ -98,7 +98,7 @@ strategy = "cascade"
 
 [llm.routing.cascade]
 initial_model = "openai/gpt-4o-mini"
-escalation_model = "anthropic/claude-sonnet-4-20250514"
+escalation_model = "anthropic/claude-sonnet-5-5"
 confidence_threshold = 0.5
 max_buffer_bytes = 32768
 buffer_timeout_secs = 10
@@ -194,6 +194,6 @@ curl http://localhost:6000/v1/chat/completions \
 
 ## Passthrough Models
 
-If a request specifies a model name that doesn't match any virtual name, Synapse passes it through to the appropriate provider based on model name prefix matching (e.g. `claude-*` routes to Anthropic, `gpt-*` routes to OpenAI) or explicit `provider/model` format (e.g. `anthropic/claude-sonnet-4-20250514`).
+If a request specifies a model name that doesn't match any virtual name, Synapse passes it through to the appropriate provider based on model name prefix matching (e.g. `claude-*` routes to Anthropic, `gpt-*` routes to OpenAI) or explicit `provider/model` format (e.g. `anthropic/claude-sonnet-5-5`).
 
 See also: [Providers](/products/synapse/providers) for configuring the upstream providers that routing selects from.

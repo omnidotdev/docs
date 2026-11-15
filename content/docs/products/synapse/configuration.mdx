@@ -155,11 +155,11 @@ Group providers that can substitute for each other. If the primary provider fail
 ```toml
 [[llm.failover.equivalence_groups]]
 name = "frontier"
-models = ["openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"]
+models = ["anthropic/claude-sonnet-5-5", "openai/gpt-4o"]
 
 [[llm.failover.equivalence_groups]]
 name = "fast"
-models = ["openai/gpt-4o-mini", "anthropic/claude-haiku-4-5-20251001"]
+models = ["anthropic/claude-haiku-5-5", "openai/gpt-4o-mini"]
 ```
 
 ### Circuit Breaker
@@ -354,11 +354,11 @@ recovery_seconds = 30
 
 [[llm.failover.equivalence_groups]]
 name = "frontier"
-models = ["anthropic/claude-opus-4-6", "anthropic/claude-sonnet-4-5-20250929", "openai/gpt-4o", "anthropic/claude-sonnet-4-20250514"]
+models = ["anthropic/claude-opus-5-5", "anthropic/claude-sonnet-5-5", "openai/gpt-4o", "nvidia/moonshotai/kimi-k2.5"]
 
 [[llm.failover.equivalence_groups]]
 name = "fast"
-models = ["openai/gpt-4o-mini", "anthropic/claude-haiku-4-5-20251001"]
+models = ["anthropic/claude-haiku-5-5", "openai/gpt-4o-mini"]
 
 [auth]
 enabled = true
