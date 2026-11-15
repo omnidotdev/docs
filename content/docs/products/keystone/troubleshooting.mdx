@@ -5,17 +5,18 @@ description: Common Keystone messages and what to do about them
 
 | Message or symptom | What it means | What to do |
 |--------------------|---------------|------------|
-| **Sign in to start building** | Building needs an Omni account | Sign in, or create an account |
-| **Verify your email to start building** | Your account's email address is not verified yet | Verify your email from your Omni account, then reload the builder |
-| **Generation needs a workspace** | Your account is not in a workspace yet | Create or join a workspace, then try again |
-| **This workspace is out of Omni credits** | The workspace's credit balance is used up | Select **Buy credits**, or wait for your monthly allowance. See [Plans and Credits](/products/keystone/plans) |
-| **Too many generation requests, please slow down** | You sent prompts faster than the fair-use limit | Wait a moment, then send again |
-| **Generation is temporarily at capacity** | Free generation is paused for now to protect capacity | Try again later, or upgrade the workspace to a paid plan |
-| **AI generation is temporarily unavailable** | Generation could not run just now | Wait a minute and send again |
-| **Picking up where you left off** | The workspace is at its plan's site limit, so the builder reopened your latest site | Keep building on it, or upgrade for more sites |
-| **Design-system mode is part of Pro** | Attaching a design system needs a paid plan | Upgrade the workspace, or keep building without one |
-| Publishing gave a preview link instead of a hosted site | The workspace you published under has no hosted publishing, or the hosted deploy could not run | Upgrade the workspace to Pro or Team, or publish again later |
+| **Sign in to start building** | Building needs an Omni account | Select it and sign in, or create an account |
+| The prompt box stays on **Connecting...** and you cannot type | Keystone could not open a site for your account, most often because the account's email address is not verified | Verify your email from your Omni account, then reload the builder |
+| **Generation needs a workspace. Create or join one to continue.** | Your account is not in a workspace yet | Create or join a workspace, then try again. See [Workspaces and Sites](/products/keystone/workspaces) |
+| **You're out of Omni credits. Buy more credits to keep generating.** | The credit balance of the site's workspace is used up | Select **Buy credits**, or wait for your included credits to renew. See [Credits](/products/keystone/credits) |
+| **You're generating quickly. Please wait a moment and try again.** | You sent prompts faster than the fair-use limit | Wait a moment, then send again |
+| **Generation is at capacity right now. Please try again later.** | Free generation is paused for now to protect capacity | Try again later, or upgrade your workspace to a paid plan |
+| **Generation is temporarily unavailable. Please try again in a moment.** | Generation could not run just now | Wait a minute and send again |
+| **Generation failed. Please try again.** | The turn did not complete | Send the prompt again |
+| **Picking up where you left off** | You are at your plan's site limit, so the builder reopened your latest site | Keep building on it, or upgrade for more sites. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
+| Publishing gave a preview link instead of a hosted site | Hosted sites are coming soon, so every plan publishes a preview link today | Share the preview link |
 | A custom domain was not attached | The workspace's plan does not include custom domains | Upgrade to Pro or Team and republish |
 | A hosted site is slow on the first visit | The site scaled to zero while idle and is waking up | Wait a moment; later visits are fast |
 | A product grid says the shop is unavailable | The Halo store could not be reached, or the store domain is wrong | Check the store domain in your prompt and that the store is live |
-| Integration blocks look empty in the builder | Blocks load live data only once published | Publish, then open the preview link or hosted site |
+| A GitHub sync shows **Last push failed** or **GitHub access was removed** | The push did not go through, or the Keystone app lost access to the repository | Check the reason shown, restore the app's access on GitHub if needed, then select **Push now**. See [GitHub Sync](/products/keystone/github-sync) |
+| The credit balance is missing from the builder header | The balance only shows on wider screens | Open the workspace's [Billing page](/products/keystone/workspaces#workspace-billing) |

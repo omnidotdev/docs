@@ -1,0 +1,34 @@
+---
+title: Models
+description: Pick the AI model for each turn and see how it affects credit spend
+---
+
+Keystone generates sites with Claude models, served through
+[Synapse](/products/synapse), Omni's AI gateway. The model picker sits next to
+the prompt in the builder.
+
+## Available models
+
+| Model | Best for |
+|-------|----------|
+| **Sonnet 5.5** (default) | The balance of quality and cost for most sites |
+| **Opus 5.5** | The most capable option, for ambitious designs and complex changes |
+| **Haiku 5.5** | Fast, inexpensive tweaks |
+
+The list comes from the gateway, so the models on offer can change over time.
+The picker always shows the current set.
+
+## Switch between turns
+
+Each turn uses the model selected when you send it. A common pattern is to
+start a site with a more capable model, then switch to a faster one for small
+tweaks such as copy edits and color changes.
+
+## Cost
+
+Models are priced differently, and the picker shows how each compares with the
+default: a note such as **2x credits** for a model that costs more per turn, or
+**fewer credits** for one that costs less. A turn's cost also grows with the
+size of your site and of the change, since every turn reads the whole site and
+rewrites the pages it changes. See
+[Credits](/products/keystone/credits).

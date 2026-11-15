@@ -1,0 +1,89 @@
+---
+title: GitHub Sync
+description: Keep a copy of your site's code in your own GitHub repository
+---
+
+GitHub sync keeps your site's code in a GitHub repository you own. Once a site
+is linked, Keystone pushes the latest pages to the repository every time you
+publish, whether the publish produces a preview link or a hosted site. The
+repository is a copy only: your site stays hosted by Keystone either way, and a
+failed push never fails a publish.
+
+GitHub sync is available on every plan.
+
+## Connect a repository
+
+1. Select **Publish** in the builder. The publish dialog has a **Sync to
+   GitHub** section.
+2. Select **Connect GitHub** and install the Keystone GitHub app on your
+   personal account or an organization. GitHub returns you to the builder.
+3. If the app is installed on more than one account, pick one under **GitHub
+   account**.
+4. Choose **New repository** to let Keystone create one (private unless you
+   clear **Private repository**), or **Existing repository** to pick one the
+   app can access.
+5. Select **Create and link** or **Link repository**. Keystone pushes the
+   current site right away.
+
+If the app has access to no repositories yet, select **Choose repositories on
+GitHub** to grant access, then return to the builder. To grant access to more
+repositories later, change the app's repository access in your GitHub settings.
+
+### Personal accounts
+
+GitHub only lets you create repositories on a personal account yourself. When
+you choose **New repository** for a personal account, Keystone shows a link to
+GitHub's new-repository page with the name filled in. Create the repository
+there, then return and select **I've created it, link it**.
+
+## What Keystone pushes
+
+Each page is a self-contained HTML file, laid out so any static host can serve
+the repository as is:
+
+| File | Contents |
+|------|----------|
+| `index.html` | The home page |
+| `<page>/index.html` | Every other page |
+| `README.md` | A short note about how the repository is kept in sync |
+| `.keystone/manifest.json` | The list of files Keystone manages |
+
+- **Branch**: a repository Keystone created (or an empty one) gets commits on its
+  default branch. A repository that already had commits gets them on a separate
+  `keystone` branch, so your main branch is never touched.
+- **Your files**: Keystone only changes the files listed in its manifest. Other
+  files you add are left alone, and a page you delete in Keystone is removed from
+  the repository on the next push.
+- **History**: every push is a normal commit. Keystone never force-pushes, and a
+  publish with no changes makes no commit.
+- **One way**: edits made in the repository are not read back into Keystone, and
+  a later publish overwrites the pages Keystone manages.
+- **Static copy**: the pages are the published, sanitized HTML.
+  [Integration blocks](/products/keystone/integrations) show their layout but
+  load no live data when served from the repository.
+
+## Sync status
+
+The **Sync to GitHub** section shows the linked repository, its branch, and the
+latest push:
+
+| Status | What it means |
+|--------|---------------|
+| **Pushes on every publish** | Linked, nothing pushed yet |
+| **Pushed** (with a time) | The last push succeeded |
+| **Pushing...** | A push is in progress |
+| **Last push failed** | The last push did not go through; the reason is shown below it |
+| **GitHub access was removed** | The app was uninstalled or lost access to the repository |
+
+Select **Push now** to push the current site without republishing.
+
+## Disconnect
+
+Select **Disconnect** and confirm to stop syncing the site. The repository and
+its history stay on GitHub, untouched. To remove Keystone's access entirely,
+uninstall the Keystone app from your GitHub settings.
+
+<Callout type="info">
+  Keeping a site's code in an [Arbor](/products/arbor) repository instead is
+  [coming soon](/products/keystone/coming-soon#arbor-repos).
+</Callout>
