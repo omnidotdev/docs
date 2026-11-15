@@ -25,5 +25,18 @@ When you encounter or are asked to add docs for a not-yet-launched product:
 If a reference has already been committed, it is in public history: removing it from HEAD is not
 enough. Scrub it with a history rewrite and force-push, and treat it as already-exposed.
 
+## Coming-soon products get a teaser page only
+
+`isPublic: true` with `status: "coming_soon"` means the product may be named and teased, not
+documented. Until the catalog `status` is `"active"`:
+
+- Publish only a single coming-soon page at `content/docs/products/<id>.mdx` (a `ProductOverview`
+  plus a short "Documentation coming soon" section pointing at the product site)
+- Keep the full documentation as local drafts under `content/_unlaunched/products/<id>/`
+  (gitignored and never rendered), and do not commit it, even on a branch: pushed branches and PRs
+  are public too
+- When the product goes `active`, move the drafts into `content/docs/products/<id>/` and delete the
+  coming-soon page in the same change
+
 Rationale: on 2026-08-18 a public product page linked to an unlaunched product's page. The link was
 broken on the live site and revealed a product that was not meant to be public yet.
