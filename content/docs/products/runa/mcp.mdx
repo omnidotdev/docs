@@ -1,0 +1,132 @@
+---
+title: MCP Server
+description: Connect an AI assistant to Runa at https://mcp.runa.omni.dev/mcp (Streamable HTTP) by signing in through the browser, or with a runa_ API token for CI and headless agents, then list projects and tasks, create and update tasks, move them between columns, and comment
+---
+
+The Runa MCP server exposes Runa's boards to AI assistants that speak the
+[Model Context Protocol](https://modelcontextprotocol.io). Connect an MCP
+client (for example a coding assistant or agent) and the assistant can list
+projects, columns, and tasks, read a task with its comments, create and update
+tasks, move them between columns, and comment, through typed tools.
+
+## How it works
+
+Runa hosts the server at `https://mcp.runa.omni.dev/mcp` over the Streamable
+HTTP transport, so there is nothing to install. Your MCP client authenticates
+every request in one of two ways:
+
+- **Browser sign-in (default):** the client opens your browser, you sign in
+  with your Omni account and approve access, and every action runs with your
+  own access.
+- **API token:** for CI and headless agents with no browser, the client sends a
+  workspace API token (`runa_...`), and every action runs with that token's
+  access.
+
+The server forwards the credential to the Runa API. It stores no credentials
+and keeps no sessions: each request is handled on its own.
+
+## Connect with browser sign-in
+
+Add the server to your client's MCP configuration as a remote (HTTP) server,
+with no credentials:
+
+```json
+{
+  "mcpServers": {
+    "runa": {
+      "type": "http",
+      "url": "https://mcp.runa.omni.dev/mcp"
+    }
+  }
+}
+```
+
+The first time the client connects, the server answers `401` and points the
+client at Omni sign-in. The client opens your browser, you sign in, and a
+consent page names the client and what it can access. Approve it, and the
+client stores the sign-in and refreshes it on its own. Sign-in uses the
+standard [MCP authorization](https://modelcontextprotocol.io/specification/latest/basic/authorization)
+flow (OAuth 2.1 with PKCE), so any client that supports it connects without
+extra setup.
+
+An MCP client is never approved automatically: the consent page appears the
+first time each client connects. Approve only a sign-in your own client
+started.
+
+## Connect with an API token
+
+Use a token where no browser is available, such as CI jobs and headless agents.
+A workspace admin creates one in the workspace's **Settings**, under **API
+tokens**, and grants only the scopes the assistant needs (see [Tools](#tools)).
+Copy the secret when it is shown (it is shown only once) and store it in your
+MCP client's secret configuration, never in a file committed to Git.
+
+Pass the token in the `Authorization` header:
+
+```json
+{
+  "mcpServers": {
+    "runa": {
+      "type": "http",
+      "url": "https://mcp.runa.omni.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer runa_..."
+      }
+    }
+  }
+}
+```
+
+Clients name these fields slightly differently (some use `transport` or
+`serverUrl`); the values that matter are the URL, the HTTP transport, and the
+`Authorization: Bearer <token>` header.
+
+## Workspaces
+
+With browser sign-in, you can belong to several workspaces. The assistant
+calls `list_workspaces` to see them, then passes `workspace` (the workspace's
+slug or id) to the other tools to choose where to act:
+
+- With exactly one workspace, it is selected automatically and `workspace` can
+  be omitted.
+- With several, a tool called without `workspace` returns an error asking the
+  assistant to call `list_workspaces` and pick one.
+
+A token is bound to the workspace it was created in, so `workspace` does not
+apply to it and is ignored.
+
+## Tools
+
+Tools take a project (`project`: its slug, name, task prefix, or id), a task
+(`task`: its key, such as `APP-12`, or its id), and a column (`column`: its
+title or id). Every tool except `list_workspaces` also takes an optional
+`workspace` (see [Workspaces](#workspaces)). A token needs `project:read` to
+resolve projects and task keys, plus the scope listed for each tool.
+
+| Tool | Access | Arguments | What it does |
+|------|--------|-----------|--------------|
+| `list_workspaces` | Read | None | List the workspaces you can act in |
+| `list_projects` | Read | None | List the workspace's projects with their slugs and task prefixes. Scope `project:read` |
+| `list_columns` | Read | `project` | List a project's columns (statuses) in board order, marking the done column. Scope `project:read` |
+| `list_tasks` | Read | `project`, optional `column`, `priority`, `search`, `limit` | List a project's tasks with key, title, status, priority, due date, and assignees. Scope `task:read` |
+| `get_task` | Read | `task` | Read a task with its description and comments. Scope `task:read` |
+| `create_task` | Write | `project`, `title`, optional `description`, `column`, `priority`, `dueDate` | Create a task at the end of a column (the project's first column by default). Scope `task:write` |
+| `update_task` | Write | `task`, optional `title`, `description`, `priority`, `dueDate` | Change a task's fields; pass `dueDate` as `null` to clear it. Scope `task:write` |
+| `move_task` | Write | `task`, `column` | Move a task to the end of another column in its project. Scope `task:write` |
+| `add_comment` | Write | `task`, `body` | Comment on a task. Scope `comment:write` |
+
+Each tool calls the same API the web app uses, so an assistant's actions show
+up in task activity and notify people the same way.
+
+## Security
+
+- A browser sign-in issues an access token bound to the Runa MCP server (its
+  audience), and the Runa API refuses sign-in tokens issued for any other
+  service.
+- A token acts with its creator's access in its one workspace, limited to its
+  scopes. Grant the smallest set of scopes, and revoke any token that leaks
+  from the workspace's **Settings**.
+- Keep the token in your MCP client's secret store, not in a checked-in config
+  file.
+- Review what an assistant proposes before it runs a write tool; MCP clients
+  surface each tool call for approval.
