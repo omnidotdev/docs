@@ -16,8 +16,10 @@ description: Common Keystone messages and what to do about them
 | **This workspace has N members, but its plan includes N seats.** | The site's team workspace has more members than its plan's seats | Remove members or upgrade the workspace's plan. See [Seats](/products/keystone/workspaces#seats) |
 | **That workspace isn't available to you.** | Keystone could not confirm you are a member of the workspace the builder was opened for | Pick another workspace under **Building in**, or ask a workspace owner to add you |
 | **Picking up where you left off** | The workspace is at its plan's site limit, so the builder reopened its latest site | Keep building on it, or upgrade for more sites. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
-| Publishing gave a preview link instead of a hosted site | Hosted sites are coming soon, so every plan publishes a preview link today | Share the preview link |
-| A custom domain was not attached | The workspace's plan does not include custom domains | Upgrade to Pro or Team and republish |
+| **This workspace's Fractal plan doesn't allow hosting another site.** | The workspace's Fractal plan has no room for another project or service | Select **Upgrade on Fractal** to upgrade the workspace's Fractal plan, then select **Host on Fractal** again; the preview link works meanwhile |
+| **You can't deploy sites in this workspace on Fractal.** | Your access in the workspace does not let you deploy on Fractal | Ask a workspace owner for access; the preview link works meanwhile |
+| Publishing gave a preview link instead of a hosted site | You selected **Get a preview link**, or the hosted deploy could not run just now | Select **Host on Fractal**, or try again later |
+| A custom domain was not attached | The workspace's Fractal plan has no custom domain left | Upgrade the workspace's [Fractal plan](https://fractal.omni.dev/pricing) and republish |
 | A hosted site is slow on the first visit | The site scaled to zero while idle and is waking up | Wait a moment; later visits are fast |
 | A product grid says the shop is unavailable | The Halo store could not be reached, or the store domain is wrong | Check the store domain in your prompt and that the store is live |
 | A GitHub sync shows **Last push failed** or **GitHub access was removed** | The push did not go through, or the Keystone app lost access to the repository | Check the reason shown, restore the app's access on GitHub if needed, then select **Push now**. See [GitHub Sync](/products/keystone/github-sync) |
