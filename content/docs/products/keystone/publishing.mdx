@@ -35,7 +35,7 @@ make after publishing appear there without publishing again.
 
 On Pro and Team, publishing deploys your site as its own live service on
 [Fractal](/products/fractal), Omni's deploy platform. Each site runs in isolation
-on its own address under `fractal.dev`, separate from Keystone itself, and every
+on its own address under `fractaldeploy.app`, separate from Keystone itself, and every
 page is served (the home page at `/`, other pages at `/<page>`).
 
 Hosted sites **scale to zero** when idle, so an unvisited site costs nothing to
@@ -49,6 +49,27 @@ Republishing keeps any custom domain you attached.
 If a hosted deploy cannot run for any reason, Keystone falls back to a preview
 link so you always leave with a working URL. Try publishing again later for the
 hosted site.
+
+### When a plan stops including hosting
+
+Hosting is part of the Pro and Team plans, so a hosted site follows the plan of
+its workspace. If the workspace's plan stops including hosting (the
+subscription is canceled, a payment fails, a complimentary plan ends, or the
+workspace moves to Free), the site is not taken down right away:
+
+1. **Grace period.** The site stays live for 7 days. The publish dialog and
+   **Your sites** show the date hosting ends.
+2. **Hosting ends.** After that date, the hosted address and any custom domain
+   stop serving the site, and the site goes back to its preview link. The
+   preview link keeps working and always shows the latest version of the site.
+3. **Restore hosting.** Upgrade the workspace to Pro or Team and publish again.
+   Re-enter a custom domain to attach it again.
+
+If the plan includes hosting again before the grace period ends, nothing
+changes and the site stays live. A temporary billing outage never takes a site
+down. Publishing during the grace period updates the preview link; the hosted
+address keeps serving the last version published on the paid plan until
+hosting ends.
 
 ## Choose a workspace
 
