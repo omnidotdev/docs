@@ -1,101 +1,114 @@
 ---
 title: Publishing
-description: Share a preview link today, with hosted sites and custom domains coming soon
+description: Share a preview link, or host your site on Fractal in your own workspace
 ---
 
 <Callout type="info">
-  Hosted sites and custom domains are **coming soon**. Today, publishing gives
-  every site a shareable preview link. The hosted sections below describe how
-  they will work.
+  Keystone is **coming soon**, and hosting on Fractal is part of the private
+  preview. Every site can share a preview link; the hosted sections below
+  describe how hosting works.
 </Callout>
 
-Select **Publish** in the builder to put your site on the web. What you get
-depends on the plan of the workspace you publish under:
+Select **Publish** in the builder to put your site on the web. You choose how:
 
-| | Preview link | Hosted site |
+| | Preview link | Hosted on Fractal |
 |---|---|---|
-| **Plans** | Every plan, available now | Pro and Team (coming soon) |
-| **Address** | A read-only link served by Keystone | Its own isolated address on Fractal |
+| **Who can** | Anyone | A signed-in member of the site's workspace |
+| **Paid by** | Free | Your workspace's [Fractal plan](https://fractal.omni.dev/pricing), only for sites you host |
+| **Address** | A read-only link served by Keystone | Its own address under `fractaldeploy.app` |
 | **Pages** | The home page | Every page, with clean URLs (`/about`) |
-| **Custom domain** | No | Yes |
-| **Keystone badge** | Shown | Removed |
+| **Lives in** | Keystone | Your workspace's Fractal project, with its code in a repository your workspace owns |
+| **Custom domain** | No | Yes, within your Fractal plan |
+| **Keystone badge** | Shown on Free, removed on Pro and Team | Shown on Free, removed on Pro and Team |
 | **Integration blocks** | Live | Live |
 
-Publishing never fails for lack of a plan: a workspace without hosted publishing
-always gets a preview link.
+Publishing never fails for lack of hosting: if a site cannot be hosted, it still
+gets a preview link.
 
 ## Preview link
 
 A preview link is a free, read-only view of your site's home page that anyone
-with the link can open. It carries a small **Made with Keystone** badge in the
-corner. The link always shows the latest version of your site, so changes you
-make after publishing appear there without publishing again.
+with the link can open. On the Free plan it carries a small **Made with
+Keystone** badge in the corner. The link always shows the latest version of your
+site, so changes you make after publishing appear there without publishing
+again.
 
-## Hosted site (coming soon)
+## Host on Fractal
 
-On Pro and Team, publishing deploys your site as its own live service on
-[Fractal](/products/fractal), Omni's deploy platform. Each site runs in isolation
-on its own address under `fractaldeploy.app`, separate from Keystone itself, and every
-page is served (the home page at `/`, other pages at `/<page>`).
+Select **Host on Fractal** to deploy your site as a live site on
+[Fractal](/products/fractal), Omni's cloud. The site belongs to your
+**workspace**, not to Keystone:
 
-Hosted sites **scale to zero** when idle, so an unvisited site costs nothing to
-keep running. The first visit after a quiet spell can take a moment while the
-site wakes up.
+- **Fractal project**: the site is a static site in your workspace's own Fractal
+  project, **Keystone sites**, created the first time anyone in the workspace
+  hosts a site. Every member of the workspace sees it in the
+  [Fractal dashboard](https://fractal.omni.dev), with Fractal's usual roles, and
+  can open its logs, domains, and settings there. After publishing, select
+  **Manage in Fractal** to go straight to it.
+- **Code repository**: the site's code lives in a repository your workspace owns
+  on [Arbor](/products/arbor), Omni's code host, so your team can find and clone
+  it. Keystone can update only that one repository, and a workspace admin can
+  remove its access. Arbor is in private beta, so members need Arbor access to
+  open the repository; to keep a copy on GitHub instead, see
+  [Sync to GitHub](#sync-to-github).
+- **Your permissions**: Keystone deploys only while you publish, acting with your
+  own access in that workspace, and only on the Keystone sites project.
 
-After further changes, publish again to update the same site at the same
-address (the button reads **Republish** until you reload the builder).
-Republishing keeps any custom domain you attached.
+Each hosted site runs in isolation on its own address under `fractaldeploy.app`,
+and every page is served (the home page at `/`, other pages at `/<page>`).
+Hosted sites **scale to zero** when idle, so an unvisited site uses no compute;
+the first visit after a quiet spell can take a moment while it wakes up.
 
-If a hosted deploy cannot run for any reason, Keystone falls back to a preview
-link so you always leave with a working URL. Try publishing again later for the
-hosted site.
+After further changes, select **Republish on Fractal** to update the same site at
+the same address. Republishing keeps any custom domain you attached.
 
-### When a plan stops including hosting
+If a hosted deploy cannot run for another reason, Keystone gives you a preview
+link so you always leave with a working URL. Try hosting again later.
 
-Hosting is part of the Pro and Team plans, so a hosted site follows the plan of
-its workspace. If the workspace's plan stops including hosting (the
-subscription is canceled, a payment fails, a complimentary plan ends, or the
-workspace moves to Free), the site is not taken down right away:
+### Hosting and your Fractal plan
 
-1. **Grace period.** The site stays live for 7 days. The publish dialog and
-   **Your sites** show the date hosting ends.
-2. **Hosting ends.** After that date, the hosted address and any custom domain
-   stop serving the site, and the site goes back to its preview link. The
-   preview link keeps working and always shows the latest version of the site.
-3. **Restore hosting.** Upgrade the workspace to Pro or Team and publish again.
-   Re-enter a custom domain to attach it again.
+Hosting is billed by your workspace's Fractal plan, not by Keystone, and only
+for the sites your workspace hosts. Your Keystone plan covers building (credits,
+sites, seats); your Fractal plan covers hosting. Fractal's own limits decide
+what the workspace can host, such as how many projects and services it can run
+and how many custom domains it can use; see
+[Fractal plans](https://fractal.omni.dev/pricing).
 
-If the plan includes hosting again before the grace period ends, nothing
-changes and the site stays live. A temporary billing outage never takes a site
-down. Publishing during the grace period updates the preview link; the hosted
-address keeps serving the last version published on the paid plan until
-hosting ends.
+If the workspace's Fractal plan has no room for another site, the publish
+dialog says so, gives you the preview link, and links to **Upgrade on Fractal**,
+which upgrades that workspace's Fractal plan on your Omni account and brings you
+back to the site. If you cannot deploy in the workspace on Fractal at all, ask a
+workspace owner for access.
+
+Changing your Keystone plan never takes a hosted site down. To stop hosting a
+site, delete its service in the Fractal dashboard.
 
 ## Choose a workspace
 
 If you belong to more than one workspace, the publish dialog asks which one to
 publish under. It starts on the workspace the site already belongs to. Pick
 another workspace to move the site into it; that workspace must have room under
-its site limit and a seat for each of its members. The workspace's plan decides
-whether you get a hosted site or a preview link. See
-[Workspaces and Sites](/products/keystone/workspaces). Upgrade the workspace to
-Pro or Team on the [pricing page](https://keystone.omni.dev/pricing) for hosted
-publishing.
+its Keystone site limit and a seat for each of its members. A hosted site moves
+its hosting too: its service is removed from the old workspace's Fractal project
+and created in the new one, and the new workspace's Fractal plan applies. The
+old repository stays with the workspace that owns it. See
+[Workspaces and Sites](/products/keystone/workspaces).
 
-## Custom domains (coming soon)
+## Custom domains
 
-On plans that include custom domains (Pro and Team), enter a domain such as
-`www.example.com` in the **Custom domain** field before you publish.
+For a site hosted on Fractal, enter a domain such as `www.example.com` in the
+**Custom domain** field before you select **Host on Fractal**.
 
-1. Enter the domain and select **Publish** (or **Republish**).
+1. Enter the domain and select **Host on Fractal** (or **Republish on Fractal**).
 2. Keystone shows the DNS records to add, as a table of **Type**, **Name**, and
    **Value**.
 3. Add those records at your domain registrar or DNS provider.
 4. Once DNS has propagated, your site is served on your domain, with HTTPS handled
    for you.
 
-A custom domain entered on a plan without custom domains is ignored, and the site
-publishes without it.
+Custom domains count toward your workspace's Fractal plan; the site's own
+`fractaldeploy.app` address does not. To add more custom domains than the plan
+includes, upgrade the workspace's Fractal plan.
 
 ## Sync to GitHub
 
