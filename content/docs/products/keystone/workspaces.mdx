@@ -1,6 +1,6 @@
 ---
 title: Workspaces and Sites
-description: Where your sites live, how many you can keep, and how workspace members and billing work
+description: Where your sites live, how many you can keep, and how workspace members, seats, and billing work
 ---
 
 Keystone uses your Omni workspaces, the same ones you use across every Omni
@@ -8,17 +8,31 @@ product. A workspace has a plan, an Omni credit balance, and members.
 
 ## Your building workspace
 
-New sites start in your **personal workspace**, and its plan sets how many
-sites you can keep (see [Sites](#sites)).
+Every site belongs to one workspace. That workspace's plan sets how many sites
+it can keep (see [Sites](#sites)), every turn on the site spends that
+workspace's [Omni credits](/products/keystone/credits), and the credit balance
+in the builder header is that workspace's balance.
 
-When you publish, you can choose another workspace you belong to, such as a Team
-workspace. The site then moves into that workspace:
+New sites start in your **personal workspace** unless you pick another one.
 
-- That workspace's plan decides whether the site gets a hosted site and a
-  custom domain. See [Publishing](/products/keystone/publishing#choose-a-workspace)
-- Every later turn on the site spends that workspace's
-  [Omni credits](/products/keystone/credits), so a Team's members build its
-  sites on the Team's credits
+### Build in a team workspace
+
+To build a site directly in a team workspace you belong to, either:
+
+- Open the workspace's page and select **New site in this workspace**, or
+- In the builder, before the first prompt, pick the workspace under
+  **Building in** at the top of the chat panel. The picker shows when you
+  belong to more than one workspace
+
+The new site belongs to that workspace from the start, so the team's members
+build it on the team's credits and the team's site limit applies.
+
+### Move a site when you publish
+
+When you publish, you can also choose another workspace you belong to. The site
+then moves into that workspace, which must have room under its site limit, and
+that workspace's plan decides whether the site gets a hosted site and a custom
+domain. See [Publishing](/products/keystone/publishing#choose-a-workspace).
 
 If your account has no workspace at all, generation stops with **Generation
 needs a workspace**. Create or join one from your Omni account, then try again.
@@ -38,22 +52,39 @@ Signed in, Keystone opens on **Your sites**, which lists every site you have
 built across your workspaces. Select **Open in builder** on a site to keep
 working on it, or **New site** to start another.
 
-**New site** starts a new site until you reach the limit. An unused blank site is reused rather than
-counted again. At the limit, the builder shows **Picking up where you left off**
-and reopens your most recent site, with its conversation and preview, instead
-of starting a blank one.
-
-<Callout type="info">
-  The builder does not have a list of saved sites yet, so it cannot switch back
-  to an earlier site. Publish a site or [download its code](/products/keystone/preview#download-your-code)
-  before starting the next one.
-</Callout>
+**New site** starts a new site until the workspace reaches its limit. An unused
+blank site is reused rather than counted again. At the limit, the builder shows
+**Picking up where you left off** and reopens the workspace's most recent site,
+with its conversation and preview, instead of starting a blank one. Each
+workspace has its own limit, so a full personal workspace does not stop you
+from starting a site in a team workspace.
 
 ## Members
 
 Workspace members and their roles are managed in your Omni account, so they stay
 the same across every Omni product. A workspace's **Members** page in Keystone
 links to **Manage members in Omni**.
+
+## Seats
+
+A workspace's plan includes a number of seats, and every member of a team
+workspace takes one:
+
+| Plan | Seats |
+|------|-------|
+| Free | 1 |
+| Pro | 1 |
+| Team | 10 |
+
+While a team workspace has no more members than its plan's seats, every member
+can build in it. When it has more, starting a site and generating in that
+workspace stop with a message such as **This workspace has 12 members, but its
+plan includes 10 seats**, with links to the workspace's plan and members. To
+keep building there, remove members or upgrade the plan. Existing sites stay
+saved, and their published links keep working.
+
+Sharing a workspace with other people therefore needs the Team plan. Your
+personal workspace only ever has you in it, so seats never limit it.
 
 ## Workspace billing
 
