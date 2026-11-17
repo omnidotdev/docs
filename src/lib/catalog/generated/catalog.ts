@@ -327,7 +327,7 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "AI generation: 100 credits/mo",
+          "AI generation with Omni credits or your own key",
           "Code-first parametric modeling",
           "Community support",
           "Example models",
@@ -347,7 +347,7 @@ export const products: CatalogProduct[] = [
           "Conversational refinement",
           "Everything in Free",
           "More AI generation credits",
-          "Priority models"
+          "Priority models (coming soon)"
         ]
       }
     ]
@@ -590,6 +590,60 @@ export const products: CatalogProduct[] = [
           "SSO and audit logs",
           "Unlimited sending domains",
           "Unlimited volume"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "keystone",
+    "name": "Keystone",
+    "realm": "fabric",
+    "status": "coming_soon",
+    "license": "Proprietary",
+    "plans": [
+      {
+        "tier": "free",
+        "name": "Keystone Free",
+        "description": "AI web builder for personal sites",
+        "monthlyPrice": 0,
+        "yearlyPrice": 0,
+        "features": [
+          "\"Made with Keystone\" badge",
+          "Community support",
+          "Freeform AI site generation",
+          "Host on Fractal in your workspace (billed by your Fractal plan)",
+          "Live preview and multi-turn editing",
+          "Multi-page sites",
+          "Shareable read-only preview link"
+        ]
+      },
+      {
+        "tier": "pro",
+        "name": "Keystone Pro",
+        "description": "More sites, more credits, and no Keystone badge",
+        "monthlyPrice": 1900,
+        "yearlyPrice": 19000,
+        "features": [
+          "Badge removed",
+          "Bring your own LLM key (BYOK) (coming soon)",
+          "Design-system injection (bring your own tokens and components) (coming soon)",
+          "Everything in Free",
+          "Image uploads (coming soon)",
+          "Up to 10 sites"
+        ]
+      },
+      {
+        "tier": "team",
+        "name": "Keystone Team",
+        "description": "Shared workspaces and more credits for teams",
+        "monthlyPrice": 4900,
+        "yearlyPrice": 49000,
+        "features": [
+          "Everything in Pro",
+          "Higher included credits",
+          "Priority generation (coming soon)",
+          "Shared component manifests (coming soon)",
+          "Workspace with multiple seats"
         ]
       }
     ]
