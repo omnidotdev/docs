@@ -278,9 +278,36 @@ Call an LLM via an MCP server with optional memory and tool use. Supports `image
 
 Higher-level wrappers. `prompt` runs a template through a model. `chat` keeps a message history. `summarize` produces `brief`, `detailed`, or `bullets` output. `classify` returns one or many labels.
 
+### AI providers
+
+`agent` and `modelRegistry` steps run through [Synapse](/products/synapse), the Omni AI gateway, unless the step names another `provider`. A Synapse step uses the `auto` [routing model](/products/synapse/routing) when it sets no `model`; any Synapse model id also works (`anthropic/claude-sonnet-5-5`, `claude-*`, `gpt-*`).
+
+The key comes from, in order: an `apiKey` on the step, a named `connectionId`, or the key stored for that provider in your workspace **Integrations** (connect **Synapse** once and every step without a key uses it). Naming a provider such as `openai` or `anthropic` uses that provider's own integration key instead (bring your own key).
+
+Keys are only sent where they belong:
+
+- A Synapse key (`synapse_...`) is only ever sent to the Synapse gateway, and the `synapse` provider never accepts a custom `baseUrl` on another host
+- A key stored in Integrations is only sent to that provider's own API. A custom `baseUrl` (a self-hosted or proxy endpoint) needs an `apiKey` passed with the step, and must be a public address
+
+A step that names no provider but passes its own non-Synapse `apiKey` or a `baseUrl` keeps the earlier OpenAI default.
+
 ### `agent`, `rag`, `vision`, `audio`
 
-`agent` executes an autonomous loop with `maxIterations`. `rag` queries a vector collection then prompts the model. `vision` performs `describe`, `ocr`, `detect`, or `classify` on an image. `audio` does `transcribe` or `synthesize`.
+`agent` executes an autonomous loop with `maxIterations`, calling the tools of the MCP server in `serverId`. It takes an optional `provider`, `model`, `connectionId`, `baseUrl`, and `systemPrompt` (see [AI providers](#ai-providers)). `rag` queries a vector collection then prompts the model. `vision` performs `describe`, `ocr`, `detect`, or `classify` on an image. `audio` does `transcribe` or `synthesize`.
+
+```json
+{
+  "type": "agent",
+  "agent": {
+    "serverId": "research-tools",
+    "goal": "Find this week's top three releases and summarize each",
+    "maxIterations": 8,
+    "outputVariable": "summary"
+  }
+}
+```
+
+With no `provider`, this agent runs on Synapse with `auto` and your workspace's Synapse key. Add `"provider": "anthropic", "model": "claude-sonnet-5-5"` to call Anthropic with your own Anthropic key instead.
 
 ### `embedding`, `vectorSearch`
 
@@ -288,7 +315,7 @@ Higher-level wrappers. `prompt` runs a template through a model. `chat` keeps a 
 
 ### `modelRegistry`
 
-BYOK access to `openai`, `anthropic`, `huggingface`, `ollama`, `replicate`, `together`, `groq`, `mistral`, `cohere`. Use a stored `connectionId` or an inline `apiKey`.
+Direct model access with `chat`, `complete`, `embed`, or `listModels`. `provider` defaults to `synapse` (chat, embeddings, and model listing on the gateway; `complete` runs as a single-message chat) with `model` defaulting to `auto`. Name `openai`, `anthropic`, `huggingface`, `ollama`, `replicate`, `together`, `groq`, `mistral`, or `cohere` to bring your own key. Credentials follow the [AI providers](#ai-providers) rules.
 
 ### `ai_transform`, `ai_guardrails`, `rivet`
 
