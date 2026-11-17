@@ -12,7 +12,7 @@ Synapse supports multiple providers across five modalities. This page covers con
 | Anthropic | `anthropic` | Claude Opus 4.6, Claude Sonnet 4.5, Claude Sonnet 4, Claude Haiku 4.5 |
 | OpenAI | `openai` | GPT-4o, GPT-4o mini, o3-mini |
 | Google | `google` | Gemini 2.5 Pro, Gemini 2.5 Flash |
-| NVIDIA | `openai` (with custom `base_url`) | Any model on NVIDIA NIM (e.g. Kimi K2.5) |
+| OpenAI-compatible | `openai` (with custom `base_url`) | Any model served by an OpenAI-compatible API, such as a self-hosted inference server |
 | AWS Bedrock | `bedrock` | Claude, Titan, and other Bedrock-hosted models |
 
 ### Anthropic
@@ -39,16 +39,20 @@ type = "google"
 api_key = "{{ env.GOOGLE_API_KEY }}"
 ```
 
-### NVIDIA
+### OpenAI-compatible endpoints
 
-NVIDIA NIM exposes an OpenAI-compatible API, so use the `openai` type with a custom `base_url`:
+Any API that speaks the OpenAI chat completions protocol works with the `openai` type and a custom `base_url`. Name the provider whatever you like; requests address its models as `<name>/<model>`:
 
 ```toml
-[llm.providers.nvidia]
+[llm.providers.local]
 type = "openai"
-base_url = "https://integrate.api.nvidia.com/v1"
-api_key = "{{ env.NVIDIA_API_KEY }}"
+base_url = "https://llm.example.com/v1"
+api_key = "{{ env.LOCAL_LLM_API_KEY }}"
 ```
+
+<Callout type="warning">
+  Check the upstream's terms before routing production traffic through it. Some hosted APIs allow trial or evaluation use only.
+</Callout>
 
 ### AWS Bedrock
 

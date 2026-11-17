@@ -40,7 +40,7 @@ docker compose --env-file .env.local up -d --build
 | `GATEWAY_SECRET` | Internal gateway auth secret (`openssl rand -base64 32`) |
 | `ENCRYPTION_KEY` | Provider key encryption at rest (`openssl rand -base64 32`) |
 
-At least one LLM provider API key is required: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `NVIDIA_API_KEY`.
+At least one LLM provider API key is required: `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
 
 Optional: `DB_NAME`, `DB_USER`, `DB_PORT`, `API_PORT`, `APP_PORT`, `GATEWAY_PORT`, `VALKEY_PORT`, `CORS_ALLOWED_ORIGINS`, `GOOGLE_API_KEY`, `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY`, `BRAVE_API_KEY`, and billing credentials (`BILLING_*`). See the [full .env.local.template](https://github.com/omnidotdev/synapse-stack/blob/master/.env.local.template).
 
