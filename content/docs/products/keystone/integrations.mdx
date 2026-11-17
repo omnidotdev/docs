@@ -1,13 +1,14 @@
 ---
 title: Integrations
-description: Wire live Halo products and posts, Crystal support, and Arbor repos into a site
+description: Wire live Halo products, posts, and shopper sign-in, Crystal support, and Arbor repos into a site
 ---
 
 Keystone sites can include working pieces of the Omni ecosystem instead of
 placeholder HTML. You add them in chat: give Keystone the identifier it needs (a
 store domain, a creator handle, a repo), and it places a block styled to match
 your design. Blocks show live data in the builder's preview, on preview links,
-and on hosted sites.
+and on hosted sites (the shopper sign-in and orders blocks appear on hosted sites
+only).
 
 Keystone only adds a block when you supply the matching identifier. Without one,
 it builds tasteful placeholder content and tells you what to connect.
@@ -16,6 +17,7 @@ it builds tasteful placeholder content and tells you what to connect.
 |-------|---------|--------|
 | Product grid and buy buttons | [Halo](/products/halo) | Available |
 | Blog post list | [Halo](/products/halo) | Available |
+| Sign in and My orders | [Halo](/products/halo) | Available on hosted sites |
 | Support button | [Crystal](/products/crystal) | Available as a link to your Crystal page |
 | Repo showcase | [Arbor](/products/arbor) | Available as a link card |
 | Email capture | [Herald](/products/herald) | Available |
@@ -47,6 +49,35 @@ A post list shows the latest published posts from your Halo store, each with its
 title, date, excerpt, and a **Read more** toggle with the full text. Ask for it in
 chat, for example "add a blog section with my latest three posts from
 shop.example.com".
+
+### Sign in and My orders
+
+Shoppers can sign in to your site with their Omni account and see their orders
+with your store. Signing in is optional: guest checkout keeps working as before.
+Ask for it in chat, for example "add a sign-in link to the header and an orders
+page for shop.example.com".
+
+- **Sign in** shows a **Sign in** link. Once a shopper is signed in, it shows
+  their name with a **Sign out** button.
+- **My orders** lists the signed-in shopper's orders with your store (number,
+  date, status, and total), or a sign-in prompt when they are signed out.
+
+Selecting **Sign in** opens a secure Omni page that names your store and your
+site, where the shopper signs in with a code sent to their email. They then
+return to the page they started from, signed in for up to 30 days or until
+they sign out. See [Shopper Accounts](/products/halo/shopper-accounts) for what
+the store receives and how past guest orders are linked.
+
+Requirements:
+
+- The site is published as a hosted site. Republish a site hosted before these
+  blocks existed once, so it can serve sign-in. On a preview link and in the
+  builder's preview the blocks stay hidden.
+- The Halo store belongs to the same workspace as the site. For a store in
+  another workspace, the blocks stay hidden.
+
+Sign-in keeps the shopper's session in a secure, httpOnly cookie on your site's
+own domain, so neither your site's scripts nor any other site can read it.
 
 ## Crystal support button
 
