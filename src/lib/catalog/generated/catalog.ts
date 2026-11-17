@@ -213,7 +213,7 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "50 AI credits/month",
+          "AI with Omni credits or your own key",
           "Up to 5 conversations"
         ]
       },
@@ -327,7 +327,7 @@ export const products: CatalogProduct[] = [
         "monthlyPrice": 0,
         "yearlyPrice": 0,
         "features": [
-          "AI generation with Omni credits or your own key",
+          "AI generation with AI credits or your own key",
           "Code-first parametric modeling",
           "Community support",
           "Example models",
@@ -610,7 +610,7 @@ export const products: CatalogProduct[] = [
         "features": [
           "\"Made with Keystone\" badge",
           "Community support",
-          "Freeform AI site generation",
+          "Freeform AI site generation with Omni credits",
           "Host on Fractal in your workspace (billed by your Fractal plan)",
           "Live preview and multi-turn editing",
           "Multi-page sites",
