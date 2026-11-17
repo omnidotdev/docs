@@ -152,7 +152,7 @@ provider = "synapse"
 model = "claude-sonnet-4-20250514"
 ```
 
-Synapse is preconfigured as a default provider at `http://localhost:6000/v1`. No API key is needed for local Synapse — keys are configured in Synapse's own config file.
+Synapse is preconfigured as a default provider pointing at the hosted gateway (`https://gateway.synapse.omni.dev`). Run `omni auth login` to store a Synapse API key (or set `SYNAPSE_API_KEY`). For a self-hosted gateway, set `base_url` on `[agent.providers.synapse]`; provider keys are then configured in Synapse's own config file.
 
 ### Ollama (Local)
 
@@ -223,6 +223,23 @@ max_tokens = 8192  # Default for all providers
 
 [agent.providers.anthropic]
 max_tokens = 16384  # Higher limit for Anthropic
+```
+
+## Knowledge Retrieval
+
+When a persona has knowledge packs, the CLI ranks them per turn with semantic search. That needs an embedding model (and a small chat model that rewrites follow-up questions into standalone search queries). The CLI picks where those requests go from the keys you already have:
+
+| Key available | Where retrieval requests go | Models |
+|---------------|-----------------------------|--------|
+| An OpenAI key on the `openai` provider (`OPENAI_API_KEY`) | Directly to OpenAI (or the `openai` provider's `base_url`) | `text-embedding-3-small`, `gpt-4o-mini` |
+| A Synapse API key (`omni auth login` or `SYNAPSE_API_KEY`) | The Synapse gateway configured on the `synapse` provider, the same one chat uses (`<base_url>/v1/embeddings`) | `openai/text-embedding-3-small`, `openai/gpt-4o-mini` |
+| Neither | Semantic search is off; knowledge is ranked by keyword search only | |
+
+A Synapse API key is only ever sent to your Synapse gateway, never to a model vendor. Through the gateway, retrieval usage is metered like chat. To point retrieval at a self-hosted gateway, set `base_url` on the `synapse` provider:
+
+```toml
+[agent.providers.synapse]
+base_url = "https://synapse.example.com"
 ```
 
 ## Cost Considerations
