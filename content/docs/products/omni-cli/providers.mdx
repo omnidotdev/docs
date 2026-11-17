@@ -152,7 +152,7 @@ provider = "synapse"
 model = "claude-sonnet-4-20250514"
 ```
 
-Synapse is preconfigured as a default provider at `http://localhost:6000/v1`. No API key is needed for local Synapse — keys are configured in Synapse's own config file.
+Synapse is preconfigured as a default provider pointing at the hosted gateway (`https://gateway.synapse.omni.dev`). Run `omni auth login` to store a Synapse API key (or set `SYNAPSE_API_KEY`). For a self-hosted gateway, set `base_url` on `[agent.providers.synapse]`; provider keys are then configured in Synapse's own config file.
 
 ### Ollama (Local)
 
