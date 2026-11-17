@@ -75,9 +75,45 @@ filtered, for example `/templates?category=events`.
 | Personal blog | `personal-blog` | Blog | Home, Post, About | Readable posts, an essay page, and a newsletter |
 | Open-source project | `open-source` | Software | Home, Docs, Community | Install steps, docs, and a community page |
 
-Templates draw their artwork with code (shapes, gradients, and illustrations)
-rather than photos, so nothing breaks or needs licensing. To use your own
-photos, give Keystone their web addresses and say where they go.
+Templates draw their artwork with code (shapes, gradients, illustrations,
+shaders, and 3D scenes) rather than photos, so nothing breaks or needs
+licensing. To use your own photos, give Keystone their web addresses and say
+where they go.
+
+## Motion and 3D
+
+Every template's home page opens on a living hero, and its sections ease into
+view as you scroll:
+
+| Template | Hero |
+|----------|------|
+| Coffee roaster | Lake contour lines drifting under an ember glow, with steam over the bag |
+| Product launch | Aurora ribbons, and a board that tilts flat as it scrolls in |
+| Restaurant | Candlelit bokeh and flickering candles |
+| Photographer | A pre-dawn sky with drifting mist and ridges that part in depth |
+| Design studio | Kinetic headline, turning shapes, and a cursor that swells over links |
+| Developer portfolio | A dot matrix rippling with request pulses, and packets flowing through the diagram |
+| Consultant | A tangle of lines settling into one calm path |
+| Nonprofit | Sunlight dappling through a canopy, swaying trees, and counting impact numbers |
+| Wedding | Petals and soft light drifting through the frame |
+| Conference | A kinetic poster grid and a pointer spotlight |
+| Personal blog | A landscape that shifts in depth, and a reading progress bar on posts |
+| Open-source project | A turning 3D graph with reads and writes travelling its edges |
+
+The motion is built to stay out of the way:
+
+- **Reduced motion**: with your device's reduce motion setting on, every hero
+  shows a single still frame and nothing animates on scroll
+- **Scripts off**: each page reads and looks complete without its script,
+  showing the hero's static artwork instead
+- **Performance**: animation pauses while it is off screen or the tab is hidden,
+  and the heaviest effects render at a capped resolution, so pages stay smooth
+  on phones
+
+Gallery cards show a still render of each home page. The full-size preview
+runs the motion. To change it, ask in chat, for example "Make the hero
+animation slower", "Use a still image in the hero instead", or "Remove the
+cursor effect".
 
 <Callout type="info">
   The forms in a template (newsletter, contact, RSVP) are placeholders until you
