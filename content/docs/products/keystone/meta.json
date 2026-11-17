@@ -3,6 +3,7 @@
   "pages": [
     "getting-started",
     "workspaces",
+    "templates",
     "starters",
     "building",
     "models",
