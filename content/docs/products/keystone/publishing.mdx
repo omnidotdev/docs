@@ -28,7 +28,8 @@ gets a preview link.
 ## Preview link
 
 A preview link is a free, read-only view of your site's home page that anyone
-with the link can open. On the Free plan it carries a small **Made with
+with the link can open. It is a still render: page scripts do not run there, so
+animation and 3D show their static artwork. Host the site to run them. On the Free plan it carries a small **Made with
 Keystone** badge in the corner. The link always shows the latest version of your
 site, so changes you make after publishing appear there without publishing
 again.
@@ -82,6 +83,23 @@ workspace owner for access.
 
 Changing your Keystone plan never takes a hosted site down. To stop hosting a
 site, delete its service in the Fractal dashboard.
+
+## Scripts on hosted sites
+
+A hosted site runs each page's script (its animation, 3D, and interactions) on
+the site's own address, kept apart from Omni and from every other site. Each
+page loads scripts only from:
+
+- the site itself, which serves each page's script as its own file
+- Keystone's integration block runtime
+- the whitelisted library, [three.js](https://threejs.org) 0.149.0, loaded from
+  cdnjs at one exact version and checked by its integrity hash, so the browser
+  refuses the file if its contents ever change
+
+Every hosted page sends a Content Security Policy that allows exactly those
+sources, so nothing in a page, not even its own script, can load code from
+anywhere else. Markup is cleaned on publish as before: scripts and event
+handlers written into the HTML are removed.
 
 ## Choose a workspace
 

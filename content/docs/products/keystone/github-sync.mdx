@@ -38,13 +38,14 @@ there, then return and select **I've created it, link it**.
 
 ## What Keystone pushes
 
-Each page is a self-contained HTML file, laid out so any static host can serve
-the repository as is:
+Each page is an HTML file, laid out so any static host can serve the repository
+as is:
 
 | File | Contents |
 |------|----------|
 | `index.html` | The home page |
 | `<page>/index.html` | Every other page |
+| `_keystone/<page>.js` | A page's script (its animation and interactions), when it has one |
 | `README.md` | A short note about how the repository is kept in sync |
 | `.keystone/manifest.json` | The list of files Keystone manages |
 
