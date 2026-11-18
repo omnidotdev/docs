@@ -23,7 +23,7 @@ digits, and hyphens, with no leading or trailing hyphen (for example
 - **Private** (default): objects are reachable only with the bucket's
   credentials. Serve files to users by generating presigned URLs from your app,
   or by proxying them through your backend. Use this for anything sensitive.
-- **Public** (paid plans): objects are readable by anyone at a stable URL, with
+- **Public**: objects are readable by anyone at a stable URL, with
   no credentials. A public bucket is served at
   `https://<bucket>.fractalusercontent.com`, so an object stored at
   `avatars/jane.png` in the `user-avatars` bucket is served at
@@ -31,8 +31,7 @@ digits, and hyphens, with no leading or trailing hyphen (for example
   avatars, images, video, and other assets you want browsers to load directly,
   and optionally turn on the **CDN** to serve them from a global edge (see
   [Serving public media](#serving-public-media)). Public buckets and the CDN are
-  a paid-plan feature; on the free tier a bucket you mark public is served
-  privately instead.
+  included on every plan.
 
 Writes always require the bucket's credentials, whether the bucket is public or
 private. Public only affects read access.
@@ -105,7 +104,7 @@ delivery network: reads are cached at points of presence worldwide and delivered
 over the edge with valid HTTPS, so assets load fast for users everywhere and
 origin load drops. The CDN URL uses the same `<bucket>.fractalusercontent.com`
 host, so nothing in your app changes when you enable it. Like public buckets, the
-CDN is a paid-plan feature.
+CDN is included on every plan.
 
 ## Limits
 
