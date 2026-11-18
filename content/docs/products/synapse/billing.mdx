@@ -35,7 +35,7 @@ Combine BYOK and managed keys. Attach provider keys to specific Synapse API keys
 | **Team RBAC** | No | No | Yes |
 | **Request overage** | None (hard limit) | $0.20 per 1K requests | $0.10 per 1K requests |
 
-> All tiers include BYOK and managed credits. The Free tier is subject to a hard request limit with no overage.
+> All tiers include BYOK. Managed credits are for paying workspaces: a paid tier, or a workspace that has bought credits. On Free with no purchased credits, managed requests are refused with `402` (`payment_required`). The Free tier is subject to a hard request limit with no overage.
 
 ## Workspaces
 

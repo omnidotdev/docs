@@ -22,7 +22,7 @@ herald.emails.list({ first: 20 });                            // -> { messages }
 herald.emails.get(rowId);
 ```
 
-`send` is idempotent when you pass an `idempotencyKey`. Use `{{variable}}` placeholders and supply `variables`. A future `sendAt` schedules the send.
+`send` is idempotent when you pass an `idempotencyKey`. Use `{{variable}}` placeholders and supply `variables`. A future `sendAt` schedules the send. Pass `attachments` to send files; see [attach files](/products/herald/transactional-email#attach-files) for the shape and limits.
 
 ### Domains, suppressions, webhooks
 
@@ -57,6 +57,8 @@ Content-Type: application/json
 
 { "from": "...", "to": "...", "subject": "...", "html": "..." }
 ```
+
+To attach files over REST, add an `attachments` array of `{ "filename", "content" }` objects, with base64 `content` and optional `contentType` and `contentId`. See [attach files](/products/herald/transactional-email#attach-files) for the limits and error codes.
 
 To send a one-off marketing email over REST, add `"marketing": true`; Herald then applies the one-click unsubscribe and CAN-SPAM footer, and refuses the send until the tenant's sender name and postal address are set. See [one-off marketing sends](/products/herald/marketing-email#one-off-marketing-sends).
 

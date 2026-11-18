@@ -1,0 +1,118 @@
+---
+title: Workspaces and Sites
+description: Where your sites live, how many you can keep, and how workspace members, seats, and billing work
+---
+
+Keystone uses your Omni workspaces, the same ones you use across every Omni
+product. A workspace has a plan, an AI credit balance, and members.
+
+## Your building workspace
+
+Every site belongs to one workspace. That workspace's plan sets how many sites
+it can keep (see [Sites](#sites)), every turn on the site spends that
+workspace's [AI credits](/products/keystone/credits), and the credit balance
+in the builder header is that workspace's balance.
+
+New sites start in your **personal workspace** unless you pick another one.
+
+### Build in a team workspace
+
+To build a site directly in a team workspace you belong to, either:
+
+- Open the workspace's page and select **New site in this workspace**, then
+  use a [template](/products/keystone/templates) or select **Describe one
+  from scratch**, or
+- In the builder, before the first prompt, pick the workspace under
+  **Building in** at the top of the chat panel. The picker shows when you
+  belong to more than one workspace
+
+The new site belongs to that workspace from the start, so the team's members
+build it on the team's credits and the team's site limit applies.
+
+### Move a site when you publish
+
+When you publish, you can also choose another workspace you belong to. The site
+then moves into that workspace, which must have room under its site limit. A
+site hosted on Fractal moves its hosting into that workspace's own Fractal
+project, where the workspace's Fractal plan applies. See
+[Publishing](/products/keystone/publishing#choose-a-workspace).
+
+### Your workspace on Fractal and Arbor
+
+A site you host is your workspace's, on the Omni platform: it runs in the
+workspace's own Fractal project (**Keystone sites**) and its code lives in a
+repository the workspace owns on Arbor. Every member sees the site in the
+[Fractal dashboard](https://fractal.omni.dev) with Fractal's usual roles, and
+hosting is billed by the workspace's Fractal plan, only for sites it hosts.
+Building stays on the workspace's Keystone plan. See
+[Host on Fractal](/products/keystone/publishing#host-on-fractal).
+
+If your account has no workspace at all, generation stops with **Generation
+needs a workspace**. Create or join one from your Omni account, then try again.
+
+## Sites
+
+Your site, its pages, and the chat transcript are saved as you go. Each plan
+has a site limit:
+
+| Plan | Sites |
+|------|-------|
+| Free | 1 |
+| Pro | 10 |
+| Team | Unlimited |
+
+Signed in, Keystone opens on **Your sites**, which lists every site you have
+built across your workspaces. Select **Open in builder** on a site to keep
+working on it, or **New site** to open the
+[template gallery](/products/keystone/templates) and start another, from a
+template or from scratch.
+
+A new site can start until the workspace reaches its limit. An unused blank
+site is reused rather than counted again. At the limit, **Use this template**
+explains the limit instead of creating a site, and the builder shows
+**Picking up where you left off** and reopens the workspace's most recent site,
+with its conversation and preview, instead of starting a blank one. Each
+workspace has its own limit, so a full personal workspace does not stop you
+from starting a site in a team workspace.
+
+## Members
+
+Workspace members and their roles are managed in your Omni account, so they stay
+the same across every Omni product. A workspace's **Members** page in Keystone
+links to **Manage members in Omni**.
+
+## Seats
+
+A workspace's plan includes a number of seats, and every member of a team
+workspace takes one:
+
+| Plan | Seats |
+|------|-------|
+| Free | 1 |
+| Pro | 1 |
+| Team | 10 |
+
+While a team workspace has no more members than its plan's seats, every member
+can build in it. When it has more, starting a site and generating in that
+workspace stop with a message such as **This workspace has 12 members, but its
+plan includes 10 seats**, with links to the workspace's plan and members. To
+keep building there, remove members or upgrade the plan. Existing sites stay
+saved, and their published links keep working.
+
+Sharing a workspace with other people therefore needs the Team plan. Your
+personal workspace only ever has you in it, so seats never limit it.
+
+## Workspace billing
+
+Each workspace has a **Billing** page in Keystone. Open it by selecting the
+credit balance in the builder header (on wider screens), or from the workspace's
+page under **Workspaces** in the command palette (**⌘ K** / **Ctrl K**).
+
+- **AI credits** shows the workspace's balance. **Buy credits** opens billing
+  in your Omni account with the workspace selected.
+- **Plan** shows the workspace's current plan. **Upgrade plan** opens the
+  [pricing page](https://keystone.omni.dev/pricing), and **Manage subscription**
+  opens the billing portal for an existing subscription.
+
+Only workspace owners and admins can buy credits or change the plan. Other
+members see the balance and the plan.

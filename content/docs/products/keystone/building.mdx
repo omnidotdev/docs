@@ -1,6 +1,6 @@
 ---
 title: Building in Chat
-description: Describe a site, refine it turn by turn, pick a model, and understand credit spend
+description: Describe a site and refine it turn by turn
 ---
 
 You build a Keystone site by talking to it. Each message is a turn: Keystone
@@ -15,8 +15,9 @@ The first turn sets the direction, so give Keystone enough to work with:
 - **The sections or pages you want**, for example "hero, featured beans, the roasting story, and a newsletter signup"
 - **The look and feel**, for example "warm and bold, espresso brown and cream with a burnt-orange accent"
 
-If you are not sure where to start, pick a [starter](/products/keystone/starters)
-and edit its brief.
+If you are not sure where to start, use a finished
+[template](/products/keystone/templates) and refine it, or pick a
+[starter](/products/keystone/starters) and edit its brief.
 
 ## Refine turn by turn
 
@@ -28,7 +29,7 @@ did not ask to change.
 - "Switch to a dark theme"
 - "Replace the testimonials with a pricing section with three tiers"
 
-After each turn the builder offers up to four **follow-up suggestions**, such as
+After each turn (and when you reopen a site) the builder offers up to four **follow-up suggestions**, such as
 **Add an About page**, **Add a contact form**, **Add testimonials**, **Make it
 bolder**, **Add an FAQ**, or **Polish for mobile**. Selecting one fills the prompt;
 it is sent only when you send it.
@@ -40,35 +41,44 @@ works on the whole site.
 The full conversation is saved with the site, so it is still there when you come
 back.
 
+## Motion, 3D, and scripts
+
+Keystone designs each site with a point of view: type pairing, spacing, color,
+and motion drawn from what the site is about. Ask for motion the way you would
+brief a designer:
+
+- "Give the hero a slow, glowing shader background in the brand colors"
+- "Add a rotating 3D shape to the hero"
+- "Make the cards tilt toward the pointer and fade in as I scroll"
+- "Turn off the animations"
+
+Motion lives in each page's script. Scripts only enhance a page: every page
+still reads and looks complete with scripts off, and every animation honors the
+visitor's reduce motion setting. A page can use one outside library,
+[three.js](https://threejs.org), for real 3D; anything else is written into the
+page itself. Scripts run in the [preview](/products/keystone/preview) and on
+[hosted sites](/products/keystone/publishing#scripts-on-hosted-sites), never on
+a preview link.
+
+## Title and description
+
+Keystone gives the site a title, a one-sentence description, and a content
+language on the first turn. They appear in browser tabs, search results, and
+link previews on social media. To change them, ask, for example "Set the site
+title to Ember & Bean" or "Give the About page its own description".
+
 ## Pick a model
 
 The model picker sits next to the prompt. Each turn uses the model selected when
-you send it, so you can switch between turns.
-
-| Model | Best for |
-|-------|----------|
-| **Sonnet 5.5** (default) | The balance of quality and cost for most sites |
-| **Opus 5.5** | The most capable option, for ambitious designs and complex changes |
-| **Haiku 5.5** | Fast, inexpensive tweaks |
+you send it, so you can switch between turns. See [Models](/products/keystone/models).
 
 ## Credits
 
-Generation is paid for with your workspace's **Omni credits**. Omni credits are a
-single balance per workspace, shared across every Omni product, so the same
-credits cover Keystone and any other credit-metered Omni product your workspace
-uses. Each plan adds a monthly allowance (see [Plans and Credits](/products/keystone/plans)).
-
-- **What a turn costs** depends on the model and the size of the site: every turn
-  sends the whole current site, so bigger sites and more capable models spend
-  more credits per turn.
-- **Your balance** shows in the builder header. Select it to view your credits
-  and buy more.
-- **At zero**, generation stops with "This workspace is out of Omni credits" and a
-  **Buy credits** link. There is no automatic overage charge: buy more credits to
-  keep generating, or wait for your monthly allowance.
-
-Picking a starter, selecting a follow-up suggestion, switching preview sizes, and
-downloading your code never spend credits. Only sending a prompt does.
+Every turn you send spends [AI credits](/products/keystone/credits) from the
+site's workspace. A turn's cost depends on the model, the size of the site, and
+how many pages the change rewrites. Starting from a template, picking a starter, selecting a
+follow-up suggestion, switching preview sizes, and downloading your code never
+spend credits. Only sending a prompt does.
 
 ## Fair use
 

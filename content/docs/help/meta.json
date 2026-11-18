@@ -5,6 +5,8 @@
   "pages": [
     "account-security",
     "workspaces",
+    "billing",
+    "ai-credits",
     "install-pwa",
     "...self-hosting",
     "..."

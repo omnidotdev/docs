@@ -1,0 +1,40 @@
+---
+title: Shopper Accounts
+description: Let shoppers sign in with their Omni account to see their orders with your store, alongside guest checkout.
+---
+
+Shoppers can sign in to your store with their **Omni account** to see their orders with you. Signing in is optional: guest checkout and order lookup keep working exactly as before.
+
+## How shoppers sign in
+
+On the storefront, a shopper chooses **Account**, then **Sign in**. They land on a secure Omni page that names your store and the address they will return to, and sign in with a code sent to their email. If they do not have an Omni account yet, the first sign-in creates one after they accept the Terms of Service and Privacy Policy. Shoppers who use a password, passkey, or two-factor authentication can sign in that way instead.
+
+Once signed in, the shopper returns to your store's **Account** page, which lists their orders with your store. One Omni account works on every store that offers sign-in, and a shopper already signed in to Omni continues with one click.
+
+## What your store receives
+
+Your store receives a sign-in that works **only for your store**, together with the shopper's email address. It never receives the shopper's password, their Omni account, or anything about their activity at other stores. A store sign-in lasts up to 30 days, or until the shopper signs out.
+
+## Linking past guest orders
+
+When a shopper signs in for the first time, Halo links them to the customer record for their email address at your store, so orders they placed as a guest appear on their account. Halo only does this once the shopper has proven they control that address with an emailed code or link, so nobody can claim someone else's order history by signing up with their email. A customer record already linked to one Omni account is never moved to another.
+
+Signed-in shoppers appear under **Customers** like any other buyer, with the same order history.
+
+## Requirements
+
+Sign-in is available on any storefront served from a domain registered for your store in Halo (see [Custom domain](/products/halo/stores#custom-domain)). If the domain is not registered, the **Account** page tells shoppers that signing in is not available for the store.
+
+## Keystone sites
+
+A [Keystone](/products/keystone) site in the same workspace as your store can offer the same sign-in with its **Sign in** and **My orders** blocks, on the site's own domain. See [Keystone integrations](/products/keystone/integrations#sign-in-and-my-orders).
+
+## Custom storefronts
+
+A storefront you build yourself can offer the same sign-in from its own server:
+
+1. Register a sign-in request with `POST https://identity.omni.dev/api/shopper/sign-in-requests`, sending your store domain, a random `state`, a PKCE S256 `codeChallenge`, and `returnUrl` set to exactly `https://<your store domain>/_omni/shopper/callback`.
+2. Redirect the shopper's browser to the returned `signInUrl`.
+3. Omni form-posts `code` and `state` to your callback. Check that `state` matches the one you stored for this browser, then exchange the code with `POST https://identity.omni.dev/api/shopper/sessions`, sending `code` and your PKCE `codeVerifier`.
+4. Keep the returned session token in an httpOnly cookie, never in page JavaScript. Send it to the Halo API as `Authorization: Bearer <token>` together with `X-Storefront-Domain`, and query `currentCustomer` and `myOrders`. A `401` means the session ended: clear the cookie.
+5. To sign out, call `POST https://identity.omni.dev/api/shopper/sessions/revoke` with the token and clear the cookie.

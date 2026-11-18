@@ -1,92 +1,134 @@
 ---
 title: Publishing
-description: Share a free preview link, or deploy a live hosted site with your own domain
+description: Share a preview link, or host your site on Fractal in your own workspace
 ---
 
-Select **Publish** in the builder to put your site on the web. What you get
-depends on the plan of the workspace you publish under:
+<Callout type="info">
+  Keystone is **coming soon**, and hosting on Fractal is part of the private
+  preview. Every site can share a preview link; the hosted sections below
+  describe how hosting works.
+</Callout>
 
-| | Preview link | Hosted site |
+Select **Publish** in the builder to put your site on the web. You choose how:
+
+| | Preview link | Hosted on Fractal |
 |---|---|---|
-| **Plans** | Free (and any workspace without hosted publishing) | Pro and Team |
-| **Address** | A read-only link served by Keystone | Its own isolated address on Fractal |
+| **Who can** | Anyone | A signed-in member of the site's workspace |
+| **Paid by** | Free | Your workspace's [Fractal plan](https://fractal.omni.dev/pricing), only for sites you host |
+| **Address** | A read-only link served by Keystone | Its own address under `fractaldeploy.app` |
 | **Pages** | The home page | Every page, with clean URLs (`/about`) |
-| **Custom domain** | No | Yes |
-| **Keystone badge** | Shown | Removed |
+| **Lives in** | Keystone | Your workspace's Fractal project, with its code in a repository your workspace owns |
+| **Custom domain** | No | Yes, within your Fractal plan |
+| **Keystone badge** | Shown on Free, removed on Pro and Team | Shown on Free, removed on Pro and Team |
 | **Integration blocks** | Live | Live |
 
-Publishing never fails for lack of a plan: a workspace without hosted publishing
-always gets a preview link.
+Publishing never fails for lack of hosting: if a site cannot be hosted, it still
+gets a preview link.
 
 ## Preview link
 
-A preview link is a free, read-only copy of your site's home page that anyone with
-the link can open. It carries a small Keystone badge in the corner. Publish again
-after more changes to update what the link shows.
+A preview link is a free, read-only view of your site's home page that anyone
+with the link can open. It is a still render: page scripts do not run there, so
+animation and 3D show their static artwork. Host the site to run them. On the Free plan it carries a small **Made with
+Keystone** badge in the corner. The link always shows the latest version of your
+site, so changes you make after publishing appear there without publishing
+again.
 
-## Hosted site
+## Host on Fractal
 
-On Pro and Team, publishing deploys your site as its own live service on
-[Fractal](/products/fractal), Omni's deploy platform. Each site runs in isolation
-on its own address under `fractal.dev`, separate from Keystone itself, and every
-page is served (the home page at `/`, other pages at `/<page>`).
+Select **Host on Fractal** to deploy your site as a live site on
+[Fractal](/products/fractal), Omni's cloud. The site belongs to your
+**workspace**, not to Keystone:
 
-Hosted sites **scale to zero** when idle, so an unvisited site costs nothing to
-keep running. The first visit after a quiet spell can take a moment while the
-site wakes up.
+- **Fractal project**: the site is a static site in your workspace's own Fractal
+  project, **Keystone sites**, created the first time anyone in the workspace
+  hosts a site. Every member of the workspace sees it in the
+  [Fractal dashboard](https://fractal.omni.dev), with Fractal's usual roles, and
+  can open its logs, domains, and settings there. After publishing, select
+  **Manage in Fractal** to go straight to it.
+- **Code repository**: the site's code lives in a repository your workspace owns
+  on [Arbor](/products/arbor), Omni's code host, so your team can find and clone
+  it. Keystone can update only that one repository, and a workspace admin can
+  remove its access. Arbor is in private beta, so members need Arbor access to
+  open the repository; to keep a copy on GitHub instead, see
+  [Sync to GitHub](#sync-to-github).
+- **Your permissions**: Keystone deploys only while you publish, acting with your
+  own access in that workspace, and only on the Keystone sites project.
 
-Select **Republish** after further changes to update the same site at the same
-address. Republishing keeps any custom domain you attached.
+Each hosted site runs in isolation on its own address under `fractaldeploy.app`,
+and every page is served (the home page at `/`, other pages at `/<page>`).
+Hosted sites **scale to zero** when idle, so an unvisited site uses no compute;
+the first visit after a quiet spell can take a moment while it wakes up.
 
-If a hosted deploy cannot run for any reason, Keystone falls back to a preview
-link so you always leave with a working URL. Try publishing again later for the
-hosted site.
+After further changes, select **Republish on Fractal** to update the same site at
+the same address. Republishing keeps any custom domain you attached.
+
+If a hosted deploy cannot run for another reason, Keystone gives you a preview
+link so you always leave with a working URL. Try hosting again later.
+
+### Hosting and your Fractal plan
+
+Hosting is billed by your workspace's Fractal plan, not by Keystone, and only
+for the sites your workspace hosts. Your Keystone plan covers building (credits,
+sites, seats); your Fractal plan covers hosting. Fractal's own limits decide
+what the workspace can host, such as how many projects and services it can run
+and how many custom domains it can use; see
+[Fractal plans](https://fractal.omni.dev/pricing).
+
+If the workspace's Fractal plan has no room for another site, the publish
+dialog says so, gives you the preview link, and links to **Upgrade on Fractal**,
+which upgrades that workspace's Fractal plan on your Omni account and brings you
+back to the site. If you cannot deploy in the workspace on Fractal at all, ask a
+workspace owner for access.
+
+Changing your Keystone plan never takes a hosted site down. To stop hosting a
+site, delete its service in the Fractal dashboard.
+
+## Scripts on hosted sites
+
+A hosted site runs each page's script (its animation, 3D, and interactions) on
+the site's own address, kept apart from Omni and from every other site. Each
+page loads scripts only from:
+
+- the site itself, which serves each page's script as its own file
+- Keystone's integration block runtime
+- the whitelisted library, [three.js](https://threejs.org) 0.149.0, loaded from
+  cdnjs at one exact version and checked by its integrity hash, so the browser
+  refuses the file if its contents ever change
+
+Every hosted page sends a Content Security Policy that allows exactly those
+sources, so nothing in a page, not even its own script, can load code from
+anywhere else. Markup is cleaned on publish as before: scripts and event
+handlers written into the HTML are removed.
 
 ## Choose a workspace
 
 If you belong to more than one workspace, the publish dialog asks which one to
-publish under. The site moves into that workspace, and that workspace's plan
-decides whether you get a hosted site or a preview link. Upgrade the workspace to
-Pro or Team on the [pricing page](https://keystone.omni.dev/pricing) for hosted
-publishing.
+publish under. It starts on the workspace the site already belongs to. Pick
+another workspace to move the site into it; that workspace must have room under
+its Keystone site limit and a seat for each of its members. A hosted site moves
+its hosting too: its service is removed from the old workspace's Fractal project
+and created in the new one, and the new workspace's Fractal plan applies. The
+old repository stays with the workspace that owns it. See
+[Workspaces and Sites](/products/keystone/workspaces).
 
 ## Custom domains
 
-On plans that include custom domains (Pro and Team), enter a domain such as
-`www.example.com` in the **Custom domain** field before you publish.
+For a site hosted on Fractal, enter a domain such as `www.example.com` in the
+**Custom domain** field before you select **Host on Fractal**.
 
-1. Enter the domain and select **Publish** (or **Republish**).
+1. Enter the domain and select **Host on Fractal** (or **Republish on Fractal**).
 2. Keystone shows the DNS records to add, as a table of **Type**, **Name**, and
    **Value**.
 3. Add those records at your domain registrar or DNS provider.
 4. Once DNS has propagated, your site is served on your domain, with HTTPS handled
    for you.
 
-A custom domain entered on a plan without custom domains is ignored, and the site
-publishes without it.
+Custom domains count toward your workspace's Fractal plan; the site's own
+`fractaldeploy.app` address does not. To add more custom domains than the plan
+includes, upgrade the workspace's Fractal plan.
 
 ## Sync to GitHub
 
-Keep your site's code in your own GitHub repository. Keystone pushes the site to
-it every time you publish, so the repository always matches what you published.
-Your site stays hosted by Keystone either way.
-
-1. Select **Publish**, then **Connect GitHub** under **Sync to GitHub**, and
-   install the Keystone GitHub app on your account or organization.
-2. Choose **New repository** (Keystone creates it; private by default) or
-   **Existing repository**.
-3. Select **Create and link** or **Link repository**. Keystone pushes the
-   current site right away.
-
-Keystone commits to a new repository's default branch. In a repository you
-already had, it commits to a separate `keystone` branch, so your main branch is
-never touched, and it only changes the files it manages. It never force-pushes.
-Use **Push now** to push without republishing.
-
-GitHub only lets you create repositories on a personal account yourself. When
-you pick a personal account, Keystone opens GitHub's new-repository page with
-the name filled in; create it there, then return and select **I've created it,
-link it**.
-
-**Disconnect** stops the syncing. The repository and its history stay on GitHub.
-
+To keep a copy of your site's code in your own GitHub repository, link the site
+to a repository from the publish dialog. See [GitHub Sync](/products/keystone/github-sync).

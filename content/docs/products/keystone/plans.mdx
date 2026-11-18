@@ -1,6 +1,6 @@
 ---
-title: Plans and Credits
-description: Keystone Free, Pro, and Team, and how Omni credits pay for generation
+title: Plans
+description: Keystone Free, Pro, and Team, and what each includes
 ---
 
 <Callout type="warn">
@@ -9,30 +9,38 @@ description: Keystone Free, Pro, and Team, and how Omni credits pay for generati
   [keystone.omni.dev/pricing](https://keystone.omni.dev/pricing).
 </Callout>
 
-Keystone plans belong to a workspace, not to an individual. Every member of the
-workspace builds under its plan and spends its credits.
+Keystone plans belong to a workspace, not to an individual. Each workspace's
+plan sets its own site limit, credits, and seats, and they come from the
+workspace a site belongs to: your personal workspace by default, or a team
+workspace you build it in or publish it into.
+See [Workspaces and Sites](/products/keystone/workspaces).
+
+Keystone plans cover building. Hosting is not part of a Keystone plan: a site
+you host runs in your workspace's own Fractal project and is billed by the
+workspace's [Fractal plan](https://fractal.omni.dev/pricing), only for the sites
+it hosts. See [Hosting and your Fractal plan](/products/keystone/publishing#hosting-and-your-fractal-plan).
 
 ## Free
 
 AI web builder for personal sites. **$0**.
 
-- Freeform AI site generation
+- Freeform AI site generation with Omni credits
+- Multi-page sites
 - Live preview and multi-turn editing
 - Shareable read-only preview link
+- Host on Fractal in your workspace (billed by your Fractal plan)
 - "Made with Keystone" badge
-- Self-hostable (Apache-2.0) (coming soon)
 - Community support
 
 ## Pro
 
-Custom domains, design-system mode, and more credits. **$19/month** (or $190/year).
+More sites, more credits, and no Keystone badge. **$19/month** (or $190/year).
 
 - Everything in Free
-- Hosted publishing (dedicated deploy, scales to zero)
+- Up to 10 sites
 - Design-system injection (bring your own tokens and components) (coming soon)
-- Custom domains
 - Badge removed
-- Multi-page sites and media
+- Image uploads (coming soon)
 - Bring your own LLM key (BYOK) (coming soon)
 
 ## Team
@@ -55,27 +63,31 @@ Shared workspaces and component manifests for teams. **$49/month** (or $490/year
 | | Free | Pro | Team |
 |---|---|---|---|
 | Sites | 1 | 10 | Unlimited |
-| Included credits per month | 150 | 2,000 | 6,000 |
-| Hosted publishing | No (preview link) | Yes | Yes |
-| Custom domains | None | Unlimited | Unlimited |
+| Included credits per month | None | 2,000 | 6,000 |
+| Keystone badge | Shown | Removed | Removed |
 | Seats | 1 | 1 | 10 |
 
-## How credits work
+Seats are the number of members a workspace can have and still build with
+Keystone. See [Seats](/products/keystone/workspaces#seats).
 
-Generation spends **Omni credits**, a single balance per workspace that is shared
-across every Omni product. Each plan adds its included credits every month.
+## Credits
 
-- A turn's cost depends on the model you pick and the size of your site. See
-  [Building in Chat](/products/keystone/building#credits).
-- When the balance reaches zero, generation stops until you buy more credits or
-  your monthly allowance renews. There is no automatic overage charge on any plan.
-- Your balance shows in the builder header, with a link to buy more.
-
-Browsing starters, previewing, downloading your code, and publishing never spend
-credits.
+Generation spends [AI credits](/help/ai-credits). Pro and Team include a
+monthly allowance (see the table above) that does not roll over; Free includes
+no credits, so generating on Free uses credits the workspace has bought. When
+the balance reaches zero, generation stops until you buy more credits or a paid
+plan's allowance renews; there is no automatic overage charge on any plan. See
+[Credits](/products/keystone/credits).
 
 ## Change your plan
 
-Open the [pricing page](https://keystone.omni.dev/pricing), choose the workspace
-to upgrade, and pick a plan. Monthly and yearly billing are both available; yearly
+Pro and Team open for purchase when Keystone launches; until then the
+[pricing page](https://keystone.omni.dev/pricing) lists them as coming soon.
+Once they open, choose the workspace to upgrade on the
+pricing page and pick a plan. To manage an existing subscription, open the
+workspace's [Billing page](/products/keystone/workspaces#workspace-billing) and
+select **Manage subscription**. Monthly and yearly billing are both available; yearly
 costs the same as ten months.
+
+Changing a workspace's Keystone plan never takes a hosted site down: hosting
+follows the workspace's Fractal plan.

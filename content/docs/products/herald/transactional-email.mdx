@@ -27,6 +27,55 @@ Use `{{variable}}` placeholders in the subject and body and pass their values in
   Sending a one-off marketing email rather than a receipt or notification? Pass `marketing: true` so Herald adds a one-click unsubscribe and a CAN-SPAM footer. See [one-off marketing sends](/products/herald/marketing-email#one-off-marketing-sends).
 </Callout>
 
+## Attach files
+
+Pass `attachments` to send files with a message, such as a receipt PDF or a signed document. Each attachment takes a `filename` and the file's `content` as base64:
+
+```ts
+import { readFile } from "node:fs/promises";
+
+const pdf = await readFile("contract-signed.pdf");
+const logo = await readFile("logo.png");
+
+await herald.emails.send({
+  from: "you@yourdomain.com",
+  to: "customer@example.com",
+  subject: "Your signed contract",
+  html: '<p>Your signed contract is attached.</p><img src="cid:logo" alt="Logo" />',
+  attachments: [
+    {
+      filename: "contract-signed.pdf",
+      content: pdf.toString("base64"),
+      contentType: "application/pdf",
+    },
+    {
+      filename: "logo.png",
+      content: logo.toString("base64"),
+      contentType: "image/png",
+      contentId: "logo",
+    },
+  ],
+});
+```
+
+- `contentType` is optional; Herald infers it from the file extension when you leave it out.
+- Set `contentId` to show an image inline, and reference it from the html as `cid:<contentId>`.
+- Herald cleans up the filename it shows the recipient: it drops any folder path and characters that are unsafe in a filename.
+
+Limits per message:
+
+| Limit | Value |
+| --- | --- |
+| Attachments | 20 |
+| Total size (before base64 encoding) | 25 MB |
+| Blocked file types | Executables, scripts, installers, shortcuts, and disk images (for example `.exe`, `.bat`, `.js`, `.msi`, `.lnk`, `.iso`) |
+
+A message over the size limit fails with `attachments_too_large` (HTTP 413). A malformed attachment fails with `invalid_attachment`, a blocked file type with `attachment_blocked`, and more than 20 files with `too_many_attachments` (all HTTP 422). Herald checks attachments before it records the message, so a refused send leaves nothing behind.
+
+<Callout type="info">
+  A scheduled send (a future `sendAt`) cannot carry attachments and fails with `attachments_not_schedulable`. Send the message at the time you want it delivered instead. Herald never stores attachment files: it passes them to the mail server and keeps only the message record.
+</Callout>
+
 ## Send a batch
 
 Send up to 100 distinct emails in one call. Each message succeeds or fails on its own:

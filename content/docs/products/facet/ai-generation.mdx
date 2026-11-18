@@ -39,14 +39,23 @@ device. AI generation has two paths:
   AI gateway, which routes it through Synapse the same way as a managed request.
   Generation with your own key needs no account and is billed to your Synapse
   account, not metered against Facet credits.
-- **Managed generation.** Sign in with your Omni account to generate without
-  supplying a key. Managed generation is metered in credits, with a monthly
-  allowance that is hard-capped. A credit is a usage unit, not a direct measure
-  of provider cost; larger or more complex generations spend more credits.
+- **Managed generation.** Sign in with your Omni account and generate without
+  supplying a key, on Facet Pro or after buying AI credits. Managed generation
+  spends [AI credits](/help/ai-credits) from your personal
+  workspace's balance, the same balance shared across Omni products. A credit is
+  a usage unit, not a direct measure of provider cost; larger or more complex
+  generations spend more credits. The panel shows your balance and a typical
+  cost per part.
+
+Managed generation is available on Facet Pro, which includes 2,000 credits a
+month, or once your workspace has bought a credit pack. On Free, the panel links
+to your Omni account to buy credits or upgrade, and you can always generate with
+your own Synapse key instead. When your balance runs out, generation stops before
+anything is charged. Purchased credits do not expire at the end of the month.
 
 <Callout type="warn">
-Signed in, you generate on your managed credit allowance. Not signed in, expand
-**Use your own Synapse key** and paste your Synapse key to generate without an account.
+With Pro or purchased credits, you generate on your workspace's credit balance.
+Otherwise, expand **Use your own Synapse key** and paste your Synapse key.
 </Callout>
 
 ## Your data
@@ -54,10 +63,13 @@ Signed in, you generate on your managed credit allowance. Not signed in, expand
 When you generate, the prompt you enter (and any code resubmitted to refine or
 repair a result) is sent to Facet's AI gateway and routed through the Synapse AI
 router to a third-party AI model provider, which processes it to return a result.
-Prompts and generated output are not stored on Facet's servers; only a per-user
-monthly credit count is kept, to enforce plan limits. Local modeling and file
-export send nothing off your device unless you use AI generation. See the
-[Privacy Policy](https://omni.dev/legal/privacy) for details.
+Prompts and generated output are not stored after your result is returned,
+unless you turn on **Help improve Facet's AI** in the account menu. That setting
+is off by default; turning it off deletes the prompts and outputs stored under
+it. For billing, each managed request records usage metadata (model, tokens,
+cost, and credits charged) against your workspace, with no prompt text. Local
+modeling and file export send nothing off your device unless you use AI
+generation. See the [Privacy Policy](https://omni.dev/legal/privacy) for details.
 
 ## Tips
 
