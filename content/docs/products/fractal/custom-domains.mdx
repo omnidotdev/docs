@@ -7,6 +7,10 @@ Every exposed service gets a generated `*.fractaldeploy.app` domain automaticall
 To serve it on your own domain instead, add a custom domain from the service's
 **Settings** tab.
 
+A custom domain is one you own. Fractal addresses (`*.fractaldeploy.app` and other
+Fractal-issued hosts) are already served with automatic HTTPS, so the custom domain
+field does not accept them.
+
 ## Add a domain
 
 1. Open the service and go to **Settings → Networking**.
@@ -43,14 +47,23 @@ Set **www** to `redirect` in the same Networking section to send
 
 ## Certificate status
 
-The **Certificate** badge reflects where your domain is in setup:
+The **Certificate** badge reflects whether your domain actually serves your
+service. Fractal checks this by requesting your domain over the public internet,
+so the badge reads _Active_ as soon as traffic reaches your service, including
+when your domain is proxied through its own Cloudflare zone.
 
-- **Pending**: waiting for the DNS records to resolve
-- **Verifying**: confirming you own the domain
+- **Verifying**: waiting for the DNS records to resolve
 - **Issuing**: the certificate is being issued
-- **Active**: the certificate is live and auto-renewing
-- **Error**: something needs attention (usually a missing or incorrect DNS
-  record); double-check the records shown in the dashboard
+- **Pending**: the certificate is ready but the traffic record is not in place
+  yet, or the domain no longer points at Fractal
+- **Active**: the domain serves your service
+- **Error**: something only you can fix, such as a domain that could not be
+  registered because another provider has claimed it
+
+Every state other than _Active_ shows a short message under the badge saying what
+the domain is waiting on. If a certificate's validation times out, Fractal
+restarts it automatically, so a domain recovers on its own once the DNS records
+are correct.
 
 Your existing `*.fractaldeploy.app` URL keeps serving the whole time, so there is
 never a gap while a custom domain finishes setting up.
