@@ -13,7 +13,8 @@ it can keep (see [Sites](#sites)), every turn on the site spends that
 workspace's [AI credits](/products/keystone/credits), and the credit balance
 in the builder header is that workspace's balance.
 
-New sites start in your **personal workspace** unless you pick another one.
+New sites start in your **personal workspace** unless you pick another one. On
+each device, the builder remembers the workspace you last picked.
 
 ### Build in a team workspace
 
@@ -26,8 +27,17 @@ To build a site directly in a team workspace you belong to, either:
   **Building in** at the top of the chat panel. The picker shows when you
   belong to more than one workspace
 
+Picking a workspace is instant: nothing is created until you send your first
+prompt, which creates the site in the picked workspace. Beside the picker, the
+builder shows how many of the workspace's sites are used (for example, **1 of
+1 sites used**), and the header shows the credit balance its turns will spend.
+If the workspace has no room for another site, or has more members than its
+plan's seats, the builder says so before you type, with links to open its
+latest site, see plans, or check its members.
+
 The new site belongs to that workspace from the start, so the team's members
-build it on the team's credits and the team's site limit applies.
+build it on the team's credits and the team's site limit applies. Once the site
+exists, **Building in** shows its workspace and links to the workspace's page.
 
 ### Move a site when you publish
 
@@ -70,13 +80,13 @@ select **Browse templates** to open the
 [template gallery](/products/keystone/templates). **Your sites** is also in the
 header and in the account menu.
 
-A new site can start until the workspace reaches its limit. An unused blank
-site is reused rather than counted again. At the limit, **Use this template**
-explains the limit instead of creating a site, and the builder shows
-**Picking up where you left off** and reopens the workspace's most recent site,
-with its conversation and preview, instead of starting a blank one. Each
-workspace has its own limit, so a full personal workspace does not stop you
-from starting a site in a team workspace.
+Only sites with something built on them count toward the limit. A new site can
+start until the workspace reaches its limit. At the limit, the builder explains
+it as soon as the workspace is picked, with a link to open the workspace's most
+recent site, and **Use this template** explains the limit instead of creating a
+site. A prompt never lands on an existing site by accident. Each workspace has
+its own limit, so a full personal workspace does not stop you from starting a
+site in a team workspace.
 
 ## Members
 

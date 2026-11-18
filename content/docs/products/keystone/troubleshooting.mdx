@@ -6,7 +6,9 @@ description: Common Keystone messages and what to do about them
 | Message or symptom | What it means | What to do |
 |--------------------|---------------|------------|
 | **Sign in to start building** | Building needs an Omni account | Select it and sign in, or create an account |
-| The prompt box stays on **Connecting...** and you cannot type | Keystone could not open a site for your account, most often because the account's email address is not verified | Verify your email from your Omni account, then reload the builder |
+| **Verify your email address to start building.** | Your account's email address is not verified | Verify your email from your Omni account, then send again |
+| **Keystone couldn't start your site.** or **Couldn't reach Keystone.** | The site could not be created just now; your prompt is kept | Select **Try again** |
+| **Your session has ended.** | Your sign-in expired | Select **Sign in again**; your prompt carries over |
 | **Generation needs a workspace. Create or join one to continue.** | Your account is not in a workspace yet | Create or join a workspace, then try again. See [Workspaces and Sites](/products/keystone/workspaces) |
 | **You're out of AI credits. Buy more credits to keep generating.** | The credit balance of the site's workspace is used up | Select **Buy credits**, or, on a paid plan, wait for its included credits to renew. See [Credits](/products/keystone/credits) |
 | **AI generation uses Omni credits.** | The workspace is on Free and has never bought credits | Select **Buy credits** or **Upgrade**. See [Credits](/products/keystone/credits) |
@@ -16,7 +18,7 @@ description: Common Keystone messages and what to do about them
 | **Generation failed. Please try again.** | The turn did not complete | Send the prompt again |
 | **This workspace has N members, but its plan includes N seats.** | The site's team workspace has more members than its plan's seats | Remove members or upgrade the workspace's plan. See [Seats](/products/keystone/workspaces#seats) |
 | **That workspace isn't available to you.** | Keystone could not confirm you are a member of the workspace the builder was opened for | Pick another workspace under **Building in**, or ask a workspace owner to add you |
-| **Picking up where you left off** | The workspace is at its plan's site limit, so the builder reopened its latest site | Keep building on it, or upgrade for more sites. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
+| **... has used the N sites its plan includes.** | The picked workspace is at its plan's site limit | Select **Open** to keep building its latest site, pick another workspace, or select **See plans**. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
 | **This workspace needs a Fractal plan with room for another site.** | The workspace has no Fractal plan (Fractal has no free plan), or its plan has no room for another project or service | Select **Upgrade on Fractal** to choose or upgrade the workspace's Fractal plan, then select **Host on Fractal** again; the preview link works meanwhile |
 | **You can't deploy sites in this workspace on Fractal.** | Your access in the workspace does not let you deploy on Fractal | Ask a workspace owner for access; the preview link works meanwhile |
 | Publishing gave a preview link instead of a hosted site | You selected **Get a preview link**, or the hosted deploy could not run just now | Select **Host on Fractal**, or try again later |
