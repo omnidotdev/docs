@@ -71,14 +71,19 @@ one email per site per hour. It says how many new submissions arrived and links
 to the inbox. It never includes what a visitor wrote, so read submissions in the
 inbox.
 
+If a notification email fails to send, Keystone tries again a few times over the
+next hour, then waits until new submissions arrive. Submissions always reach the
+inbox, whether or not the email does.
+
 ## Limits and spam protection
 
 - Each form carries a hidden field that people never see. Bots that fill it in
   are told their submission was sent, and it is dropped
 - One visitor can send a site up to 5 forms in 10 minutes, and a site accepts
   up to 60 submissions an hour
-- A submission can have up to 30 fields and 5,000 characters per answer. File
-  uploads are not sent
+- A submission can have up to 30 fields, 5,000 characters per answer, and
+  16,000 characters in all. A visitor who goes over is asked to shorten it.
+  File uploads are not sent
 - An inbox holds up to 5,000 submissions. When it is full, the site's forms stop
   accepting new ones until you delete some
 
