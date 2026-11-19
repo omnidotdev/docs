@@ -58,7 +58,7 @@ Code edits re-run automatically shortly after you stop typing; slider drags re-r
 
 ## Parameters and units
 
-`param.number(name, { min, max, step, default })` declares an input and returns its current value. The Studio reads the declarations after each run to build the sliders, and writes a value back when you drag one. A value defaults to `default` (falling back to `min`, then `0`) and persists across code edits.
+`param.number(name, { min, max, step, default, unit })` declares an input and returns its current value. An optional `unit` (`"mm"` for lengths, `"°"` for angles) labels the slider. The Studio reads the declarations after each run to build the sliders, and writes a value back when you drag one. A value defaults to `default` (falling back to `min`, then `0`) and persists across code edits.
 
 Facet geometry is **unitless**: the numbers in a model are just lengths, and STL itself carries no unit. By convention models are authored in millimeters, which is what most slicers assume, so a `cube(20)` prints as a 20 mm cube unless you tell your slicer otherwise.
 
