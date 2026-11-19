@@ -103,14 +103,22 @@ handlers written into the HTML are removed.
 
 ## Choose a workspace
 
-If you belong to more than one workspace, the publish dialog asks which one to
-publish under. It starts on the workspace the site already belongs to. Pick
-another workspace to move the site into it; that workspace must have room under
-its Keystone site limit and a seat for each of its members. A hosted site moves
-its hosting too: its service is removed from the old workspace's Fractal project
-and created in the new one, and the new workspace's Fractal plan applies. The
-old repository stays with the workspace that owns it. See
-[Workspaces and Sites](/products/keystone/workspaces).
+If you belong to more than one workspace, the publish dialog for a site that is
+not hosted yet asks which one to publish under. It starts on the workspace the
+site already belongs to. Pick another workspace to move the site into it; that
+workspace must have room under its Keystone site limit and a seat for each of
+its members. A hosted site stays in the workspace it is hosted in, so its
+publish dialog offers no workspace. See
+[Move a site to another workspace](/products/keystone/workspaces#move-a-site-to-another-workspace).
+
+## Delete a hosted site
+
+Deleting a hosted site from its card's menu takes it offline first: its service
+is removed from the workspace's Fractal project, which releases its address and
+custom domain, so nothing keeps running or billing. If the service cannot be
+removed just then, nothing is deleted and you can try again. The site's code
+stays in the workspace's repository on Arbor. See
+[Manage your sites](/products/keystone/workspaces#manage-your-sites).
 
 ## Custom domains
 
