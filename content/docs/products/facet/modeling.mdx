@@ -202,16 +202,18 @@ param.number(name: string, opts?: {
   max?: number;
   step?: number;
   default?: number;
+  unit?: string;
 }): number
 ```
 
 - `default` is the starting value (falls back to `min`, then `0`)
 - `min` defaults to `0`
 - `max` and `step` are derived if you omit them, but set them for predictable sliders
+- `unit` labels the slider value, so `unit: "mm"` shows "50 mm" and `unit: "°"` shows "45°". Facet models are in millimeters, so label lengths `"mm"` and leave `unit` off for plain counts
 - the returned value is a plain number you use like any other
 
 ```ts
-const w = param.number("width", { min: 20, max: 90, default: 50, step: 1 });
+const w = param.number("width", { min: 20, max: 90, default: 50, step: 1, unit: "mm" });
 let plate = cube([w, w, 8]);
 return plate;
 ```
