@@ -8,7 +8,7 @@ description: Common Keystone messages and what to do about them
 | **Sign in to start building** | Building needs an Omni account | Select it and sign in, or create an account |
 | **Verify your email address to start building.** | Your account's email address is not verified | Verify your email from your Omni account, then send again |
 | **Keystone couldn't start your site.** or **Couldn't reach Keystone.** | The site could not be created just now; your prompt is kept | Select **Try again** |
-| **Your session has ended.** | Your sign-in expired | Select **Sign in again**; your prompt carries over |
+| **Your session has ended.** or **Your session expired.** | Your sign-in expired | Select **Sign in again**; your prompt carries over |
 | **Generation needs a workspace. Create or join one to continue.** | Your account is not in a workspace yet | Create or join a workspace, then try again. See [Workspaces and Sites](/products/keystone/workspaces) |
 | **You're out of AI credits. Buy more credits to keep generating.** | The credit balance of the site's workspace is used up | Select **Buy credits**, or, on a paid plan, wait for its included credits to renew. See [Credits](/products/keystone/credits) |
 | **AI generation uses Omni credits.** | The workspace is on Free, has never bought credits, and has no free credits from a card | In your personal workspace, select **Add a card to unlock 50 free AI credits a month**. Or select **Buy credits**, or upgrade the workspace's plan. See [Credits](/products/keystone/credits#get-more-credits) |
@@ -18,10 +18,15 @@ description: Common Keystone messages and what to do about them
 | **Generation is temporarily unavailable. Please try again in a moment.** | Generation could not run just now | Wait a minute and send again |
 | **Generation failed. Please try again.** | The turn did not complete; nothing was saved | Select **Try again**, which sends your request again (it is back in the prompt, so you can edit it first) |
 | **Stopped. Nothing was changed.** | You stopped the turn | Send the request again when you are ready |
-| **This site is still generating.** | A turn is already running on the site, for example from another tab | Wait for it to finish, or stop it, then select **Try again** |
+| **This site is still generating.** | A turn is already running on the site, from another tab or another member | Wait for it to finish, then select **Try again**. Only the member who started a turn can stop it |
+| **That model isn't available. Pick another model and send again.** | The model you picked is no longer offered | Pick another model next to the prompt and send again. See [Models](/products/keystone/models) |
+| **This site couldn't be found.** or **That site couldn't be opened.** | The site was deleted, or it belongs to a workspace you are no longer in | Open another site from **Your sites**, or describe a new one |
 | **A live site can't move to another workspace** | Hosted sites stay in the workspace they are hosted in | Start a new site in the other workspace. See [Move a site to another workspace](/products/keystone/workspaces#move-a-site-to-another-workspace) |
+| **That workspace has reached its plan's site limit.** | The workspace you are moving a site into has no room for another site | Pick another workspace, or upgrade that workspace's plan. See [Sites](/products/keystone/workspaces#sites) |
+| **That workspace has more members than its plan's seats, so it can't take another site.** | The workspace you are moving a site into has more members than its plan's seats | Upgrade its plan or remove members first. See [Seats](/products/keystone/workspaces#seats) |
 | **This site's hosting couldn't be removed right now, so it wasn't deleted.** | Fractal could not take the hosted site offline just then | Try deleting again in a moment |
-| **Only this workspace's owners and admins can delete its sites** | Deleting and moving a team workspace's sites needs an owner or admin | Ask a workspace owner or admin |
+| **You can't remove this site's hosting in its workspace on Fractal, so it wasn't deleted.** | Your access on Fractal does not let you remove the hosted site's service | Ask a workspace admin to delete it |
+| **Only this workspace's owners and admins can delete its sites** (or **move its sites to another workspace**) | Deleting and moving a team workspace's sites needs an owner or admin | Ask a workspace owner or admin |
 | **This workspace has N members, but its plan includes N seats.** | The site's team workspace has more members than its plan's seats | Remove members or upgrade the workspace's plan. See [Seats](/products/keystone/workspaces#seats) |
 | **That workspace isn't available to you.** | Keystone could not confirm you are a member of the workspace the builder was opened for | Pick another workspace under **Building in**, or ask a workspace owner to add you |
 | **... has used the N sites its plan includes.** | The picked workspace is at its plan's site limit | Select **Upgrade plan** to open the workspace's billing page, select **Open** to keep building its latest site, pick another workspace, or delete a site you no longer need. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
