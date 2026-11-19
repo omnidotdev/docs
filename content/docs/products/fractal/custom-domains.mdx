@@ -51,10 +51,12 @@ immediately. The panel reports one of:
 - **Ownership: Verified**: the domain is yours, and setup continues with the DNS
   records that route it.
 
-Until the record is found, the domain is not connected. Once verified, the
-domain stays verified for as long as the service uses it; keep the TXT record in place so the domain can be
-verified again if you ever reconnect it. Changing the domain starts a new
-verification for the new one.
+Until the custom domain is verified and live, your service keeps serving on its
+`*.fractaldeploy.app` address, and the panel shows both: the address it is
+serving on now and the custom domain still being set up. Once the custom domain
+is live, it replaces that address. Changing the domain starts a new
+verification for the new one, and removing it brings the `*.fractaldeploy.app`
+address back.
 
 The code in the record is tied to your project, so the same domain needs a new
 record if you move it to a service in another project. A domain verified for
@@ -66,10 +68,26 @@ Custom domains that were already live when ownership verification was
 introduced stay verified, with nothing to add.
 </Callout>
 
+## Keep the record in place
+
+Leave the TXT record at your DNS provider after the domain is verified. Fractal
+looks it up again about once a day. If it goes missing or its value changes:
+
+- The domain stays connected, and the panel shows **Ownership record missing**
+  with the record to restore and the date to restore it by.
+- The workspace's members get an email with the same date.
+- If the record is still missing after a week of daily checks, the domain is
+  disconnected and needs to be verified again. A single failed lookup never
+  disconnects a live domain.
+
+Adding the record back before the deadline clears the warning. Domains that were
+already live when ownership verification was introduced have no record, so they
+are not re-checked.
+
 <Callout title="Zero-downtime issuance">
 Fractal uses DNS-based certificate validation, so the certificate is issued and
 ready before any traffic moves to your domain. Your existing
-`*.fractaldeploy.app` URL keeps working the whole time.
+`*.fractaldeploy.app` URL keeps working until the custom domain is live.
 </Callout>
 
 ## DNS records
@@ -112,8 +130,8 @@ the domain is waiting on. If a certificate's validation times out, Fractal
 restarts it automatically, so a domain recovers on its own once the DNS records
 are correct.
 
-Your existing `*.fractaldeploy.app` URL keeps serving the whole time, so there is
-never a gap while a custom domain finishes setting up.
+Your existing `*.fractaldeploy.app` URL keeps serving until the custom domain is
+live, so there is never a gap while it finishes setting up.
 
 ## Plan limits
 
