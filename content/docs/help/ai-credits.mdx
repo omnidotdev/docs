@@ -4,9 +4,9 @@ description: How AI credits pay for AI features across Omni products, what each 
 icon: Coins
 ---
 
-**AI credits** pay for the AI features in Omni products: generating and editing a site in Keystone, managed generation in Facet, the hosted assistant in Beacon, and cloud generation in Creator. Each AI request spends credits based on the model and how much work it does. One credit is $0.01 of AI usage at retail rates.
+**AI credits** pay for the AI features in Omni products: generating and editing a site in Keystone, managed generation in Facet, the hosted assistant in Beacon, cloud generation in Creator, and managed model requests through Synapse. Each AI request spends credits based on the model and how much work it does. One credit is $0.01 of AI usage at retail rates.
 
-AI credits pay only for AI. They are separate from [account credit](#ai-credits-and-account-credit), which is money applied to your invoices.
+AI credits pay only for AI. They are separate from [account credit](#ai-credits-and-account-credit), which is money applied to your invoices. Some products, such as MyFi, include AI in their plan on an allowance of their own that never uses AI credits.
 
 ## One balance per workspace
 
@@ -16,7 +16,7 @@ Products show the balance of the workspace they bill, for example **1,250 AI cre
 
 ## Included credits
 
-Many plans include a monthly allowance of AI credits. Allowances from different products add to the same balance: a workspace on Keystone Team that also uses Beacon Free receives both allowances each month.
+Many plans include a monthly allowance of AI credits. Allowances from different products add to the same balance: a workspace on Keystone Team that is also on Beacon Pro receives both allowances each month.
 
 | Product | Free | Pro | Team |
 |---|---|---|---|
@@ -31,24 +31,27 @@ Each product's plans page lists its current allowance. Free plans include no AI 
 
 Add a credit or debit card to your Omni account to unlock **50 free AI credits every month** in your personal workspace. Your card is saved with Stripe and **never charged**.
 
-**1. Open [Billing](https://account.omni.dev/billing?tab=ai)** and find **Free AI credits** under **AI credits**. A product's **Add a card to unlock free AI credits** link opens it directly.
+**1. Open [Billing](https://account.omni.dev/billing?tab=ai)** and find **Free AI credits** under **AI credits**. A product's **Add a card to unlock 50 free AI credits a month** link opens it directly. Your email address must be verified before you can add a card.
 
 **2. Select Add a card** and enter your card on Stripe's secure page.
 
 **3. Return to Billing.** The 50 credits join your personal workspace's balance right away, and 50 more arrive at the start of each calendar month (UTC) while the card stays saved.
 
-- One card unlocks one free allowance, across all Omni accounts. A card already used on another account cannot unlock it again.
+- A card backs one Omni account at a time. A card removed from one account can unlock the allowance on another, but each card unlocks at most one allowance per calendar month.
 - Prepaid cards cannot unlock free credits. Use a credit or debit card.
-- Free credits expire at the end of each month, like other included credits, and run on each product's designated free model.
+- Free credits expire at the start of the next calendar month (UTC), when the next 50 arrive.
+- Free credits pay only for text generation, on each product's designated free model (Haiku 5.5), whatever model you pick. Image, speech, and embedding requests never spend them.
 - They fund your personal workspace only, so products bill them when you work there.
 
 ### When included credits arrive
 
-- **Free plans**: at the start of each calendar month (UTC), or the first time the workspace uses the product that month
-- **Paid subscriptions**: at the start of each billing period, once its invoice is paid
-- **Plans granted by Omni** (for example a complimentary plan or a bundle): at the start of each calendar month (UTC), and right away when the plan is granted
+- **Monthly subscriptions**: at the start of each billing period, once its invoice is paid
+- **Yearly subscriptions**: the first month's allowance once the first invoice is paid, then a month's allowance on the same day each month while the subscription stays active (a past-due or paused subscription receives none)
+- **Complimentary plans granted by Omni**: right away when the plan is granted, then at the start of each calendar month (UTC)
 
-Paid plans of products that use AI credits start without a free trial; the paid allowance starts with the first paid billing period. If a workspace moves from a granted plan to a paid subscription, the subscription's allowance replaces what was left of the previous one, so a workspace never holds two allowances for the same product at once.
+Changing plans in the middle of a billing period (for example from Pro to Team) does not add an allowance until the next period. A plan that comes as part of a bundle adds no allowance of its own.
+
+Paid plans of products that use AI credits start without a free trial; the paid allowance starts with the first paid billing period. If a workspace moves from a complimentary plan to a paid subscription, the subscription's allowance replaces what was left of the previous one, so a workspace never holds two allowances for the same product at once.
 
 ### Unused credits
 
@@ -75,6 +78,8 @@ In a team workspace, only **owners** and **admins** can buy credits. A **member*
 When the balance reaches zero, AI features pause. The product shows an out-of-credits message, such as **You're out of AI credits. Buy more credits to keep generating.**, with a **Buy credits** link. Omni never charges overage for AI: nothing is billed until you buy more credits, and AI features resume as soon as credits arrive, either from a purchase or from the next monthly allowance.
 
 A request that is already running when the balance runs out still finishes, so the balance can end slightly below zero. The next purchase or allowance covers that first.
+
+If a credit pack is refunded or its payment is disputed, its credits are taken back, even ones already spent, so the balance can go below zero. AI features pause until the balance is above zero again.
 
 ## AI credits and account credit
 
