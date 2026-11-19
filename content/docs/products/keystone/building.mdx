@@ -41,6 +41,42 @@ works on the whole site.
 The full conversation is saved with the site, so it is still there when you come
 back.
 
+## Stop a turn
+
+While a turn runs, the send button becomes **Stop** (on phones, **Stop
+generating** also shows over the preview). Stopping ends the turn on Keystone's
+side too, so the model stops working on it, and the site stays exactly as it
+was. A turn stopped before the model answers spends no credits. Your request
+goes back into the prompt, ready to send again or edit.
+
+A site runs one turn at a time. If you send from a second tab while a turn is
+still running, Keystone asks you to wait for it to finish or stop it first.
+
+## Try again after a failed turn
+
+If a turn fails for a reason that may pass, such as a dropped connection or a
+busy moment, the message under the chat offers **Try again**. The failed turn
+is taken off the chat (nothing was saved for it) and your request is back in
+the prompt, so **Try again** sends it again, or you can edit it first. Failures
+that a retry cannot fix, such as running out of credits, show their own action
+instead. See [Troubleshooting](/products/keystone/troubleshooting).
+
+## Version history and undo
+
+Keystone saves a version of the site after every change: each turn, a start
+from a template, and each restore. Select the history button in the builder
+header (on phones, **Version history** under the chat) to see them, newest
+first, each named by the request that made it.
+
+- **Undo last change** goes back one version
+- **Restore** brings back any earlier version
+
+Restoring changes the site's pages, theme, header, and footer to that version
+and notes the restore in the chat. The restore is saved as a version too, so you
+can switch back the same way. The 50 most recent versions are kept per site.
+Restoring spends no credits, and it waits while a turn is running. A published
+site shows a restored version once you republish.
+
 ## Motion, 3D, and scripts
 
 Keystone designs each site with a point of view: type pairing, spacing, color,
@@ -66,6 +102,11 @@ Keystone gives the site a title, a one-sentence description, and a content
 language on the first turn. They appear in browser tabs, search results, and
 link previews on social media. To change them, ask, for example "Set the site
 title to Ember & Bean" or "Give the About page its own description".
+
+To rename the site in Keystone itself (its name under **Your sites** and in the
+builder header), select the rename button beside its name in the builder
+header, or **Rename** on its card. See
+[Manage your sites](/products/keystone/workspaces#manage-your-sites).
 
 ## Pick a model
 

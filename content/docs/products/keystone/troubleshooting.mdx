@@ -15,10 +15,15 @@ description: Common Keystone messages and what to do about them
 | **You're generating quickly. Please wait a moment and try again.** | You sent prompts faster than the fair-use limit | Wait a moment, then send again |
 | **Generation is at capacity right now. Please try again later.** | Free generation is paused for now to protect capacity | Try again later, or upgrade your workspace to a paid plan |
 | **Generation is temporarily unavailable. Please try again in a moment.** | Generation could not run just now | Wait a minute and send again |
-| **Generation failed. Please try again.** | The turn did not complete | Send the prompt again |
+| **Generation failed. Please try again.** | The turn did not complete; nothing was saved | Select **Try again**, which sends your request again (it is back in the prompt, so you can edit it first) |
+| **Stopped. Nothing was changed.** | You stopped the turn | Send the request again when you are ready |
+| **This site is still generating.** | A turn is already running on the site, for example from another tab | Wait for it to finish, or stop it, then select **Try again** |
+| **A live site can't move to another workspace** | Hosted sites stay in the workspace they are hosted in | Start a new site in the other workspace. See [Move a site to another workspace](/products/keystone/workspaces#move-a-site-to-another-workspace) |
+| **This site's hosting couldn't be removed right now, so it wasn't deleted.** | Fractal could not take the hosted site offline just then | Try deleting again in a moment |
+| **Only this workspace's owners and admins can delete its sites** | Deleting and moving a team workspace's sites needs an owner or admin | Ask a workspace owner or admin |
 | **This workspace has N members, but its plan includes N seats.** | The site's team workspace has more members than its plan's seats | Remove members or upgrade the workspace's plan. See [Seats](/products/keystone/workspaces#seats) |
 | **That workspace isn't available to you.** | Keystone could not confirm you are a member of the workspace the builder was opened for | Pick another workspace under **Building in**, or ask a workspace owner to add you |
-| **... has used the N sites its plan includes.** | The picked workspace is at its plan's site limit | Select **Open** to keep building its latest site, pick another workspace, or select **See plans**. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
+| **... has used the N sites its plan includes.** | The picked workspace is at its plan's site limit | Select **Upgrade plan** to open the workspace's billing page, select **Open** to keep building its latest site, pick another workspace, or delete a site you no longer need. See [Workspaces and Sites](/products/keystone/workspaces#sites) |
 | **This workspace needs a Fractal plan with room for another site.** | The workspace has no Fractal plan (Fractal has no free plan), or its plan has no room for another project or service | Select **Upgrade on Fractal** to choose or upgrade the workspace's Fractal plan, then select **Host on Fractal** again; the preview link works meanwhile |
 | **You can't deploy sites in this workspace on Fractal.** | Your access in the workspace does not let you deploy on Fractal | Ask a workspace owner for access; the preview link works meanwhile |
 | Publishing gave a preview link instead of a hosted site | You selected **Get a preview link**, or the hosted deploy could not run just now | Select **Host on Fractal**, or try again later |

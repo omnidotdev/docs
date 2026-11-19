@@ -32,20 +32,31 @@ prompt, which creates the site in the picked workspace. Beside the picker, the
 builder shows how many of the workspace's sites are used (for example, **1 of
 1 sites used**), and the header shows the credit balance its turns will spend.
 If the workspace has no room for another site, or has more members than its
-plan's seats, the builder says so before you type, with links to open its
-latest site, see plans, or check its members.
+plan's seats, the builder says so before you type, with links to upgrade its
+plan on its billing page, open its latest site, or check its members.
 
 The new site belongs to that workspace from the start, so the team's members
 build it on the team's credits and the team's site limit applies. Once the site
 exists, **Building in** shows its workspace and links to the workspace's page.
 
-### Move a site when you publish
+### Move a site to another workspace
 
-When you publish, you can also choose another workspace you belong to. The site
-then moves into that workspace, which must have room under its site limit. A
-site hosted on Fractal moves its hosting into that workspace's own Fractal
-project, where the workspace's Fractal plan applies. See
-[Publishing](/products/keystone/publishing#choose-a-workspace).
+A site that is not hosted (a draft, or one shared by preview link) can move to
+another workspace you belong to: select **Move to workspace** in its card's
+menu under **Your sites**, or pick another workspace when you publish it. The
+site moves with its chat, versions, and form submissions. The new workspace
+must have room under its site limit and a seat for each of its members; the
+site then counts toward its limit, and its turns spend that workspace's
+credits. Form notifications go to the member who moved it. A
+[GitHub Sync](/products/keystone/github-sync) link made through the old
+workspace's GitHub connection is removed, so link the repository again from the
+new workspace.
+
+A hosted site stays in the workspace it is hosted in. Its service, address,
+custom domain, and code all belong to that workspace on Fractal and Arbor, so
+moving it would take the live site offline. To build it elsewhere, start a new
+site in the other workspace. In a team workspace, only owners and admins can
+move its sites out.
 
 ### Your workspace on Fractal and Arbor
 
@@ -73,20 +84,42 @@ has a site limit:
 
 Signed in, Keystone opens on **What will you build?**: a prompt for a new site,
 with example sites that fill it in one tap. Below it, **Your sites** lists every
-site you have built across your workspaces. Select a site's card to keep
-working on it in the builder; a hosted site's card also links to the live site
-(**Visit**) and to **Manage in Fractal**. Describe a new site in the prompt, or
+site you have built across your workspaces, each card topped with a live
+thumbnail of its home page. Select a site's card to keep working on it in the
+builder; a hosted site's card also links to the live site (**Visit**) and to
+**Manage in Fractal**. Describe a new site in the prompt, or
 select **Browse templates** to open the
 [template gallery](/products/keystone/templates). **Your sites** is also in the
 header and in the account menu.
 
 Only sites with something built on them count toward the limit. A new site can
-start until the workspace reaches its limit. At the limit, the builder explains
-it as soon as the workspace is picked, with a link to open the workspace's most
-recent site, and **Use this template** explains the limit instead of creating a
-site. A prompt never lands on an existing site by accident. Each workspace has
-its own limit, so a full personal workspace does not stop you from starting a
-site in a team workspace.
+start until the workspace reaches its limit. At the limit, Keystone refuses to
+start another site there: the builder explains it as soon as the workspace is
+picked, with **Upgrade plan** (the workspace's billing page) and a link to open
+its most recent site, and **Use this template** explains the limit with a link
+to the workspace's plans and billing instead of creating a site. A prompt never
+lands on an existing site by accident. Each workspace has its own limit, so a
+full personal workspace does not stop you from starting a site in a team
+workspace. Deleting a site frees its place.
+
+### Manage your sites
+
+Each card under **Your sites** (and on a workspace's page) has a menu:
+
+- **Rename** gives the site a name of up to 80 characters. The name shows on
+  its card and in the builder header in place of the site's generated title;
+  the title visitors see in their browser stays as Keystone wrote it
+- **Move to workspace** moves a site that is not hosted (see
+  [Move a site to another workspace](#move-a-site-to-another-workspace))
+- **Delete** deletes the site after you confirm. Deleting removes the site, its
+  versions, its form submissions, and its preview link, and takes a hosted site
+  offline, releasing its address and any custom domain. It cannot be undone. A
+  hosted site's code stays in the workspace's repository on Arbor, where
+  workspace owners can delete it, and a GitHub repository linked with
+  [GitHub Sync](/products/keystone/github-sync) is left as it is
+
+In a team workspace, only owners and admins can delete or move its sites; every
+member can rename them.
 
 ## Members
 
