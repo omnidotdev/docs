@@ -30,16 +30,25 @@ its own. A hosted site updates only when you publish again. See
 
 ## Can I use my own domain?
 
-Custom domains are coming soon, with hosted sites, on Pro and Team. Today,
-publishing gives a shareable preview link. See [Custom domains](/products/keystone/publishing#custom-domains).
+Yes, for a site hosted on Fractal. Enter the domain when you select **Host on
+Fractal**, then add the DNS records Keystone shows at your registrar. Custom
+domains count toward your workspace's Fractal plan. A preview link has no custom
+domain. See [Custom domains](/products/keystone/publishing#custom-domains).
 
 ## Can scripts I ask for run on my published site?
 
-Published sites do not run custom page scripts: Keystone strips them on publish
-for safety. Interactive pieces such as product grids, buy buttons, and sign-up
-forms work through [integration blocks](/products/keystone/integrations), and
-contact and booking forms through [form blocks](/products/keystone/forms), which
-Keystone wires up itself.
+On a hosted site, yes. Each page's script (its animation, 3D, and
+interactions) runs on the site's own address, and a page can load scripts only
+from the site itself, Keystone's integration block runtime, and
+[three.js](https://threejs.org). Scripts and event handlers written into the
+HTML are removed on publish. A preview link is a still render, so no page
+script runs there. See
+[Scripts on hosted sites](/products/keystone/publishing#scripts-on-hosted-sites).
+
+Interactive pieces such as product grids, buy buttons, and sign-up forms work
+through [integration blocks](/products/keystone/integrations), and contact and
+booking forms through [form blocks](/products/keystone/forms), which Keystone
+wires up itself.
 
 ## What happens when I run out of credits?
 
