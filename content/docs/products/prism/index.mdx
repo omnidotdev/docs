@@ -1,0 +1,94 @@
+---
+title: 📊 Prism
+description: Privacy-first product analytics
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import {
+    PiChartLineUpBold,
+    PiShieldCheckBold,
+    PiCodeBold,
+} from "react-icons/pi";
+
+<ProductOverview
+  tags={[
+    {
+      label: "Product Analytics",
+      icon: <PiChartLineUpBold />,
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      label: "Cookieless",
+      icon: <PiShieldCheckBold />,
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      label: "Open Source",
+      icon: <PiCodeBold />,
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://prism.omni.dev",
+      label: "Visit App",
+      type: "website",
+      className:
+        "bg-violet-100 text-violet-800 dark:bg-violet-900/20 dark:text-violet-300",
+    },
+    {
+      href: `${app.socials.github}/prism-stack`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "💡 Big Idea",
+      description:
+        "Understand how people use your product without tracking them: no cookies, no stored IP addresses, nothing to consent to.",
+    },
+  ]}
+/>
+
+**Omni Prism** is privacy-first product analytics. Add one script tag (or the JavaScript client) to a site, app, or docs portal, and Prism reports visitors, pageviews, sessions, sources, and custom events on a dashboard and a GraphQL API.
+
+## How it fits together
+
+- A **workspace** (your Omni workspace) owns one or more **products**. A product is anything you measure: a marketing site, a web app, a docs portal.
+- Each product has a public **collector key** (`pk_...`). The key is not a secret: it only routes events to the right product.
+- A product can be **locked to a domain**, so events sent from any other site are rejected.
+- Events arrive at a public collector, roll up into per-product aggregates every few minutes, and appear on the [dashboard](/products/prism/dashboard).
+
+## The privacy promise
+
+Prism never sets a cookie, never stores a raw IP address, and never builds a profile that follows a person across days or sites. Visitors are counted with a hash that rotates every day, referrers are reduced to a hostname, and query strings are discarded apart from a short whitelist of campaign parameters. See [Privacy](/products/prism/privacy) for exactly what is stored and what is not.
+
+<Cards>
+  <Card title="Getting Started" href="/products/prism/getting-started">
+    Create a product and see your first pageview
+  </Card>
+  <Card title="Installing" href="/products/prism/installing">
+    Script tag, JavaScript client, or raw HTTP
+  </Card>
+  <Card title="Dashboard" href="/products/prism/dashboard">
+    Metrics, breakdowns, conversions, and export
+  </Card>
+  <Card title="Attribution" href="/products/prism/attribution">
+    Campaigns, sources, and conversions
+  </Card>
+  <Card title="Privacy" href="/products/prism/privacy">
+    How counting works and what is never stored
+  </Card>
+  <Card title="GraphQL API" href="/products/prism/api">
+    Read your numbers programmatically
+  </Card>
+</Cards>
+
+## Self-Hosting
+
+Prism is open source under Apache-2.0. The `prism-stack` repository ships a Docker Compose stack (Postgres, the API, and the dashboard) that runs against any OpenID Connect provider, with no plan limits. See [Self-Hosting](/products/prism/self-hosting).

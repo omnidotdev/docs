@@ -1,0 +1,35 @@
+---
+title: Pricing
+description: Prism plans and how event, product, retention, and member limits are enforced
+---
+
+import { Pricing } from "@/components/docs";
+
+Prism is priced per workspace by monthly event volume. Live pricing is always shown at [prism.omni.dev/pricing](https://prism.omni.dev/pricing).
+
+<Pricing productId="prism" features />
+
+## How limits are enforced
+
+### Events
+
+Events are counted per workspace per UTC calendar month, across all of its products. Pageviews and custom events both count; bots never do.
+
+- **Free** stops accepting events at the allowance. The collector returns `429` until the next month starts.
+- **Pro and Team** keep accepting events up to 1.5 times the allowance before stopping, so a traffic spike does not lose data.
+
+### Products
+
+Creating a product beyond the plan's limit is refused with a prompt to upgrade.
+
+### Retention
+
+Data older than the retention window is purged hourly, and the dashboard and API never show data past it. A product can set a shorter retention of its own; the effective window is the shorter of the plan's and the product's.
+
+### Members
+
+The member limit (1 on Free, 5 on Pro, unlimited on Team) works as seats. Owners and admins always hold a seat; the remaining seats go to other members in the order they joined the workspace. A member without a seat can sign in but sees an upgrade notice instead of analytics until the plan grows or a seat frees up. Members are managed in the Omni account hub at [account.omni.dev](https://account.omni.dev).
+
+## Self-hosting
+
+No plan limits apply to a [self-hosted](/products/prism/self-hosting) install.

@@ -1,0 +1,67 @@
+---
+title: Self-Hosting
+description: Run Prism on your own infrastructure with Docker Compose
+---
+
+Prism is open source under Apache-2.0. The [`prism-stack`](https://github.com/omnidotdev/prism-stack) repository runs it as three containers: Postgres, the API (collector and GraphQL), and the dashboard. Plan limits do not apply when self-hosting.
+
+## Requirements
+
+- Docker with Compose
+- An OpenID Connect provider for sign-in, with a client registered for the redirect URI `<APP_URL>/api/auth/oauth2/callback/omni`
+
+## Configure
+
+```bash
+git clone https://github.com/omnidotdev/prism-stack
+cd prism-stack
+cp .env.local.template .env
+```
+
+Fill in `.env`. Generate each secret with `openssl rand -hex 32`.
+
+| Variable | Purpose |
+| --- | --- |
+| `DB_PASSWORD` | Postgres password |
+| `APP_URL` | Public URL of the dashboard (default `http://localhost:3000`) |
+| `API_URL` | Public URL of the API and collector (default `http://localhost:4000`) |
+| `AUTH_BASE_URL` | Issuer URL of your OpenID Connect provider |
+| `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET` | The client registered with your provider |
+| `AUTH_SECRET` | Session encryption secret for the dashboard |
+
+Optional:
+
+| Variable | Purpose |
+| --- | --- |
+| `AUTH_SCOPES` | Sign-in scopes. Defaults to `openid profile email offline_access`, which suits any provider. Add `organization` when signing in with Omni Identity to use Omni workspaces |
+| `APP_PORT`, `API_PORT` | Host ports (defaults `3000` and `4000`) |
+
+## Run
+
+```bash
+docker compose up -d
+```
+
+Compose pulls `ghcr.io/omnidotdev/prism-api` and `ghcr.io/omnidotdev/prism-app`, starts Postgres, and runs database migrations on boot. The dashboard is served at `APP_URL` and the collector at `API_URL`.
+
+## Workspaces
+
+With a provider that does not issue Omni workspaces, each user gets a personal workspace and owns the products in it. With Omni Identity and the `organization` scope, Prism uses the user's Omni workspaces and roles.
+
+## Point sites at your install
+
+Load the tag from your own API:
+
+```html
+<script defer src="https://prism-api.example.com/script.js" data-product="pk_..."></script>
+```
+
+The script reports to the origin it was loaded from. With the JavaScript client, set `collectorUrl` to your `API_URL`.
+
+## Build from source
+
+To build the images instead of pulling them, clone the services (see the repository README) and run:
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```

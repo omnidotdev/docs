@@ -1,0 +1,50 @@
+---
+title: Attribution
+description: Track campaigns and break conversions down by source
+---
+
+Prism answers "where did this visit come from?" with referrers and campaign parameters, and "which channels lead to sign-ups?" with conversions.
+
+## Referrers
+
+The referrer of each event is reduced to its hostname (`news.ycombinator.com`, never the full URL). Referrals from the page's own site are dropped, so internal navigation does not show up as a source.
+
+## Campaign parameters
+
+Tag inbound links with campaign parameters:
+
+```
+https://example.com/?utm_source=newsletter&utm_medium=email&utm_campaign=launch
+```
+
+Only these parameters are read from a URL. The rest of a query string is never sent or stored.
+
+| Parameter | Used for |
+| --- | --- |
+| `utm_source` | Source (for example `newsletter`, `x`) |
+| `ref` | Source, when `utm_source` is absent |
+| `utm_campaign` | Campaign (for example `launch`) |
+| `utm_medium` | Kept on the event's properties |
+| `utm_content` | Kept on the event's properties |
+
+Values are lowercased, trimmed, and capped at 100 characters.
+
+## First touch
+
+The script tag and the JavaScript client remember the campaign parameters a tab first landed with, and attach them to every later event in that tab. A visitor who arrives from `?utm_source=newsletter`, reads three pages, then signs up is attributed to `newsletter` on the sign-up event too. The first-touch values live in `sessionStorage` and disappear when the tab closes.
+
+When sending events over [HTTP](/products/prism/installing#http-api), put the parameters in `properties` (or leave them on `path`) to get the same attribution.
+
+## Conversions
+
+Any custom event can serve as a conversion. Track the action:
+
+```js
+window.prism.track("signup", { plan: "pro" });
+```
+
+The dashboard's conversions panel then breaks that event down by source and campaign. The same breakdown is available from the [GraphQL API](/products/prism/api) with `productBreakdown(dimension: "source", event: "signup")`.
+
+## Limits of attribution
+
+Visitor ids rotate every UTC day and first touch is kept per tab, so attribution covers a single visit, not a multi-day journey. A person who clicks a campaign link on Monday and signs up in a new tab on Thursday is not linked to that campaign. This is a deliberate trade-off: see [Privacy](/products/prism/privacy).

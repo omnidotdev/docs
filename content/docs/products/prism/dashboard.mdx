@@ -1,0 +1,54 @@
+---
+title: Dashboard
+description: Read a product's metrics, breakdowns, and conversions at prism.omni.dev
+---
+
+Each product has a dashboard at `prism.omni.dev/@<workspace>/<product>`. Any member of the workspace can read it.
+
+## Headline metrics
+
+| Metric | Meaning |
+| --- | --- |
+| Visitors | Unique visitors per day, summed across the range. A person who returns on another day counts again (see [how visitors are counted](/products/prism/privacy#how-visitors-are-counted)) |
+| Pageviews | `pageview` events |
+| Sessions | Distinct per-tab sessions |
+| Bounce rate | Share of sessions with a single pageview |
+| Avg. visit duration | Average time between the first and last event of a session |
+| Events | All events, pageviews and custom events together |
+
+Each metric shows its change against the previous window of the same length.
+
+## Realtime
+
+The realtime counter shows distinct visitors in the last five minutes, read directly from incoming events.
+
+## Range
+
+Pick the last 7 days, 30 days, 90 days, or 12 months. A daily chart plots visitors and pageviews across the range. The range never reaches past your plan's [retention window](/products/prism/pricing#how-limits-are-enforced).
+
+## Breakdowns
+
+| Panel | Dimensions |
+| --- | --- |
+| Pages | Path |
+| Sources | Referrer, source, campaign |
+| Locations | Country |
+| Devices | Device type, browser, operating system |
+
+Each breakdown ranks values by count and visitors. See [Privacy](/products/prism/privacy#what-is-stored) for how coarse each dimension is.
+
+## Conversions
+
+The conversions panel breaks any custom event (for example `signup`) down by source and campaign, so you can see which channels bring people who act. See [Attribution](/products/prism/attribution).
+
+## Recent events
+
+A feed of the latest events, with the event name, path, and coarse context. Visitor and session ids are never shown.
+
+## Export
+
+Any breakdown can be downloaded as CSV with the rows currently shown.
+
+## Freshness
+
+Charts, totals, and breakdowns read from rollups that rebuild every 5 minutes, so new data appears within a few minutes. The realtime counter reads incoming events directly.
