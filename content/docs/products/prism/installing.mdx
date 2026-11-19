@@ -1,0 +1,107 @@
+---
+title: Installing
+description: Send events with the script tag, the JavaScript client, or raw HTTP
+---
+
+There are three ways to send events to Prism. All of them address a product by its collector key (`pk_...`), shown in the product's install instructions. The key is public: it only routes events, and cannot read anything.
+
+## Script tag
+
+The drop-in tag works on any site: plain HTML, static site generators, or any framework.
+
+```html
+<script defer src="https://api.prism.omni.dev/script.js" data-product="pk_..."></script>
+```
+
+- Records a pageview on load and on every History API navigation (`pushState`, `replaceState`, back and forward)
+- Skips `localhost`, `127.0.0.1`, and `file:` pages by default
+- Stores only a per-tab session id and the tab's first-touch campaign parameters in `sessionStorage`, which the browser clears when the tab closes
+
+Optional attributes:
+
+| Attribute | Purpose |
+| --- | --- |
+| `data-api` | Collector base URL. Defaults to the origin the script is loaded from |
+| `data-allow-localhost` | Report from `localhost` too, for testing |
+
+### Custom events
+
+The tag exposes `window.prism.track(name, properties)`:
+
+```js
+window.prism.track("signup", { plan: "pro" });
+```
+
+## JavaScript client
+
+For apps that bundle their own code, use the client in `@omnidotdev/providers`:
+
+```bash
+bun add github:omnidotdev/providers
+```
+
+```tsx
+import { createPrismClient, usePageview } from "@omnidotdev/providers/analytics";
+
+const prism = createPrismClient({
+  collectorUrl: "https://api.prism.omni.dev",
+  product: "pk_...",
+});
+
+// in your root component, with your router's current pathname
+usePageview(prism, pathname);
+
+// anywhere in the app
+prism.track("signup", { plan: "pro" });
+```
+
+The client queues events and sends them in batches (every 10 seconds, or sooner once 20 are queued), and flushes with `navigator.sendBeacon` when the page is hidden so leaving a page does not drop its events. It is a no-op during server rendering and when `collectorUrl` is empty, so local and preview builds can leave it unset.
+
+## HTTP API
+
+Any server or client can post events directly. CORS is open on the collector.
+
+```bash
+curl -X POST https://api.prism.omni.dev/collect \
+  -H "content-type: application/json" \
+  -d '{
+    "product": "pk_...",
+    "events": [
+      {
+        "name": "pageview",
+        "path": "/pricing",
+        "referrer": "https://example.com/blog",
+        "sessionId": "3f2a9c1e",
+        "properties": { "utm_source": "newsletter" }
+      }
+    ]
+  }'
+```
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `product` | Yes | The product's collector key |
+| `events` | Yes | 1 to 100 events per batch |
+| `events[].name` | Yes | `pageview` or any custom event name, up to 100 characters |
+| `events[].path` | No | Page path. Only whitelisted campaign parameters are read from a query string; the rest is discarded |
+| `events[].referrer` | No | Full referrer URL. Stored as a hostname only |
+| `events[].sessionId` | No | Any id stable for one visit, used for sessions and bounce rate |
+| `events[].properties` | No | JSON object, up to 2 KB. Larger properties are dropped and the event is kept |
+
+The body may also be sent as `text/plain`, which is what `navigator.sendBeacon` uses.
+
+### Responses
+
+| Status | Meaning |
+| --- | --- |
+| `202` | Accepted |
+| `400` | Malformed batch |
+| `403` | The request's `Origin` is outside the product's domain lock |
+| `404` | Unknown collector key |
+| `429` | The workspace reached its monthly event limit (see [Pricing](/products/prism/pricing)) |
+
+Requests from bots, crawlers, and empty user agents return `202` but store nothing and never count toward the monthly allowance.
+
+## Domain lock
+
+A product locked to a domain (for example `example.com`) accepts events whose `Origin` is that domain or any of its subdomains, and always accepts `localhost` for development. Events from any other site get a `403`. Requests without an `Origin` header, such as server-to-server calls, are accepted.

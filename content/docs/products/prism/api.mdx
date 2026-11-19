@@ -1,0 +1,66 @@
+---
+title: GraphQL API
+description: Read your analytics programmatically with an Omni API key
+---
+
+<Callout type="info">
+  The GraphQL read API is included on the Pro and Team plans. See [Pricing](/products/prism/pricing).
+</Callout>
+
+Prism serves the same numbers the dashboard shows over GraphQL at `POST https://api.prism.omni.dev/graphql`.
+
+## Authenticate
+
+Create an API key for your workspace in the Omni account hub at [account.omni.dev](https://account.omni.dev), then send it as a bearer token:
+
+```bash
+curl https://api.prism.omni.dev/graphql \
+  -H "Authorization: Bearer omni_..." \
+  -H "content-type: application/json" \
+  -d '{ "query": "{ products { nodes { rowId name slug } } }" }'
+```
+
+- A key is bound to one workspace and reads only that workspace's products
+- Keys are read-only: creating, editing, rotating, and deleting products is not possible with a key
+- On the Free plan, requests with a key return `403` with a message to upgrade
+
+## Queries
+
+| Query | Returns |
+| --- | --- |
+| `products` | The workspace's products (`rowId`, `name`, `slug`, `domain`, `key`, `retentionDays`) |
+| `productStats(productId, from, to)` | Visitors, pageviews, sessions, bounce rate, average session length, events, a daily series, and top events |
+| `productBreakdown(productId, dimension, event, from, to, first)` | Top values of one dimension: `path`, `referrer`, `source`, `campaign`, `country`, `device`, `browser`, or `os`. `event` defaults to `pageview`; set it to a custom event for conversions |
+| `realtimeVisitors(productId)` | Distinct visitors in the last five minutes |
+| `workspaceUsage(organizationId)` | Plan, events used this month, and limits |
+| `events` | Raw events (name, path, referrer, source, campaign, properties, country, device, browser, OS, time), paginated |
+
+`from` and `to` are UTC dates (`YYYY-MM-DD`). Without them, the window is the last 30 days. Windows are capped at 366 days and never reach past the product's retention window.
+
+## Example
+
+Sign-ups by source for the first half of November:
+
+```graphql
+query SignupsBySource($productId: UUID!) {
+  stats: productStats(productId: $productId, from: "2026-11-01", to: "2026-11-15") {
+    visitors
+    pageviews
+    bounceRate
+  }
+  signups: productBreakdown(
+    productId: $productId
+    dimension: "source"
+    event: "signup"
+    from: "2026-11-01"
+    to: "2026-11-15"
+    first: 10
+  ) {
+    value
+    count
+    visitors
+  }
+}
+```
+
+Get the `productId` (the product's `rowId`) from the `products` query.

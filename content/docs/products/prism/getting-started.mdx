@@ -1,0 +1,42 @@
+---
+title: Getting Started
+description: Create a product, install the tag, and see your first pageview
+---
+
+## Try the demo
+
+The [public demo](https://prism.omni.dev/demo) runs the real dashboard on sample data, with no sign-in.
+
+## Sign in
+
+Sign in at [prism.omni.dev](https://prism.omni.dev) with your Omni account. Prism uses your Omni workspaces: each product belongs to a workspace, and every member of that workspace can read its analytics. Workspaces and their members are managed in the Omni account hub at [account.omni.dev](https://account.omni.dev).
+
+## Create a product
+
+1. Open your workspace and create a product. Give it a name, and optionally the domain it runs on.
+2. Copy the product's collector key (`pk_...`) from its install instructions.
+
+Only workspace owners and admins can create, edit, rotate the key of, or delete a product.
+
+## Install the tag
+
+Paste the tag into the `<head>` of every page:
+
+```html
+<script defer src="https://api.prism.omni.dev/script.js" data-product="pk_..."></script>
+```
+
+It records a pageview on load and on every client-side navigation. For bundled apps, custom events, or server-side reporting, see [Installing](/products/prism/installing).
+
+## See your first pageview
+
+Visit your site from a normal browser tab. The tag skips `localhost` by default, so test against a deployed URL (or add `data-allow-localhost` while you develop).
+
+- **Realtime visitors** on the dashboard counts visitors from the last five minutes, read straight from incoming events.
+- Charts and breakdowns refresh every few minutes, as rollups run.
+
+## Next steps
+
+- Track sign-ups and other actions as [custom events](/products/prism/installing#custom-events)
+- Tag links with campaign parameters and break conversions down by source in [Attribution](/products/prism/attribution)
+- Check the [plans](/products/prism/pricing) for event allowances, retention, and member limits

@@ -1,0 +1,55 @@
+---
+title: Privacy
+description: How Prism counts visitors, what it stores, and what it never stores
+---
+
+Prism is built to measure products without tracking people. No cookies are set and nothing durable identifies a visitor, so there is no tracking for a visitor to consent to.
+
+## How visitors are counted
+
+For each event, the collector computes a visitor id: a salted SHA-256 hash of the client IP address, the user agent, and the product. The salt is random, generated fresh for each UTC day, and deleted as soon as that day ends, so a past day's visitor ids cannot be recomputed or linked to anyone, not even by whoever runs the server.
+
+- The same person on the same day, on the same product, counts as one visitor
+- The next day, the same person produces a different id, and yesterday's id cannot be linked to today's
+- The same person on two different products produces unrelated ids
+- The IP address is used only to compute the hash in memory, then discarded
+
+The visitor hash and session id stay on the server: the dashboard and the API expose counts, never the ids themselves.
+
+## Sessions
+
+The script tag and the JavaScript client keep a random per-tab session id in `sessionStorage`. It is not a cookie, it is not shared between tabs, and the browser clears it when the tab closes. Sessions power the session count, bounce rate, and visit duration.
+
+## What is stored
+
+| Data | How it is stored |
+| --- | --- |
+| Event name and path | As sent. The query string is discarded after whitelisted campaign parameters are read |
+| Referrer | Hostname only. Self-referrals are dropped |
+| Campaign | `utm_source` (or `ref`) and `utm_campaign`, lowercased |
+| Country | ISO country code from the network edge |
+| Device, browser, OS | Coarse families only (for example `mobile`, `Firefox`, `Android`), never versions or the raw user agent |
+| Custom properties | As sent, up to 2 KB per event |
+
+Data is kept for your plan's retention window, then purged (see [Pricing](/products/prism/pricing#how-limits-are-enforced)).
+
+## What is never stored
+
+- Cookies, local storage, or any persistent identifier
+- Raw IP addresses
+- Full user agents
+- Full referrer URLs
+- Query strings, other than the whitelisted campaign parameters
+- Any identifier that links a visitor across days or across products
+
+## Bots
+
+Requests from crawlers, link unfurlers, headless browsers, uptime monitors, and empty user agents are dropped at the collector. They are never stored and never count toward your monthly allowance.
+
+## Trade-offs, on purpose
+
+Because visitor ids rotate daily, Prism cannot report returning visitors across days, retention cohorts, or multi-day funnels. This is a design choice, not a missing feature: anything that could recognize a person tomorrow could also track them.
+
+## Custom properties are your responsibility
+
+Prism stores custom event properties as sent. Do not put names, email addresses, or other personal data in event names, paths, or properties.
