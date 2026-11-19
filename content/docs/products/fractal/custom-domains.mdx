@@ -15,10 +15,56 @@ field does not accept them.
 
 1. Open the service and go to **Settings → Networking**.
 2. Enter your domain (for example `app.example.com`) and save (or press Enter).
-3. Fractal shows the **DNS records** to add at your domain host. Copy each record
-   into your DNS provider.
-4. The certificate is issued automatically once the records resolve. The
+3. [Verify that you own the domain](#verify-ownership): add the TXT record
+   Fractal shows at your DNS provider.
+4. Once the domain is verified, Fractal shows the **DNS records** that route it.
+   Copy each record into your DNS provider.
+5. The certificate is issued automatically once the records resolve. The
    **Certificate** badge advances to _Active_, with no downtime.
+
+## Verify ownership
+
+Before a custom domain serves, you prove that you control its DNS. This stops
+anyone else from connecting a domain you own to their service.
+
+After you save the domain, the panel shows a TXT record to add:
+
+| Field | Value |
+|-------|-------|
+| Type | `TXT` |
+| Name | `_fractal-challenge.` followed by your domain, for example `_fractal-challenge.app.example.com` |
+| Value | `fractal-domain-verification=` followed by a code unique to your project and domain |
+
+Copy the exact name and value from the panel. Some DNS providers add your domain
+to record names automatically; if yours does, enter only the part of the name
+before your domain (for example `_fractal-challenge.app`).
+
+Fractal looks the record up through public DNS automatically, often within
+seconds at first and then less frequently. Select **Check now** to look it up
+immediately. The panel reports one of:
+
+- **Verify you own this domain**: the record has not been found yet. New DNS
+  records can take a few minutes to propagate.
+- **Ownership not verified**: a record was found but holds a different value,
+  or the domain is already connected to a service in another project. The panel
+  says which.
+- **Ownership: Verified**: the domain is yours, and setup continues with the DNS
+  records that route it.
+
+Until the record is found, the domain is not connected. Once verified, the
+domain stays verified for as long as the service uses it; keep the TXT record in place so the domain can be
+verified again if you ever reconnect it. Changing the domain starts a new
+verification for the new one.
+
+The code in the record is tied to your project, so the same domain needs a new
+record if you move it to a service in another project. A domain verified for
+one project cannot be connected to a service in a different project until it is
+removed from the first.
+
+<Callout title="Domains connected before verification">
+Custom domains that were already live when ownership verification was
+introduced stay verified, with nothing to add.
+</Callout>
 
 <Callout title="Zero-downtime issuance">
 Fractal uses DNS-based certificate validation, so the certificate is issued and
@@ -28,12 +74,13 @@ ready before any traffic moves to your domain. Your existing
 
 ## DNS records
 
-You typically add two records:
+Besides the [ownership TXT record](#verify-ownership), you typically add two
+records once the domain is verified:
 
 | Record | Purpose |
 |--------|---------|
 | Traffic `CNAME` | Points your domain at Fractal's edge |
-| Verification record | Proves domain ownership so the certificate can issue |
+| Verification record | Lets the certificate issue for your domain |
 
 The certificate is validated and served for you; the exact record names, types,
 and values are shown in the dashboard for your specific domain, each with a copy
