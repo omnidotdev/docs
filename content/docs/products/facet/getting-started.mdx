@@ -58,7 +58,7 @@ All three implement the same interface and read the same model, so you can switc
 The viewport draws a flat-shaded, Z-up preview of the current solid. Facets read crisply because normals are per-face. Loading an example reframes the camera to fit the part; editing the code or dragging a slider recomputes in place without moving the camera.
 
 <Callout type="info">
-The 3D preview uses WebGPU and falls back to WebGL when the browser has no working WebGPU (common in Chromium-based browsers on Linux, where WebGPU is still off by default). A label in the corner of the viewport shows which one is drawing. If the preview stays blank or black, open **Settings** and set **Renderer** to **WebGL**. On a browser with neither, the viewport shows a notice instead, but you can still write models and export (the geometry is computed without a GPU).
+The 3D preview uses WebGPU and falls back to WebGL when the browser has no working WebGPU. On desktop Linux, where WebGPU is still off by default, it starts with WebGL. A label in the corner of the viewport shows which one is drawing. If the preview stays blank or black, open **Settings** and set **Renderer** to **WebGL**. On a browser with neither, the viewport shows a notice instead, but you can still write models and export (the geometry is computed without a GPU).
 </Callout>
 
 ## 6. Export
