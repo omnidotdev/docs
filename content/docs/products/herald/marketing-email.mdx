@@ -45,6 +45,23 @@ Unsubscribes and complaints feed Herald's suppression list, so a contact who opt
 
 Marketing compliance needs a sender name and a physical postal address. Set both in the dashboard under Settings before sending; a marketing send is refused until they are present, so bulk mail never goes out without them. These values only apply to marketing mail, so transactional sends are unaffected.
 
+## Branded broadcasts
+
+Broadcasts are written in the dashboard's [editor](/products/herald/broadcasts#write-a-broadcast) and, once a workspace admin sets up a [brand kit](/products/herald/brand), wrapped in an email-safe branded layout with your logo, colors, font, and footer note. Every broadcast is [approved](/products/herald/broadcasts#approve-a-broadcast) by an owner or admin before it sends, and the approval pins the brand kit to it.
+
+### Body format
+
+A broadcast's `bodyFormat` decides how its body is treated:
+
+- `rich`: the editor's HTML. Herald sanitizes it on save (only formatting, links, and images uploaded to the workspace are kept), wraps it in the branded layout when that is on, and writes the plain-text version when none is given.
+- `html`: raw markup sent exactly as written, without the branded layout.
+
+Dashboard users write `rich` bodies by default; API keys default to `html`. Workspace members can't choose `html` (the API refuses with `HTML_BODY_FORBIDDEN`), so only owners, admins, and API keys send custom HTML. A `rich` body with an image that isn't one of the workspace's uploads is refused with `IMAGE_NOT_HOSTED`, and an unsupported or unclosed personalization tag with `INVALID_MERGE_TAGS`. Content that is too long, or has too many personalization tags, is refused with `CONTENT_TOO_LARGE`.
+
+### Preheader
+
+A broadcast's optional `preheader` (up to 250 characters) is the inbox preview text shown after the subject. It applies to `rich` bodies, where Herald places it hidden at the top of the email, and may use personalization tags like the subject.
+
 ## One-off marketing sends
 
 Broadcasts are the usual way to reach an audience, but a single send can opt into the same compliance treatment. Pass `marketing: true` and Herald adds the one-click `List-Unsubscribe` header and the CAN-SPAM footer (unsubscribe link, sender name, and postal address), exactly as it does for a broadcast:

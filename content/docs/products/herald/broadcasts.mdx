@@ -1,17 +1,71 @@
 ---
 title: Broadcasts
-description: Send one marketing email to an audience or segment, with built-in compliance.
+description: Write a branded marketing email, preview it exactly as recipients get it, and send it to an audience after an admin approves it.
 ---
 
 A broadcast is a one-off marketing email to every contact in an [audience](/products/herald/audiences-and-segments) (optionally narrowed to a segment). For an automated multi-step series, use [Sequences](/products/herald/sequences) instead.
 
 ## Before you send
 
-Broadcasts are bulk marketing mail, so Herald requires a sender identity for compliance. In **Settings**, set your **sender name** and **physical postal address** (CAN-SPAM). Herald injects a compliant footer and a one-click unsubscribe into every broadcast, so a broadcast cannot go out without a working opt-out.
+Broadcasts are bulk marketing mail, so Herald requires a sender identity for compliance. In **Settings**, set your **sender name** and **physical postal address** (CAN-SPAM). Herald adds a compliant footer and a one-click unsubscribe to every broadcast, so a broadcast cannot go out without a working opt-out.
 
-## Send a broadcast
+To make every broadcast look like your brand, set up a [brand kit](/products/herald/brand) first: logo, colors, font, and footer note.
 
-In the dashboard, go to **Broadcasts**, create one, pick the audience (and optionally a segment), choose a verified from-address, and send. Herald fans it out to every subscribed contact, rendering each recipient's `{{variables}}` from their attributes.
+## Write a broadcast
+
+In the dashboard, go to **Broadcasts** and select **New broadcast**. Name it, pick the audience (and optionally a segment), choose a from-address on a verified domain, and write the subject.
+
+The body is written in a rich text editor: headings, bold and italic text, lists, and links. When the brand kit's branded layout is on, Herald wraps the body in it when it sends.
+
+### Preview text
+
+**Preview text** is the short summary many inboxes show after the subject. It is optional; leave it blank and inboxes show the start of the email instead. Preview text applies to bodies written in the editor and can use personalization tags.
+
+### Images
+
+Add an image with the toolbar's image button, by pasting it, or by dragging it into the editor. JPEG, PNG, WebP, and GIF images up to 10 MB are accepted, and animated GIFs stay animated. Every image is saved to your workspace's **media library**, under the editor, where you can insert it again in later broadcasts or delete it. An image that is your brand logo, or that is in a broadcast awaiting approval, scheduled, or sending, can't be deleted.
+
+Every image needs alt text, which screen readers read aloud and email apps show when images are off. A broadcast can't be saved while:
+
+- an image is missing alt text
+- an image is still uploading
+- an image is hosted on another site; select **Upload replacement** on it to upload a copy
+
+Only images uploaded to your workspace are sent, so a broadcast never loads a tracking pixel or another site's image.
+
+### Personalization
+
+Personalization tags fill in each recipient's details, such as `{{first_name}}`. Open **Insert personalization** to see the contact attributes your audience has and add one where your cursor is. Use a tag name without spaces, and close each `{{#if}}` block with `{{/if}}`. A contact without a value for a tag gets an empty space where the tag was.
+
+### Plain-text version
+
+Most email apps show the formatted email, and some show only plain text. Leave the plain-text version blank and Herald writes it from your email.
+
+### Custom HTML
+
+Workspace owners and admins can switch a broadcast to **HTML** and write raw markup, which is sent exactly as written, without the branded layout or preview text. Switching back to the editor removes any markup the editor doesn't support, so you are asked to confirm first. Members can edit everything in an HTML broadcast except its body.
+
+## Preview
+
+The **Preview** tab shows the email exactly as recipients get it, including changes you haven't saved: the branded layout, a sample contact's details in place of personalization tags, and the compliance footer (its unsubscribe link does nothing in a preview). Switch between desktop and mobile widths, light and dark mode, and the plain-text version.
+
+Dark mode shows how the email looks in email apps that honor dark mode. An email that doesn't support dark mode stays light, as it does in those apps.
+
+The preview warns you when your sender name or postal address is missing, since a broadcast can't send without them.
+
+## Request approval
+
+Every broadcast is approved by a workspace owner or admin before it goes out. On a saved draft, select **Request approval** and pick when it should send. The date and time picker names your timezone and explains daylight-saving changes; pick a time between 5 minutes and 90 days from now. The dialog also shows how many subscribed contacts it would reach right now.
+
+While the request waits, you can edit the broadcast (which returns it to draft) or cancel the request. Until a broadcast starts going out, you can send a test copy to your own verified email address.
+
+## Approve a broadcast
+
+Owners and admins see **Approve** and **Reject** on a waiting request, marked **Admin**. Approving opens a review of exactly what will go out: the rendered email, sender, subject, audience and segment, recipient count, send time, and whether opens and clicks are tracked.
+
+The review approves exactly the version it shows, brand included. If the broadcast or the brand kit changes while you review it, approval waits until you review the latest version. Approving pins the brand kit to the broadcast, so later brand changes don't affect it; its preview then says **Brand pinned at approval**.
+
+Rejecting sends the broadcast back to draft with an optional reason the requester sees. An approved broadcast can be unscheduled until it starts sending, and a broadcast that is going out can be stopped (copies already being delivered finish).
 
 ## What is excluded
 
