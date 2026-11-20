@@ -41,22 +41,44 @@ exists, **Building in** shows its workspace and links to the workspace's page.
 
 ### Move a site to another workspace
 
-A site that is not hosted (a draft, or one shared by preview link) can move to
-another workspace you belong to: select **Move to workspace** in its card's
-menu under **Your sites**, or pick another workspace when you publish it. The
-site moves with its chat, versions, and form submissions. The new workspace
-must have room under its site limit and a seat for each of its members; the
-site then counts toward its limit, and its turns spend that workspace's
-credits. Form notifications go to the member who moved it. A
-[GitHub Sync](/products/keystone/github-sync) link made through the old
+To move a site to another workspace you belong to, select **Move to workspace**
+in its card's menu under **Your sites**. A site that is not hosted yet (a
+draft, or one shared by preview link) can also move when you pick another
+workspace while publishing it. The site moves with its chat, versions, and form
+submissions. The new workspace must have room under its site limit and a seat
+for each of its members; the site then counts toward its limit, and its turns
+spend that workspace's credits. Form notifications go to the member who moved
+it. A [GitHub Sync](/products/keystone/github-sync) link made through the old
 workspace's GitHub connection is removed, so link the repository again from the
-new workspace.
+new workspace. In a team workspace, only owners and admins can move its sites
+out.
 
-A hosted site stays in the workspace it is hosted in. Its service, address,
-custom domain, and code all belong to that workspace on Fractal and Arbor, so
-moving it would take the live site offline. To build it elsewhere, start a new
-site in the other workspace. In a team workspace, only owners and admins can
-move its sites out.
+#### Move a live site
+
+A hosted (live) site moves with its hosting and code, and stays online the
+whole time. The move dialog names the workspace it moves to and what changes:
+
+- The site keeps its address and any [custom domain](/products/keystone/publishing#custom-domains).
+  A custom domain stays verified: the TXT record you added keeps working, so
+  there is nothing to change in your DNS
+- Its service moves to the new workspace's **Keystone sites** project on
+  [Fractal](https://fractal.omni.dev), and hosting is billed by that
+  workspace's Fractal plan from the move on
+- Its code repository moves to the new workspace on
+  [Arbor](https://arbor.omni.dev) with its full history, and you become its
+  owner there. Its old clone URL keeps working
+
+Moving a live site takes an owner or admin of both workspaces, and the new
+workspace needs a Fractal plan with room for the site (and for its custom
+domain, under the plan's custom domain limit). The move takes a few minutes
+while the site is set up in the new workspace; the dialog shows each step.
+While it runs, the site can't be published, edited with a prompt, or deleted.
+
+If the new workspace can't take the site (no Fractal plan, no room, or no owner
+or admin role for you there), the move is undone and the site stays exactly
+where it was. If a move stops partway for any other reason, the site stays live
+at its address; select **Move to workspace** and the same workspace again to
+finish it.
 
 ### Your workspace on Fractal and Arbor
 
@@ -117,7 +139,8 @@ Each card under **Your sites** (and on a workspace's page) has a menu:
 - **Rename** gives the site a name of up to 80 characters. The name shows on
   its card and in the builder header in place of the site's generated title;
   the title visitors see in their browser stays as Keystone wrote it
-- **Move to workspace** moves a site that is not hosted (see
+- **Move to workspace** moves the site to another of your workspaces, a live
+  site with its hosting and code (see
   [Move a site to another workspace](#move-a-site-to-another-workspace))
 - **Delete** deletes the site after you confirm. Deleting removes the site, its
   versions, its form submissions, and its preview link, and takes a hosted site

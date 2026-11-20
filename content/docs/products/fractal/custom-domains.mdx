@@ -63,6 +63,13 @@ record if you move it to a service in another project. A domain verified for
 one project cannot be connected to a service in a different project until it is
 removed from the first.
 
+Moving the whole service to another project (for example, when a
+[Keystone](/products/keystone/workspaces#move-a-live-site) site moves to
+another workspace) is different: the service takes its domain, verification,
+and certificate along, and stays online throughout. The TXT record you added
+keeps verifying the domain, so there is nothing to change in your DNS. The
+domain counts toward the new workspace's custom domain limit.
+
 <Callout title="Domains connected before verification">
 Custom domains that were already live when ownership verification was
 introduced stay verified, with nothing to add.
