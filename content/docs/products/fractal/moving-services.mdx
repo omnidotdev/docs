@@ -1,0 +1,24 @@
+---
+title: Moving Services
+description: Move a service to another project or workspace without changing its address or taking it offline
+---
+
+You can move a service to another project, in the same workspace or in another one you own or administer. The service keeps its address and custom domain and stays online throughout.
+
+## Move a service
+
+Open the service's **Settings** tab and select **Move service**. Pick the workspace and the project to move it to. The confirm names the target and what changes:
+
+- **The address stays.** The service keeps its `*.fractaldeploy.app` address and any custom domain. A custom domain stays verified: the TXT record you added keeps working, so there is nothing to change in your DNS (see [Custom domains](/products/fractal/custom-domains))
+- **Billing moves.** From the move on, the service is billed to the target workspace's plan and counts toward its limits
+- **It is rebuilt there.** Fractal builds the service in the target project from the same source while the original keeps serving, then switches the traffic over and removes the original. This takes a few minutes, and the dialog shows each step
+
+You need to be an owner or admin of both workspaces, and the target workspace needs a Fractal plan with room for another service (and for its custom domain, under the plan's custom domain limit).
+
+## What can't move yet
+
+Services that keep data or secrets in their project can't move yet: services with volumes, databases, secret environment variables, canaries, or per-environment copies.
+
+## How the switch works
+
+The address never becomes free for anyone else to claim during a move: the new service takes over the original's claim on its address and custom domain before anything is removed. Traffic switches without errors: once the new service is ready, the edge sends requests to it whenever the original can't take them, and the original is only removed after every edge server has had time to pick that up.
