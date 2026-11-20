@@ -1,6 +1,6 @@
 ---
 title: Live Preview
-description: Check your site at every size, move between pages, and download the code
+description: Check your site at every size, move between pages, view its code, and download it
 ---
 
 The preview panel shows your site as it stands after the latest turn. It runs in
@@ -33,9 +33,21 @@ navigation link and the preview moves to that page.
 
 | Control | What it does |
 |---------|--------------|
+| **View code** | Swaps the preview for the site's code; select it again to go back |
 | **Reload preview** | Re-renders the current page |
 | **Open preview in a new tab** | Opens the current page full size in a new browser tab |
 | **Download as HTML (.zip)** | Downloads the whole site as a `.zip` of HTML files |
+
+## View the code
+
+**View code** shows the files Keystone publishes for the site, read only: each
+page's HTML (`index.html` for the home page, `<page>/index.html` for the
+others) and, for a page with a script, its script file under `_keystone/`.
+These are exactly the files a [hosted site](/products/keystone/publishing)
+serves and [GitHub Sync](/products/keystone/github-sync) commits. Pick a file
+from the list to open it, and select **Copy** to copy the whole file. The files
+refresh after every turn and every restored version. Viewing the code never
+spends credits; to change it, ask in chat.
 
 ## Download your code
 
