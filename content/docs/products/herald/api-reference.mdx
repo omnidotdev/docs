@@ -42,9 +42,55 @@ herald.raw.sendEmail({ input: { /* ... */ } });
 
 ## GraphQL API
 
-The GraphQL endpoint is at `https://api.herald.omni.dev/graphql`, authenticated with the same `Authorization: Bearer <api-key>` header (or a dashboard JWT). Management surfaces that are not on the SDK facade — audiences, segments, templates, broadcasts, and sequences — are available as GraphQL mutations, and are also managed in the dashboard.
+The GraphQL endpoint is at `https://api.herald.omni.dev/graphql`, authenticated with the same `Authorization: Bearer <api-key>` header (or a dashboard JWT). Management surfaces that are not on the SDK facade (audiences, segments, templates, broadcasts, and sequences) are available as GraphQL mutations, and are also managed in the dashboard.
 
 Reads are tenant-scoped: an API key only ever sees its own workspace's data.
+
+### Broadcasts and previews
+
+- `createBroadcast` / `updateBroadcast` take `bodyFormat` (`rich` or `html`) and an optional `preheader`. See [body format](/products/herald/marketing-email#body-format) for the defaults and the `HTML_BODY_FORBIDDEN`, `IMAGE_NOT_HOSTED`, `INVALID_MERGE_TAGS`, and `CONTENT_TOO_LARGE` refusals.
+- A render that can't read the personalization is refused with `INVALID_TEMPLATE`.
+- `previewBroadcast(id)` renders a saved broadcast exactly as recipients get it: sanitized, branded, merged with a sample subscribed contact's attributes, and with the compliance footer (its unsubscribe link inert). It returns `subject`, `fromName`, `fromAddress`, `html`, `text`, `bodyFormat`, `layoutApplied`, `brandKitPinned`, `sampleContactId`, `missingSenderIdentity`, and, read together with the html, the broadcast's `contentHash` and the `brandKitVersion` it rendered with.
+- `previewDraft(input)` renders unsaved content the same way and saves nothing. `input` takes `html` plus optional `bodyFormat`, `subject`, `preheader`, `text`, `from`, `audienceId`, `segmentId`, and a `brandKit` override (unsaved brand kit changes, validated like `updateBrandKit`). It is limited to 120 previews a minute per user per workspace (`RATE_LIMITED`) and refuses content with the same codes as a save, plus `BRAND_KIT_CONTRAST` for the override.
+- `approveBroadcast(id, contentHash, brandKitVersion)` approves and schedules a requested broadcast (owners, admins, and full keys). Pass the `contentHash` and `brandKitVersion` from the `previewBroadcast` you reviewed; if the broadcast or the brand kit changed since, approval is refused with `BROADCAST_CHANGED`. `brandKitVersion` is optional, but without it a brand change made during the review is not detected.
+- `audienceAttributeKeys(audienceId)` lists the distinct top-level attribute keys of an audience's contacts (up to 100, sorted), for suggesting personalization tags. It returns keys only, never values.
+
+### Brand kit
+
+- `brandKits` (or `brandKit(tenantId)`) reads the workspace brand kit; no row means the defaults, with the branded layout off. `brandFontStacks` lists the fonts a kit can use, as `{ key, label, stack }`.
+- `updateBrandKit(input)` (owners, admins, and full keys) edits the kit: `logoUrl`, `logoAlt`, `logoWidth`, `accentColor`, `backgroundColor`, `textColor`, `fontStack`, `footerNote`, and `layoutEnabled`. Omitted fields are unchanged, and `null` clears the logo, alt text, width, or footer note or resets a color, font, or the layout flag to its default. It is refused with `BRAND_KIT_CONTRAST` when a color pair falls below 4.5:1, `IMAGE_NOT_HOSTED` when the logo isn't one of the workspace's uploads, and `BAD_USER_INPUT` for other invalid values. See [Brand](/products/herald/brand).
+
+### Media library
+
+- `assets(first, after, orderBy: [CREATED_AT_DESC])` lists the workspace's uploaded images (with `url`, `width`, `height`, `bytes`, `contentType`), newest first, a page at a time; pass `pageInfo.endCursor` as `after` for the next page while `pageInfo.hasNextPage` is true.
+- `assetUrlPrefixes(tenantId)` lists every URL prefix the workspace's images can have (the public origin first, then earlier ones), each `<origin>/assets/<tenantId>/`. `tenantId` is optional and only needed when the caller can reach several workspaces. An image whose URL starts with none of them is not one of the workspace's uploads.
+- `deleteAsset(id)` deletes an image and its file (any workspace member or API key). It is refused with `ASSET_IN_USE` while the image is the brand logo or in a broadcast awaiting approval, scheduled, or sending, `NOT_FOUND` when it no longer exists, and `UPLOADS_UNAVAILABLE` when storage is unavailable.
+
+## Image uploads
+
+Upload an image for broadcasts or the brand logo with a multipart request whose `file` field holds the image:
+
+```
+POST https://api.herald.omni.dev/assets
+Authorization: Bearer <api-key or dashboard token>
+X-Omni-Organization: <organization id>   (dashboard users with several workspaces)
+Content-Type: multipart/form-data
+```
+
+JPEG, PNG, WebP, and GIF images up to 10 MB are accepted, and the file is stored as is (animated GIFs stay animated). Dashboard users (members and admins) and full API keys may upload. A successful upload returns `201` with `{ id, url, width, height, contentType, bytes }`; the `url` is a public, permanent address under `/assets/<tenantId>/`.
+
+A refused upload returns `{ error, code }`:
+
+| Status | `code` | Meaning |
+| --- | --- | --- |
+| 400 | `missing_file`, `ambiguous_tenant` | No `file` field, or the caller can reach several workspaces and none was chosen |
+| 401 | `unauthorized` | Missing or invalid credentials |
+| 403 | `forbidden`, `tenant_suspended` | The key can't upload, or sending is disabled for the workspace |
+| 413 | `file_too_large`, `storage_limit_reached` | The image is over 10 MB, or the workspace's media library is full |
+| 415 | `unsupported_type` | Not a JPEG, PNG, WebP, or GIF |
+| 429 | `rate_limited` | Too many uploads for the workspace in the last hour |
+| 502 | `upload_failed` | The image couldn't be stored; retry |
+| 503 | `uploads_unavailable` | Uploads are not available right now |
 
 ## REST send endpoint
 
