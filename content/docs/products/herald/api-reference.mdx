@@ -55,6 +55,17 @@ Reads are tenant-scoped: an API key only ever sees its own workspace's data.
 - `approveBroadcast(id, contentHash, brandKitVersion)` approves and schedules a requested broadcast (owners, admins, and full keys). Pass the `contentHash` and `brandKitVersion` from the `previewBroadcast` you reviewed; if the broadcast or the brand kit changed since, approval is refused with `BROADCAST_CHANGED`. `brandKitVersion` is optional, but without it a brand change made during the review is not detected.
 - `audienceAttributeKeys(audienceId)` lists the distinct top-level attribute keys of an audience's contacts (up to 100, sorted), for suggesting personalization tags. It returns keys only, never values.
 
+### Audiences
+
+- Every audience has a `kind`: `standard` (built in Herald), `managed` (mirrored from another product with `syncContact`), or `team` (synced from the workspace's members).
+- `enableTeamAudience` (owners, admins, and full keys) turns on the [team audience](/products/herald/audiences-and-segments#team-audience) and syncs the workspace's members into it. It returns `audienceId`, `name`, `created`, `synced`, and `memberCount`. Calling it again resyncs. `synced` is false when the member list couldn't be read, in which case the audience keeps its current contacts.
+- A team audience's contacts can't be changed directly, by API keys either: `addContact`, `addContacts`, `removeContact`, `syncContact`, and `removeContactByExternalId` are refused with "This audience is synced from your workspace members".
+
+### Messages
+
+- `sendMessage` takes `bodyFormat`: `html` (raw markup, sent as written) or `rich` (the dashboard editor's HTML). It defaults to `html` for API keys, owners, and admins, so existing callers are unchanged, and to `rich` for workspace members, who can't send `html` (`HTML_BODY_FORBIDDEN`). A `rich` message is cleaned like a broadcast body (`IMAGE_NOT_HOSTED`, `INVALID_MERGE_TAGS`, `CONTENT_TOO_LARGE`), wrapped in the branded layout when that is on, and given a plain-text version unless `text` is set. A one-off message carries no unsubscribe footer unless an owner, admin, or API key sends it with `marketing: true`.
+- `previewMessage(input)` renders a one-off message exactly as it will be sent and saves nothing. `input` takes `html` plus optional `subject`, `from`, `text`, `bodyFormat`, and `tenantId`; it returns `subject`, `html`, `text`, `bodyFormat`, `layoutApplied`, `fromName`, and `fromAddress`. It is limited to 120 previews a minute per user (`RATE_LIMITED`).
+
 ### Brand kit
 
 - `brandKits` (or `brandKit(tenantId)`) reads the workspace brand kit; no row means the defaults, with the branded layout off. `brandFontStacks` lists the fonts a kit can use, as `{ key, label, stack }`.

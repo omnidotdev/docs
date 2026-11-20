@@ -27,6 +27,34 @@ Use `{{variable}}` placeholders in the subject and body and pass their values in
   Sending a one-off marketing email rather than a receipt or notification? Pass `marketing: true` so Herald adds a one-click unsubscribe and a CAN-SPAM footer. See [one-off marketing sends](/products/herald/marketing-email#one-off-marketing-sends).
 </Callout>
 
+## Compose a message in the dashboard
+
+To email one person without writing code, open **Compose** in the dashboard.
+
+### Recipients
+
+**To** takes one recipient, and the address is checked before you can send. Open the advanced section to add **Cc**, **Bcc**, and **Reply-To**.
+
+### Write the message
+
+The body is written in the same rich text editor as [broadcasts](/products/herald/broadcasts#write-a-broadcast): headings, bold and italic text, lists, links, and images. Images are uploaded to your workspace's media library, and every image needs alt text. An image hosted on another site can't be sent; replace it with an upload.
+
+Workspace owners and admins have an **HTML** switch, marked **Admin**, to write raw HTML instead, which is sent exactly as written. Members always use the editor.
+
+### Preview
+
+The **Preview** tab shows the message exactly as it will be sent, including the branded layout when it is turned on in [Brand](/products/herald/brand) settings. It also shows the plain-text version, which Herald writes from your message unless you write one yourself.
+
+### Send now or later
+
+Send the message right away, or pick a future date and time to schedule it.
+
+<Callout type="info">
+  A message from **Compose** is a one-off message, not marketing mail, so it carries no unsubscribe footer. To email your whole team, send a broadcast to the [team audience](/products/herald/audiences-and-segments#team-audience) instead.
+</Callout>
+
+Over the API, `sendMessage` takes the same choice of body as `bodyFormat`. See [messages](/products/herald/api-reference#messages) in the API reference.
+
 ## Attach files
 
 Pass `attachments` to send files with a message, such as a receipt PDF or a signed document. Each attachment takes a `filename` and the file's `content` as base64:
