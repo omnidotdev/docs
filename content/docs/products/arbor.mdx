@@ -41,3 +41,13 @@ import { FaCodeBranch, FaProjectDiagram, FaCubes } from "react-icons/fa";
 <Callout type="warn">
   Arbor is in a closed beta. **[Apply for the closed beta](https://arbor.omni.dev/apply)** to get early access.
 </Callout>
+
+## Move a repository to another workspace
+
+To move a repository to another of your workspaces, open its settings and select **Move repository**, then pick the workspace. You need to be an owner or admin of the workspace the repository is in (or own it, for a personal repository) and of the target. The confirm names the target and what changes:
+
+- The repository leaves its current workspace and belongs to the target, whose members get access through it from then on
+- You become its owner. Its history, branches, and collaborators stay
+- It counts toward the target workspace's plan
+
+Old links keep working: a link or bookmark to the repository's previous page redirects to the same page where it lives now, and its old clone URL keeps working for clone, fetch, and push. A link only redirects for people who may open the repository.

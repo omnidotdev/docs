@@ -1,11 +1,12 @@
 {
-  "title": "🔷 Fractal",
+  "title": "\ud83d\udd37 Fractal",
   "pages": [
     "getting-started",
     "architecture",
     "---Guides---",
     "environments",
     "custom-domains",
+    "moving-services",
     "monorepos",
     "scheduled-jobs",
     "backups",
