@@ -19,20 +19,38 @@ If you are not sure where to start, use a finished
 [template](/products/keystone/templates) and refine it, or pick a
 [starter](/products/keystone/starters) and edit its brief.
 
-### Attach images
+### Attach images and files
 
-To show Keystone what you mean, attach a screenshot, mockup, or sketch: select
-the image button under the prompt box, or paste a screenshot into it.
-You can attach up to 3 PNG, JPEG, WebP, or GIF images to one message. Large
-images are scaled down in your browser before sending. Attached images appear
-as thumbnails above your prompt, and you can remove any of them before you
-send.
+To show Keystone what you mean, or give it the content to use, attach files to
+your message: select the paperclip button under the prompt box, or paste a
+screenshot into it. You can attach up to 3 files to one message, in any mix:
 
-Keystone uses the images as a reference for layout, colors, type, and content,
-and recreates what it needs in the site's own markup and styles; the images
-themselves don't become part of your site. They are sent to the AI model with
-that one message and are not stored, so the chat shows how many images were
-attached rather than the images. A message with images uses more
+| File | Use it for | Limit |
+|------|------------|-------|
+| PNG, JPEG, WebP, or GIF image | A screenshot, mockup, or sketch to match | 2 MB each (large images are scaled down in your browser first) |
+| PDF | A menu, brochure, or flyer to build from | 5 MB and 30 pages each |
+| Plain text, Markdown, or CSV | Copy, an About page draft, or a product or price list | 200 KB each |
+
+Attached files appear above your prompt (images as thumbnails, other files by
+name), and you can remove any of them before you send. Keystone checks each
+file by its content, not just its name, so a file that isn't really one of
+these types is refused. Word documents, audio, and video can't be attached;
+copy the text into a text file or the prompt instead.
+
+Keystone uses images as a reference for layout, colors, type, and content, and
+recreates what it needs in the site's own markup and styles. From a PDF or text
+file it reads the text (names, wording, prices, items) and puts it into your
+pages; very long files are cut at about 30,000 characters. A PDF with no
+readable text, such as a scanned page, is refused: attach a screenshot of it
+instead. The files themselves never become part of your site.
+
+Attached images are checked automatically for harmful content before they are
+sent. If an image can't be used, Keystone says so, nothing is sent, and no
+credits are charged; remove the image and send again.
+
+Everything you attach is sent to the AI model with that one message and is not
+stored, so the chat shows how many images and files were attached rather than
+the files. A message with attachments uses more
 [AI credits](/products/keystone/credits) than the same message without them.
 
 ### Enhance a prompt
