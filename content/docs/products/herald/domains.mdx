@@ -19,9 +19,9 @@ Herald generates a dedicated DKIM key for the domain and returns the DNS records
 
 Add these records at your DNS host:
 
-- **DKIM** — a `TXT` record at `herald._domainkey.<domain>` with the generated public key. Herald signs every message from the domain with the matching private key.
-- **SPF** — a `TXT` record at the domain: `v=spf1 include:_spf.herald.omni.dev ~all`. The `_spf.herald.omni.dev` indirection means a change to Herald's sending IPs never requires you to edit your DNS again.
-- **DMARC** — a `TXT` record at `_dmarc.<domain>`: `v=DMARC1; p=none; rua=mailto:dmarc@omni.dev` to start in monitor mode.
+- **DKIM**: a `TXT` record at `herald._domainkey.<domain>` with the generated public key. Herald signs every message from the domain with the matching private key.
+- **SPF**: a `TXT` record at the domain with the value `v=spf1 include:_spf.herald.omni.dev ~all`. The `_spf.herald.omni.dev` indirection means a change to Herald's sending IPs never requires you to edit your DNS again.
+- **DMARC**: a `TXT` record at `_dmarc.<domain>` with the value `v=DMARC1; p=none; rua=mailto:dmarc@omni.dev` to start in monitor mode.
 
 ## Verify
 

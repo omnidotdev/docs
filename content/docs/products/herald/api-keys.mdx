@@ -21,8 +21,8 @@ Or send the raw HTTP header `Authorization: Bearer <key>`.
 
 ## Permission scopes
 
-- **`sending`** — can send email only. Cannot manage domains, keys, suppressions, or other resources. Use this for application servers that only need to send.
-- **`full`** — can send and manage everything in the workspace. Use this for administrative automation.
+- **`sending`**: can send email only. Cannot manage domains, keys, suppressions, or other resources. Use this for application servers that only need to send.
+- **`full`**: can send and manage everything in the workspace. Use this for administrative automation.
 
 A `sending` key that attempts a management operation is rejected server-side, so a leaked send-only key cannot reconfigure your account.
 
