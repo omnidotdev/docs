@@ -9,17 +9,19 @@ A typical use: an ad drives sign-ups to a lead-capture form, the email lands in 
 
 ## Build a sequence
 
-In the dashboard, go to **Sequences** and create one. Add ordered **steps**; each step is:
+In the dashboard, go to **Sequences** and create one. Give it a name and, optionally, its own **From**: a sender name, the part before the @, and a verified domain, with a line showing what recipients see. Leave the address blank to send from the default from address in **Settings**.
+
+Add ordered **steps**; each step is:
 
 - a [template](/products/herald/templates) for the content,
-- a **delay** relative to enrollment (a number and a unit — minutes, hours, or days; step 1 is usually "on signup"),
+- a **delay** relative to enrollment (a number and a unit: minutes, hours, or days; step 1 is usually "on signup"),
 - an optional subject override.
 
 Use **Preview** on a step to see the template it will send.
 
 ## Activate and attach
 
-Set a from-address and **Activate** the sequence (this requires your sender name and postal address in Settings, like a broadcast). Then **Attach** it to an audience.
+**Activate** the sequence. Activating needs at least one saved step, your sender name and postal address in Settings (like a broadcast), and a from address on the sequence or a default from address in Settings. Then **Attach** it to an audience.
 
 While the sequence is active, every new contact added to that audience is automatically enrolled at step 1, and the drip advances on schedule.
 

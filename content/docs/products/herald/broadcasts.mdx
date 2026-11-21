@@ -9,11 +9,13 @@ A broadcast is a one-off marketing email to every contact in an [audience](/prod
 
 Broadcasts are bulk marketing mail, so Herald requires a sender identity for compliance. In **Settings**, set your **sender name** and **physical postal address** (CAN-SPAM). Herald adds a compliant footer and a one-click unsubscribe to every broadcast, so a broadcast cannot go out without a working opt-out.
 
+Also in **Settings**, set a **default from address** so every new broadcast starts with it. It uses the same sender name, address, and domain field as [Compose](/products/herald/transactional-email#from), with a live line showing what recipients see. Leave its sender name blank to use your workspace sender name.
+
 To make every broadcast look like your brand, set up a [brand kit](/products/herald/brand) first: logo, colors, font, and footer note.
 
 ## Write a broadcast
 
-In the dashboard, go to **Broadcasts** and select **New broadcast**. Name it, pick the audience (and optionally a segment), choose a from-address on a verified domain, and write the subject. To email your own workspace's members, pick the [team audience](/products/herald/audiences-and-segments#team-audience).
+In the dashboard, go to **Broadcasts** and select **New broadcast**. Name it, pick the audience (and optionally a segment), set **From**, and write the subject. **From** starts from your default from address and takes a sender name, the part before the @, and one of your verified domains, with a line under it showing exactly what recipients see. A blank sender name uses your workspace sender name. To email your own workspace's members, pick the [team audience](/products/herald/audiences-and-segments#team-audience).
 
 The body is written in a rich text editor: headings, bold and italic text, lists, and links. When the brand kit's branded layout is on, Herald wraps the body in it when it sends.
 
