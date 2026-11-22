@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@omnidotdev/garden": "^0.3.0",
-    "@omnidotdev/providers": "github:omnidotdev/providers#v0.2.0",
+    "@omnidotdev/providers": "github:omnidotdev/providers#v0.4.1",
     "@radix-ui/react-collapsible": "^1.1.20",
     "@radix-ui/react-popover": "^1.1.23",
     "@resvg/resvg-js": "^2.6.2",
