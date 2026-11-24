@@ -1,0 +1,120 @@
+---
+title: Quotes and contracts
+description: Create quotes, price line items, and print a quote or a signed service agreement
+---
+
+**Quotes & Contracts** prices out work for a client. Every quote can be shown,
+printed, or saved as PDF in two forms: the **quote** itself, and a **contract**
+(a service agreement built from the same details, with a signature block).
+
+## Create a quote
+
+Select **New quote**. On a computer, the form sits beside a live preview. On
+narrower screens, switch between **Form** and **Preview** at the top. A quote
+needs a title before it can be saved.
+
+The form has these sections:
+
+- **Theme**: the accent color shared by all documents in the workspace. See
+  [Accent color](/products/mantle/workspace-settings#accent-color).
+- **Quote details**: title (required), description, quote number, and status.
+  The number is generated when the editor opens. Select **Seq** or **Rand** next
+  to it to generate a new sequential or random number instead.
+- **Client**: the company, contact, client name, and client email. Use the
+  populate button in the section header to pick a company and contact from
+  [People](/products/mantle/people) and fill in the client details in one step.
+- **Project details**: project type (web, mobile, desktop, API or backend, or
+  other), timeline (such as "3-6 months"), valid until, and a label for the
+  additional items section (defaults to "Additional deliverables").
+- **Line items**: see below.
+- **Financials**: tax rate, currency, and the calculated subtotal, tax amount,
+  and total.
+- **Terms and notes**: payment terms, additional terms, and notes.
+
+Select **Save**. A new quote opens in the editor after its first save, and the
+preview and print buttons stay available while you edit.
+
+## Line items
+
+Each line item has a description, an optional **Detail** line shown under it, a
+quantity, a unit price, and a pricing type. The amount is the quantity times the
+unit price. Select **Add line item** to add more, drag items to reorder them, and
+use the trash button to remove one. The first item is labeled **Base development
+cost**; later items appear under the additional items label.
+
+### Pricing types
+
+| Pricing type | Use it for | Extra fields |
+| --- | --- | --- |
+| **Fixed** | A set price for described work | None |
+| **Hourly** | Work billed by the hour | Estimated hours, hourly rate, weekly cap, monthly cap, max cap (hours), minimum billing (minutes) |
+| **Royalty** | A revenue share | Royalty percentage, timeframe (months, years, or perpetual), revenue threshold, buyout amount |
+| **Complimentary** | Work included at no charge | None; the price is set to zero |
+| **Included** | Work covered by a retainer | None; the price is set to zero |
+
+Changing an item's pricing type clears the previous type's fields and fills in
+starting values (for example, an hourly item starts at a weekly cap of 10 hours
+and a monthly cap of 40).
+
+### Deliverables and acceptance criteria
+
+Each line item carries a list of **deliverables** and **acceptance criteria**,
+pre-filled for its pricing type. Edit, add, or remove entries. They print in the
+scope section of the contract.
+
+## Terms
+
+New quotes start with a set of standard terms (validity, payment terms,
+timeline, external costs, maintenance, hour caps, and scope) that you can edit
+freely. Two placeholders are filled in when the quote is shown:
+
+- `{companyName}` becomes the company name from your
+  [workspace profile](/products/mantle/workspace-settings#workspace-profile).
+- `{timeRange}` becomes the quote's timeline.
+
+Add more clauses under **Additional terms**. The printed quote notes that it is
+not legally binding and that a separate contract follows if the client accepts.
+
+## Quote statuses
+
+Set the status in **Quote details**: **Draft**, **Sent**, **Accepted**,
+**Declined**, **Expired**, or **Converted**. Mantle does not change a quote's
+status on its own; update it as the deal moves along. The quotes list has a tab
+for each status, with counts.
+
+The [dashboard](/products/mantle/dashboard) counts **Sent** quotes as open and
+lists sent quotes whose validity ends within the next seven days.
+
+## The contract view
+
+Open a quote and switch the **Document view** from **Quote** to **Contract**.
+The contract is a service agreement generated from the quote:
+
+- The parties: your business (from the workspace profile) and the client
+- Scope: project, type, description, and each item's deliverables and
+  acceptance criteria
+- Pricing, grouped into fixed price, hourly rate, royalty, complimentary, and
+  retainer items
+- Terms, including the timeline
+- Standard legal sections, such as liability, compliance, termination, and
+  governing law (which names your registration state when it is set)
+- Your additional terms
+- A signature block with name, title, signature, and date for each party
+
+Mantle does not collect signatures electronically. Print or save the contract,
+then sign it on paper or with the signing tool you already use.
+
+## Print or save as PDF
+
+On a quote's page, select **Print or save PDF** (**Save PDF** in the bottom
+action bar on a phone). The browser's print dialog opens with the document that
+is currently shown, quote or contract. Choose **Save as PDF** as the destination
+to get a file. The suggested file name is the document type and number, such as
+`contract_QT-0042`. The editor's **Print** button does the same from the
+preview.
+
+## Duplicate and delete
+
+From a quote's row menu, select **Duplicate** to start a new draft quote with
+the same details and line items and a fresh number. Select **Delete** to remove
+a quote; Mantle asks for confirmation, and deleting cannot be undone.

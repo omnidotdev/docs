@@ -1,0 +1,92 @@
+---
+title: Self-hosting
+description: Run Mantle on your own infrastructure with one command or with Docker Compose
+---
+
+Mantle is open source under Apache-2.0. The
+[`mantle-stack`](https://github.com/omnidotdev/mantle-stack) repository runs it
+as three containers: Postgres, the API, and the web app.
+
+## Requirements
+
+- Docker with Compose
+- An OpenID Connect provider for sign-in. Mantle reads your workspaces from the
+  provider's organization claims, so use Omni Identity (or a provider that issues
+  the same claims). Register a client for the redirect URI
+  `<APP_URL>/api/auth/oauth2/callback/omni`.
+
+## One command
+
+With the [Omni CLI](/products/omni-cli) and [Run](/products/run) installed
+(`omni install run`), start the whole stack with:
+
+```bash
+omni run up mantle
+```
+
+Run generates the secrets, writes the Compose file and a local HTTPS proxy,
+starts the containers, waits for them to become healthy, and prints the URL to
+open. The standalone Run CLI takes the same target: `run up mantle`. See
+[Run](/products/run) for how targets, secrets, and backups work.
+
+## Docker Compose
+
+To run the stack with Compose directly:
+
+```bash
+git clone https://github.com/omnidotdev/mantle-stack
+cd mantle-stack
+cp .env.local.template .env
+```
+
+Fill in `.env`. Generate each secret with `openssl rand -base64 32`.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DB_PASSWORD` | Yes | Password for the Postgres database the stack creates |
+| `AUTH_SECRET` | Yes | Session encryption secret for the app |
+| `AUTH_BASE_URL` | Yes | Issuer URL of your OpenID Connect provider |
+| `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET` | Yes | The client registered with your provider |
+| `DB_NAME`, `DB_USER` | No | Database name and user (defaults `mantle` and `postgres`) |
+| `DB_PORT`, `API_PORT`, `APP_PORT` | No | Host ports (defaults `5432`, `4000`, and `3000`) |
+
+Then start the stack:
+
+```bash
+docker compose up -d
+```
+
+Compose starts Postgres first and waits for it to be healthy, then starts the
+API and the app. The API applies database migrations each time it starts. Open
+the app at `http://localhost:3000` (or your `APP_PORT`). The API listens on
+`http://localhost:4000`.
+
+Stop the stack with `docker compose down`. Data persists in the `db_data`
+volume between runs; `docker compose down -v` deletes that volume and every
+record in it.
+
+To build the images from source instead of pulling them, check out
+`services/mantle-api` and `services/mantle-app` and add the development
+override:
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml up --build
+```
+
+## Optional integrations
+
+The API starts with only its database and sign-in configured. Each optional
+integration logs a warning at startup when it is not set, and its feature stays
+off:
+
+| Variable | Feature |
+| --- | --- |
+| `BILLING_BASE_URL`, `BILLING_SERVICE_API_KEY` | Plans and billing through the Omni billing service |
+| `VORTEX_API_URL`, `VORTEX_API_KEY` | Publishing Mantle events (for example, to Omni's finance tools) |
+| `IDP_WEBHOOK_SECRET` | Deleting a workspace's Mantle data when the workspace is deleted in your identity provider |
+| `UNLEASH_SERVER_API_URL`, `UNLEASH_SERVER_API_TOKEN` | Feature flags |
+
+## Plan limits
+
+Without a billing service, Mantle applies the Free plan's limits to every
+workspace. See [Plans](/products/mantle/plans).

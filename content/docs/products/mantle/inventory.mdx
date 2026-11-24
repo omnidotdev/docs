@@ -1,0 +1,71 @@
+---
+title: Inventory
+description: Track products, stock levels, low-stock thresholds, and stock adjustments
+---
+
+**Inventory** keeps a list of the products you sell, how many are in stock, and
+a history of every change you record.
+
+## Add a product
+
+Select **New product**. The form has three sections:
+
+| Section | Fields |
+| --- | --- |
+| Details | Name, SKU, description, unit price |
+| Stock | Current quantity, low-stock threshold |
+| Status | Active |
+
+SKUs are unique within a workspace. Turn off **Active** for products you no
+longer sell; they stay in Inventory under the **Inactive** tab instead of being
+deleted.
+
+## The inventory list
+
+The list shows each product with its SKU, unit price, stock, and status.
+Search by name or SKU, and filter with the tabs, each with a count:
+
+- **All**
+- **Low stock**: at or below the product's low-stock threshold
+- **Out of stock**: zero or fewer in stock
+- **Inactive**: products marked as not active
+
+The page header sums up how many products are low or out of stock. Each row has
+a menu with **View**, **Edit**, and **Delete**.
+
+## Stock levels and low stock
+
+A product's stock level comes from its current quantity:
+
+- **Out**: the quantity is zero or less
+- **Low**: the quantity is at or below the low-stock threshold
+- No badge: anything above the threshold, or any positive quantity when no
+  threshold is set
+
+Low and out badges appear in the list and on the product's page. Active products
+at or below their threshold also appear under **Needs attention** on the
+[dashboard](/products/mantle/dashboard).
+
+## Stock adjustments
+
+A product's page shows its quantity in stock, unit price, and low-stock
+threshold, followed by its **Adjustment history**. Record an adjustment each
+time stock changes, so the history explains how the count got where it is:
+
+1. Select **Adjust stock** (or **Add adjustment** above the history).
+2. Enter the **Quantity change**: a positive number for stock added (`10`) or a
+   negative number for stock removed (`-5`).
+3. Enter a **Reason**, such as Restock, Sold, or Damaged.
+4. Save the adjustment.
+
+<Callout type="warn">
+  Recording an adjustment adds it to the history but does not change the
+  product's **In stock** count. After recording one, select **Edit** and update
+  **Current quantity** to match.
+</Callout>
+
+## Delete a product
+
+Delete a product from its row menu. Mantle asks for confirmation, and deleting
+removes the product and its adjustment history. This cannot be undone. To keep
+a product's history, mark it inactive instead.

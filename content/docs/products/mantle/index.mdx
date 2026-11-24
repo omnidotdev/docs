@@ -1,0 +1,108 @@
+---
+title: 🌋 Mantle
+description: Contacts, quotes, contracts, invoices, and inventory in one workspace
+---
+
+import { ProductOverview } from "@/components/docs";
+import app from "@/lib/config/app.config";
+import { PiAddressBookBold, PiPackageBold, PiReceiptBold } from "react-icons/pi";
+
+<ProductOverview
+  productId="mantle"
+  tags={[
+    {
+      label: "People",
+      icon: <PiAddressBookBold />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    {
+      label: "Invoicing",
+      icon: <PiReceiptBold />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    {
+      label: "Inventory",
+      icon: <PiPackageBold />,
+      className: "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+  ]}
+  links={[
+    {
+      href: "https://mantle.omni.dev",
+      label: "Visit App",
+      type: "website",
+    },
+    {
+      href: `${app.socials.github}/mantle-stack`,
+      label: "Visit Repository",
+      type: "repository",
+    },
+  ]}
+  alerts={[
+    {
+      title: "💡 Big Idea",
+      description:
+        "Run the day-to-day of a small business from one place: the people you work with, the quotes and contracts you send them, the invoices you bill, and the stock you sell.",
+    },
+  ]}
+/>
+
+<Callout type="info">
+  Mantle is in early access. Features and labels can change as it develops.
+</Callout>
+
+**Omni Mantle** is a business operations suite. It brings four modules into one workspace, so a contact you add once can be quoted, contracted, and invoiced without retyping anything.
+
+## Modules
+
+- **People**: companies and contacts, tags, company memberships, import and export, and a network view of how contacts connect
+- **Quotes & Contracts**: quotes with fixed, hourly, royalty, complimentary, and included line items, each printable as a quote or as a service agreement with a signature block
+- **Invoices**: branded invoices with a live preview, multiple payments per invoice, workspace credit from overpayments, and per-client numbering
+- **Inventory**: products with SKUs and prices, stock levels, low-stock thresholds, and a history of stock adjustments
+
+A dashboard ties them together with outstanding and overdue balances, payments received this month, open quotes, and a list of items that need attention.
+
+## How it fits together
+
+- Everything in Mantle belongs to a **workspace** (your Omni workspace). The active workspace is part of every address, for example `mantle.omni.dev/@acme/invoices`, so a link always opens the same workspace.
+- Your **workspace profile** (business name, contact details, address, logo, and accent color) fills in the "from" side of every quote, contract, and invoice.
+- **Document numbering** is set per workspace for quotes and invoices, and a client can have its own invoice sequence.
+- Quotes and invoices are printed, or saved as PDF, from the browser. Mantle does not email documents for you.
+
+## Explore the docs
+
+<Cards>
+  <Card title="Getting started" href="/products/mantle/getting-started">
+    Sign in, open your workspace, and add your first records
+  </Card>
+  <Card title="Workspace settings" href="/products/mantle/workspace-settings">
+    Business details, branding, and document numbering
+  </Card>
+  <Card title="People" href="/products/mantle/people">
+    Companies, contacts, tags, import and export, and the network view
+  </Card>
+  <Card title="Quotes and contracts" href="/products/mantle/quotes-and-contracts">
+    Line items, pricing types, the contract view, and printing
+  </Card>
+  <Card title="Invoices" href="/products/mantle/invoices">
+    Payments, workspace credit, payment links, numbering, and statuses
+  </Card>
+  <Card title="Inventory" href="/products/mantle/inventory">
+    Products, stock levels, adjustments, and low-stock alerts
+  </Card>
+  <Card title="Dashboard" href="/products/mantle/dashboard">
+    Balances, payments, and what needs attention
+  </Card>
+  <Card title="Keyboard shortcuts" href="/products/mantle/keyboard-shortcuts">
+    The command palette and global shortcuts
+  </Card>
+  <Card title="Self-hosting" href="/products/mantle/self-hosting">
+    Run Mantle on your own infrastructure
+  </Card>
+  <Card title="Plans" href="/products/mantle/plans">
+    Where to find current plans and pricing
+  </Card>
+  <Card title="FAQ and troubleshooting" href="/products/mantle/faq">
+    Short answers and fixes for common problems
+  </Card>
+</Cards>
