@@ -51,7 +51,8 @@ Fill in `.env.local`. Generate each secret with `openssl rand -hex 32` (keep
 | `AUTH_JWKS_URL` | Yes | The provider's JWKS endpoint (the `jwks_uri` in its discovery document), used by the API to verify sign-in tokens |
 | `PERSONAL_WORKSPACE_FALLBACK` | No | Gives each user a personal workspace when the provider sends no Omni workspace claims. Defaults to `true`; set it to `false` with Omni Identity |
 | `APP_URL`, `API_URL` | No | Public URLs the browser uses (defaults `http://localhost:3000` and `http://localhost:4000`) |
-| `MANTLE_VERSION` | No | Image tag to run (default `latest`) |
+| `MANTLE_API_IMAGE` | No | API image to run (defaults to the pinned release, e.g. `api.manifold.omni.dev/omnidotdev/mantle-api:latest`) |
+| `MANTLE_APP_IMAGE` | No | App image to run (defaults to the pinned release, e.g. `api.manifold.omni.dev/omnidotdev/mantle-app:latest`) |
 | `DB_NAME`, `DB_USER` | No | Database name and user (defaults `mantle` and `postgres`) |
 | `API_PORT`, `APP_PORT` | No | Host ports (defaults `4000` and `3000`) |
 
