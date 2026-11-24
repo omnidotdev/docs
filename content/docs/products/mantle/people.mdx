@@ -1,0 +1,92 @@
+---
+title: People
+description: Companies, contacts, tags, memberships, import and export, and the network view
+---
+
+**People** holds the companies and contacts you work with. Quotes and invoices
+pick their client from here, so a client entered once is reused everywhere.
+
+People has three tabs, each with a count: **Companies**, **Contacts**, and
+**Network**.
+
+## Companies
+
+Select **Add company** (or **New company** from the create button on a phone).
+Only the name is required.
+
+| Section | Fields |
+| --- | --- |
+| Details | Name, website, industry, email, phone |
+| Address | Address lines 1 and 2, city, state, postal code, country |
+| Notes | Free-form notes |
+
+The companies list shows name, industry, email, and phone. Search matches the
+name, industry, email, phone, or website. Select a company to open it.
+
+A company's page also has:
+
+- **Members**: the contacts who belong to the company, each with an optional
+  title. Mark one as the **Primary contact**. Removing a member only removes
+  their link to the company; the contact stays in People.
+- **Invoice numbering**: an optional numbering sequence used for this client's
+  invoices. See [per-client numbering](/products/mantle/invoices#per-client-numbering).
+
+## Contacts
+
+Select **Add contact**. First and last name are required.
+
+- **Details**: first name, last name, phone, and **Internal team member**. Turn
+  on Internal team member for people inside your own business, so they can be
+  told apart from clients and partners.
+- **Email addresses**: add as many as needed. Press **Enter** after each one.
+- **Tags**: toggle the suggested tags (employee, client, prospect, active,
+  inactive, design, engineering, research, leadership, contractor) or type your
+  own and press **Enter** or **,** to add it. Tags are saved in lowercase.
+- **Notes**: free-form notes.
+
+The contacts list has its own filter for **All**, **Internal**, and
+**External** contacts, with counts, and searches by name, email, and phone.
+
+A contact's page also has **Companies**: the companies the contact belongs to,
+with a title for each and an optional **Primary company**. Removing a company
+there only removes the link; the company stays in People.
+
+## Deleting
+
+Delete a company or contact from its row menu or from its page. Mantle asks for
+confirmation, and deleting cannot be undone.
+
+## Import and export
+
+Select **Import or export** on the Companies or Contacts tab. The dialog works
+on whichever tab is open.
+
+**Export** downloads every company or contact in the workspace as **JSON** or
+**CSV**. In CSV, list fields such as emails and tags are joined with a
+semicolon (`;`).
+
+**Import** reads a `.json` or `.csv` file and creates one record per row:
+
+- A JSON file must contain a list of records.
+- A CSV file needs a header row. Use these column names:
+
+| Importing | Columns |
+| --- | --- |
+| Contacts | `firstName`, `lastName`, `emails`, `phone`, `avatarUrl`, `tags`, `internal`, `notes` |
+| Companies | `name`, `website`, `industry`, `phone`, `email`, `addressLine1`, `addressLine2`, `city`, `state`, `postalCode`, `country`, `notes` |
+
+Separate multiple emails or tags in one cell with a semicolon, and write
+`true` in `internal` for internal team members. A file exported from Mantle can
+be imported again as is. Import always adds new records; it does not update or
+merge existing ones, so importing the same file twice creates duplicates.
+
+## Network view
+
+The **Network** tab draws your contacts as a graph. Each contact is a dot, and
+two contacts are connected when they share at least one tag. A contact's color
+comes from its first tag with a known color, shown in the legend (employee,
+client, prospect, active, contractor, leadership, and other). Drag to move
+around and scroll to zoom.
+
+Contacts without tags appear as unconnected dots. Tag contacts to see how they
+connect.

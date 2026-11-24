@@ -1,0 +1,94 @@
+---
+title: Workspace settings
+description: Business details, branding, your plan, and how quotes and invoices are numbered
+---
+
+Open **Settings** from the bottom of the sidebar (or from the
+[command palette](/products/mantle/keyboard-shortcuts)). Settings has three
+parts: the workspace profile, your plan, and document numbering. All of them
+apply to the whole workspace.
+
+Only workspace owners and admins can change workspace settings, including the
+profile and document numbering. Other members see them read-only.
+
+## Workspace profile
+
+The workspace profile describes your business. Mantle prints it as the sender on
+every quote, contract, and invoice, so fill it in before sending your first
+document.
+
+The profile is saved on the workspace and shared by every member, on every
+device. If you saved a profile in this browser before profiles moved to the
+workspace, Mantle uploads it once, automatically, the first time an owner or
+admin opens the workspace.
+
+| Group | Fields |
+| --- | --- |
+| Company | Company name (required), website, logo URL, registration state |
+| Primary contact | Contact name (required), title, email (required), phone |
+| Address | Address lines 1 and 2, city, state, postal code, country |
+
+Select **Save profile** to save. The button stays disabled until the company
+name, contact name, and email are filled in.
+
+- **Logo URL**: a link to an image of your logo. A preview appears under the
+  field once the image loads. Documents show your logo in their header, or the
+  default logo when none is set.
+- **Registration state**: the state or jurisdiction your business is registered
+  in. The contract view names it in the governing law clause. When it is empty,
+  the contract refers to the jurisdiction where your business is registered
+  without naming it.
+- **Phone**: phone numbers are stored in international format, using the
+  country you enter to read a local number.
+
+The **From** section of the invoice editor edits the same profile and saves it
+after a short pause, so a change made while writing an invoice also updates
+Settings.
+
+## Accent color
+
+Quotes, contracts, and invoices share one accent color, used for the document
+header and highlights. Pick a preset or a custom color in the **Theme** section
+of the quote editor, or in **Invoice theme** in the invoice editor. The color is
+saved with the workspace profile, so every document in the workspace uses it.
+
+## Plan
+
+The **Plan** card shows the workspace's plan and how much of it is in use:
+contacts, and invoices created this month, each as a count against the plan's
+limit (or "unlimited"). Owners and admins see **Upgrade**, or **Manage billing**
+on a paid plan, which opens billing in your Omni account. Other members see a
+note that an owner or admin can upgrade. See [Plans](/products/mantle/plans).
+
+If billing is briefly unreachable, the card says so. The workspace's last known
+plan applies until billing is back (or no limits, if none is known), and your
+records stay available either way.
+
+## Document numbering
+
+Document numbering sets the format of new quote and invoice numbers. Choose
+**Quotes** or **Invoices** at the top of the card, adjust the format, and save.
+A live **Preview** shows what the next number looks like.
+
+| Setting | What it does |
+| --- | --- |
+| Company prefix | Optional text at the very start, such as `ACME` |
+| Prefix | The document prefix. Defaults to `QT` for quotes and `INV` for invoices |
+| Separator | Dash (`-`), slash (`/`), or none |
+| Date segment | None, `YYYY`, `YYMM`, or `YYYYMM`, from the date the number is generated |
+| ID strategy | **Sequential**, **Random**, or **Timestamp** |
+| Sequential padding | For sequential numbers, how many digits to pad to (`0001`) |
+| Random length | For random numbers, how many characters to generate |
+
+The strategies produce:
+
+- **Sequential**: the next number in a running count, such as `INV-0042`.
+  Mantle reserves each number when it is generated, so two people creating
+  invoices at the same time never get the same one.
+- **Random**: a random uppercase code, such as `INV-A7F3BC90`.
+- **Timestamp**: the date and time the number was generated, such as
+  `INV-20260203-115447`.
+
+A new quote or invoice gets its number when the editor opens. Numbers are unique
+within a workspace. To give one client its own invoice sequence, see
+[per-client numbering](/products/mantle/invoices#per-client-numbering).

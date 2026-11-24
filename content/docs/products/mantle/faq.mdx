@@ -1,0 +1,116 @@
+---
+title: FAQ and troubleshooting
+description: Short answers to common Mantle questions, and fixes for common problems
+---
+
+## FAQ
+
+### Does Mantle send quotes and invoices to clients?
+
+No. Print a quote, contract, or invoice, or save it as PDF from the browser, and
+send the file yourself. See
+[printing quotes](/products/mantle/quotes-and-contracts#print-or-save-as-pdf) and
+[printing invoices](/products/mantle/invoices#print-or-save-as-pdf).
+
+### Can clients sign contracts in Mantle?
+
+No. The contract view prints a signature block for both parties. Sign the
+printed or saved contract on paper or with your own signing tool.
+
+### Can clients pay invoices online?
+
+Mantle records payments but does not process them. Add a checkout link from
+your payment provider to an invoice, then copy and share it; see
+[Payment links](/products/mantle/invoices#payment-links).
+
+### Does accepting a quote create an invoice?
+
+Not on its own. On a sent or accepted quote, select **Create invoice** to make
+a draft invoice from it. See
+[Create an invoice from a quote](/products/mantle/quotes-and-contracts#create-an-invoice-from-a-quote).
+
+### Why can't I set an invoice to Paid?
+
+**Paid** is set automatically once recorded payments (plus any applied workspace
+credit) cover the total. Record the payment in the invoice's **Payments**
+section. See [Statuses](/products/mantle/invoices#statuses).
+
+### What happens when a client overpays?
+
+The excess becomes workspace credit in the invoice's currency, which you can
+apply to another invoice. See
+[Workspace credit](/products/mantle/invoices#workspace-credit).
+
+### Can I use Mantle in more than one workspace?
+
+Yes. Switch workspaces with the switcher at the top of the sidebar. Each
+workspace has its own records, profile, and numbering, and its handle is part of
+the address, so links always open the right workspace.
+
+### What happens to my data if a workspace is deleted?
+
+When a workspace is deleted from your Omni account, Mantle deletes everything it
+keeps for that workspace: people, quotes, invoices and their payments, credit,
+products and their history, numbering, and settings. Export your companies and
+contacts first if you want to keep them. See
+[Import and export](/products/mantle/people#import-and-export).
+
+### Is Mantle open source?
+
+Yes, under Apache-2.0. See [Self-hosting](/products/mantle/self-hosting).
+
+## Troubleshooting
+
+### After signing in, Mantle shows the home page instead of a workspace
+
+Your account does not belong to a workspace yet. Create one in your Omni
+account, then return to Mantle. On a self-hosted install with a provider that
+sends no workspace claims, set `PERSONAL_WORKSPACE_FALLBACK=true` so each user
+gets a personal workspace. See [Self-hosting](/products/mantle/self-hosting).
+
+### Sign-in fails on a self-hosted install
+
+Check that the client's redirect URI is `<APP_URL>/api/auth/callback/omni` and
+that the provider sends an `email` claim.
+
+### A link opens a different workspace
+
+A link to a workspace you are not a member of opens your default workspace
+instead. Ask a member of that workspace to invite you.
+
+### Save is disabled on a quote
+
+A quote needs a title before it can be saved. Fill in **Title** in **Quote
+details**.
+
+### Save profile is disabled in Settings
+
+The company name, contact name, and email are required. Fill in all three.
+
+### My logo does not appear on documents
+
+Check that the **Logo URL** in Settings opens the image directly in a browser.
+Settings shows "This image could not be loaded" when the link does not work.
+
+### The contract does not name a governing state
+
+Add your **Registration state** in
+[Settings](/products/mantle/workspace-settings#workspace-profile).
+
+### An import fails
+
+Use a `.json` file containing a list of records, or a `.csv` file with a header
+row using the column names in
+[Import and export](/products/mantle/people#import-and-export). When a CSV row
+cannot be read, the message names the row near the problem.
+
+### Creating a record fails without a clear reason
+
+The workspace may have reached its contact or invoice limit. Check usage in
+[Settings](/products/mantle/workspace-settings#plan), and see
+[Plans](/products/mantle/plans).
+
+### I can't edit the workspace profile or numbering
+
+Only workspace owners and admins can change workspace settings. Ask one of them
+to make the change or to give you the admin role.

@@ -1,0 +1,145 @@
+---
+title: Invoices
+description: Create invoices, record payments, apply workspace credit, and print or save PDFs
+---
+
+**Invoices** bills clients and tracks what they owe. Each invoice shows a live,
+branded preview and keeps a list of the payments made against it.
+
+## Create an invoice
+
+Select **New invoice**. On a computer, the form sits beside a live preview. On
+narrower screens, switch between **Form** and **Preview** at the top.
+
+The form has these sections:
+
+- **From**: your business name, contact name, email, phone, and address. These
+  fields edit the
+  [workspace profile](/products/mantle/workspace-settings#workspace-profile)
+  directly, so they carry over to every document.
+- **Invoice theme**: the accent color shared by all documents in the workspace.
+- **Invoice details**: invoice number, status, issue date (today by default),
+  and due date.
+- **Bill to**: the recipient's name and address as free text. Use the populate
+  button in the section header to pick a company and contact from
+  [People](/products/mantle/people); Mantle links the invoice to that client and
+  fills in the bill-to text.
+- **Line items**: a description, quantity, and unit price for each line. The
+  amount is the quantity times the unit price. Select **Add line item** to add
+  more, and drag lines to reorder them.
+- **Totals**: tax rate and currency, with the subtotal, tax amount, and total
+  calculated for you.
+- **Payments**: see below.
+- **Notes**: payment terms, a thank-you note, or anything else for the client.
+
+Select **Save**. The totals are recalculated on the server from the line items,
+so the saved total always matches the lines.
+
+## Invoice numbers
+
+A new invoice gets its number from the workspace numbering scheme when the
+editor opens (see
+[Document numbering](/products/mantle/workspace-settings#document-numbering)).
+Select the refresh button next to the number to generate the next one. When you
+pick a client with the populate button on a new invoice, the number is drawn from
+that client's own sequence if it has one. You can also type a number by hand.
+Invoice numbers are unique within a workspace.
+
+### Per-client numbering
+
+To give a client its own invoice sequence, open the company in
+[People](/products/mantle/people) and find **Invoice numbering**:
+
+1. Turn on **Custom invoice numbering for this client**.
+2. Enter a prefix, such as `TDTS`.
+3. Choose **Sequential**, **Random**, or **Timestamp**, and check the preview.
+4. Select **Save numbering**.
+
+The client's sequence keeps the rest of the workspace format (separator, date
+segment, and padding). Turn the switch off to return the client to the
+workspace numbering.
+
+## Statuses
+
+| Status | Meaning |
+| --- | --- |
+| **Draft** | Not sent yet |
+| **Sent** | Sent to the client |
+| **Viewed** | The client has seen it |
+| **Partially paid** | Some of the total has been paid |
+| **Paid** | Payments (and any applied credit) cover the total |
+| **Overdue** | Past due |
+| **Void** | Cancelled; no longer owed |
+
+Set the status by hand in **Invoice details**, with one exception: **Paid** is
+set automatically once payments cover the total, and cannot be chosen by hand.
+Removing a payment so a balance remains moves a paid invoice back to **Sent**.
+Mantle does not mark invoices as viewed or overdue on its own, but the
+[dashboard](/products/mantle/dashboard) counts any sent invoice past its due
+date as overdue.
+
+The totals of a **Paid** or **Void** invoice are frozen: editing its line items
+never changes the recorded total.
+
+The invoices list has a tab for each status, with counts, and searches by
+invoice number or client.
+
+## Record payments
+
+An invoice can take any number of payments, for example a deposit and a final
+payment. In the **Payments** section of the editor, select **Add payment** and
+enter:
+
+- **Date** the payment arrived
+- **Amount**
+- **Reference**, such as a check number or transfer ID
+- **Method**, such as check, wire, card, or cash
+
+The section header shows the remaining balance, or **Paid in full**. On the
+invoice's page, a balance card shows how much has been paid with a progress
+bar, and **Record payment** opens the editor. Payments are also listed on the
+page with their method, date, reference, and amount.
+
+## Workspace credit
+
+When payments add up to more than an invoice's total, Mantle turns the excess
+into **workspace credit** automatically, in the invoice's currency. Recording
+another payment later only adds the new excess, never the same overpayment
+twice.
+
+When the workspace has credit in an invoice's currency and the invoice still has
+a balance, the invoice's page shows a credit panel with the available credit
+and the outstanding balance. Select **Apply credit** and confirm to draw the
+credit down against the invoice. Credit applied to an invoice counts toward
+paying it, and applying credit cannot be undone.
+
+## Payment links
+
+An invoice can carry a payment link: a checkout URL from your payment
+provider where the client pays online. Paste it into **Payment link** in the
+**Payments** section of the invoice editor; it must be a full link starting with `https://`. The invoice's
+page then shows the link with **Copy payment link**, so you can share it with
+the client. Mantle does not create payment links or process payments itself.
+
+## Print or save as PDF
+
+On an invoice's page, select **Print or save PDF** (**Save PDF** in the bottom
+action bar on a phone). The browser's print dialog opens with the invoice.
+Choose **Save as PDF** as the destination to get a file. The suggested file name
+is `invoice_` followed by the invoice number.
+
+The printed invoice includes your logo and accent color, the line items, totals,
+and notes. Turn on **Show quantity and unit price** above the preview to print
+those columns. Once an invoice has payments, it lists them with the amount paid
+and the balance due. A paid invoice shows a **Paid** badge and the date it was
+paid in full, so it doubles as a receipt.
+
+## Duplicate and delete
+
+Select **Duplicate** on an invoice's page or in its row menu to start a new
+invoice with the same client, bill-to text, line items, tax rate, currency, and
+notes. The copy gets a fresh number and dates, starts as a draft, and has no
+payments.
+
+Select **Delete invoice** to remove an invoice and its payments. Mantle asks for
+confirmation, and deleting cannot be undone.

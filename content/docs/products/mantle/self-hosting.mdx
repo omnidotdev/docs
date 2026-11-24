@@ -1,0 +1,98 @@
+---
+title: Self-hosting
+description: Run Mantle on your own infrastructure with one command or with Docker Compose
+---
+
+Mantle is open source under Apache-2.0. The
+[`mantle-stack`](https://github.com/omnidotdev/mantle-stack) repository runs it
+as three containers: Postgres, the API, and the web app.
+
+## Requirements
+
+- Docker with Compose
+- An OpenID Connect provider for sign-in: any standard provider, or Omni
+  Identity. Register Mantle as a confidential client with the redirect URI
+  `<APP_URL>/api/auth/callback/omni`. The provider must send an `email` claim,
+  or sign-in fails.
+
+## One command
+
+With the [Omni CLI](/products/omni-cli) and [Run](/products/run) installed
+(`omni install run`), start the whole stack with:
+
+```bash
+omni run up mantle
+```
+
+Run generates the secrets, writes the Compose file and a local HTTPS proxy,
+starts the containers, waits for them to become healthy, and prints the URL to
+open. The standalone Run CLI takes the same target: `run up mantle`. See
+[Run](/products/run) for how targets, secrets, and backups work.
+
+## Docker Compose
+
+To run the stack with Compose directly:
+
+```bash
+git clone https://github.com/omnidotdev/mantle-stack
+cd mantle-stack
+cp .env.local.template .env.local
+```
+
+Fill in `.env.local`. Generate each secret with `openssl rand -hex 32` (keep
+`DB_PASSWORD` URL-safe, since it is part of the database connection URL).
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DB_PASSWORD` | Yes | Password for the Postgres database the stack creates |
+| `AUTH_SECRET` | Yes | Session encryption secret for the app |
+| `AUTH_BASE_URL` | Yes | Issuer URL of your OpenID Connect provider (it must serve `/.well-known/openid-configuration`) |
+| `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET` | Yes | The client registered with your provider |
+| `AUTH_JWKS_URL` | Yes | The provider's JWKS endpoint (the `jwks_uri` in its discovery document), used by the API to verify sign-in tokens |
+| `PERSONAL_WORKSPACE_FALLBACK` | No | Gives each user a personal workspace when the provider sends no Omni workspace claims. Defaults to `true`; set it to `false` with Omni Identity |
+| `APP_URL`, `API_URL` | No | Public URLs the browser uses (defaults `http://localhost:3000` and `http://localhost:4000`) |
+| `MANTLE_API_IMAGE` | No | API image to run (defaults to the pinned release, e.g. `api.manifold.omni.dev/omnidotdev/mantle-api:latest`) |
+| `MANTLE_APP_IMAGE` | No | App image to run (defaults to the pinned release, e.g. `api.manifold.omni.dev/omnidotdev/mantle-app:latest`) |
+| `DB_NAME`, `DB_USER` | No | Database name and user (defaults `mantle` and `postgres`) |
+| `API_PORT`, `APP_PORT` | No | Host ports (defaults `4000` and `3000`) |
+
+Then start the stack:
+
+```bash
+docker compose --env-file .env.local up -d
+```
+
+Compose starts Postgres first and waits for it to be healthy, then starts the
+API, and the app once the API is ready. The API applies database migrations each
+time it starts. Open the app at `APP_URL` (`http://localhost:3000` by default).
+The API listens at `API_URL`.
+
+Stop the stack with `docker compose down`. Data persists in the `db_data`
+volume between runs; `docker compose down -v` deletes that volume and every
+record in it.
+
+To build the images from source instead of pulling them, check out
+`services/mantle-api` and `services/mantle-app` and add the development
+override:
+
+```bash
+docker compose --env-file .env.local -f compose.yaml -f compose.dev.yaml up --build
+```
+
+## Optional integrations
+
+The API starts with only its database and sign-in configured. Each optional
+integration logs a warning at startup when it is not set, and its feature stays
+off:
+
+| Variable | Feature |
+| --- | --- |
+| `BILLING_BASE_URL`, `BILLING_SERVICE_API_KEY` | Plans and billing through the Omni billing service |
+| `VORTEX_API_URL`, `VORTEX_API_KEY` | Publishing Mantle events (for example, to Omni's finance tools) |
+| `IDP_WEBHOOK_SECRET` | Deleting a workspace's Mantle data when the workspace is deleted in your identity provider |
+| `UNLEASH_SERVER_API_URL`, `UNLEASH_SERVER_API_TOKEN` | Feature flags |
+
+## Plan limits
+
+Plan limits do not apply to a self-hosted install. See
+[Plans](/products/mantle/plans).
