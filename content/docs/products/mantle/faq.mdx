@@ -63,7 +63,14 @@ Yes, under Apache-2.0. See [Self-hosting](/products/mantle/self-hosting).
 ### After signing in, Mantle shows the home page instead of a workspace
 
 Your account does not belong to a workspace yet. Create one in your Omni
-account, then return to Mantle.
+account, then return to Mantle. On a self-hosted install with a provider that
+sends no workspace claims, set `PERSONAL_WORKSPACE_FALLBACK=true` so each user
+gets a personal workspace. See [Self-hosting](/products/mantle/self-hosting).
+
+### Sign-in fails on a self-hosted install
+
+Check that the client's redirect URI is `<APP_URL>/api/auth/callback/omni` and
+that the provider sends an `email` claim.
 
 ### A link opens a different workspace
 
@@ -95,12 +102,6 @@ Use a `.json` file containing a list of records, or a `.csv` file with a header
 row using the column names in
 [Import and export](/products/mantle/people#import-and-export). When a CSV row
 cannot be read, the message names the row near the problem.
-
-### The stock count did not change after an adjustment
-
-Adjustments are recorded in the history only. Edit the product and update its
-**Current quantity**. See
-[Stock adjustments](/products/mantle/inventory#stock-adjustments).
 
 ### Creating a record fails without a clear reason
 
