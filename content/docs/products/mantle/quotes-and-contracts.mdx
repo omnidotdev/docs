@@ -78,12 +78,31 @@ not legally binding and that a separate contract follows if the client accepts.
 ## Quote statuses
 
 Set the status in **Quote details**: **Draft**, **Sent**, **Accepted**,
-**Declined**, **Expired**, or **Converted**. Mantle does not change a quote's
-status on its own; update it as the deal moves along. The quotes list has a tab
-for each status, with counts.
+**Declined**, **Expired**, or **Converted**. Update the status as the deal
+moves along; Mantle sets **Converted** itself when you create an invoice from
+the quote. The quotes list has a tab for each status, with counts.
 
 The [dashboard](/products/mantle/dashboard) counts **Sent** quotes as open and
 lists sent quotes whose validity ends within the next seven days.
+
+## Create an invoice from a quote
+
+On a **Sent** or **Accepted** quote, select **Create invoice**. Mantle creates a
+draft invoice for the same client, with the quote's currency, tax rate, and
+notes, opens it for editing, and marks the quote **Converted**. Each line item
+carries over by pricing type:
+
+- **Fixed**: the quantity and unit price as quoted
+- **Hourly**: the estimated hours at the hourly rate (zero hours when there is
+  no estimate, ready to fill in)
+- **Complimentary** and **Included**: listed at no charge
+- **Royalty**: left off, since it depends on future revenue; Mantle says how
+  many were skipped so you can add them when the amount is known
+
+The invoice shows **Created from** with a link back to the quote, and the
+quote shows **View invoice** instead of **Create invoice**. A quote can be
+invoiced once. Deleting an invoice created from a quote returns the quote to
+**Accepted**, so it can be invoiced again.
 
 ## The contract view
 

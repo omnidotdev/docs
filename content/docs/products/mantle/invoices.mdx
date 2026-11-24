@@ -115,10 +115,11 @@ paying it, and applying credit cannot be undone.
 
 ## Payment links
 
-An invoice can carry a payment link: a URL where the client pays online. When an
-invoice has one, its page shows **Copy payment link**. Mantle does not create
-payment links itself, and the invoice editor has no field for one; a link is
-attached to an invoice through the Mantle API.
+An invoice can carry a payment link: a checkout URL from your payment
+provider where the client pays online. Paste it into **Payment link** in the
+**Payments** section of the invoice editor; it must be a full link starting with `https://`. The invoice's
+page then shows the link with **Copy payment link**, so you can share it with
+the client. Mantle does not create payment links or process payments itself.
 
 ## Print or save as PDF
 

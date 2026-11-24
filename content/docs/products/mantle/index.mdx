@@ -56,8 +56,8 @@ import { PiAddressBookBold, PiPackageBold, PiReceiptBold } from "react-icons/pi"
 ## Modules
 
 - **People**: companies and contacts, tags, company memberships, import and export, and a network view of how contacts connect
-- **Quotes & Contracts**: quotes with fixed, hourly, royalty, complimentary, and included line items, each printable as a quote or as a service agreement with a signature block
-- **Invoices**: branded invoices with a live preview, multiple payments per invoice, workspace credit from overpayments, and per-client numbering
+- **Quotes & Contracts**: quotes with fixed, hourly, royalty, complimentary, and included line items, each printable as a quote or as a service agreement with a signature block, and turned into a draft invoice in one click
+- **Invoices**: branded invoices with a live preview, payment links, multiple payments per invoice, workspace credit from overpayments, and per-client numbering
 - **Inventory**: products with SKUs and prices, stock levels, low-stock thresholds, and a history of stock adjustments
 
 A dashboard ties them together with outstanding and overdue balances, payments received this month, open quotes, and a list of items that need attention.
@@ -65,7 +65,7 @@ A dashboard ties them together with outstanding and overdue balances, payments r
 ## How it fits together
 
 - Everything in Mantle belongs to a **workspace** (your Omni workspace). The active workspace is part of every address, for example `mantle.omni.dev/@acme/invoices`, so a link always opens the same workspace.
-- Your **workspace profile** (business name, contact details, address, logo, and accent color) fills in the "from" side of every quote, contract, and invoice.
+- Your **workspace profile** (shared by every member: business name, contact details, address, logo, and accent color) fills in the "from" side of every quote, contract, and invoice.
 - **Document numbering** is set per workspace for quotes and invoices, and a client can have its own invoice sequence.
 - Quotes and invoices are printed, or saved as PDF, from the browser. Mantle does not email documents for you.
 
@@ -76,13 +76,13 @@ A dashboard ties them together with outstanding and overdue balances, payments r
     Sign in, open your workspace, and add your first records
   </Card>
   <Card title="Workspace settings" href="/products/mantle/workspace-settings">
-    Business details, branding, and document numbering
+    Business details, branding, your plan, and document numbering
   </Card>
   <Card title="People" href="/products/mantle/people">
     Companies, contacts, tags, import and export, and the network view
   </Card>
   <Card title="Quotes and contracts" href="/products/mantle/quotes-and-contracts">
-    Line items, pricing types, the contract view, and printing
+    Line items, pricing types, invoicing a quote, the contract view, and printing
   </Card>
   <Card title="Invoices" href="/products/mantle/invoices">
     Payments, workspace credit, payment links, numbering, and statuses
@@ -100,7 +100,7 @@ A dashboard ties them together with outstanding and overdue balances, payments r
     Run Mantle on your own infrastructure
   </Card>
   <Card title="Plans" href="/products/mantle/plans">
-    Where to find current plans and pricing
+    Free, Pro, and Team, and how limits work
   </Card>
   <Card title="FAQ and troubleshooting" href="/products/mantle/faq">
     Short answers and fixes for common problems
