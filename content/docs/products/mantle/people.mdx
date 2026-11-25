@@ -1,6 +1,6 @@
 ---
 title: People
-description: Companies, contacts, tags, memberships, import and export, and the network view
+description: Companies, contacts, tags, custom fields, memberships, import and export, and the network view
 ---
 
 **People** holds the companies and contacts you work with. Quotes and invoices
@@ -18,6 +18,7 @@ Only the name is required.
 | --- | --- |
 | Details | Name, website, industry, email, phone |
 | Address | Address lines 1 and 2, city, state, postal code, country |
+| Custom fields | Your workspace's [custom fields](#custom-fields) for companies, if any |
 | Notes | Free-form notes |
 
 The companies list shows name, industry, email, and phone. Search matches the
@@ -42,6 +43,8 @@ Select **Add contact**. First and last name are required.
 - **Tags**: toggle the suggested tags (employee, client, prospect, active,
   inactive, design, engineering, research, leadership, contractor) or type your
   own and press **Enter** or **,** to add it. Tags are saved in lowercase.
+- **Custom fields**: your workspace's [custom fields](#custom-fields) for
+  contacts, if any.
 - **Notes**: free-form notes.
 
 The contacts list has its own filter for **All**, **Internal**, and
@@ -50,6 +53,35 @@ The contacts list has its own filter for **All**, **Internal**, and
 A contact's page also has **Companies**: the companies the contact belongs to,
 with a title for each and an optional **Primary company**. Removing a company
 there only removes the link; the company stays in People.
+
+## Custom fields
+
+Custom fields track what matters to your business on each record, such as a
+lead's qualification or a client's budget. Workspace owners and admins manage
+them in **Settings** under **Custom fields**, separately for contacts and
+companies; every member can fill them in.
+
+Select **Add field**, give the field a name, and choose its type:
+
+| Type | Holds |
+| --- | --- |
+| Select | One choice from a list, such as Lead, Qualified, or Customer |
+| Multi-select | Any number of choices from a list |
+| Text | A line of text |
+| Number | A number |
+| Date | A calendar date |
+| Checkbox | Yes or no |
+
+A field's values appear in a **Custom fields** section on each contact's or
+company's page. Select and multi-select fields also show as a column on the
+Contacts or Companies list, with a filter beside the search box that narrows the
+list to one choice. The first two such fields get a column and a filter.
+
+You can rename a field and add, rename, or remove its choices later. A field's
+type is set when it is created; to change it, delete the field and add a new
+one. Removing a choice clears it from the records that had it, and deleting a
+field removes its values from every record. Mantle asks for confirmation before
+deleting a field, and it cannot be undone.
 
 ## Deleting
 
@@ -74,6 +106,10 @@ semicolon (`;`).
 | --- | --- |
 | Contacts | `firstName`, `lastName`, `emails`, `phone`, `avatarUrl`, `tags`, `internal`, `notes` |
 | Companies | `name`, `website`, `industry`, `phone`, `email`, `addressLine1`, `addressLine2`, `city`, `state`, `postalCode`, `country`, `notes` |
+
+Exports include each custom field as its own column, named after the field,
+with the values as shown in Mantle. Import does not read custom fields; fill
+them in on each record after importing.
 
 Separate multiple emails or tags in one cell with a semicolon, and write
 `true` in `internal` for internal team members. A file exported from Mantle can
