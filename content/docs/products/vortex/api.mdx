@@ -208,7 +208,7 @@ GraphQL queries are subject to cost analysis. The maximum cost per query default
 | Scope | Limit |
 |---|---|
 | General API | 100 requests/minute per IP |
-| Workflow executions | Rate-limited per plan tier |
+| Workflow executions | Monthly cap set by your plan, counted per calendar month (UTC). Once it is reached, new executions return `429` until the next month |
 
 ## Health checks
 
