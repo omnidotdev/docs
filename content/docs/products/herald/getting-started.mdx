@@ -28,7 +28,7 @@ You can also create a domain from the SDK:
 await herald.domains.create({ domain: "mail.yourdomain.com" });
 ```
 
-See [Deliverability](/products/herald/deliverability) for how domain verification, DKIM signing, and reputation isolation work together.
+See [Deliverability](/products/herald/deliverability) for how domain verification, DKIM signing, warm-up, and suppression work together.
 
 ## Create an API key
 
@@ -70,4 +70,4 @@ Herald runs suppression checks and DKIM signing before the message goes out. Onc
 
 - [Transactional Email](/products/herald/transactional-email): batch sends, listing and inspecting messages, and webhooks
 - [Marketing Email](/products/herald/marketing-email): audiences and broadcasts
-- [Deliverability](/products/herald/deliverability): dedicated IPs, suppression, and reputation isolation
+- [Deliverability](/products/herald/deliverability): domain authentication, warm-up, suppression, and sending safeguards

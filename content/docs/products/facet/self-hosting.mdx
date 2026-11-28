@@ -1,9 +1,9 @@
 ---
 title: Self-Hosting
-description: Build the Facet static app and serve it on your own infrastructure
+description: Build the Facet static app, serve it on your own infrastructure, and optionally add the AI gateway
 ---
 
-Facet is fully open source (Apache 2.0). It is a static single-page app with no backend: the editor, the CSG kernels, the viewport, and STL export all run in the browser. Hosting it is a matter of building the app and serving the resulting `dist/` folder from any static web server. The Rust kernel is vendored as WebAssembly, so no Rust toolchain is needed to build or run it.
+Facet is fully open source (Apache 2.0). Modeling is a static single-page app with no backend: the editor, the kernels, the viewport, and STL, 3MF, and STEP export all run in the browser. AI generation is the one exception: it needs the Facet AI gateway ([facet-api](https://github.com/omnidotdev/facet-api)), a separate service that routes requests through the [Synapse](/products/synapse) AI router (see [AI generation](#ai-generation)). Hosting it is a matter of building the app and serving the resulting `dist/` folder from any static web server. The Rust kernel is vendored as WebAssembly, so no Rust toolchain is needed to build or run it.
 
 ## Prerequisites
 
@@ -66,7 +66,15 @@ bun run wasm:build
 
 This compiles the crate to WebAssembly and writes the vendored bundle back into `src/wasm`, after which a normal `bun run build` picks it up.
 
+## AI generation
+
+The **Describe a part** panel is hidden unless the app is built with `VITE_FACET_API_URL` pointing at a running Facet AI gateway. To enable it:
+
+1. Run [facet-api](https://github.com/omnidotdev/facet-api) (an Elysia service; its `.env.local.template` lists every variable). With no variables set it boots with bring-your-own-key generation only: each request carries the user's own Synapse key, and no account is needed.
+2. Optionally, enable managed generation (billed to the signed-in user's Omni credits) by setting the Synapse provisioning variables on the gateway, plus `VITE_AUTH_BASE_URL` on the app so users can sign in.
+3. Build the app with `VITE_FACET_API_URL` set to the gateway's base URL. Vite bakes `VITE_` variables into the bundle at build time, so rebuild after changing them.
+
 ## Notes
 
-- Facet stores nothing server-side and requires no database, cache, or auth service to run standalone. It is static files plus in-browser compute.
-- All features are available in a self-hosted build; there is no billing or entitlement gate on the modeling tools.
+- Modeling stores nothing server-side and requires no database, cache, or auth service. Without the AI gateway, Facet is static files plus in-browser compute.
+- All modeling features are available in a self-hosted build; there is no billing or entitlement gate on the modeling tools.
